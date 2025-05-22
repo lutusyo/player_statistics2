@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Players</title>
+    </head>
+    <body>
+        <h1>Players</h1>
+        <ul>
+            {% for player in players %}
+                <li>{{ player.name }} {{ player.position }} </li>
+            {% endfor %}
+        </ul>
+    </body>
+</html>
