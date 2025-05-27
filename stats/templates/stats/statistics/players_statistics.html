@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale1.0"/>
+    <title>Player Statistics</title>
+    <link rel="stylesheet" href="{% static 'stats/css/players_statistics.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Player Statistics</h1>
+
+        <form method="get">
+            <div>
+                <label for="season">Season:</label>
+                <select name="season" id="season" onchange="this.form.submit()">
+                    <option value="">All Seasons</option>
+                    {% for key, label in seasons.items %}
+                        <option value="{{ key }}" {% if key == selected_season %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="age_group">Age Group:</label>
+                <select name="age_group" id="age_group" onchange="this.form.submit()">
+                    <option value="">All Age Groups</option>
+                    {% for key, label in age_groups.items %}
+                        <option value="{{ key }}" {% if key == selected_age_group %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="competition">Competition:</label>
+                <select name="competition" id="competition" onchange="this.form.submit()">
+                    <option value="">All Competitions</option>
+                    {% for key, label in competitions.items %}
+                        <option value="{{ key }}" {% if key == selected_competition %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Appearances</th>
+                    <th>Goals</th>
+                    <th>Assists</th>
+                    <th>Minutes Played</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in player_data %}
+                <tr>
+                    <td>{{ stat.player.name }}</td>
+                    <td>{{ stat.appearances }}</td>
+                    <td>{{ stat.goals }}</td>
+                    <td>{{ stat.assists }}</td>
+                    <td>{{ stat.minutes }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

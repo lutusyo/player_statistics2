@@ -1,27 +1,28 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Players</title>
-    </head>
-    <body>
-        <h1>All Players</h1>
-        <ul>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale1.0"/>
+    <title>All Players</title>
+    <link rel="stylesheet" href="{% static 'stats/css/player.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Our Squad</h1>
+            <a href="{% url 'players_statistics' %}">Players Statistics</a>
+        </header>
+
+        <div class="players-grid">
             {% for player in players %}
-                <div style="margin-bottom: 20px;">
-                    <a href="{% url 'player_detail' player.id %}">
-                        <img src="{{ player.photo.url }}" alt="{{ player.name }}" width="100" height="100" style="object-fit: cover; border-radius: 50%;">
-                        {{ player.name }} - {{ player.position }}
-
-                    </a> 
-                </div>
-
+                <a href="{% url 'player_detail' player.id %}" class="player-card">
+                    <img src="{{ player.photo.url }}" alt="{{ player.name }}">
+                    <h3>{{ player.name }}</h3>
+                    <p>{{ player.position }}</p>
+                </a>
             {% endfor %}
-        </ul>
-    </body>
+        </div>
+    </div>
+</body>
 </html>
-
-
-
-
-
-

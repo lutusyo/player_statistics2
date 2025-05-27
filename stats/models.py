@@ -9,6 +9,18 @@ AGE_GROUP_CHOICES = [
     (UNDER_15, 'Under 15'),
 ]
 
+SEASON_CHOICES = [
+    ("2022/2023", "2022/2023"),
+    ("2023/2024", "2023/2024"),
+    ("2024/2025", "2024/2025"),
+]
+
+COMPETITION_CHOICES = [
+    ('Local Friendly', 'Local Friendly'),
+    ('International Friendly', 'International Friendly'),
+    ('NBC Youth League', 'NBC Youth League'),
+]
+
 class Player(models.Model):
     name = models.CharField(max_length=100)
     birthdate = models.CharField(null=True, blank=True)
@@ -33,6 +45,8 @@ class Match(models.Model):
     date = models.DateField()
     opponent = models.CharField(max_length=100)
     is_home = models.BooleanField(default=True)
+    season = models.CharField(max_length=20, choices=SEASON_CHOICES)
+    competition_type = models.CharField(max_length=50, choices=COMPETITION_CHOICES, default='Local Friendly')
 
     def __str__(self):
         return f"{self.date} vs {self.opponent}"
