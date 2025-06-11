@@ -1,0 +1,133 @@
+/* Layout container for the players page */
+.page-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin: 30px auto;
+    max-width: 1200px;
+    padding: 0 20px;
+}
+
+/* Left main content (players grid and filter) */
+.main-content {
+    flex: 3;
+    min-width: 0;
+}
+
+/* Filter form */
+.filter-form {
+    margin-bottom: 20px;
+    font-size: 0.95em;
+}
+
+/* Sidebar on the right */
+.sidebar {
+    flex: 1;
+    min-width: 250px;
+    max-width: 300px;
+    background-color: #fafafa;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar h3 {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    color: #007BFF;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin-bottom: 10px;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: #333;
+    transition: color 0.2s;
+}
+
+.sidebar ul li a:hover {
+    color: #007BFF;
+}
+
+/* Adjust grid to ensure 3 cards per row when possible */
+.players-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+
+/* Player Card Styles */
+.player-card {
+    display: block;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background-color: #fff;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.player-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.player-photo-box img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-bottom: 1px solid #eee;
+}
+
+.player-info-box {
+    padding: 12px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.name-number {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Player name styling: blue */
+.player-name {
+    font-weight: 700;
+    color: #007BFF; /* Bootstrap blue */
+    font-size: 1.1em;
+}
+
+/* Jersey number styling: bigger and blue */
+.player-number {
+    font-weight: 900;
+    color: #000000; /* very black */
+    font-size: 2em;
+    line-height: 1;
+}
+
+
+.nationality {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.nationality img {
+    width: 18px;
+    height: auto;
+    border-radius: 2px;
+}

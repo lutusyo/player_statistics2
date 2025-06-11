@@ -1,0 +1,86 @@
+<!-- templates/base.html -->
+{% load static %}
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>{% block title %}Azam FC Academy{% endblock %}</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="{% static 'accounts_app/css/main.css' %}" />
+</head>
+<body class="is-preload homepage">
+    <div id="page-wrapper">
+
+        <!-- Header -->
+        <div id="header-wrapper">
+            <header id="header" class="container">
+                <div id="logo">
+                    <h1><a href="{% url 'home' %}">Azam FC</a></h1>
+                </div>
+                <nav id="nav">
+                    <ul>
+                        <li><a href="{% url 'home' %}">Home</a></li>
+                        <li><a href="{% url 'matches_app:players_statistics' %}">Match Stats</a></li>
+                        <li><a href="#">GPS Analysis</a></li>
+                        <li><a href="{% url 'players_app:player_list' %}">Player Insights</a></li>
+                        <li><a href="#">Tactical Reports</a></li>
+                        {% if user.is_authenticated %}
+
+                            <form method="POST" action="{% url 'accounts_app:logout' %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" style="background: none; border: none; padding: 0; margin: 0; color: inherit; cursor: pointer;">
+                                    Logout
+                                </button>
+                            </form>
+
+                        {% else %}
+                            <li><a href="{% url 'accounts_app:login' %}">Login</a></li>
+                            <li><a href="{% url 'accounts_app:signup' %}">Signup</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </header>
+        </div>
+
+        <!-- Main Content -->
+        <div id="main-wrapper">
+                {% block content %}
+                {% endblock %}
+        </div>
+
+        <!-- Footer -->
+        <div id="footer-wrapper">
+            <footer id="footer" class="container">
+                <div class="row">
+                    <div class="col-6 col-12-small">
+                        <section class="widget contact">
+                            <h3>Contact</h3>
+                            <p>Email: blutusyo@gmail.com<br />
+                            Phone: +255 749 033 868</p>
+                            <ul class="icons">
+                                <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+                                <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+                                <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+                            </ul>
+                        </section>
+                    </div>
+                    <div class="col-6 col-12-small">
+                        <section>
+                            <h3>About Azam FC Academy</h3>
+                            <p>We focus on elite youth football development...</p>
+                        </section>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{% static 'accounts_app/js/jquery.min.js' %}"></script>
+    <script src="{% static 'accounts_app/js/jquery.dropotron.min.js' %}"></script>
+    <script src="{% static 'accounts_app/js/browser.min.js' %}"></script>
+    <script src="{% static 'accounts_app/js/breakpoints.min.js' %}"></script>
+    <script src="{% static 'accounts_app/js/util.js' %}"></script>
+    <script src="{% static 'accounts_app/js/main.js' %}"></script>
+</body>
+</html>

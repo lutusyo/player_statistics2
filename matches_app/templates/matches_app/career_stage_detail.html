@@ -1,0 +1,21 @@
+<!-- stats/templates/stats/career_stage_detail.html -->
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Player Timeline{% endblock %}
+
+
+{% block content %}
+
+
+<h1>{{ stage.team_name }} ({{ stage.start_year }} - {{ stage.end_year|default:"Present" }})</h1>
+<p><strong>Type:</strong> {{ stage.get_stage_type_display }}</p>
+<p><strong>Position:</strong> {{ stage.position }}</p>
+<p><strong>Matches:</strong> {{ stage.matches_played }}</p>
+<p><strong>Minutes:</strong> {{ stage.minutes_played }}</p>
+<p><strong>Goals:</strong> {{ stage.goals_scored }}</p>
+<p><strong>Assists:</strong> {{ stage.assists }}</p>
+<p><strong>Notes:</strong> {{ stage.notes }}</p>
+
+{%endblock%}

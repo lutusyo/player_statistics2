@@ -39,7 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # local
-    'stats',
+    'accounts_app',
+    'players_app',
+    'matches_app',
+    'actions_app',
+    'gps_app',
 ]
 
 MIDDLEWARE = [
@@ -68,6 +72,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'player_statistics_project.wsgi.application'
 
@@ -126,3 +131,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR/'media'
+
+# Enable static files
+STATIC_URL = '/static/'
+
+# For development
+STATICFILES_DIRS = [ BASE_DIR / 'accounts_app' / 'static',]
+
+
+LOGIN_REDIRECT_URL = 'home'  # redirect after login
+LOGOUT_REDIRECT_URL = 'accounts_app:login'
+LOGIN_URL = 'accounts_app:login'
+
+# For password reset (development only)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

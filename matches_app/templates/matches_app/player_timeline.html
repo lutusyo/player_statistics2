@@ -1,0 +1,123 @@
+
+
+<style>
+/* --- Timeline styles --- */
+.timeline-wrapper {
+    position: relative;
+    padding-top: 100px;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.timeline-line {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #673ab7;
+    z-index: 1;
+}
+
+.timeline-scroll {
+    display: flex;
+    gap: 80px;
+    padding: 0 40px;
+    position: relative;
+    z-index: 2;
+}
+
+.timeline-item {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.timeline-dot {
+    width: 14px;
+    height: 14px;
+    background-color: white;
+    border: 3px solid #673ab7;
+    border-radius: 50%;
+    position: absolute;
+    top: -50px;
+    z-index: 3;
+}
+
+.timeline-dot.active {
+    background-color: #5d0aed;
+}
+
+.timeline-card {
+    margin-top: 0px;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    width: 180px;
+    min-height: 100px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    overflow: hidden;
+}
+
+.timeline-card h4 {
+    font-size: 14px;
+    font-weight: bold;
+    color: #673ab7;
+    margin: 0 0 6px 0;
+}
+
+.timeline-card p {
+    font-size: 13px;
+    color: #333;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.timeline-item:hover .timeline-dot {
+    background-color: #5d0aed;
+    box-shadow: 0 0 0 4px rgba(93, 10, 237, 0.2);
+}
+
+.timeline-card {
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s;
+}
+.timeline-card:hover {
+    transform: scale(1.02);
+}
+
+</style>
+
+<h2>Timeline</h2>
+<div class="timeline-wrapper">
+    <div class="timeline-line"></div>
+    <div class="timeline-scroll">
+        {% for stage in stages %}
+        <div class="timeline-item">
+            <div class="timeline-dot{% if loop.first %} active{% endif %}"></div>
+            <div class="timeline-item">
+    <div class="timeline-dot{% if loop.first %} active{% endif %}"></div>
+        <a href="{% url 'matches_app:career_stage_detail' stage.id %}" class="timeline-card">
+            <h4>{{ stage.start_year }}</h4>
+            {% if stage.stage_type %}
+                <p>Joined {{ stage.team_name }}.</p>
+            {% endif %}
+            {% if stage.notes %}
+                <p>{{ stage.notes }}</p>
+            {% endif %}
+        </a>
+    </div>
+
+        </div>
+        {% endfor %}
+    </div>
+</div>
