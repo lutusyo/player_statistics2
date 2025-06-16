@@ -2686,3 +2686,141 @@ input, select, textarea {
 			}
 
 	}
+/* ... [keep the rest of your existing styles as-is] ... */
+
+/* === Azam FC Custom Theme === */
+:root {
+    --azam-blue: #0057B7;
+    --azam-white: #ffffff;
+    --azam-black: #111111;
+    --azam-light-gray: #f7f9fc;
+}
+
+/* Overall body styling */
+body {
+    background-color: var(--azam-light-gray);
+    color: var(--azam-black);
+}
+
+/* Header */
+#header-wrapper {
+    background-color: var(--azam-blue);
+    color: var(--azam-white);
+    padding: 2em 0 1.5em 0; /* reduced height */
+}
+
+/* Logo */
+#logo h1 {
+    background: none;
+    color: var(--azam-white);
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+/* Navigation */
+#nav {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 0.9em;
+}
+#nav ul {
+    list-style: none;
+    padding-left: 0;
+}
+#nav ul li {
+    float: left;
+    line-height: 3em; /* reduced line-height */
+    padding-left: 1.5em;
+}
+#nav ul li a,
+#nav ul form button,
+#nav ul form .logout-link {
+    color: var(--azam-white);
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    background: none;
+    border: none;
+    padding: 0.5em 1em;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    border-radius: 6px;
+}
+#nav ul li:hover a,
+#nav ul form .logout-link:hover {
+    background: var(--azam-white);
+    color: var(--azam-blue);
+}
+
+/* Dropdown menus */
+#nav ul ul {
+    display: none;
+    position: absolute;
+    background: #1a1a1a;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+#nav ul li:hover > ul {
+    display: block;
+}
+#nav ul ul li a {
+    padding: 10px;
+    display: block;
+    color: white;
+    white-space: nowrap;
+}
+
+/* Main content background */
+#main-wrapper {
+    background-color: var(--azam-white);
+    color: var(--azam-black);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Footer */
+#footer-wrapper {
+    background-color: var(--azam-black);
+    color: var(--azam-white);
+}
+#footer h3 {
+    color: var(--azam-blue);
+}
+#footer a {
+    color: var(--azam-white);
+}
+#footer a:hover {
+    text-decoration: underline;
+}
+
+/* Buttons */
+button,
+input[type="submit"],
+input[type="button"],
+.button {
+    background-color: var(--azam-blue);
+    color: var(--azam-white);
+    font-weight: bold;
+    border-radius: 5px;
+    padding: 10px 20px;
+}
+button:hover,
+input[type="submit"]:hover,
+.button:hover {
+    background-color: #003f91;
+}
+
+/* Filter form in header */
+.header-filter-form {
+    display: inline-block;
+    margin-left: 20px;
+    color: white;
+}
+.header-filter-form select {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}

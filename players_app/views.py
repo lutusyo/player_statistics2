@@ -13,7 +13,7 @@ def player_list(request):
     if age_group:
         players = Player.objects.filter(age_group=age_group)
     else:
-        players = Player.objects.all()
+        players = Player.objects.filter(age_group='U20')
 
     # Group players by position
     grouped_players = defaultdict(list)

@@ -4,104 +4,93 @@
 {% block title %}{{ player.name }}{% endblock %}
 {% block content %}
 
-
-        <!-- Banner -->
-        <div id="banner-wrapper">
-            <div id="banner" class="box container">
-                <div class="row">
-                    <div class="col-7 col-12-medium">
-                        <h2>Welcome to Azam FC Academy Analysis Portal</h2>
-                        <p>Track performance. Analyze GPS data. Build football intelligence.</p>
-                    </div>
-                    <div class="col-5 col-12-medium">
-                        <ul>
-                            <li><a href="#" class="button large icon solid fa-arrow-circle-right">Start Now</a></li>
-                            <li><a href="#" class="button alt large icon solid fa-info-circle">Learn More</a></li>
-                        </ul>
-                    </div>
-                </div>
+<!-- Banner -->
+<div id="banner-wrapper">
+    <div id="banner" class="box container">
+        <div class="row">
+            <div class="col-12">
+                <h2>Azam FC Academy Data Analysis Portal</h2>
+                <p style="margin-top: 0.5em;">Match Statistics, Player statistics and GPS Analysis </p>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Features -->
-        <div id="features-wrapper">
-            <div class="container">
-                <div class="row">
-                    <div class="col-4 col-12-medium">
-                        <section class="box feature">
-                            <a href="#" class="image featured"><img src="{% static 'accounts_app/images/gps.jpg' %}" alt="" /></a>
-                            <div class="inner">
-                                <header>
-                                    <h2>GPS Performance Tracking</h2>
-                                    <p>Analyze sprint distance, efforts, and intensity</p>
-                                </header>
-                                <p>Accurate player movement and physical metrics using Catapult GPS for match and training sessions.</p>
-                            </div>
-                        </section>
+<!-- Features -->
+<div id="features-wrapper">
+    <div class="container">
+        <div class="row">
+            <div class="col-4 col-12-medium">
+                <section class="box feature">
+                    <a href="#" class="image featured"><img src="{% static 'accounts_app/images/gps.jpg' %}" alt="" /></a>
+                    <div class="inner">
+                        <header>
+                            <h2>GPS Performance </h2>
+                            <p>Analyze sprint distance, efforts, and intensity</p>
+                        </header>
+                        <p>Accurate player movement and physical metrics using Catapult GPS for match and training sessions.</p>
                     </div>
-                    <div class="col-4 col-12-medium">
-                        <section class="box feature">
-                            <a href="#" class="image featured"><img src="{% static 'accounts_app/images/bea.jpg' %}" alt="" /></a>
-                            <div class="inner">
-                                <header>
-                                    <h2>Tactical Match Reports</h2>
-                                    <p>Offensive, defensive and transition play</p>
-                                </header>
-                                <p>Break down each match tactically with visual insights and structured feedback for team development.</p>
-                            </div>
-                        </section>
+                </section>
+            </div>
+            <div class="col-4 col-12-medium">
+                <section class="box feature">
+                    <a href="#" class="image featured"><img src="{% static 'accounts_app/images/bea.jpg' %}" alt="" /></a>
+                    <div class="inner">
+                        <header>
+                            <h2>Match statistics</h2>
+                        </header>
+                        <p>Break down each match tactically with visual insights and structured feedback for team development.</p>
                     </div>
-                    <div class="col-4 col-12-medium">
-                        <section class="box feature">
-                            <a href="#" class="image featured"><img src="{% static 'accounts_app/images/nyangasa.jpg' %}" alt="" /></a>
-                            <div class="inner">
-                                <header>
-                                    <h2>Player Performance</h2>
-                                    <p>Individual statistics and evaluations</p>
-                                </header>
-                                <p>Track and review goals, assists, duels won, successful crosses, and other player-specific metrics.</p>
-                            </div>
-                        </section>
+                </section>
+            </div>
+            <div class="col-4 col-12-medium">
+                <section class="box feature">
+                    <a href="#" class="image featured"><img src="{% static 'accounts_app/images/nyangasa.jpg' %}" alt="" /></a>
+                    <div class="inner">
+                        <header>
+                            <h2>Player Statistics</h2>
+                            <p>Individual statistics and evaluations</p>
+                        </header>
+                        <p>Track and review goals, assists, duels won, successful crosses, and other player-specific metrics.</p>
                     </div>
-                </div>
+                </section>
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Main Content -->
-        <div id="main-wrapper">
-            <div class="container">
-                <div class="row gtr-200">
-                    <div class="col-4 col-12-medium">
-                        <div id="sidebar">
-                            <section class="widget thumbnails">
-                                <h3>Snapshots</h3>
-                                <div class="grid">
-                                    <div class="row gtr-50">
-                                        <div class="col-6"><img src="{% static 'accounts_app/images/media.jpg' %}" class="image fit" alt=""></div>
-                                        <div class="col-6"><img src="{% static 'accounts_app/images/manager.jpg' %}" class="image fit" alt=""></div>
-                                        <div class="col-6"><img src="{% static 'accounts_app/images/hassan.jpg' %}" class="image fit" alt=""></div>
-                                        <div class="col-6"><img src="{% static 'accounts_app/images/rasta.jpg' %}" class="image fit" alt=""></div>
-                                    </div>
-                                </div>
-                                <a href="#" class="button icon fa-file-alt">More</a>
-                            </section>
+<!-- Main Content -->
+<div id="main-wrapper">
+    <div class="container">
+        <div class="row gtr-200">
+            <div class="col-4 col-12-medium">
+                <div id="sidebar">
+                    <section class="widget thumbnails">
+                        <h3>Snapshots</h3>
+                        <div class="grid">
+                            <div class="row gtr-50">
+                                <div class="col-6"><img src="{% static 'accounts_app/images/media.jpg' %}" class="image fit" alt=""></div>
+                                <div class="col-6"><img src="{% static 'accounts_app/images/manager.jpg' %}" class="image fit" alt=""></div>
+                                <div class="col-6"><img src="{% static 'accounts_app/images/hassan.jpg' %}" class="image fit" alt=""></div>
+                                <div class="col-6"><img src="{% static 'accounts_app/images/rasta.jpg' %}" class="image fit" alt=""></div>
+                            </div>
                         </div>
-                    </div>
+                        <a href="#" class="button icon fa-file-alt">More</a>
+                    </section>
+                </div>
+            </div>
 
-                    <div class="col-8 col-12-medium imp-medium">
-                        <div id="content">
-                            <section class="last">
-                                <h2>What is this platform about?</h2>
-                                <p><strong>Azam FC Academy Data Analysis Platform</strong> is a modern performance intelligence tool tailored for youth development. It integrates tactical breakdowns, Catapult GPS data, and individual match stats to empower coaches, players, and analysts with meaningful insights.</p>
-                                <p>Our mission is to improve player performance through smart data interpretation, long-term tracking, and contextualized football analytics.</p>
-                                <a href="#" class="button icon solid fa-arrow-circle-right">Explore Features</a>
-                            </section>
-                        </div>
-                    </div>
+            <div class="col-8 col-12-medium imp-medium">
+                <div id="content">
+                    <section class="last">
+                        <h2>What is this platform about?</h2>
+                        <p><strong>Azam FC Academy Data Analysis Platform</strong> is a modern performance intelligence tool tailored for youth development. It integrates tactical breakdowns, Catapult GPS data, and individual match stats to empower coaches, players, and analysts with meaningful insights.</p>
+                        <p>Our mission is to improve player performance through smart data interpretation, long-term tracking, and contextualized football analytics.</p>
+                    </section>
                 </div>
             </div>
         </div>
-
-        
+    </div>
+</div>
 
 {% endblock %}

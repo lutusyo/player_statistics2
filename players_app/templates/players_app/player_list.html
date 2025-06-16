@@ -12,19 +12,7 @@
 
     <!-- Left content: Filter + Player Grid -->
     <div class="main-content">
-        <form method="get" action="" class="filter-form">
-            <label for="age_group">Filter by Age Group:</label>
-            <select name="age_group" id="age_group" onchange="this.form.submit()">
-                <option value="">All</option>
-                {% for group in age_groups %}
-                    <option value="{{ group }}" {% if selected_age_group == group %}selected{% endif %}>
-                        {{ group }}
-                    </option>
-                {% endfor %}
-            </select>
-        </form>
-
-        
+    
 
            {% for position in position_order %}
                 {% with players_in_position=grouped_players|get_item:position %}

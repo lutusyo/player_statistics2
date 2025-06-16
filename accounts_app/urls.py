@@ -1,12 +1,16 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from accounts_app.forms import CustomLoginForm
 from . import views
 
 app_name = 'accounts_app'
 
 urlpatterns = [
     path('signup/', views.signup_view, name='signup'),
-    path('login/', auth_views.LoginView.as_view(template_name='accounts_app/login.html'), name='login'),
+
+    path('login/', auth_views.LoginView.as_view(template_name='accounts_app/login.html',authentication_form=CustomLoginForm), name='login'),
+
+    
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 
     path('password_change/', auth_views.PasswordChangeView.as_view(template_name='accounts_app/password_change.html'), name='password_change'),

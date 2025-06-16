@@ -15,24 +15,35 @@
         <div id="header-wrapper">
             <header id="header" class="container">
                 <div id="logo">
-                    <h1><a href="{% url 'home' %}">Azam FC</a></h1>
+                    <h1><a href="{% url 'home' %}">Data Analysis </a></h1>
                 </div>
                 <nav id="nav">
                     <ul>
                         <li><a href="{% url 'home' %}">Home</a></li>
-                        <li><a href="{% url 'matches_app:players_statistics' %}">Match Stats</a></li>
+
+
+                        <li>
+                            <a href="#">TEAMS</a>
+                            <ul>
+                                <li><a href="{% url 'players_app:player_list' %}">All</a></li>
+                                {% for group in age_groups %}
+                                    <li>
+                                        <a href="{% url 'players_app:player_list' %}?age_group={{ group }}">{{ group }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+
+                        <li><a href="{% url 'matches_app:players_statistics' %}">Statistics</a></li>
                         <li><a href="#">GPS Analysis</a></li>
-                        <li><a href="{% url 'players_app:player_list' %}">Player Insights</a></li>
-                        <li><a href="#">Tactical Reports</a></li>
+                        
                         {% if user.is_authenticated %}
-
-                            <form method="POST" action="{% url 'accounts_app:logout' %}" style="display: inline;">
-                                {% csrf_token %}
-                                <button type="submit" style="background: none; border: none; padding: 0; margin: 0; color: inherit; cursor: pointer;">
-                                    Logout
-                                </button>
-                            </form>
-
+                            <li>
+                                <form method="POST" action="{% url 'accounts_app:logout' %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="logout-link">Logout</button>
+                                </form>
+                            </li>
                         {% else %}
                             <li><a href="{% url 'accounts_app:login' %}">Login</a></li>
                             <li><a href="{% url 'accounts_app:signup' %}">Signup</a></li>
