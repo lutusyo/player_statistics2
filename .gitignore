@@ -1,1 +1,13 @@
 ps_env/
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+staticfiles/
+tmp/
+*.log
+*.sqlite3
+Passengerfile.json
+passenger_wsgi.py
+
