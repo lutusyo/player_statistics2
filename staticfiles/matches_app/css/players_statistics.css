@@ -1,0 +1,98 @@
+/* Container styling */
+.stats-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 30px; /* space between form and table */
+    flex-wrap: wrap;
+    padding: 1rem;
+}
+
+/* Filter form section */
+.filter-form {
+    flex: 0 0 250px;
+}
+
+.filter-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+form label {
+    font-weight: bold;
+    margin-right: 5px;
+    color: #333;
+}
+
+form select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    min-width: 180px;
+}
+
+/* Stats table section */
+.stats-table {
+    flex: 1;
+    overflow-x: auto;
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+    min-width: 600px; /* Ensure horizontal scroll on small devices */
+}
+
+thead {
+    background-color: #007BFF;
+    color: #fff;
+}
+
+th, td {
+    padding: 14px 18px;
+    text-align: center;
+    font-size: 15px;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f2f6fc;
+}
+
+tbody tr:hover {
+    background-color: rgb(246, 246, 249);
+}
+
+/* Responsive styling for small screens */
+@media (max-width: 768px) {
+    .stats-container {
+        flex-direction: column;
+    }
+
+    .filter-form {
+        width: 100%;
+        flex: 1 1 100%;
+    }
+
+    .filter-form form {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .filter-form select {
+        width: 100%;
+    }
+
+    .stats-table {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 100%;
+    }
+}

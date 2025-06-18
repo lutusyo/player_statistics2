@@ -1,0 +1,206 @@
+/* Layout container for the players page */
+.page-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin: 30px auto;
+    max-width: 1200px;
+    padding: 0 20px;
+}
+
+/* Left main content (players grid and filter) */
+.main-content {
+    flex: 3;
+    min-width: 0;
+}
+
+/* Filter form */
+.filter-form {
+    margin-bottom: 20px;
+    font-size: 0.95em;
+}
+
+/* Sidebar on the right */
+.sidebar {
+    flex: 1;
+    min-width: 250px;
+    max-width: 300px;
+    background-color: #fafafa;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar h3 {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    color: #007BFF;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin-bottom: 10px;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: #333;
+    transition: color 0.2s;
+}
+
+.sidebar ul li a:hover {
+    color: #007BFF;
+}
+
+/* Adjust grid to ensure 3 cards per row when possible */
+.players-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+/* Player Card Styles */
+.player-card {
+    display: block;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background-color: #fff;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.player-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.player-photo-box img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-bottom: 1px solid #eee;
+}
+
+.player-info-box {
+    padding: 12px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.name-number {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Player name styling: blue */
+.player-name {
+    font-weight: 700;
+    color: #007BFF; /* Bootstrap blue */
+    font-size: 1.1em;
+}
+
+/* Jersey number styling: bigger and black */
+.player-number {
+    font-weight: 900;
+    color: #000000;
+    font-size: 2em;
+    line-height: 1;
+}
+
+.nationality {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.nationality img {
+    width: 18px;
+    height: auto;
+    border-radius: 2px;
+}
+
+/* ============================= */
+/* Responsive behavior on mobile */
+/* ============================= */
+@media (max-width: 768px) {
+    .page-container {
+        flex-direction: column;
+    }
+
+    .main-content {
+        order: 1;
+    }
+
+    .sidebar {
+        order: 2;
+        width: 100%;
+        max-width: 100%;
+        margin-top: 20px;
+    }
+}
+
+
+
+/* Player Profile New Styling */
+.player-profile-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.player-photo-centered img {
+    max-width: 300px;
+    height: auto;
+    margin-bottom: 30px;
+}
+
+.player-attributes {
+    margin-top: 20px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.info-block {
+    flex: 1 1 30%;
+    padding: 10px;
+    text-align: center;
+}
+
+.info-block h4 {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 5px;
+}
+
+
+@media (max-width: 768px) {
+    .info-row {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .info-block {
+        width: 100%;
+    }
+}
+
