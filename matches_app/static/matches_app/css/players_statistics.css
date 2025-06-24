@@ -34,7 +34,9 @@ form select {
 /* Stats table section */
 .stats-table {
     flex: 1;
+    width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* smooth scroll for iOS */
 }
 
 /* Table styles */
@@ -43,9 +45,9 @@ table {
     border-collapse: collapse;
     background-color: #fff;
     border-radius: 10px;
-    overflow: hidden;
+    overflow: auto;
     box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
-    min-width: 600px; /* Ensure horizontal scroll on small devices */
+    min-width: 600px; /* force scroll on small devices */
 }
 
 thead {
@@ -65,6 +67,15 @@ tbody tr:nth-child(even) {
 
 tbody tr:hover {
     background-color: rgb(246, 246, 249);
+}
+
+/* Scrollbar styling (optional) */
+.stats-table::-webkit-scrollbar {
+    height: 6px;
+}
+.stats-table::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
 }
 
 /* Responsive styling for small screens */
@@ -93,6 +104,12 @@ tbody tr:hover {
     }
 
     table {
-        min-width: 100%;
+        min-width: 600px;
+        width: 100%;
+    }
+
+    th, td {
+        font-size: 14px;
+        padding: 10px 12px;
     }
 }

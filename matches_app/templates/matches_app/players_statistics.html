@@ -3,13 +3,12 @@
 
 {% block title %}Match statistics{% endblock %}
 
-
 {% block content %}
-    
-    
-    <link rel="stylesheet" href="{% static 'matches_app/css/players_statistics.css' %}">
 
-    <div class="stats-container">
+<link rel="stylesheet" href="{% static 'matches_app/css/players_statistics.css' %}">
+
+<div class="stats-container">
+    <!-- Filter Form -->
     <div class="filter-form">
         <form method="get">
             <div>
@@ -41,6 +40,7 @@
         </form>
     </div>
 
+    <!-- Stats Table -->
     <div class="stats-table">
         <table>
             <thead>
