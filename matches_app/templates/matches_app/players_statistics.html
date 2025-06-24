@@ -1,70 +1,64 @@
-{% extends "base.html" %}
 {% load static %}
 
-{% block title %}Match statistics{% endblock %}
-
+{% block title %}Match Statistics{% endblock %}
 
 {% block content %}
-    
-    
-    <link rel="stylesheet" href="{% static 'matches_app/css/players_statistics.css' %}">
+<link rel="stylesheet" href="{% static 'matches_app/css/players_statistics.css' %}">
 
-    <div class="stats-container">
-    <div class="filter-form">
-        <form method="get">
-            <div>
-                <select name="season" id="season" onchange="this.form.submit()">
-                    <option value="">All Seasons</option>
-                    {% for key, label in seasons.items %}
-                        <option value="{{ key }}" {% if key == selected_season %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+<div class="filters-container">
+    <form method="get">
+        <!-- Season Dropdown -->
+        <select name="season">
+            <option value="">SEASON</option>
+            {% for key, label in seasons.items %}
+                <option value="{{ key }}" {% if selected_season == key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
 
-            <div>
-                <select name="age_group" id="age_group" onchange="this.form.submit()">
-                    <option value="">All Age Groups</option>
-                    {% for key, label in age_groups.items %}
-                        <option value="{{ key }}" {% if key == selected_age_group %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+        <!-- Competition Dropdown -->
+        <select name="competition">
+            <option value="">COMPETITION</option>
+            {% for key, label in competitions.items %}
+                <option value="{{ key }}" {% if selected_competition == key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
 
-            <div>
-                <select name="competition" id="competition" onchange="this.form.submit()">
-                    <option value="">All Competitions</option>
-                    {% for key, label in competitions.items %}
-                        <option value="{{ key }}" {% if key == selected_competition %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </form>
-    </div>
+        <!-- Age Group Dropdown -->
+        <select name="age_group">
+            <option value="">AGE GROUP</option>
+            {% for key, label in age_groups.items %}
+                <option value="{{ key }}" {% if selected_age_group == key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
 
-    <div class="stats-table">
-        <table>
-            <thead>
-                <tr>
-                    <th>Player</th>
-                    <th>Appearances</th>
-                    <th>Goals</th>
-                    <th>Assists</th>
-                    <th>Minutes Played</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for stat in player_data %}
-                <tr>
-                    <td>{{ stat.player.name }}</td>
-                    <td>{{ stat.appearances }}</td>
-                    <td>{{ stat.goals }}</td>
-                    <td>{{ stat.assists }}</td>
-                    <td>{{ stat.minutes }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <button type="submit">Apply</button>
+    </form>
 </div>
 
+<div class="stats-table-container">
+    <table class="stats-table">
+        <thead>
+            <tr>
+                <th>Player</th>
+                <th>Matches</th>
+                <th>Goals</th>
+                <th>Assists</th>
+                <th>Minutes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in player_data %}
+            <tr>
+                <td>{{ item.player.name }}</td>
+                <td>{{ item.appearances }}</td>
+                <td>{{ item.goals }}</td>
+                <td>{{ item.assists }}</td>
+                <td>{{ item.minutes }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">No stats found for selected filters.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

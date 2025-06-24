@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %}{{ team }} Fixtures {% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ team }} Fixtures</h1>
+
+    <section>
+        <h2>Upcoming Matches</h2>
+        {% if upcoming_matches %}
+            <ul>
+                {% for match in upcoming_matches %}
+                    <li>
+                        <strong>{{ match.date }}</strong>
+                        {% if match.match_time %} at {{ match.match_time|time:"H:i" }}{% endif %} —
+                        {{ match.get_team_display }} vs {{ match.opponent }}
+                        {% if match.is_home %}(Home){% else %}(Away){% endif %}
+                        @ {{ match.venue }}
+                        | {{ match.get_competition_type_display }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No Upcoming Matches.</p>
+        {% endif %}
+    </section>
+
+    <hr>
+
+    <section>
+        <h2>Past Matches</h2>
+        {% if past_matches %}
+            <ul>
+                {% for match in past_matches %}
+                    <li>
+                        <strong>{{ match.date }}</strong>
+                        {% if match.match_time %} at {{ match.match_time|time:"H:i" }}{% endif %} —
+                        {{ match.get_team_display }} vs {{ match.opponent }}
+                        {% if match.is_home %}(Home){% else %}(Away){% endif %}
+                        @ {{ match.venue }}
+                        | {{ match.get_competition_type_display }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No past matches.</p>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}
+
+

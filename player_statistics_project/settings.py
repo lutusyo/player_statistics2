@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-d6-hxwo53dojql00)t==rs-ftwko*e_ap(7cd(&nt&uq@6@ofl'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['www.azamfcportal.com', 'azamfcportal.com']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -129,17 +129,26 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# MEDIA settings
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/home/afcportal/public_html/media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Stores uploaded files in BASE_DIR/media
 
-
-# Enable static files
+# STATIC files (CSS, JS, etc.)
 STATIC_URL = '/static/'
+
+# Only used in production when you run collectstatic
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-
-# For development
-STATICFILES_DIRS = [ BASE_DIR / 'accounts_app' / 'static',]
+# Development static directories (Django will look here during dev)
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'accounts_app', 'static'),
+    os.path.join(BASE_DIR, 'players_app', 'static'),
+    os.path.join(BASE_DIR, 'matches_app', 'static'),
+    os.path.join(BASE_DIR, 'actions_app', 'static'),
+    os.path.join(BASE_DIR, 'gps_app', 'static'),
+    # optionally a global one if you have BASE_DIR/static
+    # os.path.join(BASE_DIR, 'static'),
+]
 
 
 LOGIN_REDIRECT_URL = 'home'  # redirect after login

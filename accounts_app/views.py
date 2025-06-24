@@ -7,7 +7,9 @@ from django.contrib.auth.decorators import login_required
 
 
 def index(request):
-    return render(request, 'accounts_app/index.html')
+    return render(request, 'accounts_app/index.html', {
+        'selected_age_group': 'U20',
+    })
 
 
 def home_view(request):

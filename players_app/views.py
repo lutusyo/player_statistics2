@@ -39,4 +39,13 @@ def player_list(request):
 def player_detail(request, player_id):
     player = get_object_or_404(Player, id=player_id)
     stages = player.career_stages.all()
-    return render(request, 'players_app/player_detail.html', {'player': player, 'stages': stages})
+    selected_age_group = request.GET.get('age_group')
+
+    context = {
+        'player': player,
+        'stages': stages,
+        'selected_age_group': selected_age_group,
+
+    }
+
+    return render(request, 'players_app/player_detail.html', context)

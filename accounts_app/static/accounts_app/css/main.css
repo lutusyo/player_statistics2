@@ -2667,6 +2667,54 @@ input, select, textarea {
 					margin: 0 0 1em 0;
 				}
 
+
+
+				.sub-navbar-wrapper {
+				background-color: #222;
+				padding: 10px 0;
+				margin-bottom: 20px;
+			}
+
+			.sub-navbar {
+				display: flex;
+				justify-content: center;
+				list-style: none;
+				padding: 0;
+				margin: 0;
+				gap: 40px;
+			}
+
+			.sub-navbar li a {
+				color: #fff;
+				text-decoration: none;
+				font-weight: bold;
+				padding: 8px 16px;
+				border-radius: 5px;
+			}
+
+			.sub-navbar li a:hover {
+				background-color: #555;
+			}
+
+
+			.navbar li {
+				position: relative;
+			}
+
+			.dropdown-menu {
+				display: none;
+				position: absolute;
+				background-color: white;
+				list-style: none;
+				padding: 0;
+				margin: 0;
+			}
+
+			.dropdown:hover .dropdown-menu {
+				display: block;
+			}
+
+
 		/* Content */
 
 			#content {
@@ -2824,3 +2872,77 @@ input[type="submit"]:hover,
     border-radius: 4px;
     border: 1px solid #ccc;
 }
+
+.team-nav {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 1rem 0;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.team-nav a {
+    font-family: 'Arial Black', sans-serif;
+    text-decoration: none;
+    color: #c8102e;
+    font-size: 16px;
+    letter-spacing: 1px;
+    padding: 8px 12px;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.team-nav a:hover {
+    color: #a5001a;
+}
+
+.team-nav a.active {
+    font-weight: bold;
+    color: #c8102e;
+}
+
+.team-nav a.active::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: #c8102e;
+    border-radius: 2px;
+}
+
+
+.filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin: 1.5rem 0;
+}
+
+.filters-container select,
+.filters-container button {
+    padding: 10px 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    min-width: 160px;
+    background-color: #fff;
+    color: #333;
+    font-weight: bold;
+}
+
+.filters-container button {
+    background-color: #c8102e;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.filters-container button:hover {
+    background-color: #a5001a;
+}
+
+

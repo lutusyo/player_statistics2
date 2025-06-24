@@ -34,7 +34,13 @@
                             </ul>
                         </li>
 
-                        <li><a href="{% url 'matches_app:players_statistics' %}">Statistics</a></li>
+                        <li>
+                            <a href="{% url 'matches_app:players_statistics' selected_age_group %}">MATCHES</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{% url 'matches_app:team_dashboard' 'U17' %}">U17</a></li>
+                                <li><a href="{% url 'matches_app:team_dashboard' 'U20' %}">U20</a></li>
+                            </ul>
+                        </li>
                         <li><a href="#">GPS Analysis</a></li>
                         
                         {% if user.is_authenticated %}
@@ -55,8 +61,19 @@
 
         <!-- Main Content -->
         <div id="main-wrapper">
-                {% block content %}
-                {% endblock %}
+
+
+            {% if team_selected %}
+            <div class="team-nav">
+                <a href="#" class="{% if request.path == '#' %}active{% endif %}">FIXTURES</a>
+                <a href="#" class="{% if request.path == '#' %}active{% endif %}">RESULTS</a>
+                <a href="#" class="{% if request.path == '#' %}active{% endif %}">TABLES</a>
+                <a href="{% url 'matches_app:players_statistics' team_selected %}" class="{% if request.resolver_match.url_name == 'players_statistics' %}active{% endif %}">STATS</a>
+            </div>
+            {% endif %}
+
+            {% block content %}
+            {% endblock %}
         </div>
 
         <!-- Footer -->

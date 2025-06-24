@@ -2,52 +2,44 @@
 {% load static %}
 {% load player_extras %}
 
-
-{% block title %}All Players{% endblock %}
+{% block title %}{{ team_selected }} Players{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'players_app/css/player.css' %}">
 
 <div class="page-container">
 
-    <!-- Left content: Filter + Player Grid -->
     <div class="main-content">
-    
+        <h1>{{ team_selected }} Squad</h1>
 
-           {% for position in position_order %}
-                {% with players_in_position=grouped_players|get_item:position %}
-                    {% if players_in_position %}
-                        <h2 class="position-title">{{ position }}s</h2>
-                        <div class="players-grid">
-                            {% for player in players_in_position %}
-                                <a href="{% url 'players_app:player_detail' player.id %}" class="player-card">
-                                    <div class="player-photo-box">
-                                        <img src="{{ player.photo.url }}" alt="{{ player.name }}">
+        {% for position in position_order %}
+            {% with players_in_position=grouped_players|get_item:position %}
+                {% if players_in_position %}
+                    <h2 class="position-title">{{ position }}s</h2>
+                    <div class="players-grid">
+                        {% for player in players_in_position %}
+                            <a href="{% url 'players_app:player_detail' player.id %}" class="player-card">
+                                <div class="player-photo-box">
+                                    <img src="{{ player.photo.url }}" alt="{{ player.name }}">
+                                </div>
+                                <div class="player-info-box">
+                                    <div class="name-number">
+                                        <span class="player-name">{{ player.name }}</span>
+                                        <span class="player-number">{{ player.jersey_number }}</span>
                                     </div>
-
-                                    <div class="player-info-box">
-                                        <div class="name-number">
-                                            <span class="player-name">{{ player.name }}</span>
-                                            <span class="player-number">{{ player.jersey_number }}</span>
-                                        </div>
-                                        <div class="nationality">
-                                            <img src="{% static 'players_app/images/tanzania-flag.png' %}" alt="Tanzania Flag">
-                                            <span>Tanzania</span>
-                                        </div>
+                                    <div class="nationality">
+                                        <img src="{% static 'players_app/images/tanzania-flag.png' %}" alt="Tanzania Flag">
+                                        <span>Tanzania</span>
                                     </div>
-                                </a>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                {% endwith %}
-            {% endfor %}
-
-
-
-       
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+        {% endfor %}
     </div>
 
-    <!-- Right Sidebar -->
     <div class="sidebar">
         <h3>Latest News</h3>
         <ul>
