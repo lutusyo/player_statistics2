@@ -33,7 +33,7 @@
                                 {% endfor %}
                             </ul>
                         </li>
-
+                        
                         <li>
                             <a href="{% url 'matches_app:players_statistics' selected_age_group %}">MATCHES</a>
                             <ul class="dropdown-menu">
@@ -41,6 +41,7 @@
                                 <li><a href="{% url 'matches_app:team_dashboard' 'U20' %}">U20</a></li>
                             </ul>
                         </li>
+
                         <li><a href="#">GPS Analysis</a></li>
                         
                         {% if user.is_authenticated %}
