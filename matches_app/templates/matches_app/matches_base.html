@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'matches_app/css/matches_tabs.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="header">
+        <h1 class="team-title">MATCHES</h1>
+    </div>
+
+    <nav class="team-tabs">
+        <a href="{% url 'matches_app:team_fixtures' team_selected %}" class="{% if active_tab == 'fixtures' %}active{% endif %}">FIXTURES</a>
+        <a href="{% url 'matches_app:team_results' team_selected %}" class="{% if active_tab == 'results' %}active{% endif %}">RESULTS</a>
+        <a href="{% url 'matches_app:team_table' team_selected %}" class="{% if active_tab == 'table' %}active{% endif %}">TABLE</a>
+        <a href="{% url 'matches_app:players_statistics' team_selected %}" class="{% if active_tab == 'statistics' %}active{% endif %}">STATS</a>
+    </nav>
+
+    <div class="tab-content">
+        {% block match_content %}{% endblock %}
+    </div>
+{% endblock %}

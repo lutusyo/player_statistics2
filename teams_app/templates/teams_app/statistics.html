@@ -1,39 +1,36 @@
-{% extends "base.html" %}
+{% extends "teams_app/team_base.html" %}
 {% load static %}
 
-{% block title %}Match Statistics{% endblock %}
+{% block title %}Match statistics{% endblock %}
 
-{% block content %}
+{% block team_content %}
 <link rel="stylesheet" href="{% static 'matches_app/css/players_statistics.css' %}">
 
-<div >
-    <div class="filter-tabs">
+<div class="filter-tabs">
     <form method="get" class="tab-style-form">
         <div class="tab-style-filters">
-        <select name="season" onchange="this.form.submit()">
-            <option value="">SEASON</option>
-            {% for key, label in seasons.items %}
-            <option value="{{ key }}" {% if selected_season == key %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
+            <select name="season" onchange="this.form.submit()">
+                <option value="">SEASON</option>
+                {% for key, label in seasons.items %}
+                    <option value="{{ key }}" {% if selected_season == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="competition" onchange="this.form.submit()">
+                <option value="">COMPETITION</option>
+                {% for key, label in competitions.items %}
+                <option value="{{ key }}" {% if selected_competition == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
 
-        <select name="competition" onchange="this.form.submit()">
-            <option value="">COMPETITION</option>
-            {% for key, label in competitions.items %}
-            <option value="{{ key }}" {% if selected_competition == key %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
-
-        <select name="age_group" onchange="this.form.submit()">
-            <option value="">AGE GROUP</option>
-            {% for key, label in age_groups.items %}
-            <option value="{{ key }}" {% if selected_age_group == key %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
+            <select name="age_group" onchange="this.form.submit()">
+                <option value="">AGE GROUP</option>
+                {% for key, label in age_groups.items %}
+                <option value="{{ key }}" {% if selected_age_group == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
         </div>
     </form>
-    </div>
-
 
 </div>
 

@@ -1,0 +1,12 @@
+{% extends "teams_app/team_base.html" %}
+{% block team_content %}
+
+<h2>{{ team_selected }} Honours</h2>
+
+<ul>
+    {% for honour in honours %}
+        <li><strong>{{ honour.year }}</strong> - {{ honour.title }}</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

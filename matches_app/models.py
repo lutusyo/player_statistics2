@@ -42,6 +42,28 @@ class PlayerMatchStats(models.Model):
     assists = models.PositiveIntegerField(default=0)
     minutes_played = models.PositiveIntegerField(default=0)
 
+
+    # Goalkeeping-specific fields
+    is_goalkeeper = models.BooleanField(default=False)
+    saves_success_rate = models.FloatField(default=0.0, blank=True)
+    clean_sheets = models.PositiveIntegerField(default=0, blank=True)
+    catches = models.PositiveIntegerField(default=0, blank=True)
+    punches = models.PositiveIntegerField(default=0, blank=True)
+    drops = models.PositiveIntegerField(default=0, blank=True)
+    penalties_saved = models.PositiveIntegerField(default=0, blank=True)
+    clearances = models.PositiveIntegerField(default=0, blank=True)
+
+    # Distribution
+    total_passes = models.PositiveIntegerField(default=0, blank=True)
+    pass_success_rate = models.FloatField(default=0.0, blank=True)
+    long_pass_success = models.FloatField(default=0.0, blank=True)
+
+    # Discipline
+    fouls_won = models.PositiveIntegerField(default=0, blank=True)
+    fouls_conceded = models.PositiveIntegerField(default=0, blank=True)
+    yellow_cards = models.PositiveIntegerField(default=0, blank=True)
+    red_cards = models.PositiveIntegerField(default=0, blank=True)
+
     class Meta:
         unique_together = ('player', 'match')
 

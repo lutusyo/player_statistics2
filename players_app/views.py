@@ -45,7 +45,6 @@ def player_detail(request, player_id):
         'player': player,
         'stages': stages,
         'selected_age_group': selected_age_group,
-
     }
 
     return render(request, 'players_app/player_detail.html', context)

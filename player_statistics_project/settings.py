@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'matches_app',
     'actions_app',
     'gps_app',
+    'teams_app',
 ]
 
 MIDDLEWARE = [

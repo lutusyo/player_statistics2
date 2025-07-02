@@ -63,7 +63,6 @@
     gap: 20px;
 }
 
-
 /* Player Card Styles */
 .player-card {
     display: block;
@@ -105,18 +104,17 @@
 /* Player name styling: blue */
 .player-name {
     font-weight: 700;
-    color: #007BFF; /* Bootstrap blue */
+    color: #007BFF;
     font-size: 1.1em;
 }
 
-/* Jersey number styling: bigger and blue */
+/* Jersey number styling */
 .player-number {
     font-weight: 900;
-    color: #000000; /* very black */
+    color: #000000;
     font-size: 2em;
     line-height: 1;
 }
-
 
 .nationality {
     display: flex;
@@ -130,4 +128,95 @@
     width: 18px;
     height: auto;
     border-radius: 2px;
+}
+
+/* ============================ */
+/* Player Profile Detail Page   */
+/* ============================ */
+
+.player-photo-centered {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.player-photo-centered img {
+    max-width: 220px;
+    height: auto;
+    border-radius: 10px;
+}
+
+.button-group {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 0 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1em;
+}
+
+.blue-btn {
+    background: linear-gradient(90deg, #007BFF, #0056b3);
+    color: white;
+    border: none;
+}
+
+/* Grid for attributes */
+
+.player-attributes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Exactly 3 columns */
+    gap: 30px;
+    text-align: center;
+    max-width: 900px;
+    margin: 30px auto 40px;
+}
+
+.attribute-block .label {
+    font-weight: 600;
+    color: gray;
+    font-size: 0.9em;
+    text-transform: uppercase;
+}
+
+.attribute-block .value {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.blue-text {
+    color: #007BFF;
+}
+
+/* ============================ */
+/* Responsive Fix               */
+/* ============================ */
+@media (max-width: 768px) {
+    .page-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        max-width: 100%;
+        min-width: unset;
+        margin-top: 20px;
+    }
+
+    .players-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .player-card {
+        margin-bottom: 15px;
+    }
+
+    .player-attributes-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
 }
