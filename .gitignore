@@ -1,12 +1,19 @@
+# Python environment
 ps_env/
-
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Django-related
+db.sqlite3
+*.sqlite3
+/media/
+
+# Logs and temporary files
 tmp/
 *.log
-*.sqlite3
+
+# Deployment-specific
 Passengerfile.json
 passenger_wsgi.py
-
