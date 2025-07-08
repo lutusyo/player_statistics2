@@ -4,6 +4,7 @@ from players_app.models import PlayerCareerStage, Player
 from django.db.models import Sum, Count
 from django.contrib.auth.decorators import login_required
 from datetime import date
+from gps_app.models import GPSRecord
 
 
 
@@ -160,6 +161,16 @@ def table_view(request, team):
         'active_tab': 'table',
         }
     return render(request, 'teams_app/table.html', context)
+
+@login_required
+def match_details(request, match_id):
+    match = get_object_or_404(Match, id=match_id)
+    gps_records = GPSRecord.objects.filter(match=match)
+    return render(request, 'matches_app/match_details.html', {
+        'match':match,
+        'gps_records': gps_records,
+        })
+
 
 
 

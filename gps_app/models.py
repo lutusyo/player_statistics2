@@ -1,54 +1,53 @@
 from django.db import models
+from players_app.models import Player
+from matches_app.models import Match
 
-class GPSData(models.Model):
-    player_name = models.CharField(max_length=100)
-    period_name = models.CharField(max_length=50)
-    period_number = models.IntegerField()
-    max_acceleration = models.FloatField()
-    max_deceleration = models.FloatField()
-    acceleration_efforts = models.IntegerField()
-    deceleration_efforts = models.IntegerField()
-    accel_decel_efforts = models.IntegerField()
-    accel_decel_efforts_per_minute = models.FloatField()
-    duration = models.CharField(max_length=20)
-    distance = models.FloatField()
-    player_load = models.FloatField()
-    max_velocity = models.FloatField()
-    max_vel_percent_max = models.FloatField()
-    meterage_per_minute = models.FloatField()
-    player_load_per_minute = models.FloatField()
-    work_rest_ratio = models.FloatField()
-    max_heart_rate = models.IntegerField()
-    avg_heart_rate = models.IntegerField()
-    max_hr_percent_max = models.FloatField()
-    avg_hr_percent_max = models.FloatField()
-    hr_exertion = models.FloatField()
-    red_zone = models.FloatField()
-    hr_band_1_duration = models.CharField(max_length=20)
-    hr_band_2_duration = models.CharField(max_length=20)
-    hr_band_3_duration = models.CharField(max_length=20)
-    hr_band_4_duration = models.CharField(max_length=20)
-    hr_band_5_duration = models.CharField(max_length=20)
-    hr_band_6_duration = models.CharField(max_length=20)
-    energy = models.FloatField()
-    high_metabolic_load_distance = models.FloatField()
-    standing_distance = models.FloatField()
-    walking_distance = models.FloatField()
-    jogging_distance = models.FloatField()
-    running_distance = models.FloatField()
-    hi_distance = models.FloatField()
-    sprint_distance = models.FloatField()
-    sprint_efforts = models.IntegerField()
-    sprint_dist_per_min = models.FloatField()
-    high_speed_distance = models.FloatField()
-    high_speed_efforts = models.IntegerField()
-    high_speed_distance_per_minute = models.FloatField()
-    impacts = models.IntegerField()
-    athlete_tags = models.CharField(max_length=100, blank=True, null=True)
-    activity_tags = models.CharField(max_length=100, blank=True, null=True)
-    game_tags = models.CharField(max_length=100, blank=True, null=True)
-    athlete_participation_tags = models.CharField(max_length=100, blank=True, null=True)
-    period_tags = models.CharField(max_length=100, blank=True, null=True)
+class PodAssignment(models.Model):
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    pod_number = models.CharField(max_length=20)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('match', 'pod_number')
 
     def __str__(self):
-        return f"{self.player_name} - {self.period_name}"
+        return f"{self.match} - {self.pod_number} = {self.player}"
+
+class GPSRecord(models.Model):
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    pod_number = models.CharField(max_length=20)
+    date_recorded = models.DateField(auto_now_add=True)
+
+    # All fields from CSV
+    distance = models.FloatField()
+    duration = models.CharField(max_length=20)
+    max_velocity = models.FloatField()
+    meterage_per_minute = models.FloatField(null=True, blank=True)
+    player_load_per_minute = models.FloatField(null=True, blank=True)
+    player_load = models.FloatField()
+    sprint_distance = models.FloatField()
+    sprint_efforts = models.IntegerField()
+    high_speed_distance = models.FloatField()
+    high_speed_efforts = models.IntegerField()
+    acceleration_efforts = models.IntegerField()
+    deceleration_efforts = models.IntegerField()
+    max_acceleration = models.FloatField()
+    max_deceleration = models.FloatField()
+    work_rest_ratio = models.FloatField(null=True, blank=True)
+    max_heart_rate = models.IntegerField(null=True, blank=True)
+    avg_heart_rate = models.IntegerField(null=True, blank=True)
+    red_zone = models.FloatField(null=True, blank=True)
+    standing_distance = models.FloatField(null=True, blank=True)
+    walking_distance = models.FloatField(null=True, blank=True)
+    jogging_distance = models.FloatField(null=True, blank=True)
+    running_distance = models.FloatField(null=True, blank=True)
+    sprinting_distance = models.FloatField(null=True, blank=True)
+    acceleration_distance = models.FloatField(null=True, blank=True)
+    deceleration_distance = models.FloatField(null=True, blank=True)
+    explosive_distance = models.FloatField(null=True, blank=True)
+    sprint_explosive_distance = models.FloatField(null=True, blank=True)
+    impacts = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.match} - {self.player}"

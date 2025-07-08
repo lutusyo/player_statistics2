@@ -11,7 +11,6 @@ urlpatterns = [
     path('matches_app/', include('matches_app.urls')),
     path('actions_app/', include('actions_app.urls')),
     path('gps_app/', include('gps_app.urls')),
-    path('', include('accounts_app.urls')),
     path('', views.index, name='home'),
     path('teams/', include('teams_app.urls')),
 ]

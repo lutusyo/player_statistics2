@@ -36,13 +36,16 @@
             <ul>
                 {% for match in past_matches %}
                     <li>
-                        <strong>{{ match.date }}</strong>
-                        {% if match.match_time %} at {{ match.match_time|time:"H:i" }}{% endif %} —
-                        {{ match.get_team_display }} vs {{ match.opponent }}
-                        {% if match.is_home %}(Home){% else %}(Away){% endif %}
-                        @ {{ match.venue }}
-                        | {{ match.get_competition_type_display }}
+                        <a href="{% url 'matches_app:match_details' match_id=match.id %}">
+                            <strong>{{ match.date }}</strong>
+                            {% if match.match_time %} at {{ match.match_time|time:"H:i" }}{% endif %} —
+                            {{ match.get_team_display }} vs {{ match.opponent }}
+                            {% if match.is_home %}(Home){% else %}(Away){% endif %}
+                            @ {{ match.venue }}
+                            | {{ match.get_competition_type_display }}
+                        </a>
                     </li>
+
                 {% endfor %}
             </ul>
         {% else %}

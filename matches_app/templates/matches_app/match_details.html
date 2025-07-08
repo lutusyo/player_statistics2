@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Match Details{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Match Details</h1>
+    
+    <p><strong>Date:</strong> {{ match.date }}</p>
+    {% if match.match_time %}
+        <p><strong>Time:</strong> {{ match.match_time|time:"H:i" }}</p>
+    {% endif %}
+    
+    <p><strong>Team:</strong> {{ match.get_team_display }}</p>
+    <p><strong>Opponent:</strong> {{ match.opponent }}</p>
+    <p><strong>Home/Away:</strong> {% if match.is_home %}Home{% else %}Away{% endif %}</p>
+    <p><strong>Venue:</strong> {{ match.venue }}</p>
+    <p><strong>Competition Type:</strong> {{ match.get_competition_type_display }}</p>
+    
+    <hr>
+
+    <a href="{% url 'matches_app:team_fixtures' team=match.team %}">← Back to Fixtures</a>
+</div>
+
+
+<hr>
+<h2>Player GPS Stats</h2>
+{% if gps_records %}
+    <table>
+        <thead>
+            <tr>
+                <th>Player</th>
+                <th>Distance (m)</th>
+                <th>Player Load</th>
+                <th>Max Velocity</th>
+                <th>Sprint Efforts</th>
+                <!-- Add more if needed -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in gps_records %}
+                <tr>
+                    <td>{{ record.player }}</td>
+                    <td>{{ record.distance }}</td>
+                    <td>{{ record.player_load }}</td>
+                    <td>{{ record.max_velocity }}</td>
+                    <td>{{ record.sprint_efforts }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No GPS data available for this match.</p>
+{% endif %}
+
+
+
+{% endblock %}
