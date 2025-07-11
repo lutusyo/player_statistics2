@@ -9,9 +9,21 @@
     {% if match.match_time %}
         <p><strong>Time:</strong> {{ match.match_time|time:"H:i" }}</p>
     {% endif %}
-    
-    <p><strong>Team:</strong> {{ match.get_team_display }}</p>
-    <p><strong>Opponent:</strong> {{ match.opponent }}</p>
+
+    <p><strong>Team:</strong>
+        {% if match.our_team_logo %}
+            <img src="{{ match.our_team_logo.url }}" alt="Our team logo" style="height:40px; vertical-align:middle; margin-right:8px;">
+        {% endif %}
+        {{ match.get_team_display }}
+    </p>
+
+    <p><strong>Opponent:</strong>
+        {% if match.opponent_logo %}
+            <img src="{{ match.opponent_logo.url }}" alt="Opponent logo" style="height:40px; vertical-align:middle; margin-right:8px;">
+        {% endif %}
+        {{ match.opponent }}
+    </p>
+
     <p><strong>Home/Away:</strong> {% if match.is_home %}Home{% else %}Away{% endif %}</p>
     <p><strong>Venue:</strong> {{ match.venue }}</p>
     <p><strong>Competition Type:</strong> {{ match.get_competition_type_display }}</p>
@@ -20,7 +32,6 @@
 
     <a href="{% url 'matches_app:team_fixtures' team=match.team %}">← Back to Fixtures</a>
 </div>
-
 
 <hr>
 <h2>Player GPS Stats</h2>
@@ -51,7 +62,5 @@
 {% else %}
     <p>No GPS data available for this match.</p>
 {% endif %}
-
-
 
 {% endblock %}

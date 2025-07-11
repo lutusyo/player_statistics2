@@ -29,6 +29,8 @@ class Match(models.Model):
     venue = models.CharField(max_length=100, default='Azam Complex')
     season = models.CharField(max_length=20, choices=SeasonChoices.choices)
     competition_type = models.CharField(max_length=50, choices=CompetitionType.choices, default=CompetitionType.LOCAL_FRIENDLY)
+    our_team_logo = models.ImageField(upload_to='team_logo', null=True, blank=True)
+    opponent_logo = models.ImageField(upload_to='team_logo/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.get_team_display()} vs {self.opponent} on {self.date}"

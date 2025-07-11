@@ -75,7 +75,7 @@ def upload_gps_data(request):
                     continue
 
             messages.success(request, "GPS data uploaded successfully.")
-            return redirect('gps_dashboard')
+            return redirect('gps_app:gps_dashboard')
     else:
         form = GPSUploadForm()
 

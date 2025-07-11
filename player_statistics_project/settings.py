@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-d6-hxwo53dojql00)t==rs-ftwko*e_ap(7cd(&nt&uq@6@ofl'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -131,14 +131,13 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # MEDIA settings
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Stores uploaded files in BASE_DIR/media
+MEDIA_URL = '/media_player_statistics2/'
+MEDIA_ROOT = '/home/afcportal/public_html/media_player_statistics2/'
 
-# STATIC files (CSS, JS, etc.)
-STATIC_URL = '/static/'
 
-# Only used in production when you run collectstatic
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static_player_statistics2/'
+STATIC_ROOT = '/home/afcportal/public_html/static_player_statistics2/'
+
 
 # Development static directories (Django will look here during dev)
 STATICFILES_DIRS = [
@@ -147,6 +146,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'matches_app', 'static'),
     os.path.join(BASE_DIR, 'actions_app', 'static'),
     os.path.join(BASE_DIR, 'gps_app', 'static'),
+    os.path.join(BASE_DIR, 'teams_app', 'static'),
     # optionally a global one if you have BASE_DIR/static
     # os.path.join(BASE_DIR, 'static'),
 ]
