@@ -1,7 +1,14 @@
-{% extends 'base.html' %}
+{% extends 'matches_app/matches_base.html' %}
+{% load static %}
 {% block title %}Match Details{% endblock %}
 
-{% block content %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/match_details.css' %}">
+{% endblock %}
+
+
+{% block match_content %}
 <div class="container">
     <h1>Match Details</h1>
     

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2>📈 GPS Dashboard</h2>
+    <h2><a href="{% url 'gps_app:gps_upload'  %}">UPLOAD GPS CSV</a></h2>
+
+    <!-- Filters -->
+    <form method="get" class="mb-4">
+        <select name="player">
+            <option value="">All Players</option>
+            {% for player in players %}
+                <option value="{{ player.id }}">{{ player.full_name }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="match">
+            <option value="">All Matches</option>
+            {% for match in matches %}
+                <option value="{{ match.id }}">{{ match }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Filter</button>
+    </form>
+
+    <!-- Trend Line -->
+    <canvas id="trendChart"></canvas>
+
+    <!-- Pie Chart -->
+    <canvas id="pieChart" class="mt-4"></canvas>
+
+    <!-- Radar Chart -->
+    <canvas id="radarChart" class="mt-4"></canvas>
+
+    <!-- Table -->
+    <h3 class="mt-5">Raw GPS Data</h3>
+    <table border="1">
+        <tr>
+            <th>Player</th>
+            <th>Match</th>
+            <th>Top Speed</th>
+            <th>Sprint Distance</th>
+            <th>Efforts</th>
+            <th>Load</th>
+        </tr>
+        {% for r in records %}
+        <tr>
+            <td>{{ r.player }}</td>
+            <td>{{ r.match }}</td>
+            <td>{{ r.top_speed }}</td>
+            <td>{{ r.sprint_distance }}</td>
+            <td>{{ r.sprint_efforts }}</td>
+            <td>{{ r.player_load }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const pieCtx = document.getElementById('pieChart').getContext('2d');
+new Chart(pieCtx, {
+    type: 'pie',
+    data: {
+        labels: {{ pie_labels|safe }},
+        datasets: [{
+            data: {{ pie_data|safe }},
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+        }]
+    }
+});
+
+const radarCtx = document.getElementById('radarChart').getContext('2d');
+new Chart(radarCtx, {
+    type: 'radar',
+    data: {
+        labels: {{ radar_labels|safe }},
+        datasets: [{
+            label: 'Performance Avg',
+            data: {{ radar_data|safe }},
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'blue',
+        }]
+    }
+});
+
+const trendCtx = document.getElementById('trendChart').getContext('2d');
+new Chart(trendCtx, {
+    type: 'line',
+    data: {
+        labels: {{ trend_labels|safe }},
+        datasets: [{
+            label: 'Sprint Distance Over Time',
+            data: {{ trend_values|safe }},
+            fill: false,
+            borderColor: 'green',
+            tension: 0.2
+        }]
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,68 @@
+/* match_details.css */
+
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+    font-family: 'Segoe UI', sans-serif;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+p {
+    font-size: 16px;
+    color: #333;
+    margin: 8px 0;
+}
+
+strong {
+    color: #444;
+}
+
+img {
+    vertical-align: middle;
+    height: 40px;
+    margin-right: 10px;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 30px 0;
+}
+
+a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 15px;
+}
+
+table thead {
+    background-color: #f8f8f8;
+}
+
+table th, table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #e1e1e1;
+}
+
+table tbody tr:hover {
+    background-color: #f1f1f1;
+}

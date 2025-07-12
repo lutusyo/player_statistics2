@@ -166,10 +166,17 @@ def table_view(request, team):
 def match_details(request, match_id):
     match = get_object_or_404(Match, id=match_id)
     gps_records = GPSRecord.objects.filter(match=match)
+
+    team_selected = match.team  # It's already a string
+
     return render(request, 'matches_app/match_details.html', {
-        'match':match,
+        'match': match,
         'gps_records': gps_records,
-        })
+        'team_selected': team_selected,
+        'active_tab': 'fixtures',
+    })
+
+
 
 
 
