@@ -1,0 +1,97 @@
+/* Header */
+.top-header h1 {
+    font-size: 48px;
+    color: #d50032;
+    font-weight: bold;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.match-nav {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 10px 0;
+    background: #f7f7f7;
+    border-bottom: 2px solid #ddd;
+}
+.match-nav li {
+    margin: 0 20px;
+}
+.match-nav li a {
+    color: #000;
+    text-decoration: none;
+    font-weight: 600;
+}
+.match-nav .active a {
+    color: #d50032;
+    border-bottom: 3px solid #d50032;
+}
+
+/* Filters */
+.filters-section {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin: 20px 0;
+}
+.filter-dropdown {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+/* Tab Bar */
+.tab-bar {
+    display: flex;
+    justify-content: center;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 20px;
+}
+.tab-link {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    font-weight: 600;
+    cursor: pointer;
+}
+.tab-link.active {
+    border-bottom: 3px solid #d50032;
+    color: #d50032;
+}
+
+/* Ranking Entries */
+.ranking-list {
+    padding: 20px;
+}
+.ranking-entry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+.player-photo-name {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.player-photo-name img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+.stat-bar {
+    display: flex;
+    align-items: center;
+    width: 70%;
+}
+.bar-fill {
+    height: 12px;
+    background-color: red;
+    border-radius: 5px;
+    flex-grow: 1;
+    margin-right: 10px;
+}
+.stat-value {
+    font-weight: bold;
+}

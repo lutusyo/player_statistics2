@@ -53,7 +53,7 @@
     <h2 style="text-align: center; margin-top: 40px;">Past Matches</h2>
     {% if past_matches %}
         {% for match in past_matches %}
-            <a href="{% url 'matches_app:match_details' match_id=match.id %}" style="text-decoration: none; color: inherit;">
+            <a href="{% url 'matches_app:match_detail' match_id=match.id %}" style="text-decoration: none; color: inherit;">
                 <div class="fixture-card">
                     <div class="fixture-header">
                         <div class="fixture-date">
@@ -71,7 +71,14 @@
                             <div>{{ match.get_team_display }}</div>
                         </div>
 
-                        <div class="vs">VS</div>
+                        <div class="vs">
+                            {% if match.teammatchresult %}
+                                <strong>{{ match.teammatchresult.our_score }} - {{ match.teammatchresult.opponent_score }}</strong>
+                            {% else %}
+                                <span style="font-size: 14px; color: gray;">No result</span>
+                            {% endif %}
+                        </div>
+
 
                         <div class="team">
                             {% if match.opponent_logo %}
@@ -86,6 +93,7 @@
     {% else %}
         <p style="text-align: center;">No past matches.</p>
     {% endif %}
+
 
 </div>
 {% endblock %}

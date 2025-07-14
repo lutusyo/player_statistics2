@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ player.name }} - Stats{% endblock %}
+
+{% block content %}
+<!-- CSS Links -->
+<link rel="stylesheet" href="{% static 'players_app/css/player_statistics.css' %}">
+<link rel="stylesheet" href="{% static 'players_app/css/player_ranking.css' %}">
+
+<!-- Top Section Header -->
+<div class="top-header">
+    <h1>MATCHES</h1>
+    <ul class="match-nav">
+        <li><a href="#">Fixtures</a></li>
+        <li><a href="#">Results</a></li>
+        <li><a href="#">Tables</a></li>
+        <li class="active"><a href="#">Stats</a></li>
+    </ul>
+</div>
+
+<!-- Filters -->
+<div class="filters-section">
+    <select class="filter-dropdown">
+        <option selected>2024-2025</option>
+    </select>
+    <select class="filter-dropdown">
+        <option selected>All Competitions</option>
+    </select>
+    <select class="filter-dropdown">
+        <option selected>Player Ranking</option>
+    </select>
+</div>
+
+<!-- Tabs -->
+<div class="tab-bar">
+    <button class="tab-link active" data-target="#goals">Goals & Assists</button>
+    <button class="tab-link" data-target="#gps">GPS</button>
+    <button class="tab-link" data-target="#actions">Actions</button>
+    <button class="tab-link" data-target="#ranking">Player Ranking</button>
+</div>
+
+<!-- Tab Content -->
+<div class="tab-content">
+    <!-- Goals & Assists -->
+    <div class="tab-pane show active" id="goals">
+        <div class="ranking-list">
+            {% for p in players %}
+            <div class="ranking-entry">
+                <div class="player-photo-name">
+
+                    {% if p.player__photo %}
+                        <img src="{{ p.player__photo.url }}" alt="{{ p.player__name }}">
+                    {% else %}
+                        <img src="{% static 'players_app/images/default-avatar.png' %}" alt="No photo">
+                    {% endif %}
+
+
+                    <span>{{ p.player__name }}</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-fill" style="width: {{ p.total|default:0|floatformat:0 }}%;"></div>
+                    <span class="stat-value">{{ p.total|default:0 }}</span>
+                </div>
+            </div>
+            {% empty %}
+            <p>No data found.</p>
+            {% endfor %}
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Match</th>
+                    <th>Goals</th>
+                    <th>Assists</th>
+                    <th>Minutes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in match_stats %}
+                <tr>
+                    <td>{{ stat.match }}</td>
+                    <td>{{ stat.goals }}</td>
+                    <td>{{ stat.assists }}</td>
+                    <td>{{ stat.minutes_played }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- GPS Tab -->
+    <div class="tab-pane" id="gps">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Match</th>
+                    <th>Distance (m)</th>
+                    <th>Sprint Distance</th>
+                    <th>Max Velocity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gps in gps_stats %}
+                <tr>
+                    <td>{{ gps.match }}</td>
+                    <td>{{ gps.distance }}</td>
+                    <td>{{ gps.sprint_distance }}</td>
+                    <td>{{ gps.max_velocity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Actions Tab -->
+    <div class="tab-pane" id="actions">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Match</th>
+                    <th>Completed Passes</th>
+                    <th>Total Passes</th>
+                    <th>Key Passes</th>
+                    <th>Shots on Target</th>
+                    <th>Interceptions</th>
+                    <th>Clearances</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for act in action_stats %}
+                <tr>
+                    <td>{{ act.match }}</td>
+                    <td>{{ act.completed_passes }}</td>
+                    <td>{{ act.total_passes }}</td>
+                    <td>{{ act.key_passes }}</td>
+                    <td>{{ act.shots_on_target }}</td>
+                    <td>{{ act.interceptions }}</td>
+                    <td>{{ act.clearances }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Player Ranking Tab -->
+    <div class="tab-pane" id="ranking">
+        <p>Player ranking content goes here (e.g. cards, stats, visualizations).</p>
+    </div>
+</div>
+
+<!-- Tabs JS -->
+<script>
+document.querySelectorAll('.tab-link').forEach(button => {
+    button.addEventListener('click', () => {
+        document.querySelectorAll('.tab-link').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('show', 'active'));
+
+        button.classList.add('active');
+        const target = document.querySelector(button.dataset.target);
+        target.classList.add('show', 'active');
+    });
+});
+</script>
+
+{% endblock %}

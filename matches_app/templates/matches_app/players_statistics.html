@@ -6,68 +6,96 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'matches_app/css/players_statistics.css' %}">
 
-<div >
-    <div class="filter-tabs">
-    <form method="get" class="tab-style-form">
-        <div class="tab-style-filters">
+<div class="filter-container">
+    <form method="get" class="filter-form">
         <select name="season" onchange="this.form.submit()">
-            <option value="">SEASON</option>
+            <option value="">Season</option>
             {% for key, label in seasons.items %}
-            <option value="{{ key }}" {% if selected_season == key %}selected{% endif %}>{{ label }}</option>
+                <option value="{{ key }}" {% if selected_season == key %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
 
         <select name="competition" onchange="this.form.submit()">
-            <option value="">COMPETITION</option>
+            <option value="">Competition</option>
             {% for key, label in competitions.items %}
-            <option value="{{ key }}" {% if selected_competition == key %}selected{% endif %}>{{ label }}</option>
+                <option value="{{ key }}" {% if selected_competition == key %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
 
         <select name="age_group" onchange="this.form.submit()">
-            <option value="">AGE GROUP</option>
+            <option value="">Age Group</option>
             {% for key, label in age_groups.items %}
-            <option value="{{ key }}" {% if selected_age_group == key %}selected{% endif %}>{{ label }}</option>
+                <option value="{{ key }}" {% if selected_age_group == key %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
-        </div>
     </form>
-    </div>
-
-
 </div>
 
-<div class="players-stats-section">
-    {% for item in player_data %}
-        <div class="player-card">
-            <div class="player-header">
-                <h3>{{ item.player.name }}</h3>
-                <div class="position">{{ item.player.position }}</div>
-            </div>
 
-            <div class="stats-section">
-                <h4>General Stats</h4>
-                <div class="stat-box">Matches: <strong>{{ item.appearances }}</strong></div>
-                <div class="stat-box">Goals: <strong>{{ item.goals }}</strong></div>
-                <div class="stat-box">Assists: <strong>{{ item.assists }}</strong></div>
-                <div class="stat-box">Minutes: <strong>{{ item.minutes }}</strong></div>
-            </div>
+<div class="stats-table-section">
+    <h2 style="text-align: center; margin-top: 30px;">{{ team_selected|upper }} STATISTICS {{ selected_season }}</h2>
 
-            {% if item.player.position == 'Goalkeeper' %}
-            <div class="stats-section">
-                <h4>Goalkeeping</h4>
-                <div class="stat-box">Saves %: <strong>{{ item.saves_success_rate }}</strong></div>
-                <div class="stat-box">Clean Sheets: <strong>{{ item.clean_sheets }}</strong></div>
-                <div class="stat-box">Catches: <strong>{{ item.catches }}</strong></div>
-                <div class="stat-box">Punches: <strong>{{ item.punches }}</strong></div>
-                <div class="stat-box">Drops: <strong>{{ item.drops }}</strong></div>
-                <div class="stat-box">Penalties Saved: <strong>{{ item.penalties_saved }}</strong></div>
-                <div class="stat-box">Clearances: <strong>{{ item.clearances }}</strong></div>
-            </div>
-            {% endif %}
-        </div>
-    {% empty %}
-        <p>No stats found for selected filters.</p>
-    {% endfor %}
+    <table class="stats-table">
+        <thead>
+            <tr>
+                <th>PLAYER</th>
+                <th colspan="2">Local Friendly</th>
+                <th colspan="2">International Friendly</th>
+                <th colspan="2">NBC Youth League</th>
+                <th colspan="2">TOTAL</th>
+            </tr>
+            <tr>
+                <th></th>
+                <th>AP</th><th>GL</th>
+                <th>AP</th><th>GL</th>
+                <th>AP</th><th>GL</th>
+                <th>AP</th><th>GL</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in player_data %}
+            <tr>
+                <td>{{ item.player.name }}</td>
+
+                <td>{{ item.local_ap }}</td>
+                <td>{{ item.local_gl }}</td>
+
+                <td>{{ item.int_ap }}</td>
+                <td>{{ item.int_gl }}</td>
+
+                <td>{{ item.nbc_ap }}</td>
+                <td>{{ item.nbc_gl }}</td>
+
+                <td><strong>{{ item.total_ap }}</strong></td>
+                <td><strong>{{ item.total_gl }}</strong></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" style="text-align: center;">No stats found for selected filters.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
+
+<style>
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.stats-table th, .stats-table td {
+    border: 1px solid #ccc;
+    padding: 8px 10px;
+    text-align: center;
+}
+.stats-table thead {
+    background-color: #0c1d36;
+    color: white;
+}
+.stats-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+</style>
+
 {% endblock %}

@@ -1,73 +1,117 @@
-{% extends 'matches_app/matches_base.html' %}
+{% extends 'base.html' %}
 {% load static %}
-{% block title %}Match Details{% endblock %}
 
+{% block content %}
+<div class="container" style="max-width: 900px; margin: auto;">
 
-{% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/match_details.css' %}">
-{% endblock %}
+    <!-- Match Title -->
+    <h2 style="text-align: center; margin-bottom: 20px;">
+        {{ match.get_team_display }} vs {{ match.opponent }}
+    </h2>
 
+    <!-- Match Info Grid -->
+    <div style="
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        background: #f9f9f9;
+        padding: 15px 20px;
+        border-radius: 10px;
+        font-size: 14px;
+        margin-bottom: 30px;
+    ">
+        <div><strong>📅 Date:</strong> {{ match.date }}</div>
+        <div><strong>🕒 Time:</strong> {{ match.match_time }}</div>
+        <div><strong>📍 Venue:</strong> {{ match.venue }}</div>
+        <div><strong>🏆 Competition:</strong> {{ match.get_competition_type_display }}</div>
+        <div><strong>📅 Season:</strong> {{ match.season }}</div>
+    </div>
 
-{% block match_content %}
-<div class="container">
-    <h1>Match Details</h1>
-    
-    <p><strong>Date:</strong> {{ match.date }}</p>
-    {% if match.match_time %}
-        <p><strong>Time:</strong> {{ match.match_time|time:"H:i" }}</p>
+    <!-- Score Section -->
+    <div style="display: flex; align-items: center; justify-content: center; gap: 30px; margin-bottom: 30px;">
+        <div style="text-align: center;">
+            {% if match.our_team_logo %}
+                <img src="{{ match.our_team_logo.url }}" alt="Our Team Logo" height="60">
+            {% endif %}
+            <div>{{ match.get_team_display }}</div>
+        </div>
+
+        <div style="font-size: 22px; font-weight: bold;">
+            {% if team_result %}
+                {{ team_result.our_score }} - {{ team_result.opponent_score }}
+            {% else %}
+                <span style="font-size: 16px; color: gray;">No result yet</span>
+            {% endif %}
+        </div>
+
+        <div style="text-align: center;">
+            {% if match.opponent_logo %}
+                <img src="{{ match.opponent_logo.url }}" alt="Opponent Logo" height="60">
+            {% endif %}
+            <div>{{ match.opponent }}</div>
+        </div>
+    </div>
+
+    <!-- Goals Timeline -->
+    <h3>⚽ Goals Timeline</h3>
+    {% if goals %}
+        <ul style="line-height: 1.8;">
+            {% for goal in goals %}
+                <li>
+                    {{ goal.minute }}':
+                    {% if goal.is_own_goal %}
+                        🥅 Own Goal by {{ goal.scorer }}
+                    {% else %}
+                        {{ goal.scorer }}
+                        {% if goal.assist_by %}(Assist: {{ goal.assist_by }}){% endif %}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No goals recorded yet.</p>
     {% endif %}
 
-    <p><strong>Team:</strong>
-        {% if match.our_team_logo %}
-            <img src="{{ match.our_team_logo.url }}" alt="Our team logo" style="height:40px; vertical-align:middle; margin-right:8px;">
-        {% endif %}
-        {{ match.get_team_display }}
-    </p>
+    <hr style="margin: 40px 0;">
 
-    <p><strong>Opponent:</strong>
-        {% if match.opponent_logo %}
-            <img src="{{ match.opponent_logo.url }}" alt="Opponent logo" style="height:40px; vertical-align:middle; margin-right:8px;">
-        {% endif %}
-        {{ match.opponent }}
-    </p>
+    <!-- Player Stats Table -->
+    <h3>📊 Player Stats</h3>
+    {% if player_stats %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <thead style="background: #f1f1f1;">
+                    <tr>
+                        <th style="padding: 8px; border: 1px solid #ccc;">Player</th>
+                        <th style="padding: 8px; border: 1px solid #ccc;">Minutes</th>
+                        <th style="padding: 8px; border: 1px solid #ccc;">Goals</th>
+                        <th style="padding: 8px; border: 1px solid #ccc;">Assists</th>
+                        <th style="padding: 8px; border: 1px solid #ccc;">Yellow</th>
+                        <th style="padding: 8px; border: 1px solid #ccc;">Red</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in player_stats %}
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ stat.player.name }}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ stat.minutes_played }}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ stat.goals }}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ stat.assists }}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ stat.yellow_cards }}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">{{ stat.red_cards }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>No player stats available.</p>
+    {% endif %}
 
-    <p><strong>Home/Away:</strong> {% if match.is_home %}Home{% else %}Away{% endif %}</p>
-    <p><strong>Venue:</strong> {{ match.venue }}</p>
-    <p><strong>Competition Type:</strong> {{ match.get_competition_type_display }}</p>
-    
-    <hr>
+    <!-- Export Buttons -->
+    <div style="margin-top: 30px; text-align: center;">
+        <a href="{% url 'matches_app:export_csv' match.id %}" class="btn btn-primary" style="margin-right: 10px;">⬇️ Export CSV</a>
+        <a href="{% url 'matches_app:export_pdf' match.id %}" class="btn btn-secondary">⬇️ Download PDF</a>
+    </div>
 
-    <a href="{% url 'matches_app:team_fixtures' team=match.team %}">← Back to Fixtures</a>
 </div>
-
-<hr>
-<h2>Player GPS Stats</h2>
-{% if gps_records %}
-    <table>
-        <thead>
-            <tr>
-                <th>Player</th>
-                <th>Distance (m)</th>
-                <th>Player Load</th>
-                <th>Max Velocity</th>
-                <th>Sprint Efforts</th>
-                <!-- Add more if needed -->
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in gps_records %}
-                <tr>
-                    <td>{{ record.player }}</td>
-                    <td>{{ record.distance }}</td>
-                    <td>{{ record.player_load }}</td>
-                    <td>{{ record.max_velocity }}</td>
-                    <td>{{ record.sprint_efforts }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <p>No GPS data available for this match.</p>
-{% endif %}
-
 {% endblock %}

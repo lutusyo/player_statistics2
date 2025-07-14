@@ -36,14 +36,31 @@ class Match(models.Model):
         return f"{self.get_team_display()} vs {self.opponent} on {self.date}"
     
 
+class Goal(models.Model):
+    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='goals')
+    scorer = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='goals_scored')
+    assist_by = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='assists_made')
+    minute = models.PositiveIntegerField()
+    is_own_goal = models.BooleanField(default=False)
 
+    def __str__(self):
+        if self.is_own_goal:
+            return f"Own Goal at {self.minute}'"
+        return f"{self.scorer} scored at {self.minute}'"
+    
+class TeamMatchResult(models.Model):
+    match = models.OneToOneField(Match, on_delete=models.CASCADE)
+    our_score = models.PositiveIntegerField()
+    opponent_score = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.our_score} - {self.opponent_score}"
+    
 class PlayerMatchStats(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    goals = models.PositiveIntegerField(default=0)
-    assists = models.PositiveIntegerField(default=0)
-    minutes_played = models.PositiveIntegerField(default=0)
 
+    minutes_played = models.PositiveIntegerField(default=0)
 
     # Goalkeeping-specific fields
     is_goalkeeper = models.BooleanField(default=False)
@@ -71,3 +88,12 @@ class PlayerMatchStats(models.Model):
 
     def __str__(self):
         return f"{self.player.name} - {self.match}"
+
+    @property
+    def goals(self):
+        return Goal.objects.filter(match=self.match, scorer=self.player, is_own_goal=False).count()
+
+    @property
+    def assists(self):
+        return Goal.objects.filter(match=self.match, assist_by=self.player).count()
+

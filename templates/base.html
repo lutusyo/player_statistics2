@@ -34,22 +34,22 @@
                             </ul>
                         </li>
                         
-                        <!--<li>
+                        <li>
                             <a href="#">MATCHES</a>
                             <ul class="dropdown-menu">
                                 {% for group in age_groups %}
                                     <li><a href="{% url 'matches_app:team_dashboard' group %}">{{ group }}</a></li>
                                 {% endfor %}
                             </ul>
-                        </li>-->
+                        </li>
 
-                        <li>
+                        <!--<li>
                             <a href="{% url 'matches_app:team_fixtures' team_selected|default:'U20' %}" class="{% if active_tab == 'fixtures' %}active{% endif %}">FIXTURES</a>
                         </li>
 
                         <li>
                             <a href="{% url 'matches_app:players_statistics' team_selected|default:'U20' %}" class="{% if active_tab == 'statistics' %}active{% endif %}">STATISTICS</a>
-                        </li>
+                        </li>-->
 
 
                         <li><a href="{% url 'gps_app:gps_dashboard' %}">GPS</a></li>

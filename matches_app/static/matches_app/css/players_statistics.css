@@ -1,16 +1,49 @@
-/* Filters container */
-.filters-container {
-    padding: 1rem;
-    text-align: center;
+/* Filters Section */
+.filters-container,
+.filter-tabs {
     display: flex;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-    flex-direction: row;
+    justify-content: center; /* Centered on wide screens */
     align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem 0 1.5rem;
+    flex-wrap: nowrap;
+    overflow-x: auto; /* Prevents breaking on small screens */
+    scrollbar-width: none; /* Firefox */
 }
 
-/* Cards Section */
+.filters-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+}
+
+.filter-form {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: nowrap;
+}
+
+/* Dropdown Selects */
+.filter-form select {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #001f3f;
+    min-width: 130px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.filter-form select:hover,
+.filter-form select:focus {
+    background-color: #001f3f;
+    color: #fff;
+    outline: none;
+}
+
+/* Player Cards Grid */
 .players-stats-section {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
@@ -18,16 +51,15 @@
     padding: 1.5rem;
 }
 
-/* Player card */
+/* Individual Player Card */
 .player-card {
     background-color: #ffffff;
-    border-left: 6px solid #001f3f; /* deep blue */
+    border-left: 6px solid #001f3f;
     border-radius: 12px;
     padding: 1rem;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
 }
 
-/* Player header */
 .player-header h3 {
     margin: 0;
     color: #001f3f;
@@ -39,7 +71,7 @@
     color: #888;
 }
 
-/* Stat sections */
+/* Stat Sections */
 .stats-section {
     margin-top: 1rem;
     border-top: 1px solid #eee;
@@ -48,7 +80,7 @@
 
 .stats-section h4 {
     font-size: 0.95rem;
-    color: #daa520; /* gold */
+    color: #daa520;
     margin-bottom: 0.5rem;
     border-bottom: 1px solid #ddd;
     padding-bottom: 3px;
@@ -67,45 +99,20 @@
 
 /* Responsive */
 @media screen and (max-width: 768px) {
+    .filters-container,
+    .filter-form {
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+
+    .filter-form select {
+        min-width: 120px;
+        flex-shrink: 0;
+    }
+
     .players-stats-section {
         grid-template-columns: 1fr;
         padding: 1rem;
     }
 }
-
-
-.filter-tabs {
-    text-align: center;
-    margin: 1rem 0;
-}
-
-.tab-style-filters {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-
-.tab-style-filters li {
-    display: inline-block;
-}
-
-.tab-style-filters select {
-    padding: 0.5rem 1rem;
-    border: 2px solid #001f3f;
-    border-radius: 20px;
-    background-color: #fff;
-    color: #001f3f;
-    font-weight: bold;
-    cursor: pointer;
-    min-width: 150px;
-    text-align: center;
-    transition: background-color 0.2s ease;
-}
-
-.tab-style-filters select:hover {
-    background-color: #001f3f;
-    color: #fff;
-}
-

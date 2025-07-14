@@ -1,7 +1,17 @@
 from django.contrib import admin
-from .models import Match, PlayerMatchStats
+from .models import Match, PlayerMatchStats, Goal, TeamMatchResult
+from .forms import GoalForm
 
-admin.site.register(Match)
+
+@admin.register(TeamMatchResult)
+class TeamMatchResultAdmin(admin.ModelAdmin):
+    list_display = ['match', 'our_score', 'opponent_score']
+
+
+@admin.register(Goal)
+class GoalAdmin(admin.ModelAdmin):
+    form = GoalForm
+    list_display = ['match', 'scorer', 'assist_by', 'minute', 'is_own_goal']
 
 class PlayerMatchStatsAdmin(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
@@ -17,3 +27,7 @@ class PlayerMatchStatsAdmin(admin.ModelAdmin):
         return form
 
 admin.site.register(PlayerMatchStats, PlayerMatchStatsAdmin)
+admin.site.register(Match)
+
+
+

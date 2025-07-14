@@ -1,11 +1,18 @@
+from django.conf import settings
 from django.shortcuts import render, get_object_or_404
-from .models import Match, PlayerMatchStats
+from .models import Match, Goal, PlayerMatchStats, TeamMatchResult
 from players_app.models import PlayerCareerStage, Player
 from django.db.models import Sum, Count
 from django.contrib.auth.decorators import login_required
 from datetime import date
 from gps_app.models import GPSRecord
-
+import csv
+from django.http import HttpResponse
+from .models import Match, PlayerMatchStats
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import ImageReader
+import os
 
 
 @login_required
@@ -62,19 +69,32 @@ def player_statistics_view(request, team):
     player_data = []
     for player in players:
         player_stats = stats.filter(player=player)
-        appearances = player_stats.count()
-        goals = player_stats.aggregate(Sum('goals'))['goals__sum'] or 0
-        assists = player_stats.aggregate(Sum('assists'))['assists__sum'] or 0
-        minutes = player_stats.aggregate(Sum('minutes_played'))['minutes_played__sum'] or 0
 
-        
+        def get_stats_by_competition(comp):
+            comp_stats = player_stats.filter(match__competition_type=comp)
+            return {
+                'appearances': comp_stats.count(),
+                'goals': Goal.objects.filter(
+                    match__in=comp_stats.values('match'),
+                    scorer=player,
+                    is_own_goal=False
+                ).count()
+            }
+
+        local = get_stats_by_competition('Local Friendly')
+        international = get_stats_by_competition('International Friendly')
+        nbc = get_stats_by_competition('NBC Youth League')
 
         player_info = {
             'player': player,
-            'appearances': appearances,
-            'goals': goals,
-            'assists': assists,
-            'minutes': minutes,
+            'local_ap': local['appearances'],
+            'local_gl': local['goals'],
+            'int_ap': international['appearances'],
+            'int_gl': international['goals'],
+            'nbc_ap': nbc['appearances'],
+            'nbc_gl': nbc['goals'],
+            'total_ap': local['appearances'] + international['appearances'] + nbc['appearances'],
+            'total_gl': local['goals'] + international['goals'] + nbc['goals'],
         }
 
         # Only include goalkeeper stats if the player is a goalkeeper
@@ -163,19 +183,122 @@ def table_view(request, team):
     return render(request, 'teams_app/table.html', context)
 
 @login_required
-def match_details(request, match_id):
-    match = get_object_or_404(Match, id=match_id)
-    gps_records = GPSRecord.objects.filter(match=match)
-
-    team_selected = match.team  # It's already a string
+def match_detail(request, match_id):
+    match = get_object_or_404(Match, pk=match_id)
+    goals = Goal.objects.filter(match=match).select_related('scorer', 'assist_by')
+    team_result = TeamMatchResult.objects.filter(match=match).first()
+    player_stats = PlayerMatchStats.objects.filter(match=match).select_related('player')
 
     return render(request, 'matches_app/match_details.html', {
         'match': match,
-        'gps_records': gps_records,
-        'team_selected': team_selected,
-        'active_tab': 'fixtures',
+        'goals': goals,
+        'team_result': team_result,
+        'player_stats': player_stats,
     })
 
+def export_player_stats_csv(request, match_id):
+    match = get_object_or_404(Match, pk=match_id)
+    stats = PlayerMatchStats.objects.filter(match=match).select_related('player')
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{match}-player-stats.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Player Name', 'Minutes Played', 'Goals', 'Assists', 'Yellow Cards', 'Red Cards'])
+
+    for stat in stats:
+        writer.writerow([
+            stat.player.name,
+            stat.minutes_played,
+            stat.goals,
+            stat.assists,
+            stat.yellow_cards,
+            stat.red_cards
+        ])
+
+    return response
+
+
+
+
+def export_match_summary_pdf(request, match_id):
+    match = get_object_or_404(Match, pk=match_id)
+    goals = Goal.objects.filter(match=match).select_related('scorer', 'assist_by')
+    stats = PlayerMatchStats.objects.filter(match=match).select_related('player')
+    result = TeamMatchResult.objects.filter(match=match).first()
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="match-summary-{match.id}.pdf"'
+
+    p = canvas.Canvas(response, pagesize=A4)
+    width, height = A4
+    y = height - 50
+
+    # Load and draw logos
+    if match.our_team_logo:
+        our_logo_path = os.path.join(settings.MEDIA_ROOT, match.our_team_logo.name)
+        if os.path.exists(our_logo_path):
+            p.drawImage(ImageReader(our_logo_path), 50, y - 60, width=80, height=80, preserveAspectRatio=True)
+
+    if match.opponent_logo:
+        opponent_logo_path = os.path.join(settings.MEDIA_ROOT, match.opponent_logo.name)
+        if os.path.exists(opponent_logo_path):
+            p.drawImage(ImageReader(opponent_logo_path), width - 130, y - 60, width=80, height=80, preserveAspectRatio=True)
+
+    # Match Title in between logos
+    p.setFont("Helvetica-Bold", 14)
+    p.drawCentredString(width / 2, y, f"{match.get_team_display()} vs {match.opponent}")
+    y -= 100
+
+    # Match details
+    p.setFont("Helvetica", 12)
+    if result:
+        p.drawString(50, y, f"Score: {result.our_score} - {result.opponent_score}")
+        y -= 20
+
+    p.drawString(50, y, f"Venue: {match.venue}")
+    y -= 20
+    p.drawString(50, y, f"Date: {match.date} | Time: {match.match_time}")
+    y -= 30
+
+    # Goals Timeline
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, y, "Goals Timeline:")
+    y -= 20
+    p.setFont("Helvetica", 10)
+    if goals:
+        for goal in goals:
+            if y < 100:
+                p.showPage()
+                y = height - 50
+            text = f"{goal.minute}': "
+            if goal.is_own_goal:
+                text += f"Own Goal by {goal.scorer}"
+            else:
+                text += f"{goal.scorer}"
+                if goal.assist_by:
+                    text += f" (Assist: {goal.assist_by})"
+            p.drawString(60, y, text)
+            y -= 15
+    else:
+        p.drawString(60, y, "No goals recorded.")
+        y -= 20
+
+    y -= 20
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, y, "Player Statistics:")
+    y -= 20
+    p.setFont("Helvetica", 10)
+    for stat in stats:
+        if y < 100:
+            p.showPage()
+            y = height - 50
+        p.drawString(60, y, f"{stat.player.name} - Minutes: {stat.minutes_played}, Goals: {stat.goals}, Assists: {stat.assists}, Yellows: {stat.yellow_cards}, Reds: {stat.red_cards}")
+        y -= 15
+
+    p.showPage()
+    p.save()
+    return response
 
 
 
