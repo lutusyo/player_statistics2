@@ -218,9 +218,6 @@ def export_player_stats_csv(request, match_id):
 
     return response
 
-
-
-
 def export_match_summary_pdf(request, match_id):
     match = get_object_or_404(Match, pk=match_id)
     goals = Goal.objects.filter(match=match).select_related('scorer', 'assist_by')
@@ -234,7 +231,7 @@ def export_match_summary_pdf(request, match_id):
     width, height = A4
     y = height - 50
 
-    # Load and draw logos
+    # Team logos
     if match.our_team_logo:
         our_logo_path = os.path.join(settings.MEDIA_ROOT, match.our_team_logo.name)
         if os.path.exists(our_logo_path):
@@ -245,7 +242,7 @@ def export_match_summary_pdf(request, match_id):
         if os.path.exists(opponent_logo_path):
             p.drawImage(ImageReader(opponent_logo_path), width - 130, y - 60, width=80, height=80, preserveAspectRatio=True)
 
-    # Match Title in between logos
+    # Match title
     p.setFont("Helvetica-Bold", 14)
     p.drawCentredString(width / 2, y, f"{match.get_team_display()} vs {match.opponent}")
     y -= 100
@@ -255,13 +252,58 @@ def export_match_summary_pdf(request, match_id):
     if result:
         p.drawString(50, y, f"Score: {result.our_score} - {result.opponent_score}")
         y -= 20
-
     p.drawString(50, y, f"Venue: {match.venue}")
     y -= 20
     p.drawString(50, y, f"Date: {match.date} | Time: {match.match_time}")
     y -= 30
 
-    # Goals Timeline
+    # Line-ups
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, y, "Line-up")
+    y -= 20
+    p.setFont("Helvetica", 10)
+
+    our_team_players = stats.filter(player__age_group=match.team)
+    opponent_players = stats.exclude(player__age_group=match.team)
+
+
+    def split_lineup(queryset):
+        starters = queryset.filter(is_starting=True) if hasattr(PlayerMatchStats, 'is_starting') else queryset[:11]
+        subs = queryset.exclude(pk__in=starters.values_list('pk', flat=True))
+        return starters, subs
+
+    our_starters, our_subs = split_lineup(our_team_players)
+    opp_starters, opp_subs = split_lineup(opponent_players)
+
+    p.drawString(60, y, "Our Team")
+    p.drawString(width / 2 + 20, y, "Opponent Team")
+    y -= 15
+
+    max_lines = max(len(our_starters) + len(our_subs), len(opp_starters) + len(opp_subs))
+    for i in range(max_lines):
+        if y < 100:
+            p.showPage()
+            y = height - 50
+            p.setFont("Helvetica", 10)
+
+        left = ""
+        right = ""
+
+        if i < len(our_starters):
+            left = f"⚽ {our_starters[i].player.name}"
+        elif i - len(our_starters) < len(our_subs):
+            left = f"↩ {our_subs[i - len(our_starters)].player.name}"
+
+        if i < len(opp_starters):
+            right = f"⚽ {opp_starters[i].player.name}"
+        elif i - len(opp_starters) < len(opp_subs):
+            right = f"↩ {opp_subs[i - len(opp_starters)].player.name}"
+
+        p.drawString(60, y, left)
+        p.drawString(width / 2 + 20, y, right)
+        y -= 15
+
+    y -= 20
     p.setFont("Helvetica-Bold", 12)
     p.drawString(50, y, "Goals Timeline:")
     y -= 20
@@ -299,6 +341,7 @@ def export_match_summary_pdf(request, match_id):
     p.showPage()
     p.save()
     return response
+
 
 
 

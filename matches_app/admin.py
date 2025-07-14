@@ -14,6 +14,9 @@ class GoalAdmin(admin.ModelAdmin):
     list_display = ['match', 'scorer', 'assist_by', 'minute', 'is_own_goal']
 
 class PlayerMatchStatsAdmin(admin.ModelAdmin):
+    list_display = ['player', 'match', 'is_starting', 'minutes_played', 'goals', 'assists']
+    list_filter = ['match', 'is_starting']
+
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         if obj and obj.player.position != 'Goalkeeper':

@@ -61,6 +61,7 @@ class PlayerMatchStats(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
 
     minutes_played = models.PositiveIntegerField(default=0)
+    is_starting = models.BooleanField(default=False)
 
     # Goalkeeping-specific fields
     is_goalkeeper = models.BooleanField(default=False)
