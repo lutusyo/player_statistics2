@@ -1,0 +1,98 @@
+{% load custom_filters %}
+
+
+{% block title %}Match Action Stats{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <h2 style="text-align: center;">Match Summary - Key Statistics</h2>
+  <p style="text-align: center;">{{ match.date }} - {{ match.venue }} - {{ match.match_time }}</p>
+
+  {% with our_team=team_stats|get_item:0 opponent_team=team_stats|get_item:1 %}
+    <table border="1" cellspacing="0" cellpadding="10" style="width: 100%; text-align: center;">
+      <thead>
+        <tr>
+          <th>{{ our_team.team_name }}</th>
+          <th>Stat</th>
+          <th>{{ opponent_team.team_name }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ our_team.shots_on_target_inside_box|add:our_team.shots_on_target_outside_box }}</td>
+          <td>Goals</td>
+          <td>{{ opponent_team.shots_on_target_inside_box|add:opponent_team.shots_on_target_outside_box }}</td>
+        </tr>
+        <tr>
+          <td>
+            {{ our_team.shots_on_target_inside_box|add:our_team.shots_on_target_outside_box|add:our_team.shots_off_target_inside_box|add:our_team.shots_off_target_outside_box }}
+            ({{ our_team.shots_on_target_inside_box|add:our_team.shots_on_target_outside_box }})
+          </td>
+          <td>Attempts at Goal (On Target)</td>
+          <td>
+            {{ opponent_team.shots_on_target_inside_box|add:opponent_team.shots_on_target_outside_box|add:opponent_team.shots_off_target_inside_box|add:opponent_team.shots_off_target_outside_box }}
+            ({{ opponent_team.shots_on_target_inside_box|add:opponent_team.shots_on_target_outside_box }})
+          </td>
+        </tr>
+        <tr>
+          <td>{{ our_team.corners }}</td>
+          <td>Corners</td>
+          <td>{{ opponent_team.corners }}</td>
+        </tr>
+        <tr>
+          <td>{{ our_team.successful_crosses }}</td>
+          <td>Successful Crosses</td>
+          <td>{{ opponent_team.successful_crosses }}</td>
+        </tr>
+        <tr>
+          <td>{{ our_team.unsuccessful_crosses }}</td>
+          <td>Unsuccessful Crosses</td>
+          <td>{{ opponent_team.unsuccessful_crosses }}</td>
+        </tr>
+        <tr>
+          <td>{{ our_team.aerial_duel_won }}</td>
+          <td>Aerial Duels Won</td>
+          <td>{{ opponent_team.aerial_duel_won }}</td>
+        </tr>
+        <tr>
+          <td>{{ our_team.aerial_duel_lost }}</td>
+          <td>Aerial Duels Lost</td>
+          <td>{{ opponent_team.aerial_duel_lost }}</td>
+        </tr>
+        <tr>
+          <td>{{ our_team.bad_passes }}</td>
+          <td>Bad Passes</td>
+          <td>{{ opponent_team.bad_passes }}</td>
+        </tr>
+        <tr>
+          <td>{{ our_team.duel_1v1_won }}</td>
+          <td>1v1 Duels Won</td>
+          <td>{{ opponent_team.duel_1v1_won }}</td>
+        </tr>
+        <tr>
+          <td>{{ our_team.fouls_committed }}</td>
+          <td>Fouls Committed</td>
+          <td>{{ opponent_team.fouls_committed }}</td>
+        </tr>
+        <tr>
+          <td>{{ our_team.fouls_won }}</td>
+          <td>Fouls Won</td>
+          <td>{{ opponent_team.fouls_won }}</td>
+        </tr>
+        <tr>
+          <td>{{ our_team.mistakes }}</td>
+          <td>Mistakes</td>
+          <td>{{ opponent_team.mistakes }}</td>
+        </tr>
+        <tr>
+          <td>{{ our_team.offsides }}</td>
+          <td>Offsides</td>
+          <td>{{ opponent_team.offsides }}</td>
+        </tr>
+      </tbody>
+    </table>
+  {% endwith %}
+
+</div>
+{% endblock %}

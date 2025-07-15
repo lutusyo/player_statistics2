@@ -4,16 +4,20 @@ from django.db import models
 UNDER_20 = 'U20'
 UNDER_17 = 'U17'
 UNDER_15 = 'U15'
+UNDER_13 ='U13'
 AGE_GROUP_CHOICES = [
     (UNDER_20, 'Under 20'),
     (UNDER_17, 'Under 17'),
     (UNDER_15, 'Under 15'),
+    (UNDER_13, 'Under 13'),
 ]
 
 SEASON_CHOICES = [
     ("2022/2023", "2022/2023"),
     ("2023/2024", "2023/2024"),
     ("2024/2025", "2024/2025"),
+    ("2025/2026", "2025/2026"),
+    ("2026/2027", "2026/2027"),
 ]
 
 COMPETITION_CHOICES = [

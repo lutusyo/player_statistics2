@@ -13,6 +13,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
 import os
+from actions_app.models import TeamActionStats
 
 
 @login_required
@@ -185,16 +186,19 @@ def table_view(request, team):
 @login_required
 def match_detail(request, match_id):
     match = get_object_or_404(Match, pk=match_id)
+    player_stats = PlayerMatchStats.objects.filter(match=match).select_related('player')
     goals = Goal.objects.filter(match=match).select_related('scorer', 'assist_by')
     team_result = TeamMatchResult.objects.filter(match=match).first()
-    player_stats = PlayerMatchStats.objects.filter(match=match).select_related('player')
+    team_stats = TeamActionStats.objects.filter(match=match).order_by('-is_our_team')  # Our team first
 
     return render(request, 'matches_app/match_details.html', {
         'match': match,
+        'player_stats': player_stats,
         'goals': goals,
         'team_result': team_result,
-        'player_stats': player_stats,
+        'team_stats': team_stats,
     })
+
 
 def export_player_stats_csv(request, match_id):
     match = get_object_or_404(Match, pk=match_id)
@@ -259,7 +263,6 @@ def export_match_summary_pdf(request, match_id):
 
     # Line-ups
     p.setFont("Helvetica-Bold", 12)
-    p.drawString(50, y, "Line-up")
     y -= 20
     p.setFont("Helvetica", 10)
 
@@ -275,33 +278,47 @@ def export_match_summary_pdf(request, match_id):
     our_starters, our_subs = split_lineup(our_team_players)
     opp_starters, opp_subs = split_lineup(opponent_players)
 
-    p.drawString(60, y, "Our Team")
-    p.drawString(width / 2 + 20, y, "Opponent Team")
+    # Draw Line-up Titles
+    p.drawString(60, y, "STARTING")
+    p.drawString(width / 2 + 20, y, "STARTING")
     y -= 15
 
-    max_lines = max(len(our_starters) + len(our_subs), len(opp_starters) + len(opp_subs))
-    for i in range(max_lines):
+    # Print Starters
+    max_starters = max(len(our_starters), len(opp_starters))
+    for i in range(max_starters):
+        if y < 100:
+            p.showPage()
+            y = height - 50
+            p.setFont("Helvetica", 10)
+        
+        left = our_starters[i].player.name if i < len(our_starters) else ""
+        right = opp_starters[i].player.name if i < len(opp_starters) else ""
+        p.drawString(60, y, f"⚽ {left}")
+        p.drawString(width / 2 + 20, y, f"⚽ {right}")
+        y -= 15
+
+    # Substitutes Heading
+    y -= 10
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(60, y, "SUBSTITUTES")
+    p.drawString(width / 2 + 20, y, "SUBSTITUTES")
+    y -= 15
+    p.setFont("Helvetica", 10)
+
+    # Print Substitutes
+    max_subs = max(len(our_subs), len(opp_subs))
+    for i in range(max_subs):
         if y < 100:
             p.showPage()
             y = height - 50
             p.setFont("Helvetica", 10)
 
-        left = ""
-        right = ""
-
-        if i < len(our_starters):
-            left = f"⚽ {our_starters[i].player.name}"
-        elif i - len(our_starters) < len(our_subs):
-            left = f"↩ {our_subs[i - len(our_starters)].player.name}"
-
-        if i < len(opp_starters):
-            right = f"⚽ {opp_starters[i].player.name}"
-        elif i - len(opp_starters) < len(opp_subs):
-            right = f"↩ {opp_subs[i - len(opp_starters)].player.name}"
-
-        p.drawString(60, y, left)
-        p.drawString(width / 2 + 20, y, right)
+        left = our_subs[i].player.name if i < len(our_subs) else ""
+        right = opp_subs[i].player.name if i < len(opp_subs) else ""
+        p.drawString(60, y, f"↩ {left}")
+        p.drawString(width / 2 + 20, y, f"↩ {right}")
         y -= 15
+
 
     y -= 20
     p.setFont("Helvetica-Bold", 12)

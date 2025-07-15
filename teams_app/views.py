@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from players_app.models import Player
 from collections import defaultdict
+from .models import staffMember
 
 @login_required
 def team_squad(request, team):
@@ -44,3 +45,8 @@ def team_statistics(request, team):
         'team_selected': team,
         'active_tab': 'statistics'
     })
+
+
+def staff_list(request):
+    staff_members = staffMember.objects.all().order_by('age_group', 'role')
+    return render(request, 'teams_app/staff_list.html', {'staff_members': staff_members})
