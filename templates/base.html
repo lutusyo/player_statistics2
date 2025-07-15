@@ -10,6 +10,32 @@
     
     {% block extra_head %}{% endblock %}
     
+    <style>
+        /* Increase logo title font size */
+        #logo h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        /* Increase nav link font size */
+        #nav ul li a {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        /* Increase dropdown items font size */
+        .dropdown-menu li a {
+            font-size: 1.1rem;
+        }
+
+        /* Optional: Increase Logout/Login button text */
+        .logout-link,
+        #nav ul li form button {
+            font-size: 1.1rem;
+        }
+    </style>
+
+
 </head>
 <body class="is-preload homepage">
     <div id="page-wrapper">
@@ -53,7 +79,7 @@
 
 
                         <li><a href="{% url 'gps_app:gps_dashboard' %}">GPS</a></li>
-                        <li><a href="{% url 'teams_app:staff_list' %}">Technical Staff</a></li>
+                        <!--<li><a href="{% url 'teams_app:staff_list' %}">Technical Staff</a></li>-->
 
                         
                         {% if user.is_authenticated %}
