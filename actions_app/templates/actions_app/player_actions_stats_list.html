@@ -1,0 +1,108 @@
+<p>Match: {{ match.id }} - {{ match.date }}</p>
+
+<!-- Action Counts Summary -->
+<p>Offensive Actions Count: {{ offensive_actions|length }}</p>
+<p>Defensive Actions Count: {{ defensive_actions|length }}</p>
+<p>Set Piece Actions Count: {{ set_piece_actions|length }}</p>
+<p>Transition Actions Count: {{ transition_actions|length }}</p>
+<p>Discipline Actions Count: {{ discipline_actions|length }}</p>
+<p>Goal Keeping Actions Count: {{ goal_keeping_actions|length }}</p>
+<p>General Actions Count: {{ general_actions|length }}</p>
+
+<!-- Offensive Actions -->
+<h2>Offensive Actions</h2>
+<ul>
+  {% for action in offensive_actions %}
+    <li>
+      <a href="{% url 'actions_app:player_action_detail' match.id action.player.id %}">
+        {{ action.player.name }}
+      </a>: Shots On Target Inside Box - {{ action.shots_on_target_inside_box }}
+    </li>
+  {% empty %}
+    <li>No offensive data yet.</li>
+  {% endfor %}
+</ul>
+
+<!-- Defensive Actions -->
+<h2>Defensive Actions</h2>
+<ul>
+  {% for action in defensive_actions %}
+    <li>
+      <a href="{% url 'actions_app:player_action_detail' match.id action.player.id %}">
+        {{ action.player.name }}
+      </a>: Aerial Duel Won - {{ action.aerial_duel_won }}
+    </li>
+  {% empty %}
+    <li>No defensive data yet.</li>
+  {% endfor %}
+</ul>
+
+<!-- Set Piece Actions -->
+<h2>Set Piece Actions</h2>
+<ul>
+  {% for action in set_piece_actions %}
+    <li>
+      <a href="{% url 'actions_app:player_action_detail' match.id action.player.id %}">
+        {{ action.player.name }}
+      </a>: Corners Taken - {{ action.corners_taken }}
+    </li>
+  {% empty %}
+    <li>No set piece data yet.</li>
+  {% endfor %}
+</ul>
+
+<!-- Transition Actions -->
+<h2>Transition Actions</h2>
+<ul>
+  {% for action in transition_actions %}
+    <li>
+      <a href="{% url 'actions_app:player_action_detail' match.id action.player.id %}">
+        {{ action.player.name }}
+      </a>: Counter Press Actions - {{ action.counter_press_actions }}
+    </li>
+  {% empty %}
+    <li>No transition data yet.</li>
+  {% endfor %}
+</ul>
+
+<!-- Discipline Actions -->
+<h2>Discipline Actions</h2>
+<ul>
+  {% for action in discipline_actions %}
+    <li>
+      <a href="{% url 'actions_app:player_action_detail' match.id action.player.id %}">
+        {{ action.player.name }}
+      </a>: Yellow Cards - {{ action.yellow_cards }}
+    </li>
+  {% empty %}
+    <li>No discipline data yet.</li>
+  {% endfor %}
+</ul>
+
+<!-- Goal Keeping Actions -->
+<h2>Goal Keeping Actions</h2>
+<ul>
+  {% for action in goal_keeping_actions %}
+    <li>
+      <a href="{% url 'actions_app:player_action_detail' match.id action.player.id %}">
+        {{ action.player.name }}
+      </a>: Saves - {{ action.saves }}
+    </li>
+  {% empty %}
+    <li>No goal keeping data yet.</li>
+  {% endfor %}
+</ul>
+
+<!-- General Actions -->
+<h2>General Actions</h2>
+<ul>
+  {% for action in general_actions %}
+    <li>
+      <a href="{% url 'actions_app:player_action_detail' match.id action.player.id %}">
+        {{ action.player.name }}
+      </a>: Minutes Played - {{ action.minutes_played }}
+    </li>
+  {% empty %}
+    <li>No general data yet.</li>
+  {% endfor %}
+</ul>

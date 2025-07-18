@@ -43,9 +43,14 @@
         <!-- Header -->
         <div id="header-wrapper">
             <header id="header" class="container">
-                <div id="logo">
+
+                <div id="logo" style="display: flex; align-items: center; gap: 10px;">
+                    <a href="{% url 'home' %}">
+                        <img src="{% static 'accounts_app/images/logo.png' %}" alt="Azam FC Logo" style="height: 100px;">
+                    </a>
                     <h1><a href="{% url 'home' %}">Azam FC Youth</a></h1>
                 </div>
+               
                 <nav id="nav">
                     <ul>
                         <li><a href="{% url 'home' %}">Home</a></li>
