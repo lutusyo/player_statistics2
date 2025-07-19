@@ -5,12 +5,14 @@ class AgeGroup(models.TextChoices):
     UNDER_20 = 'U20', 'Under 20'
     UNDER_17 = 'U17', 'Under 17'
     UNDER_15 = 'U15', 'Under 15'
+    UNDER_13 = 'U13', 'Under 13'
 
 
 class SeasonChoices(models.TextChoices):
     SEASON_2022_2023 = "2022/2023", "2022/2023"
     SEASON_2023_2024 = "2023/2024", "2023/2024"
     SEASON_2024_2025 = "2024/2025", "2024/2025"
+    SEASON_2025_2026 = "2025/2026", "2025/2026"
 
 
 class CompetitionType(models.TextChoices):

@@ -17,34 +17,38 @@
     {% if upcoming_matches %}
         <h2 style="text-align: center; margin-bottom: 20px;">Upcoming Matches</h2>
         {% for match in upcoming_matches %}
-            <div class="fixture-card">
-                <div class="fixture-header">
-                    <div class="fixture-date">
-                        {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
+
+             <a href="{% url 'matches_app:match_detail' match_id=match.id %}" style="text-decoration: none; color: inherit;">  
+                <div class="fixture-card">
+                    <div class="fixture-header">
+                        <div class="fixture-date">
+                            {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
+                        </div>
+                        <div class="fixture-venue">{{ match.venue }}</div>
+                        <div class="fixture-type">{{ match.get_competition_type_display }}</div>
                     </div>
-                    <div class="fixture-venue">{{ match.venue }}</div>
-                    <div class="fixture-type">{{ match.get_competition_type_display }}</div>
+                    <div class="fixture-body">
+                        <div class="team">
+                            {% if match.our_team_logo %}
+                                <img src="{{ match.our_team_logo.url }}" alt="{{ match.get_team_display }} logo">
+                            {% endif %}
+                            <div>{{ match.get_team_display }}</div>
+                        </div>
+                        <div class="vs">VS</div>
+                        <div class="team">
+                            {% if match.opponent_logo %}
+                                <img src="{{ match.opponent_logo.url }}" alt="{{ match.opponent }} logo">
+                            {% endif %}
+                            <div>{{ match.opponent }}</div>
+                        </div>
+                    </div>
                 </div>
+            </a>
 
-                <div class="fixture-body">
-                    <div class="team">
-                        {% if match.our_team_logo %}
-                            <img src="{{ match.our_team_logo.url }}" alt="{{ match.get_team_display }} logo">
-                        {% endif %}
-                        <div>{{ match.get_team_display }}</div>
-                    </div>
 
-                    <div class="vs">VS</div>
-
-                    <div class="team">
-                        {% if match.opponent_logo %}
-                            <img src="{{ match.opponent_logo.url }}" alt="{{ match.opponent }} logo">
-                        {% endif %}
-                        <div>{{ match.opponent }}</div>
-                    </div>
-                </div>
-            </div>
         {% endfor %}
+
+
     {% else %}
         <p style="text-align: center;">No upcoming matches.</p>
     {% endif %}

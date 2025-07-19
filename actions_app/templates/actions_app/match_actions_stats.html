@@ -8,6 +8,7 @@
   <p style="text-align: center;">{{ match.date }} - {{ match.venue }} - {{ match.match_time }}</p>
 
   {% with our_team=team_stats|get_item:0 opponent_team=team_stats|get_item:1 %}
+    {% if our_team and opponent_team %}
     <table border="1" cellspacing="0" cellpadding="10" style="width: 100%; text-align: center;">
       <thead>
         <tr>
@@ -18,91 +19,94 @@
       </thead>
       <tbody>
         <tr>
-          <td>{{ our_team.shots_on_target_inside_box|add:our_team.shots_on_target_outside_box }}</td>
+          <td>{{ our_team.shots_on_target_inside_box|default_if_none:0|add:our_team.shots_on_target_outside_box|default_if_none:0 }}</td>
           <td>Shots on Target</td>
-          <td>{{ opponent_team.shots_on_target_inside_box|add:opponent_team.shots_on_target_outside_box }}</td>
+          <td>{{ opponent_team.shots_on_target_inside_box|default_if_none:0|add:opponent_team.shots_on_target_outside_box|default_if_none:0 }}</td>
         </tr>
         <tr>
           <td>
-            {{ our_team.shots_on_target_inside_box|add:our_team.shots_on_target_outside_box|add:our_team.shots_off_target_inside_box|add:our_team.shots_off_target_outside_box|add:our_team.blocked_shots }}
+            {{ our_team.shots_on_target_inside_box|default_if_none:0|add:our_team.shots_on_target_outside_box|default_if_none:0|add:our_team.shots_off_target_inside_box|default_if_none:0|add:our_team.shots_off_target_outside_box|default_if_none:0|add:our_team.blocked_shots|default_if_none:0 }}
           </td>
           <td>Total Attempts at Goal</td>
           <td>
-            {{ opponent_team.shots_on_target_inside_box|add:opponent_team.shots_on_target_outside_box|add:opponent_team.shots_off_target_inside_box|add:opponent_team.shots_off_target_outside_box|add:opponent_team.blocked_shots }}
+            {{ opponent_team.shots_on_target_inside_box|default_if_none:0|add:opponent_team.shots_on_target_outside_box|default_if_none:0|add:opponent_team.shots_off_target_inside_box|default_if_none:0|add:opponent_team.shots_off_target_outside_box|default_if_none:0|add:opponent_team.blocked_shots|default_if_none:0 }}
           </td>
         </tr>
         <tr>
-          <td>{{ our_team.blocked_shots }}</td>
+          <td>{{ our_team.blocked_shots|default_if_none:0 }}</td>
           <td>Blocked Shots</td>
-          <td>{{ opponent_team.blocked_shots }}</td>
+          <td>{{ opponent_team.blocked_shots|default_if_none:0 }}</td>
         </tr>
         <tr>
-          <td>{{ our_team.missed_chances }}</td>
+          <td>{{ our_team.missed_chances|default_if_none:0 }}</td>
           <td>Missed Chances</td>
-          <td>{{ opponent_team.missed_chances }}</td>
+          <td>{{ opponent_team.missed_chances|default_if_none:0 }}</td>
         </tr>
         <tr>
-          <td>{{ our_team.ball_lost }}</td>
+          <td>{{ our_team.ball_lost|default_if_none:0 }}</td>
           <td>Ball Lost</td>
-          <td>{{ opponent_team.ball_lost }}</td>
+          <td>{{ opponent_team.ball_lost|default_if_none:0 }}</td>
         </tr>
         <tr>
-          <td>{{ our_team.corners }}</td>
+          <td>{{ our_team.corners|default_if_none:0 }}</td>
           <td>Corners</td>
-          <td>{{ opponent_team.corners }}</td>
+          <td>{{ opponent_team.corners|default_if_none:0 }}</td>
         </tr>
         <tr>
-          <td>{{ our_team.successful_crosses }}</td>
+          <td>{{ our_team.successful_crosses|default_if_none:0 }}</td>
           <td>Successful Crosses</td>
-          <td>{{ opponent_team.successful_crosses }}</td>
+          <td>{{ opponent_team.successful_crosses|default_if_none:0 }}</td>
         </tr>
         <tr>
-          <td>{{ our_team.unsuccessful_crosses }}</td>
+          <td>{{ our_team.unsuccessful_crosses|default_if_none:0 }}</td>
           <td>Unsuccessful Crosses</td>
-          <td>{{ opponent_team.unsuccessful_crosses }}</td>
+          <td>{{ opponent_team.unsuccessful_crosses|default_if_none:0 }}</td>
         </tr>
         <tr>
-          <td>{{ our_team.aerial_duel_won }}</td>
+          <td>{{ our_team.aerial_duel_won|default_if_none:0 }}</td>
           <td>Aerial Duels Won</td>
-          <td>{{ opponent_team.aerial_duel_won }}</td>
+          <td>{{ opponent_team.aerial_duel_won|default_if_none:0 }}</td>
         </tr>
         <tr>
-          <td>{{ our_team.aerial_duel_lost }}</td>
+          <td>{{ our_team.aerial_duel_lost|default_if_none:0 }}</td>
           <td>Aerial Duels Lost</td>
-          <td>{{ opponent_team.aerial_duel_lost }}</td>
+          <td>{{ opponent_team.aerial_duel_lost|default_if_none:0 }}</td>
         </tr>
         <tr>
-          <td>{{ our_team.bad_passes }}</td>
+          <td>{{ our_team.bad_passes|default_if_none:0 }}</td>
           <td>Bad Passes</td>
-          <td>{{ opponent_team.bad_passes }}</td>
+          <td>{{ opponent_team.bad_passes|default_if_none:0 }}</td>
         </tr>
         <tr>
-          <td>{{ our_team.duel_1v1_won }}</td>
+          <td>{{ our_team.duel_1v1_won|default_if_none:0 }}</td>
           <td>1v1 Duels Won</td>
-          <td>{{ opponent_team.duel_1v1_won }}</td>
+          <td>{{ opponent_team.duel_1v1_won|default_if_none:0 }}</td>
         </tr>
         <tr>
-          <td>{{ our_team.fouls_committed }}</td>
+          <td>{{ our_team.fouls_committed|default_if_none:0 }}</td>
           <td>Fouls Committed</td>
-          <td>{{ opponent_team.fouls_committed }}</td>
+          <td>{{ opponent_team.fouls_committed|default_if_none:0 }}</td>
         </tr>
         <tr>
-          <td>{{ our_team.fouls_won }}</td>
+          <td>{{ our_team.fouls_won|default_if_none:0 }}</td>
           <td>Fouls Won</td>
-          <td>{{ opponent_team.fouls_won }}</td>
+          <td>{{ opponent_team.fouls_won|default_if_none:0 }}</td>
         </tr>
         <tr>
-          <td>{{ our_team.mistakes }}</td>
+          <td>{{ our_team.mistakes|default_if_none:0 }}</td>
           <td>Mistakes</td>
-          <td>{{ opponent_team.mistakes }}</td>
+          <td>{{ opponent_team.mistakes|default_if_none:0 }}</td>
         </tr>
         <tr>
-          <td>{{ our_team.offsides }}</td>
+          <td>{{ our_team.offsides|default_if_none:0 }}</td>
           <td>Offsides</td>
-          <td>{{ opponent_team.offsides }}</td>
+          <td>{{ opponent_team.offsides|default_if_none:0 }}</td>
         </tr>
       </tbody>
     </table>
+    {% else %}
+      <p style="text-align: center;">Team stats are not available for this match.</p>
+    {% endif %}
   {% endwith %}
 </div>
 {% endblock %}
