@@ -14,6 +14,9 @@ urlpatterns = [
     path('gps_app/', include('gps_app.urls')),
     path('', views.index, name='home'),
     path('teams/', include('teams_app.urls')),
+
+    path('announcements/', include('announcements_app.urls')),
+
 ]
 
 if settings.DEBUG:

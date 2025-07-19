@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'actions_app',
     'gps_app',
     'teams_app',
+    'announcements_app',
 ]
 
 MIDDLEWARE = [

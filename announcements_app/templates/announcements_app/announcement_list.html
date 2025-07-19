@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 style="text-align:center;">Announcements{% if selected_age_group %} - {{ selected_age_group }}{% endif %}</h1>
+
+{% for announcement in announcements %}
+    <div class="announcement-card">
+        <h2>{{ announcement.title }} ({{ announcement.age_group }})</h2>
+        <p><strong>Date:</strong> {{ announcement.date_for }}</p>
+        <ul>
+            {% for item in announcement.plan_items.all %}
+                <li><strong>{{ item.time|time:"H:i" }}</strong>: {{ item.activity }}</li>
+            {% endfor %}
+        </ul>
+        <hr>
+    </div>
+{% empty %}
+    <p>No announcements available.</p>
+{% endfor %}
+{% endblock %}

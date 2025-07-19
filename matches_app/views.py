@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Match, Goal, PlayerMatchStats, TeamMatchResult
 from players_app.models import PlayerCareerStage, Player
 from django.db.models import Sum, Count
@@ -18,29 +18,9 @@ from actions_app.models import TeamActionStats
 
 @login_required
 def team_dashboard(request, team):
-    players = Player.objects.filter(age_group=team)
+    # Just redirect to the fixtures view
+    return redirect('matches_app:team_fixtures', team=team)
 
-    position_order = ['Goalkeeper', 'Defender', 'Midfielder', 'Forward']
-    selected_age_group = request.GET.get('age_group')
-
-
-    #group players by position
-
-    grouped_players = {}
-    for position in position_order:
-        grouped_players[position] = players.filter(position=position)
-
-
-
-    context = {
-        'team_selected': team,
-        'selected_age_group': selected_age_group,
-        'players': players,
-        'position_order': position_order,
-        'grouped_players': grouped_players,
-        'active_tab': 'fixtures'
-    }
-    return render(request, 'matches_app/fixtures.html', context)
 
 
 @login_required

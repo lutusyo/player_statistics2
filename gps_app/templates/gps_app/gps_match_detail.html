@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h2>📍 GPS Data - {{ match.get_team_display }} vs {{ match.opponent }} ({{ match.date }})</h2>
+
+    {% if records %}
+        <table border="1" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Top Speed</th>
+                    <th>Sprint Distance</th>
+                    <th>Efforts</th>
+                    <th>Player Load</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td>{{ r.player }}</td>
+                    <td>{{ r.max_velocity }}</td>
+                    <td>{{ r.sprint_distance }}</td>
+                    <td>{{ r.sprint_efforts }}</td>
+                    <td>{{ r.player_load }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No GPS data available for this match.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,13 +1,12 @@
 import csv
 import json
 from io import TextIOWrapper
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .forms import GPSUploadForm
 from .models import GPSRecord, PodAssignment
 from matches_app.models import Match
 from players_app.models import Player
-
 
 def upload_gps_data(request):
     if request.method == 'POST':
@@ -15,7 +14,7 @@ def upload_gps_data(request):
         if form.is_valid():
             match = form.cleaned_data['match']
             file = TextIOWrapper(request.FILES['csv_file'].file, encoding='utf-8')
-            reader = csv.reader(file, delimiter='\t')
+            reader = csv.reader(file)
 
 
             # Skip metadata rows (first 9 rows)
@@ -24,12 +23,12 @@ def upload_gps_data(request):
 
             headers = next(reader)
             print("Headers:", headers)
-            header_map = {h.strip(): i for i, h in enumerate(headers)}
+            header_map = {h.strip().strip('"'): i for i, h in enumerate(headers)}
 
             required_column = "Period Name"
             if required_column not in header_map:
                 messages.error(request, f"'{required_column}' column not found in CSV. Found: {list(header_map.keys())}")
-                return redirect('gps_upload')
+                return redirect('gps_app:gps_upload')
 
             for row in reader:
                 if row[header_map["Period Name"]].strip() != "Session":
@@ -131,3 +130,15 @@ def gps_dashboard(request):
         'matches': Match.objects.all(),
     }
     return render(request, 'gps_app/gps_dashboard.html', context)
+
+
+def gps_match_detail(request, match_id):
+    match = get_object_or_404(Match, id=match_id)
+    records = GPSRecord.objects.filter(match=match)
+
+    context = {
+        'match': match,
+        'records': records,
+    }
+    return render(request, 'gps_app/gps_match_detail.html', context)
+
