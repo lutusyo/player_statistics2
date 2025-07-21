@@ -1,46 +1,56 @@
-<h2>{{ action.player.name }} - Match vs {{ action.match.opponent }} ({{ action.match.date }})</h2>
+{% load static %}
+<html>
+<head>
+    <link rel="stylesheet" href="{% static 'actions_app/css/player_actions.css' %}">
+</head>
+<body>
+<div class="container">
+    <h2>{{ action.player.name }} - Match vs {{ action.match.opponent }} ({{ action.match.date }})</h2>
 
-<h3>1. Offensive Actions</h3>
-<ul>
-  <li>Shots On Target Inside Box: {{ action.shots_on_target_inside_box }}</li>
-  <li>Shots On Target Outside Box: {{ action.shots_on_target_outside_box }}</li>
-  <li>Shots Off Target Inside Box: {{ action.shots_off_target_inside_box }}</li>
-  <li>Shots Off Target Outside Box: {{ action.shots_off_target_outside_box }}</li>
-  <li>Successful Crosses: {{ action.successful_cross }}</li>
-  <li>Unsuccessful Crosses: {{ action.unsuccessful_cross }}</li>
-  <li>Missed Chances: {{ action.missed_chance }}</li>
-  <li>Bad Chances: {{ action.bad_chance }}</li>
-  <li>Touches Inside Box: {{ action.touches_inside_box }}</li>
-</ul>
+    <h3>1. Offensive Actions</h3>
+    <ul>
+        <li>Shots On Target Inside Box: {{ action.shots_on_target_inside_box }}</li>
+        <li>Shots On Target Outside Box: {{ action.shots_on_target_outside_box }}</li>
+        <li>Shots Off Target Inside Box: {{ action.shots_off_target_inside_box }}</li>
+        <li>Shots Off Target Outside Box: {{ action.shots_off_target_outside_box }}</li>
+        <li>Successful Crosses: {{ action.successful_cross }}</li>
+        <li>Unsuccessful Crosses: {{ action.unsuccessful_cross }}</li>
+        <li>Missed Chances: {{ action.missed_chance }}</li>
+        <li>Bad Chances: {{ action.bad_chance }}</li>
+        <li>Touches Inside Box: {{ action.touches_inside_box }}</li>
+    </ul>
 
-<h3>2. Defensive Actions</h3>
-<ul>
-  <li>Blocked Shots: {{ action.blocked_shots }}</li>
-  <li>Aerial Duels Won: {{ action.aerial_duel_won }}</li>
-  <li>Aerial Duels Lost: {{ action.aerial_duel_lost }}</li>
-  <li>1v1 Duels Won: {{ action.one_v_one_duel_won }}</li>
-  <li>1v1 Duels Lost: {{ action.one_v_one_duel_lost }}</li>
-  <li>Ball Lost: {{ action.ball_lost }}</li>
-</ul>
+    <h3>2. Defensive Actions</h3>
+    <ul>
+        <li>Blocked Shots: {{ action.blocked_shots }}</li>
+        <li>Aerial Duels Won: {{ action.aerial_duel_won }}</li>
+        <li>Aerial Duels Lost: {{ action.aerial_duel_lost }}</li>
+        <li>1v1 Duels Won: {{ action.one_v_one_duel_won }}</li>
+        <li>1v1 Duels Lost: {{ action.one_v_one_duel_lost }}</li>
+        <li>Ball Lost: {{ action.ball_lost }}</li>
+    </ul>
 
-<h3>3. Set Pieces</h3>
-<ul><li>Corners: {{ action.corners }}</li></ul>
+    <h3>3. Set Pieces</h3>
+    <ul><li>Corners: {{ action.corners }}</li></ul>
 
-<h3>4. Transition</h3>
-<ul><li>Offsides: {{ action.offsides }}</li></ul>
+    <h3>4. Transition</h3>
+    <ul><li>Offsides: {{ action.offsides }}</li></ul>
 
-<h3>5. Discipline</h3>
-<ul>
-  <li>Fouls Committed: {{ action.fouls_committed }}</li>
-  <li>Fouls Won: {{ action.fouls_won }}</li>
-  <li>Mistakes: {{ action.mistakes }}</li>
-</ul>
+    <h3>5. Discipline</h3>
+    <ul>
+        <li>Fouls Committed: {{ action.fouls_committed }}</li>
+        <li>Fouls Won: {{ action.fouls_won }}</li>
+        <li>Mistakes: {{ action.mistakes }}</li>
+    </ul>
 
-<h3>6. Goalkeeping</h3>
-<ul>
-  <li>Saves: {{ action.saves }}</li>
-  <li>Punches: {{ action.punches }}</li>
-  <li>Drops: {{ action.drops }}</li>
-  <li>Catches: {{ action.catches }}</li>
-  <li>Penalties Saved: {{ action.penalties_saved }}</li>
-</ul>
+    <h3>6. Goalkeeping</h3>
+    <ul>
+        <li>Saves: {{ action.saves }}</li>
+        <li>Punches: {{ action.punches }}</li>
+        <li>Drops: {{ action.drops }}</li>
+        <li>Catches: {{ action.catches }}</li>
+        <li>Penalties Saved: {{ action.penalties_saved }}</li>
+    </ul>
+</div>
+</body>
+</html>

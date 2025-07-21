@@ -4,8 +4,6 @@ from django.db.models import Sum, Count
 from django.contrib.auth.decorators import login_required
 from collections import defaultdict
 
-
-
 @login_required
 def player_list(request):
     age_group = request.GET.get('age_group')
@@ -34,17 +32,20 @@ def player_list(request):
         'selected_age_group': age_group
     })
 
-
 @login_required
 def player_detail(request, player_id):
     player = get_object_or_404(Player, id=player_id)
+
+    related_players = Player.objects.filter(age_group=player.age_group).exclude(id=player_id)
+
     stages = player.career_stages.all()
     selected_age_group = request.GET.get('age_group')
 
     context = {
         'player': player,
+        'related_players': related_players,
         'stages': stages,
         'selected_age_group': selected_age_group,
     }
-
     return render(request, 'players_app/player_detail.html', context)
+

@@ -20,7 +20,7 @@
     font-size: 0.95em;
 }
 
-/* Sidebar on the right */
+/* Sidebar (used in both players page and player detail page) */
 .sidebar {
     flex: 1;
     min-width: 250px;
@@ -40,18 +40,52 @@
 .sidebar ul {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
-.sidebar ul li {
-    margin-bottom: 10px;
+/* Sidebar player list — updated for no spacing and inline items */
+.sidebar-player-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.sidebar ul li a {
+.sidebar-player-list li {
+    margin: 0;
+    padding: 2px 0;
+}
+
+.sidebar-player-list li a {
+    margin: 0;
+    padding: 4px 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     text-decoration: none;
     color: #333;
-    transition: color 0.2s;
+    transition: background-color 0.3s ease;
 }
 
+/* Player photo - circular, compact */
+.sidebar-player-photo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ccc;
+    flex-shrink: 0;
+    background-color: #eee;
+    background-image: url('/static/path/to/placeholder.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.sidebar-player-name {
+    font-size: 0.95em;
+    font-weight: 500;
+}
+
+/* Sidebar link hover effect */
 .sidebar ul li a:hover {
     color: #007BFF;
 }
@@ -134,6 +168,20 @@
 /* Player Profile Detail Page   */
 /* ============================ */
 
+.player-detail-wrapper {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.player-profile-container {
+    flex: 3;
+    min-width: 0;
+}
+
 .player-photo-centered {
     text-align: center;
     margin-bottom: 20px;
@@ -167,7 +215,6 @@
 }
 
 /* Grid for attributes */
-
 .player-attributes-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr); /* Exactly 3 columns */
@@ -197,7 +244,8 @@
 /* Responsive Fix               */
 /* ============================ */
 @media (max-width: 768px) {
-    .page-container {
+    .page-container,
+    .player-detail-wrapper {
         flex-direction: column;
     }
 

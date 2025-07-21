@@ -1,12 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
+{% extends 'base.html' %}
+{% load static %}
+
+    {% block extra_head %}
     <title>{% block title %}Player Statistics{% endblock %}</title>
-</head>
-<body>
+    {% endblock %}
+
+{% block content %}
+
     <div class="container">
-        {% block content %}
+        {% block player_content %}
         {% endblock %}
     </div>
-</body>
-</html>
+
+{% endblock %}

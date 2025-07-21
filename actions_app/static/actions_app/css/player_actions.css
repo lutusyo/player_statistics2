@@ -1,0 +1,51 @@
+/* Reset some base styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 28px;
+    text-align: center;
+}
+
+h3 {
+    color: #1abc9c;
+    margin-top: 30px;
+    font-size: 22px;
+    border-bottom: 2px solid #1abc9c;
+    padding-bottom: 5px;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 10px;
+}
+
+ul li {
+    background-color: #ecf0f1;
+    padding: 10px 15px;
+    margin: 5px 0;
+    border-radius: 6px;
+    transition: background-color 0.3s;
+}
+
+ul li:hover {
+    background-color: #d0d7de;
+}
+
+/* Optional: Card-style container */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.05);
+    padding: 30px;
+}
