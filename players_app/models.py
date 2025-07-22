@@ -59,6 +59,7 @@ class Player(models.Model):
     )
 
     jersey_number = models.PositiveIntegerField(default=0)
+    former_club = models.CharField(max_length=50, default="Null")
     photo = models.ImageField(
         upload_to='player_photos/',
         default='files_to_be_imported/default_image.png'

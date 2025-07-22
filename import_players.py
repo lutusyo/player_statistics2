@@ -1,7 +1,7 @@
 import pandas as pd
-from yourapp.models import Player
+from players_app.models import Player
 
-def import_players_from_excel(file_path):
+def import_players(file_path):
     try:
         df = pd.read_excel(file_path)
 
@@ -10,13 +10,14 @@ def import_players_from_excel(file_path):
                 name=row['name'],
                 birthdate=str(row.get('birthdate', '')),
                 place_of_birth='Tanzania',
-                natinality='Tanzania',
+                nationality='Tanzania',
                 position=row['position'],
                 height=row.get('height', 170),
                 weight=row.get('weight', 65),
                 foot_preference=row.get('p_foot', 'Right'),
                 jersey_number=row.get('jersey_no', 0),
-                age_group='U20',  # Fixed for all
+                former_club=row['former_club'],
+                age_group='U13',  # Fixed for all
                 # photo uses default
             )
 

@@ -154,7 +154,7 @@ STATICFILES_DIRS = [
 
 
 LOGIN_REDIRECT_URL = 'home'  # redirect after login
-LOGOUT_REDIRECT_URL = 'accounts_app:login'
+LOGOUT_REDIRECT_URL = 'home'
 LOGIN_URL = 'accounts_app:login'
 
 # For password reset (development only)

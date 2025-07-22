@@ -1926,149 +1926,119 @@ input, select, textarea {
 	}
 
 /* Header */
-
-	#header {
-		position: relative;
-	}
+#header {
+    position: relative;
+    max-width: 1200px;  /* Decrease navbar width */
+    margin: 0 auto;
+    padding: 0 20px;
+}
 
 /* Logo */
-
-	#logo {
-		display: inline-block;
-	}
-
-		#logo h1 {
-			background: #ff4486;
-			color: #fff;
-			border-radius: 6px;
-			font-family: 'Oleo Script', serif;
-			font-weight: 400;
-			padding: 0.25em 0.2em 0.25em 0.2em;
-			font-size: 3.25em;
-			letter-spacing: 0.05em;
-			display: inline-block;
-			vertical-align: middle;
-		}
-
-		#logo span {
-			font-weight: 800;
-			line-height: 4.5em;
-			letter-spacing: 0.025em;
-			font-size: 0.9em;
-			vertical-align: middle;
-			margin: 0 0 0 1.25em;
-		}
+#logo h1 {
+    background: none; /* Remove background color */
+    color: #000; /* Default text color */
+    border-radius: 0;
+    font-family: inherit; /* Normal font */
+    font-weight: 600;
+    padding: 0;
+    font-size: 2rem;
+    letter-spacing: normal;
+}
 
 /* Nav */
+#nav {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 0.9em;
+}
 
-	#nav {
-		position: absolute;
-		right: 0;
-		top: 0;
-		font-size: 0.9em;
-	}
+#nav ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
 
-		#nav ul {
-			list-style: none;
-			padding-left: 0;
-		}
+#nav ul li {
+    float: left;
+    line-height: 4.5em;
+    padding-left: 1em;
+}
 
-			#nav ul li {
-				float: left;
-				line-height: 4.5em;
-				padding-left: 1.5em;
-			}
+#nav ul li a,
+#nav ul li span {
+    transition: background-color 0.25s ease-in-out;
+    font-weight: 700;
+    letter-spacing: 0.025em;
+    color: #333;
+    text-decoration: none;
+    border-radius: 6px;
+    padding: 0.5em 1em;
+}
 
-				#nav ul li a, #nav ul li span {
-					-moz-transition: background-color .25s ease-in-out;
-					-webkit-transition: background-color .25s ease-in-out;
-					-ms-transition: background-color .25s ease-in-out;
-					transition: background-color .25s ease-in-out;
-					font-weight: 800;
-					letter-spacing: 0.025em;
-					color: #696969;
-					text-decoration: none;
-					border-radius: 6px;
-					padding: 0.5em 1em 0.5em 1em;
-				}
+#nav ul li:hover a,
+#nav ul li:hover span {
+    background: #f7f7f7;
+}
 
-				#nav ul li > ul {
-					display: none;
-				}
+#nav ul li.current a {
+    background: #444;
+    color: #fff;
+}
 
-				#nav ul li:hover a, #nav ul li:hover span {
-					background: #fff;
-				}
+/* Dropotron Dropdown */
+.dropotron {
+    background: #fff;
+    border-radius: 6px;
+    padding: 0.75em 0;
+    min-width: 12em;
+    box-shadow: 0 0.25em 0.5em rgba(0,0,0,0.05);
+    list-style: none;
+    margin: 0;
+}
 
-				#nav ul li.active a, #nav ul li.active span {
-					background: #fff;
-				}
+.dropotron li {
+    border-top: 1px solid #eee;
+    line-height: 2.5em;
+    padding-left: 0;
+}
 
-				#nav ul li.current a {
-					background: #444;
-					color: #fff;
-				}
+.dropotron li:first-child {
+    border-top: none;
+}
 
-	.dropotron {
-		background: #fff;
-		letter-spacing: 0.025em;
-		color: #696969;
-		text-decoration: none;
-		border-radius: 6px;
-		padding: 0.75em 0;
-		min-width: 15em;
-		box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1), 0 0.25em 0.25em 0.1em rgba(0, 0, 0, 0.025);
-		margin-top: calc(-0.75em + 1px);
-		margin-left: -1px;
-		list-style: none;
-		padding-left: 0;
-	}
+.dropotron li > a,
+.dropotron li > span {
+    display: block;
+    padding: 0 1.5em;
+    text-decoration: none;
+    color: #222;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
 
-		.dropotron li {
-			border-top: solid 1px #eee;
-			line-height: 3em;
-			padding-left: 0;
-		}
+/* Hover color options — pick one */
+.dropotron li > a:hover,
+.dropotron li > span:hover {
+    background: gold; /* Or use black (#000), or a zebra pattern with gradient */
+    color: #fff;
+}
 
-			.dropotron li:first-child {
-				border-top: 0;
-			}
+/* Optional: Zebra hover pattern (if needed) */
+/*
+.dropotron li > a:hover,
+.dropotron li > span:hover {
+    background: repeating-linear-gradient(
+        45deg,
+        #fff,
+        #fff 10px,
+        #000 10px,
+        #000 20px
+    );
+    color: #fff;
+}
+*/
 
-			.dropotron li > a, .dropotron li > span {
-				-moz-transition: color .25s ease-in-out, background-color .25s ease-in-out;
-				-webkit-transition: color .25s ease-in-out, background-color .25s ease-in-out;
-				-ms-transition: color .25s ease-in-out, background-color .25s ease-in-out;
-				transition: color .25s ease-in-out, background-color .25s ease-in-out;
-				text-decoration: none;
-				color: inherit;
-				display: block;
-				padding: 0 1.5em;
-			}
 
-				.dropotron li > a:hover, .dropotron li > span:hover {
-					background: #eee;
-				}
-
-			.dropotron li.active > a, .dropotron li.active > span {
-				background: #eee;
-			}
-
-		.dropotron.level-0 {
-			font-size: 0.8em;
-			margin-left: 1.5em;
-			margin-top: 0;
-		}
-
-			.dropotron.level-0:before {
-				content: '';
-				position: absolute;
-				top: -0.5em;
-				left: 1em;
-				border-bottom: solid 0.75em #ffffff;
-				border-left: solid 0.75em transparent;
-				border-right: solid 0.75em transparent;
-				z-index: 1;
-			}
 
 /* Banner */
 
