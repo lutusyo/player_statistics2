@@ -16,14 +16,18 @@
     <!-- Upcoming Matches -->
     {% if upcoming_matches %}
         <h2 style="text-align: center; margin-bottom: 20px;">Upcoming Matches</h2>
+
         {% for match in upcoming_matches %}
+
+            <div>
+                {% if user.is_authenticated and user.username == 'Azam2' %}
+                    <a href="{% url 'actions_app:tagging_panel' match.id %}">Tag Match</a>
+                {% endif %}
+            </div>
 
              <a href="{% url 'matches_app:match_detail' match_id=match.id %}" style="text-decoration: none; color: inherit;">
 
-
-
                 <div class="fixture-card">
-
 
                     <div class="fixture-header">
                         <div class="fixture-date">
@@ -32,7 +36,6 @@
                         <div class="fixture-venue">{{ match.venue }}</div>
                         <div class="fixture-type">{{ match.get_competition_type_display }}</div>
                     </div>
-
 
                     <div class="fixture-body">
                         <div class="team">
@@ -75,6 +78,14 @@
     <h2 style="text-align: center; margin-top: 40px;">Past Matches</h2>
     {% if past_matches %}
         {% for match in past_matches %}
+
+            <div>
+                {% if user.is_authenticated and user.username == 'Azam2' %}
+                    <a href="{% url 'actions_app:tagging_panel' match.id %}">Tag Match</a>
+                {% endif %}
+            </div>
+
+
             <a href="{% url 'matches_app:match_detail' match_id=match.id %}" style="text-decoration: none; color: inherit;">
                 <div class="fixture-card">
                     <div class="fixture-header">

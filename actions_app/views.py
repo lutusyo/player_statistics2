@@ -6,6 +6,7 @@ from players_app.models import Player
 from django.contrib.auth.decorators import login_required
 import json
 from django.db.models import Sum
+from django.http import HttpResponseForbidden
 
 #def match_action_stats(request, match_id):
 #   match = get_object_or_404(Match, id=match_id)
@@ -26,6 +27,10 @@ def player_action_stats(request, player_id, match_id):
 
 @login_required
 def player_detailed_action_list(request, match_id):
+
+    if request.user.username != 'Azam2':
+        return HttpResponseForbidden("Access Denied")
+    
     match = get_object_or_404(Match, id=match_id)
     actions = PlayerDetailedAction.objects.select_related('player').filter(match=match)
 
