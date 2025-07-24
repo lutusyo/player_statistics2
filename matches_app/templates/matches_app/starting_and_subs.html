@@ -1,48 +1,49 @@
-<div style="margin-top: 40px;">
-    <h3>🧾 Lineup</h3>
+{% load static %}
 
-    <!-- Starting XI -->
-    <div style="margin-bottom: 20px;">
+<link rel="stylesheet" href="{% static 'matches_app/css/lineup.css' %}">
 
-        <h4 style="color: green;">🟢 Starting XI</h4>
+<div class="lineup-section">
+  <h3>🧾 Lineup</h3>
 
-        {% with starting_players=player_stats|dictsort:"player.name" %}
-
-            {% if starting_players %}
-
-                <ul style="line-height: 1.8;">
-                    {% for stat in starting_players %}
-                        {% if stat.is_starting %}
-                            <li>{{ stat.player.name }} ({{ stat.minutes_played }} min)</li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-
-            {% else %}
-
-                <p>No starting players recorded.</p>
-
+  <!-- Starting XI -->
+  <div class="lineup-group">
+    <h4 class="starting-title">🟢 Starting XI</h4>
+    {% with starting_players=player_stats|dictsort:"player.name" %}
+      {% if starting_players %}
+        <ul class="lineup-list">
+          {% for stat in starting_players %}
+            {% if stat.is_starting %}
+              <li class="lineup-item">
+                <img src="{{ stat.player.photo.url }}" alt="{{ stat.player.name }}" class="lineup-photo">
+                <span class="lineup-name">{{ stat.player.name }} ({{ stat.minutes_played }} min)</span>
+              </li>
             {% endif %}
-            
-        {% endwith %}
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No starting players recorded.</p>
+      {% endif %}
+    {% endwith %}
+  </div>
 
-    </div>
-
-    <!-- Substitutes -->
-    <div>
-        <h4 style="color: orange;">🟠 Substitutes</h4>
-        {% with subs=player_stats|dictsort:"player.name" %}
-            {% if subs %}
-                <ul style="line-height: 1.8;">
-                    {% for stat in subs %}
-                        {% if not stat.is_starting %}
-                            <li>{{ stat.player.name }} ({{ stat.minutes_played }} min)</li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>No substitutes recorded.</p>
+  <!-- Substitutes -->
+  <div class="lineup-group">
+    <h4 class="sub-title">🟠 Substitutes</h4>
+    {% with subs=player_stats|dictsort:"player.name" %}
+      {% if subs %}
+        <ul class="lineup-list">
+          {% for stat in subs %}
+            {% if not stat.is_starting %}
+              <li class="lineup-item">
+                <img src="{{ stat.player.photo.url }}" alt="{{ stat.player.name }}" class="lineup-photo">
+                <span class="lineup-name">{{ stat.player.name }} ({{ stat.minutes_played }} min)</span>
+              </li>
             {% endif %}
-        {% endwith %}
-    </div>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No substitutes recorded.</p>
+      {% endif %}
+    {% endwith %}
+  </div>
 </div>

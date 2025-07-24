@@ -66,3 +66,18 @@ table th, table td {
 table tbody tr:hover {
     background-color: #f1f1f1;
 }
+
+
+
+.sidebar-player-photo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ccc;
+    flex-shrink: 0;
+    background-color: #eee;
+    background-image: url('/static/path/to/placeholder.png');
+    background-size: cover;
+    background-position: center;
+}

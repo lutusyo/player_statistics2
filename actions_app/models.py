@@ -89,6 +89,8 @@ class PlayerDetailedAction(models.Model):
     fouls_committed = models.PositiveIntegerField(default=0)
     fouls_won = models.PositiveIntegerField(default=0)
     mistakes = models.PositiveIntegerField(default=0)
+    yellow_cards = models.PositiveIntegerField(default=0, blank=True)
+    red_cards = models.PositiveIntegerField(default=0, blank=True)
 
     # CATEGORY 6: Goalkeeping (if player is goalkeeper)
     saves = models.PositiveIntegerField(default=0)
@@ -99,20 +101,21 @@ class PlayerDetailedAction(models.Model):
 
     # CATEGORY 7: General Game Event
     is_our_team = models.BooleanField(default=True, help_text="Track only our team")
-
     created_at = models.DateTimeField(auto_now_add=True)
-
     action_type = models.CharField(
         max_length=20,
         choices=ACTION_TYPE_CHOICES,
         default='offensive',
         help_text="Category of the player's actions",
     )
-
+    
     class Meta:
         verbose_name = "Player Detailed Action"
         verbose_name_plural = "Player Detailed Actions"
         unique_together = ('player', 'match')
 
     def __str__(self):
-        return f"{self.player.name} - {self.match.date} - Actions"
+        return f"{self.player.name} - {self.match.date} - {self.match} - Actions"
+
+
+

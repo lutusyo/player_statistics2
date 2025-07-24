@@ -5,6 +5,7 @@ UNDER_20 = 'U20'
 UNDER_17 = 'U17'
 UNDER_15 = 'U15'
 UNDER_13 = 'U13'
+UNDER_10 = 'U10'
 ALL = 'ALL'  # Used for staff members, not players
 
 # Age group choices
@@ -13,6 +14,7 @@ AGE_GROUP_CHOICES = [
     (UNDER_17, 'Under 17'),
     (UNDER_15, 'Under 15'),
     (UNDER_13, 'Under 13'),
+    (UNDER_10, 'Under 10'),
     (ALL, 'All Age Groups'),  # ✅ Correct usage of ALL constant
 ]
 

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Tagging Panel for Match: {{ match }}</h2>
+
+<form method="post" id="tag-form">
+  {% csrf_token %}
+  <div class="tag-panel">
+    <h3>Line-up Players</h3>
+    {% for player in lineup_players %}
+      <div class="player-row" data-player-id="{{ player.id }}">
+        <strong>{{ player.name }}</strong>
+        {% for action in actions %}
+          <button type="button"
+                  class="tag-button"
+                  data-action="{{ action }}"
+                  onclick="incrementAction(this)">
+            {{ action }}: <span class="count">0</span>
+          </button>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <input type="hidden" name="data" id="tag-data">
+  <button type="submit">Save All</button>
+</form>
+
+<script>
+  // ✅ 1. Inject saved data from view
+  const savedData = {{ action_data|safe }};
+  const actionData = {};
+
+  // ✅ 2. Initialize saved values in UI and JS state
+  document.addEventListener("DOMContentLoaded", () => {
+    const rows = document.querySelectorAll(".player-row");
+
+    rows.forEach(row => {
+      const playerId = row.dataset.playerId;
+      actionData[playerId] = {};
+
+      const buttons = row.querySelectorAll(".tag-button");
+      buttons.forEach(button => {
+        const action = button.dataset.action;
+
+        // Load from savedData if available
+        const savedCount = savedData[playerId]?.[action] || 0;
+
+        actionData[playerId][action] = savedCount;
+        button.querySelector(".count").textContent = savedCount;
+      });
+    });
+  });
+
+  // ✅ 3. Handle click increment
+  function incrementAction(button) {
+    const playerRow = button.closest(".player-row");
+    const playerId = playerRow.dataset.playerId;
+    const action = button.dataset.action;
+
+    actionData[playerId][action] += 1;
+    button.querySelector('.count').textContent = actionData[playerId][action];
+  }
+
+  // ✅ 4. On form submit, send updated values
+  document.getElementById("tag-form").addEventListener("submit", function(e) {
+    const hiddenField = document.getElementById("tag-data");
+    hiddenField.value = JSON.stringify(actionData);
+  });
+</script>
+{% endblock %}

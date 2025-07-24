@@ -1,39 +1,52 @@
-{% load static %}
-<html>
-<head>
-    <link rel="stylesheet" href="{% static 'actions_app/css/match_action_summary.css' %}">
-</head>
-<body>
-<div class="container">
+{% extends 'base.html' %}
+{% load custom_filters %}
 
-<p>Match: {{ match.id }} - {{ match.date }}</p>
 
-<!-- Action Counts Summary -->
-<p>Offensive Actions Count: {{ offensive_actions|length }}</p>
-<p>Defensive Actions Count: {{ defensive_actions|length }}</p>
-<p>Set Piece Actions Count: {{ set_piece_actions|length }}</p>
-<p>Transition Actions Count: {{ transition_actions|length }}</p>
-<p>Discipline Actions Count: {{ discipline_actions|length }}</p>
-<p>Goal Keeping Actions Count: {{ goal_keeping_actions|length }}</p>
-<p>General Actions Count: {{ general_actions|length }}</p>
+{% block content %}
+<h2>Match Action Summary for {{ match }}</h2>
 
-<!-- Sections... (no changes inside loops, just wrapped in container) -->
+<!-- Total actions summary -->
+<table border="1" cellpadding="5" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Action</th>
+      <th>Total Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for action in action_fields %}
+    <tr>
+      <td>{{ action|underscore_to_space }}</td>
+      <td>{{ total_action_counts|get_item:action }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
-<h2>Offensive Actions</h2>
-<ul>
-  {% for action in offensive_actions %}
-    <li>
-      <a href="{% url 'actions_app:player_action_detail' match.id action.player.id %}">
-        {{ action.player.name }}
-      </a>: Shots On Target Inside Box - {{ action.shots_on_target_inside_box }}
-    </li>
-  {% empty %}
-    <li>No offensive data yet.</li>
-  {% endfor %}
-</ul>
+<hr>
 
-<!-- Repeat structure for other action types... -->
-
-</div>
-</body>
-</html>
+<!-- Player detailed actions -->
+<h3>Player Detailed Actions</h3>
+<table border="1" cellpadding="5" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Player</th>
+      {% for action in action_fields %}
+        <th>{{ action|underscore_to_space }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for player_id, pdata in player_data.items %}
+    <tr>
+      <td>{{ pdata.name }}</td>
+      {% for action in action_fields %}
+        <td>{{ pdata.actions|get_item:action }}</td>
+      {% endfor %}
+    </tr>
+    {% empty %}
+    <tr><td colspan="{{ action_fields|length|add:'1' }}">No data available</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

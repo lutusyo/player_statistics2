@@ -118,8 +118,7 @@
     <!-- Export Buttons -->
     <div style="margin-top: 30px; text-align: center;">
         <ul>
-            <li><a href="{% url 'gps_app:gps_match_detail' match.id %}">View GPS Data</a></li>
-            <li><a href="{% url 'actions_app:match_action_stats' match.id %}">View Team Stats</a></li> 
+            <li><a href="{% url 'gps_app:gps_match_detail' match.id %}">View GPS Data</a></li> 
             <li><a href="{% url 'actions_app:player_action_list' match.id %}">View Team Actions Stats</a></li>
             <hr>
             <li><a href="{% url 'matches_app:export_csv' match.id %}" class="btn btn-primary" style="margin-right: 10px;">⬇️ Export CSV</a></li>

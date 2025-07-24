@@ -185,12 +185,16 @@
 .player-photo-centered {
     text-align: center;
     margin-bottom: 20px;
+    padding: 0 10px;
 }
 
 .player-photo-centered img {
+    width: 100%;
     max-width: 220px;
     height: auto;
     border-radius: 10px;
+    display: block;
+    margin: 0 auto;
 }
 
 .button-group {
@@ -249,6 +253,11 @@
         flex-direction: column;
     }
 
+    .sidebar,
+    .player-profile-container {
+        width: 100%;
+    }
+
     .sidebar {
         max-width: 100%;
         min-width: unset;
@@ -266,5 +275,10 @@
     .player-attributes-grid {
         grid-template-columns: 1fr;
         gap: 20px;
+        padding: 0 10px;
+    }
+
+    .player-photo-centered img {
+        max-width: 100%;
     }
 }

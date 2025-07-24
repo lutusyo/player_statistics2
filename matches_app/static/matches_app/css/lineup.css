@@ -1,0 +1,40 @@
+.lineup-section {
+    margin-top: 40px;
+}
+
+.lineup-group {
+    margin-bottom: 20px;
+}
+
+.starting-title {
+    color: green;
+}
+
+.sub-title {
+    color: orange;
+}
+
+.lineup-list {
+    list-style: none;
+    padding-left: 0;
+    line-height: 1.8;
+}
+
+.lineup-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.lineup-photo {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+}
+
+.lineup-name {
+    font-size: 15px;
+}
