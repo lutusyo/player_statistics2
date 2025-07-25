@@ -6,6 +6,7 @@ from django.db.models import Sum, Count
 from django.contrib.auth.decorators import login_required
 from datetime import date
 from gps_app.models import GPSRecord
+from actions_app.models import PlayerDetailedAction
 import csv
 from django.http import HttpResponse
 from .models import Match, PlayerMatchStats
@@ -14,20 +15,24 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
 import os
 from actions_app.models import TeamActionStats, PlayerDetailedAction
-
-
-
 from datetime import date, timedelta
 from django.utils.timezone import now
-from django.http import HttpResponse
 from .models import Match, PlayerMatchStats, Goal
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
-from django.contrib.auth.decorators import login_required
+
 import calendar
-
-
 from PIL import Image
+from datetime import date
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from django.db.models import Sum
+
+from reportlab.platypus import (SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, PageTemplate, Frame)
+
+
+
+
+
 
 def create_transparent_image(input_path, output_path, opacity=0.01):
     image = Image.open(input_path).convert("RGBA")
@@ -35,7 +40,6 @@ def create_transparent_image(input_path, output_path, opacity=0.01):
     alpha = alpha.point(lambda p: int(p * opacity))  # Apply opacity
     image.putalpha(alpha)
     image.save(output_path, format='PNG')
-
 
 
 @login_required
@@ -250,175 +254,130 @@ def draw_background(p, logo_path, width, height):
             print(f"Failed to draw background image: {e}")
 
 
+
+
+
 def export_match_summary_pdf(request, match_id):
-
-    original_logo_path = os.path.join(settings.MEDIA_ROOT, 'team_logo', 'azam-cropped-logo.png')
-    transparent_logo_path = os.path.join(settings.MEDIA_ROOT, 'team_logo', 'azam-cropped-transparent.png')
-
-    # Create transparent version if not already created
-    if not os.path.exists(transparent_logo_path):
-        create_transparent_image(original_logo_path, transparent_logo_path, opacity=0.005)
-
-    background_logo_path = transparent_logo_path
-
     match = get_object_or_404(Match, pk=match_id)
-    goals = Goal.objects.filter(match=match).select_related('scorer', 'assist_by')
-
     stats = PlayerDetailedAction.objects.filter(match=match).select_related('player')
+    player_match_stats = PlayerMatchStats.objects.filter(match=match).select_related('player')
+    goals = Goal.objects.filter(match=match).select_related('scorer', 'assist_by')
     result = TeamMatchResult.objects.filter(match=match).first()
 
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="match-summary-{match.id}.pdf"'
 
-    p = canvas.Canvas(response, pagesize=A4)
+    doc = SimpleDocTemplate(response, pagesize=A4)
+    elements = []
+    styles = getSampleStyleSheet()
     width, height = A4
-    y = height - 50
-    draw_background(p, background_logo_path, width, height)
 
-    # Team logos
-    if match.our_team_logo:
-        our_logo_path = os.path.join(settings.MEDIA_ROOT, match.our_team_logo.name)
-        if os.path.exists(our_logo_path):
-            p.drawImage(ImageReader(our_logo_path), 50, y - 60, width=80, height=80, preserveAspectRatio=True)
-
-    if match.opponent_logo:
-        opponent_logo_path = os.path.join(settings.MEDIA_ROOT, match.opponent_logo.name)
-        if os.path.exists(opponent_logo_path):
-            p.drawImage(ImageReader(opponent_logo_path), width - 130, y - 60, width=80, height=80, preserveAspectRatio=True)
-
-    # Match title
-    p.setFont("Helvetica-Bold", 14)
-    p.drawCentredString(width / 2, y, f"{match.get_team_display()} vs {match.opponent}")
-    y -= 100
-
-    # Match details
-    p.setFont("Helvetica", 12)
+    # --- Match Summary Title and Info ---
+    elements.append(Paragraph(f"<b>{match.get_team_display()} vs {match.opponent}</b>", styles['Title']))
+    elements.append(Paragraph(f"Venue: {match.venue} | Date: {match.date.strftime('%d %b %Y')} | Time: {match.match_time}", styles['Normal']))
     if result:
-        p.drawString(50, y, f"Score: {result.our_score} - {result.opponent_score}")
-        y -= 20
-    p.drawString(50, y, f"Venue: {match.venue}")
-    y -= 20
-    p.drawString(50, y, f"Date: {match.date} | Time: {match.match_time}")
-    y -= 30
+        elements.append(Paragraph(f"<b>Final Score:</b> {result.our_score} - {result.opponent_score}", styles['Heading3']))
+    elements.append(Spacer(1, 12))
 
-    # Line-ups
-    p.setFont("Helvetica-Bold", 12)
-    y -= 20
-    p.setFont("Helvetica", 10)
+    # --- STARTERS Table ---
+    def build_lineup_table(title, lineup_qs):
+        starters = lineup_qs.filter(is_starting=True)
+        subs = lineup_qs.filter(is_starting=False)
+        starter_data = [[f"{title} STARTING XI"]]
+        for player in starters:
+            starter_data.append([player.player.name])
+        starter_table = Table(starter_data, colWidths=[250])
+        starter_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ]))
 
-    # Get all PlayerMatchStats for this match
-    player_match_stats = PlayerMatchStats.objects.filter(match=match).select_related('player')
+        sub_data = [[f"{title} SUBSTITUTES"]]
+        for player in subs:
+            sub_data.append([player.player.name])
+        sub_table = Table(sub_data, colWidths=[250])
+        sub_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightgreen),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ]))
+        return starter_table, sub_table
 
-    # Separate lineups by team
     our_team_lineup = player_match_stats.filter(player__age_group=match.team)
     opponent_lineup = player_match_stats.exclude(player__age_group=match.team)
 
-    # Now split each group into starters and subs
-    def split_lineup(lineup):
-        starters = lineup.filter(is_starting=True)
-        subs = lineup.filter(is_starting=False)
-        return starters, subs
+    our_starters_table, our_subs_table = build_lineup_table("Our Team", our_team_lineup)
+    opp_starters_table, opp_subs_table = build_lineup_table("Opponent", opponent_lineup)
 
-    our_starters, our_subs = split_lineup(our_team_lineup)
-    opp_starters, opp_subs = split_lineup(opponent_lineup)
+    elements.extend([Paragraph("<b>Lineups</b>", styles['Heading2'])])
+    elements.append(Spacer(1, 6))
+    elements.extend([our_starters_table, our_subs_table, Spacer(1, 12)])
+    elements.extend([opp_starters_table, opp_subs_table, Spacer(1, 24)])
 
-    # Draw Line-up Titles
-    p.drawString(60, y, "STARTING")
-    p.drawString(width / 2 + 20, y, "STARTING")
-    y -= 15
+    # --- Goals Timeline Table ---
+    elements.append(Paragraph("<b>Goals Timeline</b>", styles['Heading2']))
+    goals_data = [['Minute', 'Scorer', 'Assist', 'Own Goal']]
+    for goal in goals:
+        goals_data.append([
+            f"{goal.minute}'",
+            goal.scorer.name if goal.scorer else '',
+            goal.assist_by.name if goal.assist_by else '',
+            'Yes' if goal.is_own_goal else 'No'
+        ])
+    if not goals:
+        goals_data.append(['-', 'No goals', '-', '-'])
 
-    # Print Starters
-    max_starters = max(len(our_starters), len(opp_starters))
-    for i in range(max_starters):
-        if y < 100:
-            p.showPage()
-            draw_background(p, background_logo_path, width, height)
-            y = height - 50
-            p.setFont("Helvetica", 10)
+    goals_table = Table(goals_data, hAlign='LEFT', colWidths=[50, 150, 150, 50])
+    goals_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.orange),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+    ]))
+    elements.append(goals_table)
+    elements.append(Spacer(1, 24))
 
-        left = our_starters[i].player.name if i < len(our_starters) else ""
-        right = opp_starters[i].player.name if i < len(opp_starters) else ""
-        p.drawString(60, y, f"⚽ {left}")
-        p.drawString(width / 2 + 20, y, f"⚽ {right}")
-        y -= 15
-
-    # Substitutes Heading
-    y -= 10
-    p.setFont("Helvetica-Bold", 12)
-    p.drawString(60, y, "SUBSTITUTES")
-    p.drawString(width / 2 + 20, y, "SUBSTITUTES")
-    y -= 15
-    p.setFont("Helvetica", 10)
-
-    # Print Substitutes
-    max_subs = max(len(our_subs), len(opp_subs))
-    for i in range(max_subs):
-        if y < 100:
-            p.showPage()
-            draw_background(p, background_logo_path, width, height)
-            y = height - 50
-            p.setFont("Helvetica", 10)
-
-        left = our_subs[i].player.name if i < len(our_subs) else ""
-        right = opp_subs[i].player.name if i < len(opp_subs) else ""
-        p.drawString(60, y, f"↩ {left}")
-        p.drawString(width / 2 + 20, y, f"↩ {right}")
-        y -= 15
-
-    y -= 20
-    p.setFont("Helvetica-Bold", 12)
-    p.drawString(50, y, "Goals Timeline:")
-    y -= 20
-    p.setFont("Helvetica", 10)
-    if goals:
-        for goal in goals:
-            if y < 100:
-                p.showPage()
-                draw_background(p, background_logo_path, width, height)
-                y = height - 50
-            text = f"{goal.minute}': "
-            if goal.is_own_goal:
-                text += f"Own Goal by {goal.scorer}"
-            else:
-                text += f"{goal.scorer}"
-                if goal.assist_by:
-                    text += f" (Assist: {goal.assist_by})"
-            p.drawString(60, y, text)
-            y -= 15
-    else:
-        p.drawString(60, y, "No goals recorded.")
-        y -= 20
-
-    y -= 20
-    p.setFont("Helvetica-Bold", 12)
-    p.drawString(50, y, "Player Statistics:")
-    y -= 20
-    p.setFont("Helvetica", 10)
-
-    # Updated loop for player stats with goal and assist counts fetched from Goal model
+    # --- Player Stats Table ---
+    elements.append(Paragraph("<b>Player Statistics</b>", styles['Heading2']))
+    stats_data = [['Player', 'Minutes', 'Goals', 'Assists', 'Yellows', 'Reds']]
     for stat in stats:
-        if y < 100:
-            p.showPage()
-            draw_background(p, background_logo_path, width, height)
-            y = height - 50
+        goals_count = goals.filter(scorer=stat.player, is_own_goal=False).count()
+        assists_count = goals.filter(assist_by=stat.player).count()
+        stats_data.append([
+            stat.player.name,
+            stat.minutes_played,
+            goals_count,
+            assists_count,
+            stat.yellow_cards,
+            stat.red_cards
+        ])
 
-        goals_count = Goal.objects.filter(match=match, scorer=stat.player, is_own_goal=False).count()
-        assists_count = Goal.objects.filter(match=match, assist_by=stat.player).count()
+    stats_table = Table(stats_data, hAlign='LEFT')
+    stats_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+    ]))
+    elements.append(stats_table)
 
-        p.drawString(
-            60, y,
-            f"{stat.player.name} - Minutes: {stat.minutes_played}, Goals: {goals_count}, Assists: {assists_count}, "
-            f"Yellows: {stat.yellow_cards}, Reds: {stat.red_cards}"
-        )
-        y -= 15
+    # --- Optional: Draw watermark/logo using canvas hook ---
+    def draw_background(canvas_obj, doc_obj):
+        # Draw background image (transparent logo)
+        bg_logo_path = os.path.join(settings.MEDIA_ROOT, 'team_logo', 'azam-cropped-transparent.png')
+        if os.path.exists(bg_logo_path):
+            canvas_obj.drawImage(ImageReader(bg_logo_path), 100, 250, width=400, height=400, preserveAspectRatio=True, mask='auto')
 
-    p.showPage()
-    p.save()
+    # Frame & Page Template with background
+    frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id='normal')
+    template = PageTemplate(id='with-logo', frames=[frame], onPage=draw_background)
+    doc.addPageTemplates([template])
+
+    doc.build(elements)
     return response
-
-
-
-
 
 
 
@@ -434,72 +393,74 @@ def monthly_report_pdf(request, team):
         date__range=(first_day, last_day)
     ).order_by('date')
 
-    stats = PlayerMatchStats.objects.filter(
-        match__in=matches
-    ).select_related('player')
-
+    stats = PlayerMatchStats.objects.filter(match__in=matches).select_related('player')
     goals = Goal.objects.filter(match__in=matches)
 
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="monthly-report-{today.month}-{today.year}.pdf"'
 
-    p = canvas.Canvas(response, pagesize=A4)
-    width, height = A4
-    y = height - 50
+    doc = SimpleDocTemplate(response, pagesize=A4)
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    # --- Title ---
+    title = Paragraph(f"<b>{team.upper()} - Monthly Match Report</b>", styles['Title'])
+    date_range = Paragraph(f"<i>Period: {first_day.strftime('%d %b %Y')} to {last_day.strftime('%d %b %Y')}</i>", styles['Normal'])
+    elements.extend([title, Spacer(1, 12), date_range, Spacer(1, 24)])
 
-    p.setFont("Helvetica-Bold", 16)
-    p.drawCentredString(width / 2, y, f"{team.upper()} - Monthly Match Report")
-    y -= 30
-    p.setFont("Helvetica", 12)
-    p.drawString(50, y, f"Period: {first_day.strftime('%d %b %Y')} to {last_day.strftime('%d %b %Y')}")
-    y -= 40
-
-    # --- MATCH SUMMARY ---
-    p.setFont("Helvetica-Bold", 14)
-    p.drawString(50, y, "Match Results")
-    y -= 20
-    p.setFont("Helvetica", 10)
-
+    # --- MATCH RESULTS TABLE ---
+    elements.append(Paragraph("<b>Match Results</b>", styles['Heading2']))
+    
+    match_data = [['Date', 'Opponent', 'Venue', 'Result']]
     for match in matches:
-        if y < 100:
-            p.showPage()
-            y = height - 50
-        
-    
         result = TeamMatchResult.objects.filter(match=match).first()
-
-
         scoreline = f"{result.our_score}-{result.opponent_score}" if result else "N/A"
-        p.drawString(50, y, f"{match.date} | vs {match.opponent} | Venue: {match.venue} | Result: {scoreline}")
-        y -= 15
+        match_data.append([match.date.strftime('%d-%b-%Y'), match.opponent, match.venue, scoreline])
 
-    # --- PLAYER STATISTICS ---
-    y -= 20
-    p.setFont("Helvetica-Bold", 14)
-    p.drawString(50, y, "Player Statistics")
-    y -= 20
-    p.setFont("Helvetica", 10)
+    match_table = Table(match_data, hAlign='LEFT')
+    match_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+    ]))
+    elements.extend([match_table, Spacer(1, 24)])
 
-    players = stats.values_list('player', flat=True).distinct()
+    # --- PLAYER STATISTICS TABLE ---
+    elements.append(Paragraph("<b>Player Statistics</b>", styles['Heading2']))
     
-    for player in Player.objects.filter(id__in=players):
+    player_ids = stats.values_list('player', flat=True).distinct()
+    player_data = [['Player', 'Apps', 'Minutes', 'Goals', 'Assists', 'Yellows', 'Reds']]
+
+    for player in Player.objects.filter(id__in=player_ids):
         player_stats = stats.filter(player=player)
         total_minutes = player_stats.aggregate(Sum('minutes_played'))['minutes_played__sum'] or 0
         goals_count = goals.filter(scorer=player, is_own_goal=False).count()
         assists_count = goals.filter(assist_by=player).count()
-
         detailed_stats = PlayerDetailedAction.objects.filter(match__in=matches, player=player)
-
         yellow_cards = detailed_stats.aggregate(Sum('yellow_cards'))['yellow_cards__sum'] or 0
         red_cards = detailed_stats.aggregate(Sum('red_cards'))['red_cards__sum'] or 0
 
-        if y < 100:
-            p.showPage()
-            y = height - 50
+        player_data.append([
+            player.name,
+            player_stats.count(),
+            total_minutes,
+            goals_count,
+            assists_count,
+            yellow_cards,
+            red_cards
+        ])
 
-        p.drawString(60, y, f"{player.name} - Apps: {player_stats.count()}, Mins: {total_minutes}, Goals: {goals_count}, Assists: {assists_count}, Yellows: {yellow_cards}, Reds: {red_cards}")
-        y -= 15
+    player_table = Table(player_data, hAlign='LEFT')
+    player_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgreen),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+    ]))
 
-    p.save()
+    elements.append(player_table)
+
+    doc.build(elements)
     return response
 

@@ -80,39 +80,6 @@
 
     <hr style="margin: 40px 0;">
 
-    <!-- Player Stats Table -->
-    <h3>📊 Player Stats</h3>
-    {% if player_stats %}
-        <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                <thead style="background: #f1f1f1;">
-                    <tr>
-                        <th style="padding: 8px; border: 1px solid #ccc;">Player</th>
-                        <th style="padding: 8px; border: 1px solid #ccc;">Minutes</th>
-                        <th style="padding: 8px; border: 1px solid #ccc;">Goals</th>
-                        <th style="padding: 8px; border: 1px solid #ccc;">Assists</th>
-                        <th style="padding: 8px; border: 1px solid #ccc;">Yellow</th>
-                        <th style="padding: 8px; border: 1px solid #ccc;">Red</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for stat in player_stats %}
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ stat.player.name }}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ stat.minutes_played }}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ stat.goals }}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ stat.assists }}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ stat.yellow_cards }}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">{{ stat.red_cards }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% else %}
-        <p>No player stats available.</p>
-    {% endif %}
-
     <!-- Export Buttons -->
     <div style="margin-top: 30px; text-align: center;">
         <ul>
