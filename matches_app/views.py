@@ -13,14 +13,24 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
 import os
-from actions_app.models import TeamActionStats
+from actions_app.models import TeamActionStats, PlayerDetailedAction
+
+
+from PIL import Image
+
+def create_transparent_image(input_path, output_path, opacity=0.01):
+    image = Image.open(input_path).convert("RGBA")
+    alpha = image.split()[3]  # Get alpha channel
+    alpha = alpha.point(lambda p: int(p * opacity))  # Apply opacity
+    image.putalpha(alpha)
+    image.save(output_path, format='PNG')
+
 
 
 @login_required
 def team_dashboard(request, team):
     # Just redirect to the fixtures view
     return redirect('matches_app:team_fixtures', team=team)
-
 
 
 @login_required
@@ -89,12 +99,12 @@ def player_statistics_view(request, team):
                 'penalties_saved': player_stats.aggregate(Sum('penalties_saved'))['penalties_saved__sum'] or 0,
                 'clearances': player_stats.aggregate(Sum('clearances'))['clearances__sum'] or 0,
 
-                #distribution
+                # distribution
                 'total_passes': player_stats.aggregate(Sum('total_passes'))['total_passes__sum'] or 0,
                 'pass_success_rate': round(player_stats.aggregate(Sum('pass_success_rate'))['pass_success_rate__sum'] or 0, 2),
                 'long_pass_success': round(player_stats.aggregate(Sum('long_pass_success'))['long_pass_success__sum'] or 0, 2),
 
-                # discpline
+                # discipline
                 'fouls_won': player_stats.aggregate(Sum('fouls_won'))['fouls_won__sum'] or 0,
                 'fouls_conceded': player_stats.aggregate(Sum('fouls_conceded'))['fouls_conceded__sum'] or 0,
                 'yellow_cards': player_stats.aggregate(Sum('yellow_cards'))['yellow_cards__sum'] or 0,
@@ -112,9 +122,10 @@ def player_statistics_view(request, team):
         'selected_competition': selected_competition,
         'player_data': player_data,
         'team_selected': team,
-        
+
     }
     return render(request, 'matches_app/players_statistics.html', context)
+
 
 @login_required
 def career_stage_detail(request, stage_id):
@@ -124,10 +135,11 @@ def career_stage_detail(request, stage_id):
     context = {
         'stage': stage,
         'selected_age_group': selected_age_group,
-        
+
     }
 
     return render(request, 'matches_app/career_stage_detail.html', context)
+
 
 @login_required
 def fixtures_view(request, team):
@@ -138,20 +150,22 @@ def fixtures_view(request, team):
         'team': team,
         'upcoming_matches': upcoming_matches,
         'past_matches': past_matches,
-        'team_selected': team,          
-        'active_tab': 'fixtures',         
+        'team_selected': team,
+        'active_tab': 'fixtures',
     }
     return render(request, 'matches_app/fixtures.html', context)
 
+
 @login_required
 def results_view(request, team):
-    
+
     context = {
         "team": team,
         'team_selected': team,
         'active_tab': 'results',
-        }
+    }
     return render(request, 'matches_app/match_results.html', context)
+
 
 @login_required
 def table_view(request, team):
@@ -160,8 +174,9 @@ def table_view(request, team):
         'team': team,
         'team_selected': team,
         'active_tab': 'table',
-        }
+    }
     return render(request, 'teams_app/table.html', context)
+
 
 @login_required
 def match_detail(request, match_id):
@@ -202,10 +217,39 @@ def export_player_stats_csv(request, match_id):
 
     return response
 
+
+def draw_background(p, logo_path, width, height):
+    if os.path.exists(logo_path):
+        try:
+            p.saveState()
+            p.drawImage(
+                ImageReader(logo_path),
+                0, 0,
+                width=width,
+                height=height,
+                preserveAspectRatio=True,
+                mask='auto'
+            )
+            p.restoreState()
+        except Exception as e:
+            print(f"Failed to draw background image: {e}")
+
+
 def export_match_summary_pdf(request, match_id):
+
+    original_logo_path = os.path.join(settings.MEDIA_ROOT, 'team_logo', 'azam-cropped-logo.png')
+    transparent_logo_path = os.path.join(settings.MEDIA_ROOT, 'team_logo', 'azam-cropped-transparent.png')
+
+    # Create transparent version if not already created
+    if not os.path.exists(transparent_logo_path):
+        create_transparent_image(original_logo_path, transparent_logo_path, opacity=0.005)
+
+    background_logo_path = transparent_logo_path
+
     match = get_object_or_404(Match, pk=match_id)
     goals = Goal.objects.filter(match=match).select_related('scorer', 'assist_by')
-    stats = PlayerMatchStats.objects.filter(match=match).select_related('player')
+
+    stats = PlayerDetailedAction.objects.filter(match=match).select_related('player')
     result = TeamMatchResult.objects.filter(match=match).first()
 
     response = HttpResponse(content_type='application/pdf')
@@ -214,6 +258,7 @@ def export_match_summary_pdf(request, match_id):
     p = canvas.Canvas(response, pagesize=A4)
     width, height = A4
     y = height - 50
+    draw_background(p, background_logo_path, width, height)
 
     # Team logos
     if match.our_team_logo:
@@ -246,17 +291,21 @@ def export_match_summary_pdf(request, match_id):
     y -= 20
     p.setFont("Helvetica", 10)
 
-    our_team_players = stats.filter(player__age_group=match.team)
-    opponent_players = stats.exclude(player__age_group=match.team)
+    # Get all PlayerMatchStats for this match
+    player_match_stats = PlayerMatchStats.objects.filter(match=match).select_related('player')
 
+    # Separate lineups by team
+    our_team_lineup = player_match_stats.filter(player__age_group=match.team)
+    opponent_lineup = player_match_stats.exclude(player__age_group=match.team)
 
-    def split_lineup(queryset):
-        starters = queryset.filter(is_starting=True) if hasattr(PlayerMatchStats, 'is_starting') else queryset[:11]
-        subs = queryset.exclude(pk__in=starters.values_list('pk', flat=True))
+    # Now split each group into starters and subs
+    def split_lineup(lineup):
+        starters = lineup.filter(is_starting=True)
+        subs = lineup.filter(is_starting=False)
         return starters, subs
 
-    our_starters, our_subs = split_lineup(our_team_players)
-    opp_starters, opp_subs = split_lineup(opponent_players)
+    our_starters, our_subs = split_lineup(our_team_lineup)
+    opp_starters, opp_subs = split_lineup(opponent_lineup)
 
     # Draw Line-up Titles
     p.drawString(60, y, "STARTING")
@@ -268,9 +317,10 @@ def export_match_summary_pdf(request, match_id):
     for i in range(max_starters):
         if y < 100:
             p.showPage()
+            draw_background(p, background_logo_path, width, height)
             y = height - 50
             p.setFont("Helvetica", 10)
-        
+
         left = our_starters[i].player.name if i < len(our_starters) else ""
         right = opp_starters[i].player.name if i < len(opp_starters) else ""
         p.drawString(60, y, f"⚽ {left}")
@@ -290,6 +340,7 @@ def export_match_summary_pdf(request, match_id):
     for i in range(max_subs):
         if y < 100:
             p.showPage()
+            draw_background(p, background_logo_path, width, height)
             y = height - 50
             p.setFont("Helvetica", 10)
 
@@ -298,7 +349,6 @@ def export_match_summary_pdf(request, match_id):
         p.drawString(60, y, f"↩ {left}")
         p.drawString(width / 2 + 20, y, f"↩ {right}")
         y -= 15
-
 
     y -= 20
     p.setFont("Helvetica-Bold", 12)
@@ -309,6 +359,7 @@ def export_match_summary_pdf(request, match_id):
         for goal in goals:
             if y < 100:
                 p.showPage()
+                draw_background(p, background_logo_path, width, height)
                 y = height - 50
             text = f"{goal.minute}': "
             if goal.is_own_goal:
@@ -328,19 +379,24 @@ def export_match_summary_pdf(request, match_id):
     p.drawString(50, y, "Player Statistics:")
     y -= 20
     p.setFont("Helvetica", 10)
+
+    # Updated loop for player stats with goal and assist counts fetched from Goal model
     for stat in stats:
         if y < 100:
             p.showPage()
+            draw_background(p, background_logo_path, width, height)
             y = height - 50
-        p.drawString(60, y, f"{stat.player.name} - Minutes: {stat.minutes_played}, Goals: {stat.goals}, Assists: {stat.assists}, Yellows: {stat.yellow_cards}, Reds: {stat.red_cards}")
+
+        goals_count = Goal.objects.filter(match=match, scorer=stat.player, is_own_goal=False).count()
+        assists_count = Goal.objects.filter(match=match, assist_by=stat.player).count()
+
+        p.drawString(
+            60, y,
+            f"{stat.player.name} - Minutes: {stat.minutes_played}, Goals: {goals_count}, Assists: {assists_count}, "
+            f"Yellows: {stat.yellow_cards}, Reds: {stat.red_cards}"
+        )
         y -= 15
 
     p.showPage()
     p.save()
     return response
-
-
-
-
-
-
