@@ -7,6 +7,9 @@ from django.contrib.auth.decorators import login_required
 import json
 from django.db.models import Sum
 from django.http import HttpResponseForbidden
+import matplotlib.pyplot as plt
+import io
+import urllib, base64
 
 #def match_action_stats(request, match_id):
 #   match = get_object_or_404(Match, id=match_id)
@@ -27,9 +30,6 @@ def player_action_stats(request, player_id, match_id):
 
 @login_required
 def player_detailed_action_list(request, match_id):
-
-    if request.user.username != 'Azam2':
-        return HttpResponseForbidden("Access Denied")
     
     match = get_object_or_404(Match, id=match_id)
     actions = PlayerDetailedAction.objects.select_related('player').filter(match=match)
@@ -77,6 +77,10 @@ def player_detailed_action_list(request, match_id):
 
 @login_required
 def tagging_panel_view(request, match_id):
+
+    if request.user.username != 'Azam2':
+        return HttpResponseForbidden("Access Denied")
+
     match = get_object_or_404(Match, id=match_id)
     all_players = Player.objects.all()
     lineup_players = Player.objects.filter(playermatchstats__match=match)
@@ -128,6 +132,48 @@ def tagging_panel_view(request, match_id):
         'match': match,
         'actions': actions,
         'action_data': json.dumps(action_data), # Pass to JS
+    })
+
+
+
+
+def view_action(request, match_id, action_name):
+    match = get_object_or_404(Match, pk=match_id)
+
+    # All player action entries for this match
+    player_actions_qs = PlayerDetailedAction.objects.filter(match=match)
+
+    # Prepare player-wise data
+    player_actions = {}  # {player_name: count}
+    for action in player_actions_qs:
+        count = getattr(action, action_name, 0)
+        if count > 0:
+            player_name = action.player.name
+            player_actions[player_name] = count
+
+    # Create pie chart
+    labels = list(player_actions.keys())
+    sizes = list(player_actions.values())
+
+    if sizes:  # only render chart if data exists
+        fig, ax = plt.subplots()
+        ax.pie(sizes, labels=labels, autopct='%1.1f%%')
+        ax.axis('equal')
+
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        image_uri = base64.b64encode(buf.read()).decode('utf-8')
+        buf.close()
+        plt.close(fig)
+    else:
+        image_uri = None  # no chart to render
+
+    return render(request, 'actions_app/action_detail.html', {
+        'match': match,
+        'action_name': action_name.replace('_', ' ').title(),
+        'player_actions': player_actions,
+        'chart': image_uri,
     })
 
 

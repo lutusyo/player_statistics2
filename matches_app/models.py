@@ -20,9 +20,54 @@ class CompetitionType(models.TextChoices):
     INTERNATIONAL_FRIENDLY = 'International Friendly', 'International Friendly'
     NBC_YOUTH_LEAGUE = 'NBC Youth League', 'NBC Youth League'
 
+class FormationChoices(models.TextChoices):
+    FOUR_THREE_THREE = "4-3-3", "4-3-3"
+    FOUR_TWO_THREE_ONE = "4-2-3-1", "4-2-3-1"
+    FOUR_FOUR_TWO = "4-4-2", "4-4-2"
+    THREE_FIVE_TWO = "3-5-2", "3-5-2"
+    THREE_FOUR_THREE = "3-4-3", "3-4-3"
+
+FORMATION_POSITIONS = {
+    "4-3-3": ["GK", "RB", "CB1", "CB2", "LB", "CM1", "CDM", "CM2", "RW", "ST", "LW"],
+    "4-2-3-1": ["GK", "RB", "CB1", "CB2", "LB", "CDM1", "CDM2", "RW", "CAM", "LW", "ST"],
+    "4-4-2": ["GK", "RB", "CB1", "CB2", "LB", "RM", "CM1", "CM2", "LM", "ST1", "ST2"],
+    "3-5-2": ["GK", "CB1", "CB2", "CB3", "LWB", "CM1", "CDM", "CM2", "RWB", "ST1", "ST2"],
+    "3-4-3": ["GK", "CB1", "CB2", "CB3", "LWB", "CM1", "CM2", "RWB", "LW", "ST", "RW"],
+}
+
+class PlayerPosition(models.TextChoices):
+    GK = 'GK', 'Goalkeeper'
+    RB = 'RB', 'Right Back'
+    LB = 'LB', 'Left Back'
+    CB1 = 'CB1', 'Center Back 1'
+    CB2 = 'CB2', 'Center Back 2'
+    CB3 = 'CB3', 'Center Back 3'
+    RWB = 'RWB', 'Right Wing Back'
+    LWB = 'LWB', 'Left Wing Back'
+    CM1 = 'CM1', 'Center Midfield 1'
+    CM2 = 'CM2', 'Center Midfield 2'
+    CDM = 'CDM', 'Defensive Midfield'
+    CAM = 'CAM', 'Attacking Midfield'
+    RM = 'RM', 'Right Midfield'
+    LM = 'LM', 'Left Midfield'
+    RW = 'RW', 'Right Wing'
+    LW = 'LW', 'Left Wing'
+    ST = 'ST', 'Striker'
+    ST1 = 'ST1', 'Striker 1'
+    ST2 = 'ST2', 'Striker 2'
+
+
 
 class Match(models.Model):
     team = models.CharField(max_length=10, choices=AgeGroup.choices, default=AgeGroup.UNDER_20)
+
+    formation = models.CharField(
+        max_length=20,
+        choices=FormationChoices.choices,
+        blank=True,
+        null=True
+    )
+
 
     date = models.DateField()
     match_time = models.TimeField(null=True, blank=True)
@@ -64,11 +109,24 @@ class PlayerMatchStats(models.Model):
 
     minutes_played = models.PositiveIntegerField(default=0)
     is_starting = models.BooleanField(default=False)
+    position = models.CharField(
+        max_length=10,
+        choices=PlayerPosition.choices,
+        blank=True,
+        null=True,
+        help_text="Position in formation (used for pitch layout)"
+    )
+
 
     class Meta:
         unique_together = ('player', 'match')
 
     def __str__(self):
-        return f"{self.player.name} - {'Starting' if self.is_starting else 'Sub'} - {self.match}"
+        return f"{self.player.name} - {self.get_position_display() or 'No Position'} - {'Starting' if self.is_starting else 'Sub'}  - {self.match}"
+
+    @property
+    def position_code(self):
+        return self.position
+
 
 

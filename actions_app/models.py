@@ -60,6 +60,8 @@ class PlayerDetailedAction(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name="detailed_actions")
     match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name="player_detailed_actions")
 
+    minutes_played = models.PositiveIntegerField(default=0)
+
     # CATEGORY 1: Offensive Actions
     shots_on_target_inside_box = models.PositiveIntegerField(default=0)
     shots_on_target_outside_box = models.PositiveIntegerField(default=0)

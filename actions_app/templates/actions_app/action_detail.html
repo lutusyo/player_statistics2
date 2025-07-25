@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>{{ action_name }} - Action Breakdown for {{ match }}</h2>
+
+{% if player_actions %}
+<table border="1" cellpadding="5" cellspacing="0">
+  <thead>
+    <tr>
+      <th>Player</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for player, count in player_actions.items %}
+    <tr>
+      <td>{{ player }}</td>
+      <td>{{ count }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No players recorded for this action.</p>
+{% endif %}
+
+{% if chart %}
+<h3>Action Distribution (Pie Chart)</h3>
+<img src="data:image/png;base64,{{ chart }}" alt="Pie Chart" />
+{% endif %}
+
+<a href="{% url 'actions_app:tagging_panel' match.id %}">← Back to Tagging Panel</a>
+{% endblock %}

@@ -28,6 +28,7 @@
         </table>
     {% else %}
         <p>No GPS data available for this match.</p>
+        <li><a href="{% url 'gps_app:gps_dashboard' %}">Press here to upload csv file</a></li>
     {% endif %}
 </div>
 {% endblock %}

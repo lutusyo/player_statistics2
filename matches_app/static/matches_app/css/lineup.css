@@ -1,40 +1,89 @@
-.lineup-section {
-    margin-top: 40px;
+.lineup-wrapper {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.lineup-group {
-    margin-bottom: 20px;
+.pitch {
+  position: relative;
+  background-color: #d1d8e0;
+  width: 70%;
+  padding-top: 100%; /* 1:1 aspect ratio */
+  border: 5px solid #000;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-.starting-title {
-    color: green;
+.subs-panel {
+  background-color: #1e272e;
+  color: white;
+  padding: 20px;
+  width: 30%;
+  font-family: sans-serif;
 }
 
-.sub-title {
-    color: orange;
+.subs-panel h3 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  border-bottom: 2px solid #fff;
+  padding-bottom: 10px;
 }
 
-.lineup-list {
-    list-style: none;
-    padding-left: 0;
-    line-height: 1.8;
+.subs-panel ul {
+  list-style: none;
+  padding: 0;
 }
 
-.lineup-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
+.subs-panel li {
+  margin-bottom: 10px;
+  font-size: 1rem;
 }
 
-.lineup-photo {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 10px;
-    border: 1px solid #ccc;
+.player {
+  position: absolute;
+  width: 70px;
+  text-align: center;
 }
 
-.lineup-name {
-    font-size: 15px;
+.player img {
+  width: 100%;
+  border-radius: 10px;
+  border: 2px solid #000;
+}
+
+.player-name {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: black;
+}
+
+/* Example Positions */
+.player-GK   { top: 85%; left: 45%; }
+.player-CB1  { top: 70%; left: 30%; }
+.player-CB2  { top: 70%; left: 60%; }
+.player-LB   { top: 70%; left: 10%; }
+.player-RB   { top: 70%; left: 80%; }
+.player-CDM  { top: 55%; left: 45%; }
+.player-CM1  { top: 50%; left: 30%; }
+.player-CM2  { top: 50%; left: 60%; }
+.player-LW   { top: 30%; left: 10%; }
+.player-ST   { top: 30%; left: 45%; }
+.player-RW   { top: 30%; left: 80%; }
+
+/* You can add more classes: player-CB3, ST1, ST2, CAM, etc. */
+
+/* Club logo in center */
+.club-logo {
+  position: absolute;
+  top: 45%;
+  left: 45%;
+  width: 80px;
+  height: 80px;
+  opacity: 0.8;
+}
+
+.club-logo img {
+  width: 100%;
+  height: auto;
 }

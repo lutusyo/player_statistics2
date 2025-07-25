@@ -3,7 +3,7 @@
 
 
 {% block content %}
-<h2>Match Action Summary for {{ match }}</h2>
+<h2> Summary for {{ match }}</h2>
 
 <!-- Total actions summary -->
 <table border="1" cellpadding="5" cellspacing="0">
@@ -16,12 +16,17 @@
   <tbody>
     {% for action in action_fields %}
     <tr>
-      <td>{{ action|underscore_to_space }}</td>
+      <td>
+        <a href="{% url 'actions_app:view_action' match.id action %}">
+          {{ action|underscore_to_space }}
+        </a>
+      </td>
       <td>{{ total_action_counts|get_item:action }}</td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+
 
 <hr>
 

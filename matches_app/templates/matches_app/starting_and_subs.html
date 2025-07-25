@@ -1,49 +1,29 @@
 {% load static %}
-
 <link rel="stylesheet" href="{% static 'matches_app/css/lineup.css' %}">
 
-<div class="lineup-section">
-  <h3>🧾 Lineup</h3>
-
-  <!-- Starting XI -->
-  <div class="lineup-group">
-    <h4 class="starting-title">🟢 Starting XI</h4>
-    {% with starting_players=player_stats|dictsort:"player.name" %}
-      {% if starting_players %}
-        <ul class="lineup-list">
-          {% for stat in starting_players %}
-            {% if stat.is_starting %}
-              <li class="lineup-item">
-                <img src="{{ stat.player.photo.url }}" alt="{{ stat.player.name }}" class="lineup-photo">
-                <span class="lineup-name">{{ stat.player.name }} ({{ stat.minutes_played }} min)</span>
-              </li>
-            {% endif %}
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p>No starting players recorded.</p>
+<div class="lineup-wrapper">
+  <div class="pitch">
+    {% for stat in player_stats %}
+      {% if stat.is_starting %}
+        <div class="player player-{{ stat.position }}">
+          <img src="{{ stat.player.photo.url }}" alt="{{ stat.player.name }}">
+          <div class="player-name">{{ stat.player.name|upper }}</div>
+        </div>
       {% endif %}
-    {% endwith %}
+    {% endfor %}
+    <div class="club-logo">
+      <img src="{% static 'matches_app/img/azam_logo.png' %}" alt="Club Logo">
+    </div>
   </div>
 
-  <!-- Substitutes -->
-  <div class="lineup-group">
-    <h4 class="sub-title">🟠 Substitutes</h4>
-    {% with subs=player_stats|dictsort:"player.name" %}
-      {% if subs %}
-        <ul class="lineup-list">
-          {% for stat in subs %}
-            {% if not stat.is_starting %}
-              <li class="lineup-item">
-                <img src="{{ stat.player.photo.url }}" alt="{{ stat.player.name }}" class="lineup-photo">
-                <span class="lineup-name">{{ stat.player.name }} ({{ stat.minutes_played }} min)</span>
-              </li>
-            {% endif %}
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p>No substitutes recorded.</p>
-      {% endif %}
-    {% endwith %}
+  <div class="subs-panel">
+    <h3>SUBS:</h3>
+    <ul>
+      {% for stat in player_stats %}
+        {% if not stat.is_starting %}
+          <li>{{ stat.player.jersey_number }} {{ stat.player.name }}</li>
+        {% endif %}
+      {% endfor %}
+    </ul>
   </div>
 </div>
