@@ -21,4 +21,8 @@ urlpatterns = [
     # Export features
     path('match/<int:match_id>/export/csv/', views.export_player_stats_csv, name='export_csv'),
     path('match/<int:match_id>/export/pdf/', views.export_match_summary_pdf, name='export_pdf'),
+
+ 
+    path('<str:team>/monthly-report/', views.monthly_report_pdf, name='monthly_report_pdf'),
+
 ]

@@ -120,7 +120,11 @@
             <li><a href="{% url 'actions_app:player_action_list' match.id %}">View Team Actions Stats</a></li>
             <hr>
             <li><a href="{% url 'matches_app:export_csv' match.id %}" class="btn btn-primary" style="margin-right: 10px;">⬇️ Export CSV</a></li>
-            <li><a href="{% url 'matches_app:export_pdf' match.id %}" class="btn btn-secondary">⬇️ Download PDF</a></li>
+            <li><a href="{% url 'matches_app:export_pdf' match.id %}" class="btn btn-secondary">⬇️ Download Match Report</a></li>
+            <hr>
+          
+                <li><a href="{% url 'matches_app:monthly_report_pdf' team=team_selected %}" class="btn btn-primary">📄 Download Monthly Report</a></li>
+           
         </ul>
     </div>
 

@@ -16,6 +16,17 @@ import os
 from actions_app.models import TeamActionStats, PlayerDetailedAction
 
 
+
+from datetime import date, timedelta
+from django.utils.timezone import now
+from django.http import HttpResponse
+from .models import Match, PlayerMatchStats, Goal
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from django.contrib.auth.decorators import login_required
+import calendar
+
+
 from PIL import Image
 
 def create_transparent_image(input_path, output_path, opacity=0.01):
@@ -184,7 +195,9 @@ def match_detail(request, match_id):
     player_stats = PlayerMatchStats.objects.filter(match=match).select_related('player')
     goals = Goal.objects.filter(match=match).select_related('scorer', 'assist_by')
     team_result = TeamMatchResult.objects.filter(match=match).first()
-    team_stats = TeamActionStats.objects.filter(match=match).order_by('-is_our_team')  # Our team first
+    team_stats = TeamActionStats.objects.filter(match=match).order_by('-is_our_team')
+
+    team_str = str(match.team).strip()  # ensure it's a non-empty string
 
     return render(request, 'matches_app/match_details.html', {
         'match': match,
@@ -192,7 +205,9 @@ def match_detail(request, match_id):
         'goals': goals,
         'team_result': team_result,
         'team_stats': team_stats,
+        'team_selected': team_str,
     })
+
 
 
 def export_player_stats_csv(request, match_id):
@@ -400,3 +415,91 @@ def export_match_summary_pdf(request, match_id):
     p.showPage()
     p.save()
     return response
+
+
+
+
+
+
+
+
+@login_required
+def monthly_report_pdf(request, team):
+    today = date.today()
+    first_day = today.replace(day=1)
+    last_day = today.replace(day=calendar.monthrange(today.year, today.month)[1])
+
+    matches = Match.objects.filter(
+        team=team,
+        date__range=(first_day, last_day)
+    ).order_by('date')
+
+    stats = PlayerMatchStats.objects.filter(
+        match__in=matches
+    ).select_related('player')
+
+    goals = Goal.objects.filter(match__in=matches)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="monthly-report-{today.month}-{today.year}.pdf"'
+
+    p = canvas.Canvas(response, pagesize=A4)
+    width, height = A4
+    y = height - 50
+
+    p.setFont("Helvetica-Bold", 16)
+    p.drawCentredString(width / 2, y, f"{team.upper()} - Monthly Match Report")
+    y -= 30
+    p.setFont("Helvetica", 12)
+    p.drawString(50, y, f"Period: {first_day.strftime('%d %b %Y')} to {last_day.strftime('%d %b %Y')}")
+    y -= 40
+
+    # --- MATCH SUMMARY ---
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(50, y, "Match Results")
+    y -= 20
+    p.setFont("Helvetica", 10)
+
+    for match in matches:
+        if y < 100:
+            p.showPage()
+            y = height - 50
+        
+    
+        result = TeamMatchResult.objects.filter(match=match).first()
+
+
+        scoreline = f"{result.our_score}-{result.opponent_score}" if result else "N/A"
+        p.drawString(50, y, f"{match.date} | vs {match.opponent} | Venue: {match.venue} | Result: {scoreline}")
+        y -= 15
+
+    # --- PLAYER STATISTICS ---
+    y -= 20
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(50, y, "Player Statistics")
+    y -= 20
+    p.setFont("Helvetica", 10)
+
+    players = stats.values_list('player', flat=True).distinct()
+    
+    for player in Player.objects.filter(id__in=players):
+        player_stats = stats.filter(player=player)
+        total_minutes = player_stats.aggregate(Sum('minutes_played'))['minutes_played__sum'] or 0
+        goals_count = goals.filter(scorer=player, is_own_goal=False).count()
+        assists_count = goals.filter(assist_by=player).count()
+
+        detailed_stats = PlayerDetailedAction.objects.filter(match__in=matches, player=player)
+
+        yellow_cards = detailed_stats.aggregate(Sum('yellow_cards'))['yellow_cards__sum'] or 0
+        red_cards = detailed_stats.aggregate(Sum('red_cards'))['red_cards__sum'] or 0
+
+        if y < 100:
+            p.showPage()
+            y = height - 50
+
+        p.drawString(60, y, f"{player.name} - Apps: {player_stats.count()}, Mins: {total_minutes}, Goals: {goals_count}, Assists: {assists_count}, Yellows: {yellow_cards}, Reds: {red_cards}")
+        y -= 15
+
+    p.save()
+    return response
+
