@@ -4,12 +4,10 @@ from .models import Match, Goal, PlayerMatchStats, TeamMatchResult
 from players_app.models import PlayerCareerStage, Player
 from django.db.models import Sum, Count
 from django.contrib.auth.decorators import login_required
-from datetime import date
 from gps_app.models import GPSRecord
 from actions_app.models import PlayerDetailedAction
 import csv
 from django.http import HttpResponse
-from .models import Match, PlayerMatchStats
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
@@ -18,20 +16,13 @@ from actions_app.models import TeamActionStats, PlayerDetailedAction
 from datetime import date, timedelta
 from django.utils.timezone import now
 from .models import Match, PlayerMatchStats, Goal
-
 import calendar
 from PIL import Image
-from datetime import date
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from django.db.models import Sum
-
 from reportlab.platypus import (SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image, PageTemplate, Frame)
-
-
-
-
 
 
 def create_transparent_image(input_path, output_path, opacity=0.01):
@@ -259,6 +250,10 @@ def draw_background(p, logo_path, width, height):
 
 def export_match_summary_pdf(request, match_id):
     match = get_object_or_404(Match, pk=match_id)
+
+    team_actions = TeamActionStats.objects.filter(match=match)
+
+
     stats = PlayerDetailedAction.objects.filter(match=match).select_related('player')
     player_match_stats = PlayerMatchStats.objects.filter(match=match).select_related('player')
     goals = Goal.objects.filter(match=match).select_related('scorer', 'assist_by')
@@ -364,6 +359,38 @@ def export_match_summary_pdf(request, match_id):
     ]))
     elements.append(stats_table)
 
+    #actions data
+
+    team_actions = TeamActionStats.objects.filter(match=match)
+
+    elements.append(Spacer(1, 24))
+    elements.append(Paragraph("<b>Team Action Summary</b>", styles['Heading2']))
+    action_data = [['Team', 'Shots (In)', 'Shots (Out)', 'Corners', 'Crosses (S/U)', 'Duels (W/L)', 'Fouls (C/W)', 'Offsides', 'Mistakes']]
+
+    for team_stat in team_actions:
+        action_data.append([
+            team_stat.team_name,
+            f"{team_stat.shots_on_target_inside_box + team_stat.shots_off_target_inside_box} / {team_stat.shots_on_target_outside_box + team_stat.shots_off_target_outside_box}",
+            f"{team_stat.shots_on_target_outside_box + team_stat.shots_off_target_outside_box}",
+            team_stat.corners,
+            f"{team_stat.successful_crosses} / {team_stat.unsuccessful_crosses}",
+            f"{team_stat.aerial_duel_won} / {team_stat.aerial_duel_lost}",
+            f"{team_stat.fouls_committed} / {team_stat.fouls_won}",
+            team_stat.offsides,
+            team_stat.mistakes,
+        ])
+
+    team_table = Table(action_data, hAlign='LEFT')
+    team_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+    ]))
+
+    elements.append(team_table)
+
+
     # --- Optional: Draw watermark/logo using canvas hook ---
     def draw_background(canvas_obj, doc_obj):
         # Draw background image (transparent logo)
@@ -384,6 +411,9 @@ def export_match_summary_pdf(request, match_id):
 
 @login_required
 def monthly_report_pdf(request, team):
+
+    
+
     today = date.today()
     first_day = today.replace(day=1)
     last_day = today.replace(day=calendar.monthrange(today.year, today.month)[1])
@@ -460,6 +490,49 @@ def monthly_report_pdf(request, team):
     ]))
 
     elements.append(player_table)
+
+    # action data
+
+    team_action_stats = TeamActionStats.objects.filter(match__in=matches)
+    detailed_actions = PlayerDetailedAction.objects.filter(match__in=matches)
+
+    elements.append(Spacer(1, 24))
+    elements.append(Paragraph("<b>Team Action Summary (Monthly)</b>", styles['Heading2']))
+
+    monthly_team_data = [['Team', 'Total Shots', 'Corners', 'Crosses (S/U)', 'Duels (W/L)', 'Fouls (C/W)', 'Mistakes']]
+
+    for is_our_team in [True, False]:
+        stats = team_action_stats.filter(is_our_team=is_our_team)
+        team_name = team.upper() if is_our_team else "Opponent"
+
+        total_shots = sum([
+            stats.aggregate(Sum(f))[f + '__sum'] or 0
+            for f in [
+                'shots_on_target_inside_box', 'shots_off_target_inside_box',
+                'shots_on_target_outside_box', 'shots_off_target_outside_box'
+            ]
+        ])
+        row = [
+            team_name,
+            total_shots,
+            stats.aggregate(Sum('corners'))['corners__sum'] or 0,
+            f"{stats.aggregate(Sum('successful_crosses'))['successful_crosses__sum'] or 0} / {stats.aggregate(Sum('unsuccessful_crosses'))['unsuccessful_crosses__sum'] or 0}",
+            f"{stats.aggregate(Sum('aerial_duel_won'))['aerial_duel_won__sum'] or 0} / {stats.aggregate(Sum('aerial_duel_lost'))['aerial_duel_lost__sum'] or 0}",
+            f"{stats.aggregate(Sum('fouls_committed'))['fouls_committed__sum'] or 0} / {stats.aggregate(Sum('fouls_won'))['fouls_won__sum'] or 0}",
+            stats.aggregate(Sum('mistakes'))['mistakes__sum'] or 0,
+        ]
+        monthly_team_data.append(row)
+
+    monthly_team_table = Table(monthly_team_data, hAlign='LEFT')
+    monthly_team_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lavender),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+    ]))
+
+    elements.append(monthly_team_table)
+
 
     doc.build(elements)
     return response
