@@ -359,6 +359,46 @@ def export_match_summary_pdf(request, match_id):
     ]))
     elements.append(stats_table)
 
+
+    # --- Player Detailed Actions Table ---
+    elements.append(Spacer(1, 24))
+    elements.append(Paragraph("<b>Player Detailed Actions</b>", styles['Heading2']))
+
+    detailed_actions = PlayerDetailedAction.objects.filter(match=match).select_related('player')
+
+    detailed_data = [
+        [
+            'Player', 'Shots (In/Out)', 'Crosses (S/U)', 'Duels (W/L)', 
+            'Fouls (C/W)', 'Offsides', 'Touches in Box', 'Mistakes', 
+            'Bad Passes', 'Ball Lost'
+        ]
+    ]
+
+    for action in detailed_actions:
+        detailed_data.append([
+            action.player.name,
+            f"{action.shots_on_target_inside_box}/{action.shots_off_target_inside_box}",
+            f"{action.successful_cross}/{action.unsuccessful_cross}",
+            f"{action.one_v_one_duel_won}/{action.one_v_one_duel_lost}",
+            f"{action.fouls_committed}/{action.fouls_won}",
+            action.offsides,
+            action.touches_inside_box,
+            action.mistakes,
+            action.bad_pass,
+            action.ball_lost,
+        ])
+
+    detailed_table = Table(detailed_data, hAlign='LEFT')
+    detailed_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.cyan),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+    ]))
+
+    elements.append(detailed_table)
+
+
     #actions data
 
     team_actions = TeamActionStats.objects.filter(match=match)
@@ -491,7 +531,69 @@ def monthly_report_pdf(request, team):
 
     elements.append(player_table)
 
-    # action data
+    # Individual action data
+
+    # --- Player Detailed Actions (Monthly Total) ---
+    elements.append(Spacer(1, 24))
+    elements.append(Paragraph("<b>Player Detailed Actions (Monthly)</b>", styles['Heading2']))
+
+    detailed_actions = PlayerDetailedAction.objects.filter(match__in=matches).select_related('player')
+
+    # Collect player IDs from the filtered actions
+    player_ids = detailed_actions.values_list('player', flat=True).distinct()
+
+    detailed_data = [
+        [
+            'Player', 'Shots (In/Out)', 'Crosses (S/U)', 'Duels (W/L)', 
+            'Fouls (C/W)', 'Offsides', 'Touches in Box', 'Mistakes', 
+            'Bad Passes', 'Ball Lost'
+        ]
+    ]
+
+    for player in Player.objects.filter(id__in=player_ids):
+        player_actions = detailed_actions.filter(player=player)
+
+        summed = player_actions.aggregate(
+            shots_in=Sum('shots_on_target_inside_box'),
+            shots_out=Sum('shots_off_target_inside_box'),
+            succ_cross=Sum('successful_cross'),
+            unsucc_cross=Sum('unsuccessful_cross'),
+            duels_won=Sum('one_v_one_duel_won'),
+            duels_lost=Sum('one_v_one_duel_lost'),
+            fouls_c=Sum('fouls_committed'),
+            fouls_w=Sum('fouls_won'),
+            offsides=Sum('offsides'),
+            touches=Sum('touches_inside_box'),
+            mistakes=Sum('mistakes'),
+            bad_passes=Sum('bad_pass'),
+            ball_lost=Sum('ball_lost'),
+        )
+
+        detailed_data.append([
+            player.name,
+            f"{summed['shots_in'] or 0}/{summed['shots_out'] or 0}",
+            f"{summed['succ_cross'] or 0}/{summed['unsucc_cross'] or 0}",
+            f"{summed['duels_won'] or 0}/{summed['duels_lost'] or 0}",
+            f"{summed['fouls_c'] or 0}/{summed['fouls_w'] or 0}",
+            summed['offsides'] or 0,
+            summed['touches'] or 0,
+            summed['mistakes'] or 0,
+            summed['bad_passes'] or 0,
+            summed['ball_lost'] or 0,
+        ])
+
+    detailed_table = Table(detailed_data, hAlign='LEFT')
+    detailed_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.aquamarine),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+    ]))
+
+    elements.append(detailed_table)
+
+
+    # Team action data
 
     team_action_stats = TeamActionStats.objects.filter(match__in=matches)
     detailed_actions = PlayerDetailedAction.objects.filter(match__in=matches)
