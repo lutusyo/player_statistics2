@@ -1,71 +1,187 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+  .player-nav {
+    position: sticky;
+    top: 0;
+    background: #f9f9f9;
+    padding: 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+    border-bottom: 1px solid #ccc;
+    z-index: 100;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .player-nav button {
+    flex: 0 0 auto;
+    padding: 6px 12px;
+    font-size: 14px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .player-nav button.active {
+    background-color: #28a745; /* Green for active player */
+    font-weight: bold;
+  }
+
+  .player-panel {
+    display: none;
+    margin: 15px 0;
+  }
+
+  .player-panel.active {
+    display: block;
+  }
+
+  /* Tag Button Styling */
+  .tag-button {
+    margin: 5px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    background-color: #17a2b8; /* Teal color */
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .tag-button:hover {
+    background-color: #138496;
+  }
+
+  .tag-button:active {
+    background-color: #117a8b;
+  }
+
+  .tag-button .count {
+    font-weight: bold;
+    margin-left: 4px;
+  }
+
+  @media (max-width: 600px) {
+    .tag-button {
+      width: 100%;
+      display: block;
+    }
+  }
+</style>
+
+
+
 <h2>Tagging Panel for Match: {{ match }}</h2>
 
 <form method="post" id="tag-form">
   {% csrf_token %}
-  <div class="tag-panel">
-    <h3>Line-up Players</h3>
+
+  <!-- Player Toggle Navbar -->
+  <div class="player-nav">
     {% for player in lineup_players %}
-      <div class="player-row" data-player-id="{{ player.id }}">
-        <strong>{{ player.name }}</strong>
-        {% for action in actions %}
-          <button type="button"
-                  class="tag-button"
-                  data-action="{{ action }}"
-                  onclick="incrementAction(this)">
-            {{ action }}: <span class="count">0</span>
-          </button>
-        {% endfor %}
-      </div>
+      <button type="button" class="player-tab" data-player-id="{{ player.id }}">
+        {{ player.name }}
+      </button>
     {% endfor %}
   </div>
+
+  <!-- Tagging Panels for Each Player -->
+  {% for player in lineup_players %}
+    <div class="player-panel" id="panel-{{ player.id }}" data-player-id="{{ player.id }}">
+      <h3>{{ player.name }}</h3>
+      {% for action in actions %}
+        <button type="button"
+                class="tag-button"
+                data-action="{{ action }}"
+                onclick="incrementAction(this)">
+          {{ action }}: <span class="count">0</span>
+        </button>
+      {% endfor %}
+    </div>
+  {% endfor %}
 
   <input type="hidden" name="data" id="tag-data">
   <button type="submit">Save All</button>
 </form>
 
+
 <script>
-  // ✅ 1. Inject saved data from view
   const savedData = {{ action_data|safe }};
   const actionData = {};
 
-  // ✅ 2. Initialize saved values in UI and JS state
   document.addEventListener("DOMContentLoaded", () => {
-    const rows = document.querySelectorAll(".player-row");
+    const panels = document.querySelectorAll(".player-panel");
 
-    rows.forEach(row => {
-      const playerId = row.dataset.playerId;
+    panels.forEach(panel => {
+      const playerId = panel.dataset.playerId;
       actionData[playerId] = {};
 
-      const buttons = row.querySelectorAll(".tag-button");
+      const buttons = panel.querySelectorAll(".tag-button");
       buttons.forEach(button => {
         const action = button.dataset.action;
-
-        // Load from savedData if available
         const savedCount = savedData[playerId]?.[action] || 0;
 
         actionData[playerId][action] = savedCount;
         button.querySelector(".count").textContent = savedCount;
       });
     });
+
+    // Activate first player by default
+    const firstTab = document.querySelector(".player-tab");
+    if (firstTab) {
+      showPanel(firstTab.dataset.playerId);
+      setActiveTab(firstTab);
+    }
   });
 
-  // ✅ 3. Handle click increment
+  // Set active style on tab buttons
+  function setActiveTab(clickedButton) {
+    document.querySelectorAll(".player-tab").forEach(btn => {
+      btn.classList.remove("active");
+    });
+    clickedButton.classList.add("active");
+  }
+
+  // Show panel for selected player
+  function showPanel(playerId) {
+    document.querySelectorAll(".player-panel").forEach(panel => {
+      panel.classList.remove("active");
+    });
+    const panel = document.getElementById("panel-" + playerId);
+    if (panel) {
+      panel.classList.add("active");
+    }
+  }
+
+  // Add event listeners to all player buttons
+  document.querySelectorAll(".player-tab").forEach(button => {
+    button.addEventListener("click", () => {
+      const playerId = button.dataset.playerId;
+      showPanel(playerId);
+      setActiveTab(button);
+    });
+  });
+
   function incrementAction(button) {
-    const playerRow = button.closest(".player-row");
-    const playerId = playerRow.dataset.playerId;
+    const panel = button.closest(".player-panel");
+    const playerId = panel.dataset.playerId;
     const action = button.dataset.action;
 
     actionData[playerId][action] += 1;
-    button.querySelector('.count').textContent = actionData[playerId][action];
+    button.querySelector(".count").textContent = actionData[playerId][action];
   }
 
-  // ✅ 4. On form submit, send updated values
   document.getElementById("tag-form").addEventListener("submit", function(e) {
-    const hiddenField = document.getElementById("tag-data");
-    hiddenField.value = JSON.stringify(actionData);
+    document.getElementById("tag-data").value = JSON.stringify(actionData);
   });
 </script>
+
+
 {% endblock %}
