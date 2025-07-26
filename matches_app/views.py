@@ -274,6 +274,8 @@ def export_match_summary_pdf(request, match_id):
         elements.append(Paragraph(f"<b>Final Score:</b> {result.our_score} - {result.opponent_score}", styles['Heading3']))
     elements.append(Spacer(1, 12))
 
+    
+
     # --- STARTERS Table ---
     def build_lineup_table(title, lineup_qs):
         starters = lineup_qs.filter(is_starting=True)
@@ -452,8 +454,6 @@ def export_match_summary_pdf(request, match_id):
 @login_required
 def monthly_report_pdf(request, team):
 
-    
-
     today = date.today()
     first_day = today.replace(day=1)
     last_day = today.replace(day=calendar.monthrange(today.year, today.month)[1])
@@ -474,20 +474,30 @@ def monthly_report_pdf(request, team):
     styles = getSampleStyleSheet()
     
     # --- Title ---
-    title = Paragraph(f"<b>{team.upper()} - Monthly Match Report</b>", styles['Title'])
+    title = Paragraph(f"<b>{team.upper()} - JULY Match Report</b>", styles['Title'])
     date_range = Paragraph(f"<i>Period: {first_day.strftime('%d %b %Y')} to {last_day.strftime('%d %b %Y')}</i>", styles['Normal'])
     elements.extend([title, Spacer(1, 12), date_range, Spacer(1, 24)])
 
     # --- MATCH RESULTS TABLE ---
     elements.append(Paragraph("<b>Match Results</b>", styles['Heading2']))
     
-    match_data = [['Date', 'Opponent', 'Venue', 'Result']]
+    match_data = [['Date', 'Opponent', 'Venue', 'Competition', 'Result']]
     for match in matches:
         result = TeamMatchResult.objects.filter(match=match).first()
         scoreline = f"{result.our_score}-{result.opponent_score}" if result else "N/A"
-        match_data.append([match.date.strftime('%d-%b-%Y'), match.opponent, match.venue, scoreline])
+        competition = match.competition_type if hasattr(match, 'competition_type') else "N/A"
+        match_data.append([
+            match.date.strftime('%d-%b-%Y'),
+            match.opponent,
+            match.venue,
+            competition,
+            scoreline
+        ])
 
-    match_table = Table(match_data, hAlign='LEFT')
+
+    #match_table = Table(match_data, hAlign='LEFT')
+    match_table = Table(match_data, hAlign='LEFT', colWidths=[70, 100, 70, 100, 60])
+
     match_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
@@ -500,26 +510,31 @@ def monthly_report_pdf(request, team):
     elements.append(Paragraph("<b>Player Statistics</b>", styles['Heading2']))
     
     player_ids = stats.values_list('player', flat=True).distinct()
-    player_data = [['Player', 'Apps', 'Minutes', 'Goals', 'Assists', 'Yellows', 'Reds']]
+    player_data = [['Player', 'Apps', 'Starts', 'Sub In', 'Minutes', 'Goals', 'Assists', 'Yellows', 'Reds']]
 
     for player in Player.objects.filter(id__in=player_ids):
         player_stats = stats.filter(player=player)
         total_minutes = player_stats.aggregate(Sum('minutes_played'))['minutes_played__sum'] or 0
         goals_count = goals.filter(scorer=player, is_own_goal=False).count()
         assists_count = goals.filter(assist_by=player).count()
-        detailed_stats = PlayerDetailedAction.objects.filter(match__in=matches, player=player)
-        yellow_cards = detailed_stats.aggregate(Sum('yellow_cards'))['yellow_cards__sum'] or 0
-        red_cards = detailed_stats.aggregate(Sum('red_cards'))['red_cards__sum'] or 0
+        yellow_cards = PlayerDetailedAction.objects.filter(match__in=matches, player=player).aggregate(Sum('yellow_cards'))['yellow_cards__sum'] or 0
+        red_cards = PlayerDetailedAction.objects.filter(match__in=matches, player=player).aggregate(Sum('red_cards'))['red_cards__sum'] or 0
+
+        start_count = player_stats.filter(is_starting=True).count()
+        sub_in_count = player_stats.filter(is_starting=False).count()
 
         player_data.append([
             player.name,
             player_stats.count(),
+            start_count,
+            sub_in_count,
             total_minutes,
             goals_count,
             assists_count,
             yellow_cards,
             red_cards
         ])
+
 
     player_table = Table(player_data, hAlign='LEFT')
     player_table.setStyle(TableStyle([
