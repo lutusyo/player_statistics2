@@ -118,16 +118,23 @@
       {% for player in lineup_players %}
         <div class="player-panel" id="panel-{{ player.id }}" data-player-id="{{ player.id }}">
           <h3>{{ player.name }}</h3>
+
           <div class="tag-grid">
-            {% for action in actions %}
-              <button type="button"
-                      class="tag-button"
-                      data-action="{{ action }}"
-                      onclick="incrementAction(this)">
-                {{ action }}: <span class="count">0</span>
-              </button>
-            {% endfor %}
+
+              {% for action in actions %}
+                <button type="button"
+                        class="tag-button"
+                        data-action="{{ action }}"
+                        onclick="incrementAction(this)">
+                  <span>
+                    <i class="fas {{ icon_map|get_item:action|default:'fa-tag' }}"></i> {{ action }}
+
+                  </span>
+                  <span class="count">0</span>
+                </button>
+              {% endfor %}
           </div>
+
         </div>
       {% endfor %}
     </div>

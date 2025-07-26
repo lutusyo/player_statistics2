@@ -126,12 +126,31 @@ def tagging_panel_view(request, match_id):
         for action in actions:
             action_data[player_id][action] = getattr(action_obj, action, 0)
 
+
+
+
+
+    icon_map = {
+        "Shot": "fa-bullseye",
+        "Cross": "fa-share-square",
+        "Foul": "fa-hand-paper",
+        "Tackle": "fa-shield-alt",
+        "Dribble": "fa-running",
+        "Header": "fa-arrow-up",
+        "Save": "fa-hands",
+        "Goal": "fa-futbol"
+    }
+
+
+
+
     return render(request, 'actions_app/tagging_panel.html', {
         'all_players': all_players,
         'lineup_players': lineup_players,
         'match': match,
         'actions': actions,
         'action_data': json.dumps(action_data), # Pass to JS
+        "icon_map": icon_map ,
     })
 
 
