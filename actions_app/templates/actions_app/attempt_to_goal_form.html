@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2>Tag Attempt to Goal</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <label for="player">Player:</label>
+    <select name="player" id="player">
+        {% for player in players %}
+            <option value="{{ player.id }}">{{ player.name }}</option>
+        {% endfor %}
+    </select><br><br>
+
+    <label for="minute">Minute:</label>
+    <input type="number" name="minute" id="minute" min="0" required>
+
+    <label for="second">Second:</label>
+    <input type="number" name="second" id="second" min="0" max="59" required><br><br>
+
+    <label for="attempt_type">Attempt Type:</label>
+    <select name="attempt_type" id="attempt_type">
+        <option value="Shot">Shot</option>
+        <option value="Header">Header</option>
+        <option value="Volley">Volley</option>
+    </select><br><br>
+
+    <label for="outcome">Outcome:</label>
+    <select name="outcome" id="outcome">
+        <option value="On Target">On Target</option>
+        <option value="Off Target">Off Target</option>
+        <option value="Goal">Goal</option>
+    </select><br><br>
+
+    <label for="comment">Comment:</label><br>
+    <textarea name="comment" id="comment" rows="3" cols="40"></textarea><br><br>
+
+    <button type="submit">Save Tag</button>
+</form>
+
+{% endblock %}

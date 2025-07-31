@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Report - {{ match.home_team.name }} vs {{ match.away_team.name }}</title>
+    <link rel="stylesheet" href="{% static 'reports_app/css/match_report.css' %}">
+</head>
+
+
+
+<body>
+
+    
+<div class="report-container">
+    <div class="header">
+        <h1>Match Report</h1>
+        <p><strong>{{ match.date }}</strong> - {{ match.competition.name }}</p>
+        <a class="download-btn" href="{% url 'match_summary_pdf' match.id %}">Download PDF Report</a>
+    </div>
+
+    <!-- Score & Summary -->
+    <section class="score-summary">
+        <h2>{{ match.home_team.name }} {{ match.home_score }} - {{ match.away_score }} {{ match.away_team.name }}</h2>
+        <p>Stadium: {{ match.venue }}</p>
+    </section>
+
+    <!-- Lineups -->
+    <section class="lineups">
+        <h3>Lineups</h3>
+        <div class="team-lineups">
+            <div class="team">
+                <h4>{{ match.home_team.name }}</h4>
+                <ul>
+                    {% for player in home_players %}<li>{{ player.name }} ({{ player.position }})</li>{% endfor %}
+                </ul>
+            </div>
+            <div class="team">
+                <h4>{{ match.away_team.name }}</h4>
+                <ul>
+                    {% for player in away_players %}<li>{{ player.name }} ({{ player.position }})</li>{% endfor %}
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Match Stats -->
+    <section class="match-stats">
+        <h3>Match Statistics</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Statistic</th>
+                    <th>{{ match.home_team.name }}</th>
+                    <th>{{ match.away_team.name }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Shots on Target</td><td>{{ home_stats.shots_on_target }}</td><td>{{ away_stats.shots_on_target }}</td></tr>
+                <tr><td>Shots off Target</td><td>{{ home_stats.shots_off_target }}</td><td>{{ away_stats.shots_off_target }}</td></tr>
+                <tr><td>Fouls</td><td>{{ home_stats.fouls }}</td><td>{{ away_stats.fouls }}</td></tr>
+                <tr><td>Crosses</td><td>{{ home_stats.crosses }}</td><td>{{ away_stats.crosses }}</td></tr>
+                <tr><td>Corners</td><td>{{ home_stats.corners }}</td><td>{{ away_stats.corners }}</td></tr>
+                <tr><td>Offsides</td><td>{{ home_stats.offsides }}</td><td>{{ away_stats.offsides }}</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Tactical Analysis Placeholder -->
+    <section class="tactical">
+        <h3>Tactical Analysis</h3>
+        <p>{{ match.tactical_analysis|linebreaks }}</p>
+    </section>
+
+    <!-- Player Stats Placeholder -->
+    <section class="player-stats">
+        <h3>Player Stats</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Goals</th>
+                    <th>Assists</th>
+                    <th>Minutes</th>
+                    <th>Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in player_stats %}
+                <tr>
+                    <td>{{ stat.player.name }}</td>
+                    <td>{{ stat.goals }}</td>
+                    <td>{{ stat.assists }}</td>
+                    <td>{{ stat.minutes_played }}</td>
+                    <td>{{ stat.rating }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</div>
+</body>
+</html>

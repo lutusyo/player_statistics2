@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h2>Lineup for Match on {{ match.date }}</h2>
+
+<div class="lineup-container">
+    <!-- Football Field Area -->
+    <div class="field">
+        {% for player in starting_players %}
+            <div class="player-position" style="top:{{ player.position_y }}%; left:{{ player.position_x }}%;">
+                <img src="{{ player.player.photo.url }}" class="player-photo" alt="{{ player.player.name }}">
+                <p>{{ player.player.name }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Right Sidebar for Substitutes -->
+    <div class="substitutes-sidebar">
+        <h3>Substitutes</h3>
+        {% for sub in substitutes %}
+            <div class="sub-player">
+                <img src="{{ sub.player.photo.url }}" class="sub-photo" alt="{{ sub.player.name }}">
+                <p>{{ sub.player.name }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.lineup-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+}
+
+.field {
+    width: 70%;
+    height: 600px;
+    background: url("{% static 'images/football_field.jpg' %}") no-repeat center;
+    background-size: cover;
+    position: relative;
+    border: 2px solid #3a3a3a;
+    margin-right: 20px;
+}
+
+.player-position {
+    position: absolute;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    color: white;
+}
+
+.player-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.substitutes-sidebar {
+    width: 25%;
+    background: #f4f4f4;
+    padding: 10px;
+    border-radius: 10px;
+    height: 600px;
+    overflow-y: auto;
+}
+
+.sub-player {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.sub-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+</style>
+
+{% endblock %}

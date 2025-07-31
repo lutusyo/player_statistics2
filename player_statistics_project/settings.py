@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+
     # local
     'accounts_app',
     'players_app',
@@ -46,6 +47,8 @@ INSTALLED_APPS = [
     'gps_app',
     'teams_app',
     'announcements_app',
+    'reports_app',
+    'tagging_app',
 ]
 
 MIDDLEWARE = [
@@ -71,6 +74,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'players_app.context_processors.player_filters',
+                'teams_app.context_processors.our_teams_context',
             ],
         },
     },
@@ -136,21 +140,25 @@ MEDIA_URL = '/media_player_statistics2/'
 MEDIA_ROOT = '/home/afcportal/public_html/media_player_statistics2/'
 
 
-STATIC_URL = '/static_player_statistics2/'
+#STATIC_URL = '/static_player_statistics2/'
+STATIC_URL = '/static/'
 STATIC_ROOT = '/home/afcportal/public_html/static_player_statistics2/'
 
 
 # Development static directories (Django will look here during dev)
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'accounts_app', 'static'),
-    os.path.join(BASE_DIR, 'players_app', 'static'),
-    os.path.join(BASE_DIR, 'matches_app', 'static'),
-    os.path.join(BASE_DIR, 'actions_app', 'static'),
-    os.path.join(BASE_DIR, 'gps_app', 'static'),
-    os.path.join(BASE_DIR, 'teams_app', 'static'),
+
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, 'accounts_app', 'static'),
+#    os.path.join(BASE_DIR, 'players_app', 'static'),
+#    os.path.join(BASE_DIR, 'matches_app', 'static'),
+#    os.path.join(BASE_DIR, 'actions_app', 'static'),
+ #   os.path.join(BASE_DIR, 'gps_app', 'static'),
+ #   os.path.join(BASE_DIR, 'teams_app', 'static'),
     # optionally a global one if you have BASE_DIR/static
     # os.path.join(BASE_DIR, 'static'),
-]
+#]
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
 
 
 LOGIN_REDIRECT_URL = 'home'  # redirect after login

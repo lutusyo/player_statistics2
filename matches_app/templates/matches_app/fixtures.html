@@ -18,10 +18,10 @@
         <h2 style="text-align: center; margin-bottom: 20px;">Upcoming Matches</h2>
 
         {% for match in upcoming_matches %}
-
+            
             <div>
                 {% if user.is_authenticated and user.username == 'Azam2' %}
-                    <a href="{% url 'actions_app:tagging_panel' match.id %}">Tag Match</a>
+                    <a href="{% url 'tagging_app:attempt_to_goal' match.id %}">Attempt to Goal Tag</a>
                 {% endif %}
             </div>
 
@@ -81,7 +81,7 @@
 
             <div>
                 {% if user.is_authenticated and user.username == 'Azam2' %}
-                    <a href="{% url 'actions_app:tagging_panel' match.id %}">Tag Match</a>
+                    <a href="{% url 'tagging_app:attempt_to_goal'  match.id %}">Attempt to Goal tag</a>
                 {% endif %}
             </div>
 

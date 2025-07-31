@@ -1,12 +1,9 @@
+# matches_app/models.py
 from django.db import models
 from players_app.models import Player
+from teams_app.models import Team, AgeGroup
 
-class AgeGroup(models.TextChoices):
-    UNDER_20 = 'U20', 'Under 20'
-    UNDER_17 = 'U17', 'Under 17'
-    UNDER_15 = 'U15', 'Under 15'
-    UNDER_13 = 'U13', 'Under 13'
-
+### CHOICES ###
 
 class SeasonChoices(models.TextChoices):
     SEASON_2022_2023 = "2022/2023", "2022/2023"
@@ -14,119 +11,71 @@ class SeasonChoices(models.TextChoices):
     SEASON_2024_2025 = "2024/2025", "2024/2025"
     SEASON_2025_2026 = "2025/2026", "2025/2026"
 
-
 class CompetitionType(models.TextChoices):
     LOCAL_FRIENDLY = 'Local Friendly', 'Local Friendly'
     INTERNATIONAL_FRIENDLY = 'International Friendly', 'International Friendly'
     NBC_YOUTH_LEAGUE = 'NBC Youth League', 'NBC Youth League'
 
-class FormationChoices(models.TextChoices):
-    FOUR_THREE_THREE = "4-3-3", "4-3-3"
-    FOUR_TWO_THREE_ONE = "4-2-3-1", "4-2-3-1"
-    FOUR_FOUR_TWO = "4-4-2", "4-4-2"
-    THREE_FIVE_TWO = "3-5-2", "3-5-2"
-    THREE_FOUR_THREE = "3-4-3", "3-4-3"
-
-FORMATION_POSITIONS = {
-    "4-3-3": ["GK", "RB", "CB1", "CB2", "LB", "CM1", "CDM", "CM2", "RW", "ST", "LW"],
-    "4-2-3-1": ["GK", "RB", "CB1", "CB2", "LB", "CDM1", "CDM2", "RW", "CAM", "LW", "ST"],
-    "4-4-2": ["GK", "RB", "CB1", "CB2", "LB", "RM", "CM1", "CM2", "LM", "ST1", "ST2"],
-    "3-5-2": ["GK", "CB1", "CB2", "CB3", "LWB", "CM1", "CDM", "CM2", "RWB", "ST1", "ST2"],
-    "3-4-3": ["GK", "CB1", "CB2", "CB3", "LWB", "CM1", "CM2", "RWB", "LW", "ST", "RW"],
-}
-
-class PlayerPosition(models.TextChoices):
+class PositionChoices(models.TextChoices):
     GK = 'GK', 'Goalkeeper'
-    RB = 'RB', 'Right Back'
     LB = 'LB', 'Left Back'
-    CB1 = 'CB1', 'Center Back 1'
-    CB2 = 'CB2', 'Center Back 2'
-    CB3 = 'CB3', 'Center Back 3'
-    RWB = 'RWB', 'Right Wing Back'
-    LWB = 'LWB', 'Left Wing Back'
-    CM1 = 'CM1', 'Center Midfield 1'
-    CM2 = 'CM2', 'Center Midfield 2'
-    CDM = 'CDM', 'Defensive Midfield'
-    CAM = 'CAM', 'Attacking Midfield'
-    RM = 'RM', 'Right Midfield'
-    LM = 'LM', 'Left Midfield'
-    RW = 'RW', 'Right Wing'
-    LW = 'LW', 'Left Wing'
+    CB = 'CB', 'Center Back'
+    RB = 'RB', 'Right Back'
+    DM = 'DM', 'Defensive Midfielder'
+    CM = 'CM', 'Central Midfielder'
+    AM = 'AM', 'Attacking Midfielder'
+    LW = 'LW', 'Left Winger'
+    RW = 'RW', 'Right Winger'
     ST = 'ST', 'Striker'
-    ST1 = 'ST1', 'Striker 1'
-    ST2 = 'ST2', 'Striker 2'
+    SUB = 'SUB', 'Substitute'
 
-
+### CORE MODELS ###
 
 class Match(models.Model):
-    team = models.CharField(max_length=10, choices=AgeGroup.choices, default=AgeGroup.UNDER_20)
-
-    formation = models.CharField(
-        max_length=20,
-        choices=FormationChoices.choices,
-        blank=True,
-        null=True
-    )
-
-
+    home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home_matches')
+    away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_matches')
     date = models.DateField()
-    match_time = models.TimeField(null=True, blank=True)
-    opponent = models.CharField(max_length=100)
-    is_home = models.BooleanField(default=True)
-    venue = models.CharField(max_length=100, default='Azam Complex')
+    time = models.TimeField(null=True, blank=True)
+    venue = models.CharField(max_length=255)
+
     season = models.CharField(max_length=20, choices=SeasonChoices.choices)
-    competition_type = models.CharField(max_length=50, choices=CompetitionType.choices, default=CompetitionType.LOCAL_FRIENDLY)
-    our_team_logo = models.ImageField(upload_to='team_logo', null=True, blank=True)
-    opponent_logo = models.ImageField(upload_to='team_logo/', null=True, blank=True)
+    competition_type = models.CharField(max_length=50, choices=CompetitionType.choices)
+    age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.get_team_display()} vs {self.opponent} on {self.date}"
-    
+        return f"{self.home_team.name} vs {self.away_team.name} ({self.date})"
 
-class Goal(models.Model):
-    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='goals')
-    scorer = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='goals_scored')
-    assist_by = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='assists_made')
-    minute = models.PositiveIntegerField()
-    is_own_goal = models.BooleanField(default=False)
 
-    def __str__(self):
-        if self.is_own_goal:
-            return f"Own Goal at {self.minute}'"
-        return f"{self.scorer} scored at {self.minute}'"
-    
-class TeamMatchResult(models.Model):
-    match = models.OneToOneField(Match, on_delete=models.CASCADE)
-    our_score = models.PositiveIntegerField()
-    opponent_score = models.PositiveIntegerField()
-
-    def __str__(self):
-        return f"{self.our_score} - {self.opponent_score}"
-    
-class PlayerMatchStats(models.Model):
-    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+class MatchLineup(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
 
-    minutes_played = models.PositiveIntegerField(default=0)
     is_starting = models.BooleanField(default=False)
-    position = models.CharField(
-        max_length=10,
-        choices=PlayerPosition.choices,
-        blank=True,
-        null=True,
-        help_text="Position in formation (used for pitch layout)"
-    )
+    position = models.CharField(max_length=5, choices=PositionChoices.choices, default=PositionChoices.SUB)
 
+    time_entered = models.TimeField(
+        null=True,
+        blank=True,
+        help_text="Time the player entered the field (for subs)"
+    )
 
     class Meta:
-        unique_together = ('player', 'match')
+        unique_together = ('match', 'player')
 
     def __str__(self):
-        return f"{self.player.name} - {self.get_position_display() or 'No Position'} - {'Starting' if self.is_starting else 'Sub'}  - {self.match}"
+        return f"{self.player.name} - {self.get_position_display()} ({'Start' if self.is_starting else 'Sub'})"
 
-    @property
-    def position_code(self):
-        return self.position
 
+class Substitution(models.Model):
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    player_out = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='subs_out')
+    player_in = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='subs_in')
+    minute = models.PositiveIntegerField()
+    second = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.player_out} ⬇ → {self.player_in} ⬆ @ {self.minute}:{self.second:02d}"
 
 

@@ -1,22 +1,6 @@
 from django.db import models
-
-# Constants for age groups
-UNDER_20 = 'U20'
-UNDER_17 = 'U17'
-UNDER_15 = 'U15'
-UNDER_13 = 'U13'
-UNDER_10 = 'U10'
-ALL = 'ALL'  # Used for staff members, not players
-
-# Age group choices
-AGE_GROUP_CHOICES = [
-    (UNDER_20, 'Under 20'),
-    (UNDER_17, 'Under 17'),
-    (UNDER_15, 'Under 15'),
-    (UNDER_13, 'Under 13'),
-    (UNDER_10, 'Under 10'),
-    (ALL, 'All Age Groups'),  # ✅ Correct usage of ALL constant
-]
+from teams_app.models import AgeGroup, Team
+from django import forms
 
 # Season choices
 SEASON_CHOICES = [
@@ -37,7 +21,7 @@ COMPETITION_CHOICES = [
 # Player model
 class Player(models.Model):
     name = models.CharField(max_length=100)
-    birthdate = models.CharField(max_length=10, null=True, blank=True)
+    birthdate = models.DateField(null=True, blank=True)
     place_of_birth = models.CharField(max_length=100, default="Tanzania")
     nationality = models.CharField(max_length=50, default="Tanzania")
     
@@ -67,13 +51,9 @@ class Player(models.Model):
         default='files_to_be_imported/default_image.png'
     )
 
-    age_group = models.CharField(
-        max_length=30,
-        choices=AGE_GROUP_CHOICES,
-        default=UNDER_20,
-        help_text="Select the age group the player belongs to."
-    )
-
+    age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    
     def __str__(self):
         return self.name
 

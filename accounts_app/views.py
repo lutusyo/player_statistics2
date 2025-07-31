@@ -2,14 +2,13 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-
-
+from teams_app.models import Team
 
 
 def index(request):
-    return render(request, 'accounts_app/index.html', {
-        'selected_age_group': 'U20',
-    })
+    team = Team.objects.filter(age_group__code='U20', team_type='OUR_TEAM').first()
+
+    return render(request, 'accounts_app/index.html', {'team': team})
 
 
 def home_view(request):

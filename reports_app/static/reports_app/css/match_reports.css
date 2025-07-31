@@ -1,0 +1,94 @@
+/* static/reports_app/css/match_report.css */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f7f7f7;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+.report-container {
+    max-width: 1000px;
+    margin: auto;
+    background: #fff;
+    padding: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    text-align: center;
+    border-bottom: 2px solid #007BFF;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+}
+
+.download-btn {
+    display: inline-block;
+    background: #007BFF;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+h1, h2, h3, h4 {
+    color: #007BFF;
+    margin-bottom: 10px;
+}
+
+.score-summary, .lineups, .match-stats, .tactical, .player-stats {
+    margin-bottom: 40px;
+}
+
+.team-lineups {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.team {
+    flex: 1;
+    background: #f0f0f0;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.team h4 {
+    margin-top: 0;
+    font-size: 16px;
+    text-align: center;
+}
+
+.team ul {
+    list-style: none;
+    padding: 0;
+    font-size: 14px;
+}
+
+.match-stats table, .player-stats table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.match-stats th, .match-stats td,
+.player-stats th, .player-stats td {
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.match-stats th, .player-stats th {
+    background-color: #007BFF;
+    color: white;
+}
+
+.tactical p {
+    line-height: 1.6;
+    background: #f8f8f8;
+    padding: 15px;
+    border-left: 4px solid #007BFF;
+    border-radius: 4px;
+}

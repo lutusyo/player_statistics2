@@ -80,20 +80,5 @@
 
     <hr style="margin: 40px 0;">
 
-    <!-- Export Buttons -->
-    <div style="margin-top: 30px; text-align: center;">
-        <ul>
-            <li><a href="{% url 'gps_app:gps_match_detail' match.id %}">View GPS Data</a></li> 
-            <li><a href="{% url 'actions_app:player_action_list' match.id %}">View Team Actions Stats</a></li>
-            <hr>
-            <li><a href="{% url 'matches_app:export_csv' match.id %}" class="btn btn-primary" style="margin-right: 10px;">⬇️ Export CSV</a></li>
-            <li><a href="{% url 'matches_app:export_pdf' match.id %}" class="btn btn-secondary">⬇️ Download Match Report</a></li>
-            <hr>
-          
-                <li><a href="{% url 'matches_app:monthly_report_pdf' team=team_selected %}" class="btn btn-primary">📄 Download Monthly Report</a></li>
-           
-        </ul>
-    </div>
-
 </div>
 {% endblock %}

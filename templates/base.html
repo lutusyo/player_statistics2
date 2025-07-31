@@ -29,24 +29,26 @@
                     <ul>
                         <li><a href="{% url 'home' %}">Home</a></li>
 
-
                         <li>
                             <a href="#">TEAMS</a>
                             <ul class="dropdown-menu">
-                                {% for group in age_groups %}
-                                    <li><a href="{% url 'teams_app:team_squad' group %}">{{ group }}</a></li>
+                                {% for team in our_teams %}
+                                    <li><a href="{% url 'teams_app:team_squad' team.id %}">{{ team.age_group.code }}</a></li>
                                 {% endfor %}
                             </ul>
                         </li>
-                        
+
                         <li>
                             <a href="#">MATCHES</a>
                             <ul class="dropdown-menu">
-                                {% for group in age_groups %}
-                                    <li><a href="{% url 'matches_app:team_dashboard' group %}">{{ group }}</a></li>
+                                {% for team in our_teams %}
+                                    
+
+                                    <li><a href="{% url 'matches_app:team_dashboard' team.id %}">{{ team.age_group.code }}</a></li>
                                 {% endfor %}
                             </ul>
                         </li>
+
 
                         <!--<li>
                             <a href="{% url 'matches_app:team_fixtures' team_selected|default:'U20' %}" class="{% if active_tab == 'fixtures' %}active{% endif %}">FIXTURES</a>

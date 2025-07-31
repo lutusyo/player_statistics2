@@ -1,7 +1,7 @@
 # actions_app/views.py
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import TeamActionStats, PlayerDetailedAction
-from matches_app.models import Match, PlayerMatchStats
+from .models import  PlayerDetailedAction
+from matches_app.models import Match
 from players_app.models import Player
 from django.contrib.auth.decorators import login_required
 import json
@@ -11,13 +11,6 @@ import matplotlib.pyplot as plt
 import io
 import urllib, base64
 
-#def match_action_stats(request, match_id):
-#   match = get_object_or_404(Match, id=match_id)
-#   team_stats = TeamActionStats.objects.filter(match=match)
-#   return render(request, 'actions_app/match_actions_stats.html', {
-#       'match': match,
-#       'team_stats': team_stats,  # renamed from team_action_stats
-#   })
 
 def player_action_stats(request, player_id, match_id):
     action = get_object_or_404(PlayerDetailedAction, player__id=player_id, match__id=match_id)
@@ -70,9 +63,7 @@ def player_detailed_action_list(request, match_id):
         'player_data': player_data,
         'action_fields': action_fields,
     }
-
     return render(request, 'actions_app/player_actions_stats_list.html', context)
-
 
 
 @login_required
@@ -126,10 +117,6 @@ def tagging_panel_view(request, match_id):
         for action in actions:
             action_data[player_id][action] = getattr(action_obj, action, 0)
 
-
-
-
-
     icon_map = {
         "Shot": "fa-bullseye",
         "Cross": "fa-share-square",
@@ -140,9 +127,6 @@ def tagging_panel_view(request, match_id):
         "Save": "fa-hands",
         "Goal": "fa-futbol"
     }
-
-
-
 
     return render(request, 'actions_app/tagging_panel.html', {
         'all_players': all_players,

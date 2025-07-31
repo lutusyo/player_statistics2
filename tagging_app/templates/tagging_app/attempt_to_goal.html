@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container">
+  <h2>Attempt to Goal Tagging - {{ match }}</h2>
+
+  <!-- CLOCK -->
+  <div id="clock" style="font-size: 24px; margin: 10px 0;">00:00</div>
+
+  <!-- PLAYER BUTTONS -->
+  <div class="players-list" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 5px;">
+    {% for entry in lineup %}
+    <button class="player-btn" data-player-id="{{ entry.player.id }}" data-player-name="{{ entry.player.name }}">
+        {{ entry.player.name }}
+    </button>
+    {% endfor %}
+
+  </div>
+
+  <!-- TAGGING PANEL -->
+  <div id="tagging-panel" style="display: block;">
+    <h3 id="step-player-name"></h3>
+
+    <!-- Step 1: Outcome -->
+    <div id="step-outcome" style="display: none;">
+      <h4>Outcome</h4>
+      <div id="outcome-options">
+        {% for player in lineup %}
+          {% for outcome in outcomes %}
+            {% with label=outcome.1 count=outcome_counts|get_item:player.id|get_item:outcome.0|default:0 %}
+              <button
+                class="outcome-btn"
+                data-player-id="{{ player.id }}"
+                data-value="{{ outcome.0 }}"
+                data-label="{{ outcome.1 }}"
+              >
+                {{ outcome.1 }} ({{ count }})
+              </button>
+            {% endwith %}
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Step 2: Body Part -->
+    <div id="step-body-part" style="display: none;">
+      <h4>Body Part</h4>
+      {% for part in body_parts %}
+        <button class="body-btn" data-value="{{ part.0 }}">{{ part.1 }}</button>
+      {% endfor %}
+    </div>
+
+    <!-- Step 3: Delivery Type -->
+    <div id="step-delivery" style="display: none;">
+      <h4>Delivery</h4>
+      {% for delivery in delivery_types %}
+        <button class="delivery-btn" data-value="{{ delivery.0 }}">{{ delivery.1 }}</button>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ASSIST SECTION (Hidden by default) -->
+  <div id="assist-section" style="display: none;">
+    <label for="assist-player">Assist Player:</label>
+    <select id="assist-player">
+      <option value="">-- Select --</option>
+      {% for player in lineup %}
+        <option value="{{ player.id }}">{{ player.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  let selectedPlayerId = null;
+  let matchId = "{{ match.id }}";
+  let selectedOutcome = null;
+  let selectedBody = null;
+  let selectedDelivery = null;
+
+  document.querySelectorAll(".player-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+      selectedPlayerId = this.dataset.playerId;
+      document.getElementById("step-outcome").style.display = "block";
+      document.getElementById("step-body-part").style.display = "none";
+      document.getElementById("step-delivery").style.display = "none";
+    });
+  });
+
+  document.querySelectorAll(".outcome-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+      if (this.dataset.playerId !== selectedPlayerId) return;
+      selectedOutcome = this.dataset.value;
+      document.getElementById("step-body-part").style.display = "block";
+    });
+  });
+
+  document.querySelectorAll(".body-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+      selectedBody = this.dataset.value;
+      document.getElementById("step-delivery").style.display = "block";
+    });
+  });
+
+  document.querySelectorAll(".delivery-btn").forEach(btn => {
+    btn.addEventListener("click", function () {
+      selectedDelivery = this.dataset.value;
+
+      let now = new Date();
+        let minute = parseInt(now.getMinutes());
+        let second = parseInt(now.getSeconds());
+        let timestamp = now.toISOString();
+
+        // fallback to 0 if somehow undefined
+        if (isNaN(minute)) minute = 0;
+        if (isNaN(second)) second = 0;
+
+        let payload = {
+        match_id: matchId,
+        player_id: selectedPlayerId,
+        minute: minute,
+        second: second,
+        outcome: selectedOutcome,
+        body_part: selectedBody,
+        delivery_type: selectedDelivery,
+        timestamp: timestamp
+        };
+
+        console.log("Sending payload:", payload);
+
+
+      fetch("{% url 'tagging_app:save_attempt_to_goal' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify(payload)
+      })
+    .then(response => response.json())
+    .then(data => {
+    if (data.status === "ok") {
+        const counts = data.updated_counts;
+        for (const [outcome, count] of Object.entries(counts)) {
+        const btn = document.querySelector(`.outcome-btn[data-player-id='${selectedPlayerId}'][data-value='${outcome}']`);
+        if (btn) {
+            btn.innerHTML = `${btn.dataset.label} (${count})`;
+        }
+        }
+        selectedOutcome = null;
+        selectedBody = null;
+        selectedDelivery = null;
+        document.getElementById("step-outcome").style.display = "none";
+        document.getElementById("step-body-part").style.display = "none";
+        document.getElementById("step-delivery").style.display = "none";
+    } else {
+        alert("Failed to save tag.");
+        console.error(data.message);
+    }
+    })
+
+      .catch(error => {
+        alert("Failed to save tag: " + (data.message || "Unknown error"));
+        console.error("Backend error:", data);
+      });
+    });
+  });
+});
+</script>
+
+{% endblock %}

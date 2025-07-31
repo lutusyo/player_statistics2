@@ -1,9 +1,11 @@
 # team_app/admin.py
 from django.contrib import admin
-from .models import staffMember
+from .models import StaffMember, Team, AgeGroup
 
+admin.site.register(AgeGroup)
+admin.site.register(Team)
 
-@admin.register(staffMember)
+@admin.register(StaffMember)
 class StaffMemberAdmin(admin.ModelAdmin):
     list_display = ['name', 'role', 'age_group']
     list_filter = ['role', 'age_group']

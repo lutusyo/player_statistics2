@@ -1,12 +1,12 @@
 # announcements_app/models.py
 from django.db import models
 from django.contrib.auth.models import User
-from players_app.models import AGE_GROUP_CHOICES
+from teams_app.models import AgeGroup, Team
 
 
 class Announcement(models.Model):
     date_for = models.DateField()
-    age_group = models.CharField(max_length=10, choices=AGE_GROUP_CHOICES)
+    age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=100, default='Plan for Tomorrow')
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
