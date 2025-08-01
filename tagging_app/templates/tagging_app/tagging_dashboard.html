@@ -1,0 +1,72 @@
+<!-- tagging_app/templates/tagging_app/tagging_dashboard.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>📊 Tagging Dashboard</h1>
+
+<h2>🧠 Pass Network Summary</h2>
+<table>
+    <tr>
+        <th>Match</th>
+        <th>Total Passes</th>
+        <th>📄 PDF</th>
+    </tr>
+    {% for item in pass_summary %}
+    <tr>
+        <td>Match {{ item.match__id }} - {{ item.match__date }}</td>
+        <td>{{ item.total_passes }}</td>
+        <td><a href="{% url 'tagging_app:pass_network_pdf' item.match__id %}" target="_blank">View PDF</a></td>
+        <td><a href="{% url 'tagging_app:pass_network_csv' item.match__id %}" target="_blank">View csv</a></td>
+
+    </tr>
+    {% endfor %}
+</table>
+
+<h2>🧤 Goalkeeper Distribution Summary</h2>
+<table>
+    <tr>
+        <th>Match</th>
+        <th>Total Distributions</th>
+        <th>📄 PDF</th>
+        <th>📥 CSV</th>
+    </tr>
+    {% for item in gk_summary %}
+    <tr>
+        <td>Match {{ item.match__id }} - {{ item.match__date }}</td>
+        <td>{{ item.total_distributions }}</td>
+        <td><a href="{% url 'tagging_app:gk_distribution_pdf' item.match__id %}" target="_blank">PDF</a></td>
+        <td><a href="{% url 'tagging_app:gk_distribution_csv' item.match__id %}" target="_blank">CSV</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2>🥅 Attempt to Goal Summary</h2>
+<table>
+    <tr>
+        <th>Match</th>
+        <th>Total Attempts</th>
+        <th>Avg xG</th>
+        <th>📄 PDF</th>
+        <th>📥 CSV</th>
+    </tr>
+    {% for item in attempt_summary %}
+    <tr>
+        <td>Match {{ item.match__id }} - {{ item.match__date }}</td>
+        <td>{{ item.total_attempts }}</td>
+        <td>{{ item.avg_xG|floatformat:2 }}</td>
+        <td><a href="{% url 'tagging_app:export_attempt_to_goal_pdf' item.match__id %}" target="_blank">PDF</a></td>
+        <td><a href="{% url 'tagging_app:export_attempt_to_goal_csv' item.match__id %}" target="_blank">CSV</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+<hr>
+
+<h3>Quick Links</h3>
+<ul>
+    <li><a href="{% url 'tagging_app:enter_attempt_to_goal' 1 %}">Tag Attempt to Goal</a></li>
+    <li><a href="{% url 'tagging_app:enter_pass_network' 1 %}">Tag Pass Network</a></li>
+    <li><a href="{% url 'tagging_app:enter_goalkeeper_distribution' 1 %}">Tag Goalkeeper Distribution</a></li>
+</ul>
+
+{% endblock %}

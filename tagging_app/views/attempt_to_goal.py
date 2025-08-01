@@ -10,7 +10,20 @@ from django.db.models import Count
 from tagging_app.models import AttemptToGoal, BodyPartChoices, DeliveryTypeChoices, OutcomeChoices
 import traceback
 
-def attempt_to_goal_page(request, match_id):
+from tagging_app.models import PassEvent, GoalkeeperDistributionEvent
+from teams_app.models import Team
+
+from django.http import FileResponse
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+
+import csv
+from django.http import HttpResponse
+import io
+
+
+
+def enter_attempt_to_goal(request, match_id):
     match = get_object_or_404(Match, id=match_id)
     lineup = MatchLineup.objects.filter(match=match, is_starting=True).select_related('player')
     players = [entry.player for entry in lineup]
@@ -30,7 +43,7 @@ def attempt_to_goal_page(request, match_id):
         'outcome_counts': outcome_counts,
     }
 
-    return render(request, 'tagging_app/attempt_to_goal.html', context)
+    return render(request, 'tagging_app/attempt_to_goal_enter_data.html', context)
 
 @csrf_exempt
 def save_attempt_to_goal(request):
@@ -82,3 +95,48 @@ def save_attempt_to_goal(request):
 
 
     return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+def export_attempt_to_goal_csv(request, match_id):
+   
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="attempt_to_goal_{match_id}.csv"'
+
+    writer = csv.writer(response)
+    # Update header to reflect actual model fields
+    writer.writerow(['Player', 'Body Part', 'Delivery Type', 'Zone X', 'Zone Y'])
+
+    attempts = AttemptToGoal.objects.filter(match_id=match_id)
+    for a in attempts:
+        # Use the correct fields from the model
+        writer.writerow([
+            a.player.name if a.player else 'N/A',
+            a.body_part,
+            a.delivery_type,
+            a.x,
+            a.y
+        ])
+    return response
+
+
+def export_attempt_to_goal_pdf(request, match_id):
+    
+
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=A4)
+    c.drawString(100, 800, f"Attempt to Goal Report for Match {match_id}")
+    
+    attempts = AttemptToGoal.objects.filter(match_id=match_id)
+    y = 750
+    for a in attempts:
+        c.drawString(100, y, f"{a.player.name} | Zone: {a.x}, {a.y}")
+        y -= 15
+        if y < 50:
+            c.showPage()
+            y = 800
+
+    c.save()
+    buffer.seek(0)
+    return FileResponse(buffer, as_attachment=True, filename='attempt_to_goal.pdf')
+
+

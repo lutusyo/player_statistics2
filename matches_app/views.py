@@ -1,3 +1,4 @@
+# matches_app/views.py
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
 from players_app.models import PlayerCareerStage, Player
@@ -49,17 +50,6 @@ def match_lineup_view(request, match_id):
         'substitutes': substitutes,
     }
     return render(request, 'matches_app/match_lineup.html', context)
-
-
-
-
-
-
-
-
-
-
-
 
 @login_required
 def team_dashboard_view(request, team_id):
@@ -169,15 +159,10 @@ def fixtures_view(request, team):
         date__gte=date.today()
     ).order_by('date')
 
-    past_matches = Match.objects.filter(
-        Q(home_team__in=our_teams) | Q(away_team__in=our_teams),
-        date__lt=date.today()
-    ).order_by('-date')
 
     context = {
         'team': team,
         'upcoming_matches': upcoming_matches,
-        'past_matches': past_matches,
         'team_selected': team,
         'active_tab': 'fixtures',
     }
@@ -186,42 +171,48 @@ def fixtures_view(request, team):
 
 @login_required
 def results_view(request, team):
+    # 'team' here is the age_group code, e.g. 'U17'
+    # get our team(s) with this age group code
+    age_group = AgeGroup.objects.get(code=team)
+    our_teams = Team.objects.filter(age_group=age_group, team_type='OUR_TEAM')
+
+    # filter matches where home_team or away_team is in our_teams
+    past_matches = Match.objects.filter(
+        Q(home_team__in=our_teams) | Q(away_team__in=our_teams),
+        date__lt=date.today()
+    ).order_by('-date')
 
     context = {
         "team": team,
         'team_selected': team,
+        'past_matches': past_matches,
         'active_tab': 'results',
     }
     return render(request, 'matches_app/match_results.html', context)
 
 @login_required
-def table_view(request, team):
-    # team is age_group code like 'U17'
-    age_group = AgeGroup.objects.get(code=team)
-    our_team = Team.objects.filter(age_group=age_group, team_type='OUR_TEAM').first()
+def table_view(request, code):
+    age_group = get_object_or_404(AgeGroup, code=code)
 
     context = {
-        'team': team,
-        'team_selected': our_team,  # <-- pass the Team instance here
+        'age_group_selected': age_group,
         'active_tab': 'table',
+        'team_selected': age_group.code, 
     }
-    return render(request, 'teams_app/table.html', context)
+    return render(request, 'matches_app/matches_table.html', context)
+
+
 
 @login_required
 def match_detail(request, match_id):
     match = get_object_or_404(Match, pk=match_id)
-    player_stats = PlayerMatchStats.objects.filter(match=match).select_related('player')
-    goals = Goal.objects.filter(match=match).select_related('scorer', 'assist_by')
-    team_result = TeamMatchResult.objects.filter(match=match).first()
+    
 
     # Option 3: Both teams as a string
     team_str = f"{match.home_team} vs {match.away_team}"
 
     return render(request, 'matches_app/match_details.html', {
         'match': match,
-        'player_stats': player_stats,
-        'goals': goals,
-        'team_result': team_result,
         'team_selected': team_str,
     })
 

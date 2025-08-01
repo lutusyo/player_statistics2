@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Goalkeeper Tagging Panel</title>
+    <script src="{% static 'tagging_app/js/goalkeeper_distribution.js' %}"></script>
+</head>
+<body>
+<h2>Goalkeeper Distribution Tagging – {{ match }}</h2>
+
+<form id="gk-form">
+    <label>Select Goalkeeper:</label>
+    <select id="goalkeeper">
+        {% for gk in goalkeepers %}
+            <option value="{{ gk.player.id }}" data-team="{{ gk.team.id }}">{{ gk.player.name }} ({{ gk.team.name }})</option>
+        {% endfor %}
+    </select>
+
+    <label>Minute:</label>
+    <input type="number" id="minute" required>
+
+    <label>Second:</label>
+    <input type="number" id="second" value="0">
+
+    <label>Involvement Duration (seconds):</label>
+    <input type="number" id="duration">
+
+    <label>Distribution Method:</label>
+    <select id="method">
+        <option value="">--Select Method--</option>
+        <option value="from_feet">From Feet</option>
+        <option value="from_hands">From Hands</option>
+        <option value="throw">Throw</option>
+    </select>
+
+    <div id="detail-buttons"></div>
+
+    <label>Is Complete?</label>
+    <input type="checkbox" id="is_complete" checked>
+
+    <label>Goal Conceded?</label>
+    <input type="checkbox" id="is_goal_conceded">
+
+    <button type="submit">Save</button>
+</form>
+
+<script>
+    const matchId = {{ match.id }};
+</script>
+</body>
+</html>

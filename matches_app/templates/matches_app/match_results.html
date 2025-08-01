@@ -1,6 +1,77 @@
-{% extends "matches_app/matches_base.html" %}
-{% block title %}{{ team_selected }} Results{% endblock %}
+<!-- matches_app/results.html -->
+{% extends 'matches_app/matches_base.html' %}
+{% load static %}
+
+{% block title %}{{ team }} Results {% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'matches_app/css/results_style.css' %}">
+{% endblock %}
+
+
+
+
 
 {% block match_content %}
-<!-- Your results content here -->
+
+    <div class="results-container">
+        
+        <!-- Past Matches -->
+        <hr>
+        <h2 style="text-align: center; margin-top: 40px;">Past Matches</h2>
+        {% if past_matches %}
+            {% for match in past_matches %}
+
+                <div>
+                    {% if user.is_authenticated and user.username == 'Azam2' %}
+                        <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}">Attempt to Goal Tag</a><br>
+                        <a href="{% url 'tagging_app:enter_pass_network' match.id %}">Pass Network Tag</a><br>
+                        <a href="{% url 'tagging_app:enter_goalkeeper_distribution' match.id %}">Goalkeeper Distribution Tag</a>
+                    {% endif %}
+                </div>
+
+
+                <a href="{% url 'matches_app:match_detail' match_id=match.id %}" style="text-decoration: none; color: inherit;">
+                    <div class="results-card">
+                        <div class="results-header">
+                            <div class="results-date">
+                                {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
+                            </div>
+                            <div class="results-venue">{{ match.venue }}</div>
+                            <div class="results-type">{{ match.get_competition_type_display }}</div>
+                        </div>
+
+                        <div class="results-body">
+                            <div class="team">
+                                {% if match.our_team_logo %}
+                                    <img src="{{ match.our_team_logo.url }}" alt="{{ match.get_team_display }} logo">
+                                {% endif %}
+                                <div>{{ match.get_team_display }}</div>
+                            </div>
+
+                            <div class="vs">
+                                {% if match.teammatchresult %}
+                                    <strong>{{ match.teammatchresult.our_score }} - {{ match.teammatchresult.opponent_score }}</strong>
+                                {% else %}
+                                    <span style="font-size: 14px; color: gray;">No result</span>
+                                {% endif %}
+                            </div>
+
+
+                            <div class="team">
+                                {% if match.opponent_logo %}
+                                    <img src="{{ match.opponent_logo.url }}" alt="{{ match.opponent }} logo">
+                                {% endif %}
+                                <div>{{ match.opponent }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center;">No past matches.</p>
+        {% endif %}
+
+    </div>
+
 {% endblock %}

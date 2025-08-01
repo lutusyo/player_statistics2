@@ -73,3 +73,52 @@ class PassEvent(models.Model):
 
     def __str__(self):
         return f"{self.from_player} → {self.to_player or 'Loss'} at {self.minute}:{self.second:02d}"
+    
+
+
+class GoalkeeperDistributionEvent(models.Model):
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    goalkeeper = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='gk_distributions')
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+
+    minute = models.PositiveIntegerField()
+    second = models.PositiveIntegerField()
+
+    method = models.CharField(max_length=30, choices=[
+        ('from_feet', 'From Feet'),
+        ('from_hands', 'From Hands'),
+        ('throw', 'Throw Distribution'),
+    ])
+
+    detail = models.CharField(max_length=30, choices=[
+        # For Feet
+        ('play_onto', 'Play Onto'),
+        ('play_into', 'Play Into'),
+        ('play_around', 'Play Around'),
+        ('play_beyond', 'Play Beyond'),
+        ('other_feet', 'Other (Feet)'),
+
+        # For Hands
+        ('side_kick', 'Side Kick'),
+        ('from_hands', 'From Hands'),
+        ('drop_kick', 'Drop Kick'),
+
+        # For Throw
+        ('over_arm', 'Over Arm'),
+        ('under_arm', 'Under Arm'),
+        ('side_arm', 'Side Arm'),
+        ('chest_pass', 'Chest Pass'),
+    ])
+
+    is_complete = models.BooleanField(default=True)
+    is_goal_conceded = models.BooleanField(default=False)
+
+    involvement_duration = models.FloatField(
+        help_text="Duration in seconds the goalkeeper had the ball",
+        null=True, blank=True
+    )
+
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.goalkeeper.name} - {self.method} ({self.minute}:{self.second:02d})"

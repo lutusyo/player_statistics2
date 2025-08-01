@@ -1,0 +1,27 @@
+<h1>Pass Network & GK Dashboard</h1>
+
+<h2>Top 10 Passing Combinations</h2>
+<table>
+    <tr><th>From</th><th>To</th><th>Count</th></tr>
+    {% for item in pass_network %}
+        <tr>
+            <td>{{ item.from_player__name }}</td>
+            <td>{{ item.to_player__name }}</td>
+            <td>{{ item.count }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<h2>Goalkeeper Stats</h2>
+<table>
+    <tr><th>GK</th><th>Saves</th><th>Punches</th><th>Catches</th><th>Avg Pos (x,y)</th></tr>
+    {% for gk in gk_stats %}
+        <tr>
+            <td>{{ gk.gk_player__name }}</td>
+            <td>{{ gk.saves }}</td>
+            <td>{{ gk.punches }}</td>
+            <td>{{ gk.catches }}</td>
+            <td>({{ gk.avg_position_x|floatformat:2 }}, {{ gk.avg_position_y|floatformat:2 }})</td>
+        </tr>
+    {% endfor %}
+</table>

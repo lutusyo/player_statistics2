@@ -1,0 +1,174 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Passing Network Tagging</title>
+    <style>
+        .player-btn, .opponent-btn {
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: lightblue;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .opponent-btn {
+            background-color: lightcoral;
+        }
+        #timer {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Passing Network Tagging: {{ match }}</h2>
+
+    <div id="timer">Time: <span id="minute">0</span>:<span id="second">0</span></div>
+
+    <h3>{{ our_team.name }} Players</h3>
+    <div id="our-players">
+        {% for p in our_players %}
+
+            <button class="player-btn"
+                    id="player-{{ p.player.id }}"
+                    data-player-id="{{ p.player.id }}"
+                    data-team-id="{{ our_team.id }}"
+                    data-pass-count="0">
+                {{ p.player.name }} (<span class="pass-count">0</span>)
+            </button>
+
+
+        {% endfor %}
+    </div>
+
+    <h3>{{ opponent_team.name }}</h3>
+    <div>
+        <button class="opponent-btn" id="opponent-btn" data-team-id="{{ opponent_team.id }}">{{ opponent_team.name }} Ball Intercept</button>
+    </div>
+
+    <p><strong>Last Pass:</strong> <span id="last-pass"></span></p>
+<script>
+let lastPlayerId = null;
+let lastTeamId = null;
+
+let minute = localStorage.getItem('minute') ? parseInt(localStorage.getItem('minute')) : 0;
+let second = localStorage.getItem('second') ? parseInt(localStorage.getItem('second')) : 0;
+
+function startTimer() {
+    setInterval(() => {
+        second++;
+        if (second === 60) {
+            minute++;
+            second = 0;
+        }
+        localStorage.setItem('minute', minute);
+        localStorage.setItem('second', second);
+        document.getElementById("minute").textContent = minute;
+        document.getElementById("second").textContent = second;
+    }, 1000);
+}
+startTimer();
+
+function highlightButton(playerId) {
+    document.querySelectorAll('.player-btn').forEach(btn => {
+        btn.style.backgroundColor = 'lightblue';
+    });
+    const btn = document.getElementById(`player-${playerId}`);
+    if (btn) {
+        btn.style.backgroundColor = 'green';
+    }
+}
+
+function incrementPassCount(playerId) {
+    const btn = document.getElementById(`player-${playerId}`);
+    if (!btn) return;
+    
+    let currentCount = parseInt(btn.dataset.passCount || 0);
+    currentCount += 1;
+    btn.dataset.passCount = currentCount;
+
+    let countSpan = btn.querySelector('.pass-count');
+    if (countSpan) {
+        countSpan.textContent = currentCount;
+    }
+}
+
+function recordPass(fromPlayerId, toPlayerId, fromTeamId, toTeamId, isSuccessful = true, isPossessionRegained = false) {
+    fetch('/tagging/save-pass/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({
+            match_id: matchId,
+            from_player_id: fromPlayerId,
+            to_player_id: toPlayerId,
+            from_team_id: fromTeamId,
+            to_team_id: toTeamId,
+            minute: minute,
+            second: second,
+            x_start: null,
+            y_start: null,
+            x_end: null,
+            y_end: null,
+            is_successful: isSuccessful,
+            is_possession_regained: isPossessionRegained
+        })
+    }).then(res => res.json()).then(data => {
+        if (data.status === 'success') {
+            document.getElementById('last-pass').textContent = `From ${fromPlayerId} → To ${toPlayerId}`;
+            incrementPassCount(toPlayerId);
+            highlightButton(toPlayerId);
+        } else {
+            alert("Failed to save: " + data.message);
+        }
+    });
+}
+
+document.querySelectorAll('.player-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const playerId = btn.dataset.playerId;
+        const teamId = btn.dataset.teamId;
+
+        if (lastPlayerId) {
+            recordPass(lastPlayerId, playerId, lastTeamId, teamId);
+        }
+
+        lastPlayerId = playerId;
+        lastTeamId = teamId;
+        highlightButton(playerId);
+    });
+});
+
+document.getElementById('opponent-btn').addEventListener('click', () => {
+    const opponentTeamId = document.getElementById('opponent-btn').dataset.teamId;
+    if (lastPlayerId && lastTeamId) {
+        recordPass(lastPlayerId, null, lastTeamId, opponentTeamId, false, false);
+        lastPlayerId = null;
+        lastTeamId = null;
+        highlightButton(null);
+    }
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let c of cookies) {
+            const cookie = c.trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+
+
+</body>
+</html>

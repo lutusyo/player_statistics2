@@ -1,6 +1,6 @@
 # actions_app/views.py
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import  PlayerDetailedAction
+#from .models import  PlayerDetailedAction
 from matches_app.models import Match
 from players_app.models import Player
 from django.contrib.auth.decorators import login_required

@@ -18,7 +18,9 @@ urlpatterns = [
 
     path('<str:team>/fixtures/', views.fixtures_view, name='team_fixtures'),
     path('<str:team>/results/', views.results_view, name='team_results'),
-    path('<str:team>/table/', views.table_view, name='team_table'),
+    # matches_app/urls.py
+    path('<str:code>/table/', views.table_view, name='team_table'),
+
 
     # Match details
     path('match/<int:match_id>/', views.match_detail, name='match_detail'),

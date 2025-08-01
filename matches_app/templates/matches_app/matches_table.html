@@ -1,0 +1,45 @@
+<!-- matches_app/matches_table.html -->
+{% extends 'matches_app/matches_base.html' %}
+{% load static %}
+
+{% block title %}{{ team }} Results {% endblock %}
+
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'matches_app/css/matches_table_style.css' %}">
+{% endblock %}
+
+
+{% block match_content %}
+
+<h2>{{ age_group_selected.name }} League Table</h2>
+
+
+<table border="1" cellpadding="10" cellspacing="0">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Team</th>
+            <th>Played</th>
+            <th>Won</th>
+            <th>Drawn</th>
+            <th>Lost</th>
+            <th>Points</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in table_data %}
+        <tr>
+            <td>{{ row.position }}</td>
+            <td>{{ row.team }}</td>
+            <td>{{ row.played }}</td>
+            <td>{{ row.won }}</td>
+            <td>{{ row.drawn }}</td>
+            <td>{{ row.lost }}</td>
+            <td>{{ row.points }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
