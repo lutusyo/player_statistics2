@@ -22,6 +22,8 @@ from collections import Counter
 from django.views.decorators.http import require_GET
 
 
+
+
 def enter_attempt_to_goal(request, match_id):
     match = get_object_or_404(Match, id=match_id)
     lineup = MatchLineup.objects.filter(match=match, is_starting=True).select_related('player')
@@ -123,6 +125,41 @@ def get_live_tagging_state(request, match_id):
         'timer': 0,  # You can later add a MatchTimer model here
         'events': data
     })
+
+
+
+def attempt_to_goal_dashboard(request, match_id):
+    match = get_object_or_404(Match, id=match_id)
+    
+    players = Player.objects.filter(attempts__match=match).distinct()
+    player_names = {p.id: p.name for p in players}
+
+    # Count attempts by outcome per player
+    outcomes_matrix = defaultdict(lambda: defaultdict(int))
+    attempts = AttemptToGoal.objects.filter(match=match)
+
+    for attempt in attempts:
+        player_id = attempt.player.id if attempt.player else None
+        if player_id is not None:
+            outcome = attempt.outcome
+            outcomes_matrix[player_id][outcome] += 1
+
+    # Top scorers (outcome='Goal')
+    goal_counts = attempts.filter(outcome='Goal').values('player_id').annotate(goals=Count('id'))
+    top_scorers = sorted(
+        [(player_names[g['player_id']], g['goals']) for g in goal_counts if g['player_id'] in player_names],
+        key=lambda x: x[1], reverse=True
+    )[:5]
+
+    context = {
+        'match': match,
+        'players': players,
+        'outcomes_matrix': outcomes_matrix,
+        'top_scorers': top_scorers,
+    }
+
+    return render(request, 'tagging_app/attempt_to_goal_dashboard.html', context)
+
 
 
 

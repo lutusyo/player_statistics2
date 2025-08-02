@@ -63,6 +63,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'player_statistics_project.urls'
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -75,6 +76,9 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'players_app.context_processors.player_filters',
                 'teams_app.context_processors.our_teams_context',
+            ],
+            'builtins': [
+                'django.templatetags.static',
             ],
         },
     },
@@ -167,3 +171,5 @@ LOGIN_URL = 'accounts_app:login'
 
 # For password reset (development only)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+

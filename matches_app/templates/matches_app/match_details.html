@@ -60,28 +60,33 @@
 
     <!-- Goals Timeline -->
     <h3>⚽ Goals Timeline</h3>
+
     {% if goals %}
-        <ul style="line-height: 1.8;">
-            {% for goal in goals %}
-                <li>
-                    {{ goal.minute }}':
-                    {% if goal.is_own_goal %}
-                        🥅 Own Goal by {{ goal.scorer }}
-                    {% else %}
-                        {{ goal.scorer }}
-                        {% if goal.assist_by %}(Assist: {{ goal.assist_by }}){% endif %}
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No goals recorded yet.</p>
-    {% endif %}
+    <ul style="line-height: 1.8;">
+        {% for goal in goals %}
+            <li>
+                {{ goal.minute }}':
+                {% if goal.is_own_goal %}
+                    🥅 Own Goal by {{ goal.scorer }}
+                {% else %}
+                    {{ goal.scorer }}
+                    {% if goal.assist_by %}(Assist: {{ goal.assist_by }}){% endif %}
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No goals recorded yet.</p>
+{% endif %}
+
 
     <hr style="margin: 40px 0;">
 
     <a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
         📊 View Pass Network
+    </a>|
+    <a href="{% url 'tagging_app:attempt_to_goal_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
+        📊 View Goal Attempts
     </a>
 
 

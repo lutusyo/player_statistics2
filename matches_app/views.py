@@ -10,6 +10,7 @@ from datetime import date
 from django.db.models import Q
 from teams_app.models import Team, AgeGroup
 from .models import MatchLineup, Match
+from tagging_app.models import AttemptToGoal
 
 
 # position coordinates (x: left-right %, y: top-bottom %)
@@ -203,17 +204,32 @@ def table_view(request, code):
 
 
 
+
+
 @login_required
 def match_detail(request, match_id):
     match = get_object_or_404(Match, pk=match_id)
-    
 
-    # Option 3: Both teams as a string
+    # Query all AttemptToGoal with outcome 'Goal' for this match
+    goals_qs = AttemptToGoal.objects.filter(match=match, outcome='Goal').select_related('player', 'assist_by')
+
+    # Convert to a list of dicts for template
+    goals = []
+    for goal in goals_qs:
+        goals.append({
+            'minute': goal.minute,
+            'second': goal.second,
+            'scorer': goal.player.name if goal.player else "Unknown",
+            'assist_by': goal.assist_by.name if goal.assist_by else None,
+            'is_own_goal': False,  # If you track own goals, set this here
+        })
+
     team_str = f"{match.home_team} vs {match.away_team}"
 
     return render(request, 'matches_app/match_details.html', {
         'match': match,
         'team_selected': team_str,
+        'goals': goals,
     })
 
 

@@ -15,7 +15,7 @@ urlpatterns = [
     # Attempt to Goal
     path('match/<int:match_id>/attempt-to-goal/', attempt_to_goal.enter_attempt_to_goal, name='enter_attempt_to_goal'),
     path('save-attempt-to-goal/', attempt_to_goal.save_attempt_to_goal, name='save_attempt_to_goal'),
-    #path(dashboard),
+    path('attempt-to-goal-dashboard/<int:match_id>/', attempt_to_goal.attempt_to_goal_dashboard, name='attempt_to_goal_dashboard'),
     path('match/<int:match_id>/csv/export-attempt-to-goal-csv/',attempt_to_goal.export_attempt_to_goal_csv, name='export_attempt_to_goal_csv'),
     path('match/<int:match_id>/csv/export-attempt-to-goal-pdf/',attempt_to_goal.export_attempt_to_goal_pdf, name='export_attempt_to_goal_pdf'),
     # acros multiple device
