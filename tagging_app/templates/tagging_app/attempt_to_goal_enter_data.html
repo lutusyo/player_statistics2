@@ -3,172 +3,258 @@
 {% load custom_filters %}
 
 {% block content %}
-<div class="container">
-  <h2>Attempt to Goal Tagging - {{ match }}</h2>
+<style>
+  .tag-panel {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .timer-controls button {
+    margin-right: 10px;
+  }
+  .event-log {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 15px;
+  }
+  .count-badge {
+    background-color: #007bff;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 0.75em;
+    margin-left: 5px;
+  }
+  .selected {
+    background-color: #28a745 !important;
+    color: white !important;
+  }
+</style>
 
-  <!-- CLOCK -->
-  <div id="clock" style="font-size: 24px; margin: 10px 0;">00:00</div>
+<h2>Match: {{ match }}</h2>
 
-  <!-- PLAYER BUTTONS -->
-  <div class="players-list" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 5px;">
-    {% for entry in lineup %}
-    <button class="player-btn" data-player-id="{{ entry.player.id }}" data-player-name="{{ entry.player.name }}">
-        {{ entry.player.name }}
-    </button>
-    {% endfor %}
-
-  </div>
-
-  <!-- TAGGING PANEL -->
-  <div id="tagging-panel" style="display: block;">
-    <h3 id="step-player-name"></h3>
-
-    <!-- Step 1: Outcome -->
-    <div id="step-outcome" style="display: none;">
-      <h4>Outcome</h4>
-      <div id="outcome-options">
-        {% for player in lineup %}
-          {% for outcome in outcomes %}
-            {% with label=outcome.1 count=outcome_counts|get_item:player.id|get_item:outcome.0|default:0 %}
-              <button
-                class="outcome-btn"
-                data-player-id="{{ player.id }}"
-                data-value="{{ outcome.0 }}"
-                data-label="{{ outcome.1 }}"
-              >
-                {{ outcome.1 }} ({{ count }})
-              </button>
-            {% endwith %}
-          {% endfor %}
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- Step 2: Body Part -->
-    <div id="step-body-part" style="display: none;">
-      <h4>Body Part</h4>
-      {% for part in body_parts %}
-        <button class="body-btn" data-value="{{ part.0 }}">{{ part.1 }}</button>
-      {% endfor %}
-    </div>
-
-    <!-- Step 3: Delivery Type -->
-    <div id="step-delivery" style="display: none;">
-      <h4>Delivery</h4>
-      {% for delivery in delivery_types %}
-        <button class="delivery-btn" data-value="{{ delivery.0 }}">{{ delivery.1 }}</button>
-      {% endfor %}
-    </div>
-  </div>
-
-  <!-- ASSIST SECTION (Hidden by default) -->
-  <div id="assist-section" style="display: none;">
-    <label for="assist-player">Assist Player:</label>
-    <select id="assist-player">
-      <option value="">-- Select --</option>
-      {% for player in lineup %}
-        <option value="{{ player.id }}">{{ player.name }}</option>
-      {% endfor %}
-    </select>
+<div>
+  <h3>Time: <span id="timer-display">00:00</span></h3>
+  <div class="timer-controls">
+    <button id="pause-btn">Pause</button>
+    <button id="resume-btn">Resume</button>
+    <button id="reset-btn">Reset</button>
   </div>
 </div>
 
+<hr>
+
+<h3>Select Player</h3>
+<div class="tag-panel" id="player-panel">
+ 
+  {% for player in players %}
+    {% with total=outcome_counts|get_item_or:player.id %}
+      {% with count=total.total|default:0 %}
+        <button class="player-btn" data-player-id="{{ player.id }}">
+          {{ player.name }} <span class="count-badge">{{ count }}</span>
+        </button>
+      {% endwith %}
+    {% endwith %}
+  {% endfor %}
+
+ 
+
+
+</div>
+
+<div id="tagging-section" style="display:none;">
+  <h3>Select Outcome</h3>
+  <div id="outcome-panel" class="tag-panel">
+    {% for value, label in outcomes %}
+      {% with count=total_outcome_counts|get_item:value|stringformat:"s"|default:0 %}
+        <button class="outcome-btn" data-outcome="{{ value }}">
+          {{ label }} <span class="count-badge">{{ count }}</span>
+        </button>
+      {% endwith %}
+    {% endfor %}
+  </div>
+
+  <h3>Select Body Part</h3>
+  <div id="body-part-panel" class="tag-panel">
+    {% for value, label in body_parts %}
+      <button class="body-part-btn" data-body-part="{{ value }}">{{ label }}</button>
+    {% endfor %}
+  </div>
+
+  <h3>Select Delivery Type</h3>
+  <div id="delivery-panel" class="tag-panel">
+    {% for value, label in delivery_types %}
+      <button class="delivery-btn" data-delivery-type="{{ value }}">{{ label }}</button>
+    {% endfor %}
+  </div>
+</div>
+
+<hr>
+
+<h3>Live Event Log</h3>
+<div class="event-log" id="event-log"></div>
+
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  let selectedPlayerId = null;
-  let matchId = "{{ match.id }}";
-  let selectedOutcome = null;
-  let selectedBody = null;
-  let selectedDelivery = null;
+let timer = 0;
+let interval = null;
+let isPaused = false;
+let selectedPlayer = null, selectedOutcome = null, selectedBodyPart = null, selectedDeliveryType = null;
+const matchId = {{ match.id }};
 
-  document.querySelectorAll(".player-btn").forEach(btn => {
-    btn.addEventListener("click", function () {
-      selectedPlayerId = this.dataset.playerId;
-      document.getElementById("step-outcome").style.display = "block";
-      document.getElementById("step-body-part").style.display = "none";
-      document.getElementById("step-delivery").style.display = "none";
+// Utilities
+function formatTime(seconds) {
+  let m = String(Math.floor(seconds / 60)).padStart(2, '0');
+  let s = String(seconds % 60).padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function updateTimerDisplay() {
+  document.getElementById('timer-display').innerText = formatTime(timer);
+  sessionStorage.setItem('tagging-timer', timer);
+}
+
+function startTimer() {
+  interval = setInterval(() => {
+    if (!isPaused) {
+      timer++;
+      updateTimerDisplay();
+    }
+  }, 1000);
+}
+
+function clearSelected(selector) {
+  document.querySelectorAll(selector).forEach(btn => btn.classList.remove('selected'));
+}
+
+// Restore time + fetch live state from backend
+window.onload = function () {
+  timer = parseInt(sessionStorage.getItem('tagging-timer')) || 0;
+  updateTimerDisplay();
+  startTimer();
+
+  // Fetch live state
+  fetch(`/tagging/live_state/${matchId}/`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.timer > timer) {
+        timer = data.timer;
+        updateTimerDisplay();
+      }
+
+      const log = document.getElementById('event-log');
+      log.innerHTML = '';
+      data.events.forEach(ev => {
+        log.innerHTML += `<div><b>${ev.player_name}</b> - ${ev.outcome} - ${ev.body_part} - ${ev.delivery_type} at ${String(ev.minute).padStart(2,'0')}:${String(ev.second).padStart(2,'0')}</div>`;
+      });
     });
-  });
+};
 
-  document.querySelectorAll(".outcome-btn").forEach(btn => {
-    btn.addEventListener("click", function () {
-      if (this.dataset.playerId !== selectedPlayerId) return;
-      selectedOutcome = this.dataset.value;
-      document.getElementById("step-body-part").style.display = "block";
-    });
-  });
+document.getElementById('pause-btn').onclick = () => isPaused = true;
+document.getElementById('resume-btn').onclick = () => isPaused = false;
+document.getElementById('reset-btn').onclick = () => {
+  timer = 0;
+  updateTimerDisplay();
+  sessionStorage.setItem('tagging-timer', 0);
+};
 
-  document.querySelectorAll(".body-btn").forEach(btn => {
-    btn.addEventListener("click", function () {
-      selectedBody = this.dataset.value;
-      document.getElementById("step-delivery").style.display = "block";
-    });
-  });
+// Player
+document.querySelectorAll('.player-btn').forEach(btn => {
+  btn.onclick = () => {
+    selectedPlayer = btn.dataset.playerId;
+    document.getElementById('tagging-section').style.display = 'block';
+    clearSelected('.player-btn');
+    btn.classList.add('selected');
+  };
+});
 
-  document.querySelectorAll(".delivery-btn").forEach(btn => {
-    btn.addEventListener("click", function () {
-      selectedDelivery = this.dataset.value;
+// Outcome
+document.querySelectorAll('.outcome-btn').forEach(btn => {
+  btn.onclick = () => {
+    selectedOutcome = btn.dataset.outcome;
+    clearSelected('.outcome-btn');
+    btn.classList.add('selected');
+  };
+});
 
-      let now = new Date();
-        let minute = parseInt(now.getMinutes());
-        let second = parseInt(now.getSeconds());
-        let timestamp = now.toISOString();
+// Body Part
+document.querySelectorAll('.body-part-btn').forEach(btn => {
+  btn.onclick = () => {
+    selectedBodyPart = btn.dataset.bodyPart;
+    clearSelected('.body-part-btn');
+    btn.classList.add('selected');
+  };
+});
 
-        // fallback to 0 if somehow undefined
-        if (isNaN(minute)) minute = 0;
-        if (isNaN(second)) second = 0;
+// Delivery Type
+document.querySelectorAll('.delivery-btn').forEach(btn => {
+  btn.onclick = () => {
+    selectedDeliveryType = btn.dataset.deliveryType;
+    clearSelected('.delivery-btn');
+    btn.classList.add('selected');
 
-        let payload = {
+    if (selectedPlayer && selectedOutcome && selectedBodyPart && selectedDeliveryType) {
+      const now = new Date();
+      const data = {
         match_id: matchId,
-        player_id: selectedPlayerId,
-        minute: minute,
-        second: second,
+        player_id: selectedPlayer,
         outcome: selectedOutcome,
-        body_part: selectedBody,
-        delivery_type: selectedDelivery,
-        timestamp: timestamp
-        };
-
-        console.log("Sending payload:", payload);
-
+        body_part: selectedBodyPart,
+        delivery_type: selectedDeliveryType,
+        minute: Math.floor(timer / 60),
+        second: timer % 60,
+        timestamp: now.toISOString()
+      };
 
       fetch("{% url 'tagging_app:save_attempt_to_goal' %}", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRFToken": "{{ csrf_token }}"
+          "X-CSRFToken": '{{ csrf_token }}'
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(data)
       })
-    .then(response => response.json())
-    .then(data => {
-    if (data.status === "ok") {
-        const counts = data.updated_counts;
-        for (const [outcome, count] of Object.entries(counts)) {
-        const btn = document.querySelector(`.outcome-btn[data-player-id='${selectedPlayerId}'][data-value='${outcome}']`);
-        if (btn) {
-            btn.innerHTML = `${btn.dataset.label} (${count})`;
-        }
-        }
-        selectedOutcome = null;
-        selectedBody = null;
-        selectedDelivery = null;
-        document.getElementById("step-outcome").style.display = "none";
-        document.getElementById("step-body-part").style.display = "none";
-        document.getElementById("step-delivery").style.display = "none";
-    } else {
-        alert("Failed to save tag.");
-        console.error(data.message);
-    }
-    })
+      .then(res => res.json())
+      .then(json => {
+        if (json.status === 'ok') {
+          const log = document.getElementById('event-log');
+          log.innerHTML = `<div><b>${json.player_name}</b> - ${selectedOutcome} - ${selectedBodyPart} - ${selectedDeliveryType} at ${formatTime(timer)}</div>` + log.innerHTML;
 
-      .catch(error => {
-        alert("Failed to save tag: " + (data.message || "Unknown error"));
-        console.error("Backend error:", data);
+          // Reset selections
+          selectedPlayer = selectedOutcome = selectedBodyPart = selectedDeliveryType = null;
+          clearSelected('.player-btn');
+          clearSelected('.outcome-btn');
+          clearSelected('.body-part-btn');
+          clearSelected('.delivery-btn');
+          document.getElementById('tagging-section').style.display = 'none';
+
+          // Update count badges
+          updateCounts(json.updated_counts, json.player_id);
+        } else {
+          alert(json.message);
+        }
       });
-    });
-  });
+    }
+  };
 });
-</script>
 
+// Update counts live
+function updateCounts(updatedCounts, playerId) {
+  const playerBtn = document.querySelector(`.player-btn[data-player-id="${playerId}"]`);
+  if (playerBtn) {
+    const badge = playerBtn.querySelector('.count-badge');
+    if (badge) badge.textContent = updatedCounts.total || 0;
+  }
+
+  for (const outcome in updatedCounts) {
+    if (outcome === 'total') continue;
+    const btn = document.querySelector(`.outcome-btn[data-outcome="${outcome}"]`);
+    if (btn) {
+      const badge = btn.querySelector('.count-badge');
+      if (badge) badge.textContent = updatedCounts[outcome];
+    }
+  }
+}
+</script>
 {% endblock %}

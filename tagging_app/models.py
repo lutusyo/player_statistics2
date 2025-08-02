@@ -29,8 +29,8 @@ class AttemptToGoal(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     player = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='attempts')
 
-    minute = models.PositiveIntegerField()
-    second = models.PositiveIntegerField()
+    minute = models.PositiveIntegerField(default=0)
+    second = models.PositiveIntegerField(default=0)
 
     body_part = models.CharField(max_length=20, choices=BodyPartChoices.choices)
     delivery_type = models.CharField(max_length=20, choices=DeliveryTypeChoices.choices)

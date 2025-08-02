@@ -18,6 +18,9 @@ urlpatterns = [
     #path(dashboard),
     path('match/<int:match_id>/csv/export-attempt-to-goal-csv/',attempt_to_goal.export_attempt_to_goal_csv, name='export_attempt_to_goal_csv'),
     path('match/<int:match_id>/csv/export-attempt-to-goal-pdf/',attempt_to_goal.export_attempt_to_goal_pdf, name='export_attempt_to_goal_pdf'),
+    # acros multiple device
+    path('live_state/<int:match_id>/', attempt_to_goal.get_live_tagging_state, name='get_live_tagging_state'),
+
     
     # Passing Network
     path('match/<int:match_id>/pass-network/', pass_network.pass_network_page, name='enter_pass_network'),

@@ -14,3 +14,10 @@ def get_item(list, index):
 def underscore_to_space(value):
     """Replace underscores with spaces and capitalize the first letter."""
     return value.replace('_', ' ').capitalize()
+
+
+
+@register.filter(name='get_item_or')
+def get_item_or(dictionary, key):
+    return dictionary.get(key, {})
+
