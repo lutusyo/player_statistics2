@@ -24,13 +24,12 @@
 
         <select name="age_group" onchange="this.form.submit()">
             <option value="">Age Group</option>
-            {% for key, label in age_groups.items %}
-                <option value="{{ key }}" {% if selected_age_group == key %}selected{% endif %}>{{ label }}</option>
+            {% for group in age_groups %}
+                <option value="{{ group.code }}" {% if selected_age_group == group.code %}selected{% endif %}>{{ group.name }}</option>
             {% endfor %}
         </select>
     </form>
 </div>
-
 
 <div class="stats-table-section">
     <h2 style="text-align: center; margin-top: 30px;">{{ team_selected|upper }} STATISTICS {{ selected_season }}</h2>
@@ -56,16 +55,12 @@
             {% for item in player_data %}
             <tr>
                 <td>{{ item.player.name }}</td>
-
                 <td>{{ item.local_ap }}</td>
                 <td>{{ item.local_gl }}</td>
-
                 <td>{{ item.int_ap }}</td>
                 <td>{{ item.int_gl }}</td>
-
                 <td>{{ item.nbc_ap }}</td>
                 <td>{{ item.nbc_gl }}</td>
-
                 <td><strong>{{ item.total_ap }}</strong></td>
                 <td><strong>{{ item.total_gl }}</strong></td>
             </tr>
@@ -97,5 +92,4 @@
     background-color: #f2f2f2;
 }
 </style>
-
 {% endblock %}

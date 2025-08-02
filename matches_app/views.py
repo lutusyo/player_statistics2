@@ -13,11 +13,6 @@ from .models import MatchLineup, Match
 from tagging_app.models import AttemptToGoal
 from collections import Counter
 
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render
-from tagging_app.models import AttemptToGoal
-from matches_app.models import Match, MatchLineup
 from collections import defaultdict
 
 # position coordinates (x: left-right %, y: top-bottom %)
@@ -73,49 +68,38 @@ def player_statistics_view(request, team):
     selected_age_group = request.GET.get('age_group')
     selected_competition = request.GET.get('competition')
 
-    matches = Match.objects.all()
     seasons = dict(Match._meta.get_field('season').choices)
     competitions = dict(Match._meta.get_field('competition_type').choices)
     age_groups = AgeGroup.objects.all()
 
-    stats = PlayerMatchStats.objects.select_related('player', 'match')
     players = Player.objects.filter(age_group__code=team)
 
-    if selected_season:
-        stats = stats.filter(match__season=selected_season)
-
     if selected_age_group:
-        stats = stats.filter(player__age_group__code=selected_age_group)
         players = players.filter(age_group__code=selected_age_group)
 
-    if selected_competition:
-        stats = stats.filter(match__competition_type=selected_competition)
+    def get_stats(player, comp_type):
+        matches = Match.objects.filter(
+            competition_type=comp_type,
+        )
 
-    # rest of your logic...
+        if selected_season:
+            matches = matches.filter(season=selected_season)
+        if selected_age_group:
+            matches = matches.filter(age_group__code=selected_age_group)
 
+        appearances = MatchLineup.objects.filter(player=player, match__in=matches).count()
+        goals = AttemptToGoal.objects.filter(player=player, match__in=matches, outcome='On Target Goal').count()
 
-
+        return {'appearances': appearances, 'goals': goals}
 
     player_data = []
+
     for player in players:
-        player_stats = stats.filter(player=player)
+        local = get_stats(player, 'Local Friendly')
+        international = get_stats(player, 'International Friendly')
+        nbc = get_stats(player, 'NBC Youth League')
 
-        def get_stats_by_competition(comp):
-            comp_stats = player_stats.filter(match__competition_type=comp)
-            return {
-                'appearances': comp_stats.count(),
-                'goals': Goal.objects.filter(
-                    match__in=comp_stats.values('match'),
-                    scorer=player,
-                    is_own_goal=False
-                ).count()
-            }
-
-        local = get_stats_by_competition('Local Friendly')
-        international = get_stats_by_competition('International Friendly')
-        nbc = get_stats_by_competition('NBC Youth League')
-
-        player_info = {
+        player_data.append({
             'player': player,
             'local_ap': local['appearances'],
             'local_gl': local['goals'],
@@ -125,20 +109,23 @@ def player_statistics_view(request, team):
             'nbc_gl': nbc['goals'],
             'total_ap': local['appearances'] + international['appearances'] + nbc['appearances'],
             'total_gl': local['goals'] + international['goals'] + nbc['goals'],
-        }
+        })
 
     context = {
         'seasons': seasons,
-        'age_groups': age_groups,
         'competitions': competitions,
+        'age_groups': age_groups,
         'selected_season': selected_season,
         'selected_age_group': selected_age_group,
         'selected_competition': selected_competition,
         'player_data': player_data,
         'team_selected': team,
-
     }
+
     return render(request, 'matches_app/players_statistics.html', context)
+
+
+
 
 
 @login_required
@@ -154,19 +141,38 @@ def career_stage_detail(request, stage_id):
 
     return render(request, 'matches_app/career_stage_detail.html', context)
 
+
+
+
+def get_match_goals(match):
+    goals_qs = AttemptToGoal.objects.filter(match=match, outcome='On Target Goal')
+    home_ids = MatchLineup.objects.filter(match=match, team=match.home_team).values_list('player_id', flat=True)
+    away_ids = MatchLineup.objects.filter(match=match, team=match.away_team).values_list('player_id', flat=True)
+
+    home_goals = 0
+    away_goals = 0
+
+    for goal in goals_qs:
+        if goal.player_id in home_ids or goal.team_id == match.home_team_id:
+            home_goals += 1
+        elif goal.player_id in away_ids or goal.team_id == match.away_team_id:
+            away_goals += 1
+
+    return home_goals, away_goals
+
+
 @login_required
 def fixtures_view(request, team):
-    # 'team' here is the age_group code, e.g. 'U17'
-    # get our team(s) with this age group code
     age_group = AgeGroup.objects.get(code=team)
     our_teams = Team.objects.filter(age_group=age_group, team_type='OUR_TEAM')
 
-    # filter matches where home_team or away_team is in our_teams
     upcoming_matches = Match.objects.filter(
         Q(home_team__in=our_teams) | Q(away_team__in=our_teams),
         date__gte=date.today()
     ).order_by('date')
 
+    for match in upcoming_matches:
+        match.home_goals, match.away_goals = get_match_goals(match)
 
     context = {
         'team': team,
@@ -179,16 +185,16 @@ def fixtures_view(request, team):
 
 @login_required
 def results_view(request, team):
-    # 'team' here is the age_group code, e.g. 'U17'
-    # get our team(s) with this age group code
     age_group = AgeGroup.objects.get(code=team)
     our_teams = Team.objects.filter(age_group=age_group, team_type='OUR_TEAM')
 
-    # filter matches where home_team or away_team is in our_teams
     past_matches = Match.objects.filter(
         Q(home_team__in=our_teams) | Q(away_team__in=our_teams),
         date__lt=date.today()
     ).order_by('-date')
+
+    for match in past_matches:
+        match.home_goals, match.away_goals = get_match_goals(match)
 
     context = {
         "team": team,
@@ -197,6 +203,7 @@ def results_view(request, team):
         'active_tab': 'results',
     }
     return render(request, 'matches_app/match_results.html', context)
+
 
 @login_required
 def table_view(request, code):

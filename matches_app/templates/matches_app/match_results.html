@@ -50,11 +50,13 @@
                             </div>
 
                             <div class="vs">
-                                {% if match.teammatchresult %}
-                                    <strong>{{ match.teammatchresult.our_score }} - {{ match.teammatchresult.opponent_score }}</strong>
+
+                                {% if match.home_goals is not None and match.away_goals is not None %}
+                                    <strong>{{ match.home_goals }} - {{ match.away_goals }}</strong>
                                 {% else %}
-                                    <span style="font-size: 14px; color: gray;">No result</span>
+                                    <span style="font-size: 14px; color: gray;">0 - 0</span>
                                 {% endif %}
+
                             </div>
 
 

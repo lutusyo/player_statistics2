@@ -5,9 +5,6 @@
 {% block title %}Attempt to Goal Dashboard{% endblock %}
 
 {% block content %}
-<h1>Match: {{ match }}</h1>
-
-<h2>Top 5 Goal Scorers</h2>
 <ul>
   {% for player, goals in top_scorers %}
     <li><strong>{{ player }}</strong>: {{ goals }} goal{{ goals|pluralize }}</li>

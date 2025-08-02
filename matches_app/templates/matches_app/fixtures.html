@@ -42,18 +42,20 @@
 
                     <div class="fixture-body">
                         <div class="team">
-                            {% if match.our_team_logo %}
-                                <img src="{{ match.our_team_logo.url }}" alt="{{ match.get_team_display }} logo">
+                            {% if match.home_team.logo %}
+                                <img src="{{ match.home_team.logo.url }}" alt="{{ home_team_name }} logo">
                             {% endif %}
                             <div>{{ match.get_team_display }}</div>
                         </div>
 
                         <div class="vs">
-                            {% if match.teammatchresult %}
-                                <strong>{{ match.teammatchresult.our_score }} - {{ match.teammatchresult.opponent_score }}</strong>
+
+                            {% if match.home_goals is not None and match.away_goals is not None %}
+                                <strong>{{ match.home_goals }} - {{ match.away_goals }}</strong>
                             {% else %}
-                                <span style="font-size: 14px; color: gray;">No result</span>
+                                <span style="font-size: 14px; color: gray;">0 - 0</span>
                             {% endif %}
+
                         </div>
 
 
