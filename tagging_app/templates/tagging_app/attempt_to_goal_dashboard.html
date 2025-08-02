@@ -18,59 +18,29 @@
 
 <hr>
 
-<h2>Attempts by Outcome per Player</h2>
+<h2>GOAL ATTEMPTS</h2>
 <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
   <thead>
     <tr>
       <th>Player</th>
-      <th>Goal</th>
-      <th>Miss</th>
-      <th>Saved</th>
-      <th>Post</th>
+      <th>On Target Goal</th>
+      <th>On Target Saved</th>
+      <th>Off Target</th>
+      <th>Blocked</th>
+      <th>Player Error</th>
     </tr>
   </thead>
   <tbody>
     {% for player in players %}
       <tr>
         <td>{{ player.name }}</td>
-        <td>{{ outcomes_matrix|get_item:player.id|get_item:"Goal"|default:0 }}</td>
-        <td>{{ outcomes_matrix|get_item:player.id|get_item:"Miss"|default:0 }}</td>
-        <td>{{ outcomes_matrix|get_item:player.id|get_item:"Saved"|default:0 }}</td>
-        <td>{{ outcomes_matrix|get_item:player.id|get_item:"Post"|default:0 }}</td>
+        <td>{{ outcomes_matrix|get_item:player.id|get_item:"On Target Goal"|default:0 }}</td>
+        <td>{{ outcomes_matrix|get_item:player.id|get_item:"On Target Saved"|default:0 }}</td>
+        <td>{{ outcomes_matrix|get_item:player.id|get_item:"Off Target"|default:0 }}</td>
+        <td>{{ outcomes_matrix|get_item:player.id|get_item:"Blocked"|default:0 }}</td>
+        <td>{{ outcomes_matrix|get_item:player.id|get_item:"Player Error"|default:0 }}</td>
       </tr>
     {% endfor %}
   </tbody>
 </table>
-
-<hr>
-
-<h2>Goals per Player Chart</h2>
-<canvas id="goalsChart" width="600" height="300"></canvas>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  const ctx = document.getElementById('goalsChart').getContext('2d');
-  const chart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: [{% for player, goals in top_scorers %}'{{ player }}',{% endfor %}],
-      datasets: [{
-        label: 'Goals',
-        data: [{% for player, goals in top_scorers %}{{ goals }},{% endfor %}],
-        backgroundColor: 'rgba(54, 162, 235, 0.7)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1,
-      }]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-          precision: 0
-        }
-      }
-    }
-  });
-</script>
-
 {% endblock %}

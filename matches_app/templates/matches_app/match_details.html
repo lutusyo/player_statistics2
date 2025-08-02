@@ -6,7 +6,7 @@
 
     <!-- Match Title -->
     <h2 style="text-align: center; margin-bottom: 20px;">
-        {{ match.get_team_display }} vs {{ match.opponent }}
+        {{ home_team_name }} vs {{ away_team_name }}
     </h2>
 
     <!-- Match Info Grid -->
@@ -21,7 +21,7 @@
         margin-bottom: 30px;
     ">
         <div><strong>📅 Date:</strong> {{ match.date }}</div>
-        <div><strong>🕒 Time:</strong> {{ match.match_time }}</div>
+        <div><strong>🕒 Time:</strong> {{ match.time }}</div>
         <div><strong>📍 Venue:</strong> {{ match.venue }}</div>
         <div><strong>🏆 Competition:</strong> {{ match.get_competition_type_display }}</div>
         <div><strong>📅 Season:</strong> {{ match.season }}</div>
@@ -30,65 +30,66 @@
     <!-- Score Section -->
     <div style="display: flex; align-items: center; justify-content: center; gap: 30px; margin-bottom: 30px;">
         <div style="text-align: center;">
-            {% if match.our_team_logo %}
-                <img src="{{ match.our_team_logo.url }}" alt="Our Team Logo" height="60">
+            {% if match.home_team.logo %}
+                <img src="{{ match.home_team.logo.url }}" alt="Home Team Logo" height="60">
             {% endif %}
-            <div>{{ match.get_team_display }}</div>
+            <div>{{ home_team_name }}</div>
         </div>
 
         <div style="font-size: 22px; font-weight: bold;">
-            {% if team_result %}
-                {{ team_result.our_score }} - {{ team_result.opponent_score }}
-            {% else %}
-                <span style="font-size: 16px; color: gray;">No result yet</span>
-            {% endif %}
+            {{ home_team_goals|default:0 }} - {{ away_team_goals|default:0 }}
         </div>
 
         <div style="text-align: center;">
-            {% if match.opponent_logo %}
-                <img src="{{ match.opponent_logo.url }}" alt="Opponent Logo" height="60">
+            {% if match.away_team.logo %}
+                <img src="{{ match.away_team.logo.url }}" alt="Away Team Logo" height="60">
             {% endif %}
-            <div>{{ match.opponent }}</div>
+            <div>{{ away_team_name }}</div>
         </div>
     </div>
 
-
     <!-- Include Line up -->
     {% include "matches_app/starting_and_subs.html" %}
-
-
 
     <!-- Goals Timeline -->
     <h3>⚽ Goals Timeline</h3>
 
     {% if goals %}
-    <ul style="line-height: 1.8;">
-        {% for goal in goals %}
-            <li>
-                {{ goal.minute }}':
-                {% if goal.is_own_goal %}
-                    🥅 Own Goal by {{ goal.scorer }}
-                {% else %}
-                    {{ goal.scorer }}
-                    {% if goal.assist_by %}(Assist: {{ goal.assist_by }}){% endif %}
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No goals recorded yet.</p>
-{% endif %}
-
+        <p style="font-size: 18px; font-weight: bold; color: green; margin-top: -10px;">
+            Total Goals: {{ goals|length }}
+        </p>
+        <ul style="line-height: 1.8;">
+            {% for goal in goals %}
+                <li>
+                    {{ goal.minute }}':
+                    {% if goal.is_own_goal %}
+                        🥅 Own Goal by {{ goal.scorer }}
+                    {% else %}
+                        {{ goal.scorer }}
+                        {% if goal.assist_by %}(Assist: {{ goal.assist_by }}){% endif %}
+                    {% endif %}
+                    ({{ goal.team_name }})
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>0 - 0</p>
+    {% endif %}
 
     <hr style="margin: 40px 0;">
 
     <a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
         📊 View Pass Network
-    </a>|
+    </a> | 
     <a href="{% url 'tagging_app:attempt_to_goal_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
         📊 View Goal Attempts
-    </a>
-
+    </a> | 
+    <a href="#" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
+        📊 View Goalkeeping Distribution
+    </a> | 
+    <a href="#" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
+        📊 View Other statistics
+    </a> 
 
 </div>
 {% endblock %}
