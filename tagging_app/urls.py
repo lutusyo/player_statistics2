@@ -22,8 +22,9 @@ urlpatterns = [
     # Passing Network
     path('match/<int:match_id>/pass-network/', pass_network.pass_network_page, name='enter_pass_network'),
     path('save-pass-network/', pass_network.save_pass_network, name='save_pass_network'),
-    path('dashboard/', pass_network.pass_network_dashboard, name='pass_network_dashboard'),
+    path('pass-network-dashboard/<int:match_id>/', pass_network.pass_network_dashboard, name='pass_network_dashboard'),
     path('match/<int:match_id>/csv/export-pass-network-csv/', pass_network.export_pass_network_csv, name='export_pass_network_csv'),
+    path('match/<int:match_id>/excel/export-pass-network-excel/', pass_network.export_pass_network_excel, name='export_pass_network_excel'),
     path('match/<int:match_id>/pdf/export-pass-network-pdf/', pass_network.export_pass_network_pdf, name='export_pass_network_pdf'),
 
     # Goalkeeper Distribution

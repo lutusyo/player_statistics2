@@ -9,16 +9,21 @@ import json
 from collections import defaultdict
 from django.db.models import Count, Avg
 import traceback
-
 from tagging_app.models import PassEvent, GoalkeeperDistributionEvent
 from teams_app.models import Team
-
 import csv
 from django.http import HttpResponse
-
 from django.http import FileResponse
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+import io
+from reportlab.lib import colors
+from reportlab.platypus import Table, TableStyle, SimpleDocTemplate, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
+
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+
 
 
 def pass_network_page(request, match_id):
@@ -40,7 +45,6 @@ def pass_network_page(request, match_id):
     return render(request, 'tagging_app/pass_network_enter_data.html', context)
 
 
-
 @csrf_exempt
 def save_pass_network(request):
     if request.method == 'POST':
@@ -52,6 +56,7 @@ def save_pass_network(request):
             from_team = Team.objects.get(id=data['from_team_id'])
             to_team = Team.objects.get(id=data['to_team_id'])
 
+            # Save pass
             PassEvent.objects.create(
                 match=match,
                 from_player=from_player,
@@ -67,65 +72,151 @@ def save_pass_network(request):
                 is_successful=data['is_successful'],
                 is_possession_regained=data.get('is_possession_regained', False)
             )
-            return JsonResponse({'status': 'success'})
+
+            # Get updated count of passes from this player in this match
+            count = PassEvent.objects.filter(match=match, from_player=from_player).count()
+
+            return JsonResponse({'status': 'success', 'count': count})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'invalid request'})
 
-def pass_network_dashboard(request):
-    # Example GK stats
-    gk_stats = GoalkeeperDistributionEvent.objects.values('gk_player__name').annotate(
-        saves=Count('save'),
-        punches=Count('punch'),
-        catches=Count('catch'),
-        avg_position_x=Avg('position_x'),
-        avg_position_y=Avg('position_y')
-    )
+def pass_network_dashboard(request, match_id):
+    match = get_object_or_404(Match, id=match_id)
+    players = Player.objects.filter(passes_made__match=match).distinct()
+    
+    player_ids = list(players.values_list('id', flat=True))
+    player_names = {p.id: p.name for p in players}
 
-    # Pass network data (top 10)
-    pass_network = PassEvent.objects.values('from_player__name', 'to_player__name').annotate(
-        count=Count('id')
-    ).order_by('-count')[:10]
+    # Matrix: {from_id: {to_id: count}}
+    matrix = defaultdict(lambda: defaultdict(int))
+    passes = PassEvent.objects.filter(match=match).values('from_player_id', 'to_player_id').annotate(count=Count('id'))
 
-    return render(request, 'pass_event/dashboard.html', {
-        'gk_stats': gk_stats,
-        'pass_network': pass_network,
-    })
+    for p in passes:
+        if p['to_player_id']:
+            matrix[p['from_player_id']][p['to_player_id']] = p['count']
 
-def export_pass_network_csv(request):
+    # Top 5 combinations
+    top_combinations = sorted(
+        [(player_names[f], player_names[t], c) for f, tos in matrix.items() for t, c in tos.items()],
+        key=lambda x: x[2], reverse=True
+    )[:5]
+
+    context = {
+        'match': match,
+        'players': players,
+        'matrix': matrix,
+        'player_names': player_names,
+        'top_combinations': top_combinations,
+    }
+    return render(request, 'tagging_app/pass_network_dashboard.html', context)
+
+
+
+def export_pass_network_csv(request, match_id):
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="pass_events.csv"'
+    response['Content-Disposition'] = f'attachment; filename="pass_events_match_{match_id}.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(['Match', 'From', 'To', 'Minute', 'X', 'Y'])
+    writer.writerow(['Match', 'From', 'To', 'Minute', 'Second', 'X Start', 'Y Start', 'X End', 'Y End'])
 
-    for event in PassEvent.objects.select_related('match', 'from_player', 'to_player'):
+    passes = PassEvent.objects.filter(match_id=match_id).select_related('match', 'from_player', 'to_player')
+
+    for event in passes:
         writer.writerow([
-            event.match,
+            str(event.match),
             event.from_player.name,
-            event.to_player.name,
+            event.to_player.name if event.to_player else 'Loss',
             event.minute,
-            event.position_x,
-            event.position_y
+            event.second,
+            event.x_start,
+            event.y_start,
+            event.x_end,
+            event.y_end
         ])
+
     return response
+
+
+
+
+
+
+def export_pass_network_excel(request, match_id):
+    match = get_object_or_404(Match, id=match_id)
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Pass Network Matrix"
+
+    players = Player.objects.filter(passes_made__match=match).distinct()
+    player_ids = list(players.values_list('id', flat=True))
+    player_names = {p.id: p.name for p in players}
+
+    matrix = defaultdict(lambda: defaultdict(int))
+    passes = PassEvent.objects.filter(match=match).values('from_player_id', 'to_player_id').annotate(count=Count('id'))
+    for p in passes:
+        if p['to_player_id']:
+            matrix[p['from_player_id']][p['to_player_id']] = p['count']
+
+    ws.cell(row=1, column=1, value="From\\To")
+    for col_index, p in enumerate(players, start=2):
+        ws.cell(row=1, column=col_index, value=player_names[p.id][:10])
+
+    for row_index, from_player in enumerate(players, start=2):
+        ws.cell(row=row_index, column=1, value=player_names[from_player.id][:10])
+        for col_index, to_player in enumerate(players, start=2):
+            if from_player.id == to_player.id:
+                ws.cell(row=row_index, column=col_index, value="—")
+            else:
+                ws.cell(row=row_index, column=col_index, value=matrix[from_player.id].get(to_player.id, 0))
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="pass_network_{match_id}.xlsx"'
+    wb.save(response)
+    return response
+
 
 
 def export_pass_network_pdf(request, match_id):
     buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
-    c.drawString(100, 800, f"Pass Network Report for Match {match_id}")
-    
-    passes = PassEvent.objects.filter(match_id=match_id)
-    y = 750
-    for p in passes:
-        c.drawString(100, y, f"{p.player.name} ➡ {p.receiver.name} | Zone: {p.zone_x}, {p.zone_y}")
-        y -= 15
-        if y < 50:
-            c.showPage()
-            y = 800
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    elements = []
+    styles = getSampleStyleSheet()
 
-    c.save()
+    match = get_object_or_404(Match, id=match_id)
+    players = Player.objects.filter(passes_made__match=match).distinct()
+    player_ids = list(players.values_list('id', flat=True))
+    player_names = {p.id: p.name for p in players}
+
+    # Matrix
+    matrix = defaultdict(lambda: defaultdict(int))
+    passes = PassEvent.objects.filter(match=match).values('from_player_id', 'to_player_id').annotate(count=Count('id'))
+
+    for p in passes:
+        if p['to_player_id']:
+            matrix[p['from_player_id']][p['to_player_id']] = p['count']
+
+    data = [["From\\To"] + [player_names[p.id][:10] for p in players]]
+    for row_player in players:
+        row = [player_names[row_player.id][:10]]
+        for col_player in players:
+            if row_player.id == col_player.id:
+                row.append("—")
+            else:
+                row.append(str(matrix[row_player.id].get(col_player.id, 0)))
+        data.append(row)
+
+    t = Table(data)
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+    ]))
+    elements.append(Paragraph(f"Passing Network Matrix - {match}", styles['Title']))
+    elements.append(t)
+
+    doc.build(elements)
     buffer.seek(0)
-    return FileResponse(buffer, as_attachment=True, filename='pass_network.pdf')
+    return FileResponse(buffer, as_attachment=True, filename='pass_network_matrix.pdf')

@@ -15,8 +15,8 @@
     <tr>
         <td>Match {{ item.match__id }} - {{ item.match__date }}</td>
         <td>{{ item.total_passes }}</td>
-        <td><a href="{% url 'tagging_app:pass_network_pdf' item.match__id %}" target="_blank">View PDF</a></td>
-        <td><a href="{% url 'tagging_app:pass_network_csv' item.match__id %}" target="_blank">View csv</a></td>
+        <td><a href="{% url 'tagging_app:export_pass_network_pdf' item.match__id %}" target="_blank">View PDF</a></td>
+        <td><a href="{% url 'tagging_app:export_pass_network_csv' item.match__id %}" target="_blank">View csv</a></td>
 
     </tr>
     {% endfor %}

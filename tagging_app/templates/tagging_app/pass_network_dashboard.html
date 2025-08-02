@@ -1,27 +1,73 @@
-<h1>Pass Network & GK Dashboard</h1>
+{% load static %}
+{% load custom_filters %}
 
-<h2>Top 10 Passing Combinations</h2>
-<table>
-    <tr><th>From</th><th>To</th><th>Count</th></tr>
-    {% for item in pass_network %}
-        <tr>
-            <td>{{ item.from_player__name }}</td>
-            <td>{{ item.to_player__name }}</td>
-            <td>{{ item.count }}</td>
-        </tr>
-    {% endfor %}
-</table>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pass Network Matrix</title>
+    <style>
+        table, th, td {
+            border: 1px solid #aaa;
+            border-collapse: collapse;
+            text-align: center;
+            padding: 6px;
+        }
+        th {
+            background: #f0f0f0;
+        }
+        td.black-cell {
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+    <h2>Passing Networks</h2>
+    <p>{{ match.date }} - {{ match.stadium }} - {{ match.kickoff }}</p>
 
-<h2>Goalkeeper Stats</h2>
-<table>
-    <tr><th>GK</th><th>Saves</th><th>Punches</th><th>Catches</th><th>Avg Pos (x,y)</th></tr>
-    {% for gk in gk_stats %}
+    <table>
+        <thead>
+            <tr>
+                <th>Passes From → To</th>
+                {% for p in players %}
+                    <th>{{ p.name|slice:":10" }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row_player in players %}
+            <tr>
+                <th>{{ row_player.name|slice:":10" }}</th>
+                {% for col_player in players %}
+                    {% if row_player.id == col_player.id %}
+                        <td class="black-cell"></td>
+                    {% else %}
+                        <td>
+                            {{ matrix|get_item:row_player.id|get_item:col_player.id|default:"0" }}
+                        </td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Top 5 Player to Player Passers</h3>
+    <table>
         <tr>
-            <td>{{ gk.gk_player__name }}</td>
-            <td>{{ gk.saves }}</td>
-            <td>{{ gk.punches }}</td>
-            <td>{{ gk.catches }}</td>
-            <td>({{ gk.avg_position_x|floatformat:2 }}, {{ gk.avg_position_y|floatformat:2 }})</td>
+            <th>Player</th>
+            <th>Passed To</th>
+            <th># Passes</th>
         </tr>
-    {% endfor %}
-</table>
+        {% for from_name, to_name, count in top_combinations %}
+        <tr>
+            <td>{{ from_name }}</td>
+            <td>{{ to_name }}</td>
+            <td>{{ count }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <a href="{% url 'tagging_app:export_pass_network_pdf' match.id %}">Download PDF</a> |
+    <a href="{% url 'tagging_app:export_pass_network_csv' match.id %}">Download CSV</a>
+</body>
+</html>
