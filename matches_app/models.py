@@ -16,6 +16,9 @@ class CompetitionType(models.TextChoices):
     INTERNATIONAL_FRIENDLY = 'International Friendly', 'International Friendly'
     NBC_YOUTH_LEAGUE = 'NBC Youth League', 'NBC Youth League'
 
+class VenueChoices(models.TextChoices):
+    CHAMAZI_COMPLEX = 'CHAMAZI COMPLEX', 'CHAMAZI COMPLEX'
+
 class PositionChoices(models.TextChoices):
     GK = 'GK', 'Goalkeeper'
     LB = 'LB', 'Left Back'
@@ -36,8 +39,7 @@ class Match(models.Model):
     away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_matches')
     date = models.DateField()
     time = models.TimeField(null=True, blank=True)
-    venue = models.CharField(max_length=255)
-
+    venue = models.CharField(max_length=50, choices=VenueChoices.choices,default=VenueChoices.CHAMAZI_COMPLEX)
     season = models.CharField(max_length=20, choices=SeasonChoices.choices)
     competition_type = models.CharField(max_length=50, choices=CompetitionType.choices)
     age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)

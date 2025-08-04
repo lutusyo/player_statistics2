@@ -22,7 +22,7 @@
         <div class="row">
             <div class="col-4 col-12-medium">
                 <section class="box feature">
-                    <a href="{% url 'gps_app:gps_dashboard' %}" class="image featured"><img src="{% static 'accounts_app/images/gps.jpg' %}" alt="" /></a>
+                    <a href="#" class="image featured"><img src="{% static 'accounts_app/images/gps.jpg' %}" alt="" /></a>
                     <div class="inner">
                         <header>
                             <h2>GPS Performance</h2>
@@ -34,13 +34,14 @@
             </div>
             <div class="col-4 col-12-medium">
                 <section class="box feature">
-                    <a href="{% url 'matches_app:team_dashboard' team.id %}" class="image featured"><img src="{% static 'accounts_app/images/bea.jpg' %}" alt="" /></>
-                    <div class="inner">
-                        <header>
-                            <h2>Match statistics</h2>
-                        </header>
-                        <p>Break down each match tactically with visual insights and structured feedback for team development.</p>
-                    </div>
+                    <a href="{% url 'matches_app:team_dashboard' team.id %}" class="image featured"><img src="{% static 'accounts_app/images/bea.jpg' %}" alt="" />
+                        <div class="inner">
+                            <header>
+                                <h2>Match statistics</h2>
+                            </header>
+                            <p>Break down each match tactically with visual insights and structured feedback for team development.</p>
+                        </div>
+                    </a>
                 </section>
             </div>
             <div class="col-4 col-12-medium">

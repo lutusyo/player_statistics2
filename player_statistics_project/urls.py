@@ -23,6 +23,9 @@ urlpatterns = [
     #tagging_app
     path('tagging/', include('tagging_app.urls')),
 
+    #goalkeeping_app
+    path('goalkeeping/', include('goalkeeping_app.urls')),    
+
 
 ]
 

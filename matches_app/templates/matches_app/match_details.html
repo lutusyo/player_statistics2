@@ -21,7 +21,7 @@
         margin-bottom: 30px;
     ">
         <div><strong>📅 Date:</strong> {{ match.date }}</div>
-        <div><strong>🕒 Time:</strong> {{ match.time }}</div>
+        <div><strong>🕒 Time:</strong>{{ match.time|time:"H:i" }}</div>
         <div><strong>📍 Venue:</strong> {{ match.venue }}</div>
         <div><strong>🏆 Competition:</strong> {{ match.get_competition_type_display }}</div>
         <div><strong>📅 Season:</strong> {{ match.season }}</div>

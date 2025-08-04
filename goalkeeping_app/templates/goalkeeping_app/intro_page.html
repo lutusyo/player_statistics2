@@ -1,0 +1,38 @@
+{% extends 'goalkeeping_app/goalkeeping_base.html' %}
+{% load static %}
+
+{% block goalkeeping_content %}
+<div style="background-color: #e6f0ff; padding: 30px;">
+     <img src="{% static 'goalkeeping_app/azamfc_logo.png' %}" class="company-logo" alt="Azam FC Logo">
+    <p style="text-align: center; margin-top: 50px; font-size: 18px; font-style: italic;">
+        Prepared by <strong>{{ company }}</strong>
+    </p>
+    
+    <h1 style="text-align: center; color: #003366; font-size: 36px;">{{ title }}</h1>
+
+
+
+    <div style="display: flex; justify-content: space-around; align-items: center; margin: 30px 0;">
+        <div style="text-align: center;">
+            {% if home_team.logo %}
+                <img src="{{ home_team.logo.url }}" alt="{{ home_team.name }}" style="height: 80px;">
+            {% endif %}
+            <p style="font-weight: bold;">{{ home_team.name }}</p>
+        </div>
+
+        <div style="font-size: 24px; font-weight: bold;">
+             <br> vs <br> 
+        </div>
+
+        <div style="text-align: center;">
+            {% if away_team.logo %}
+                <img src="{{ away_team.logo.url }}" alt="{{ away_team.name }}" style="height: 80px;">
+            {% endif %}
+            <p style="font-weight: bold;">{{ away_team.name }}</p>
+        </div>
+    </div>
+
+
+
+</div>
+{% endblock %}

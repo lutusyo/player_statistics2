@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'announcements_app',
     'reports_app',
     'tagging_app',
+    'goalkeeping_app',
 ]
 
 MIDDLEWARE = [
@@ -173,3 +174,5 @@ LOGIN_URL = 'accounts_app:login'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
+
+TIME_INPUT_FORMATS = ['%H:%M']

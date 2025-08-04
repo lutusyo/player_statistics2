@@ -91,19 +91,19 @@ class GoalkeeperDistributionEvent(models.Model):
     ])
 
     detail = models.CharField(max_length=30, choices=[
-        # For Feet
+        # Distribution with Feet
         ('play_onto', 'Play Onto'),
         ('play_into', 'Play Into'),
         ('play_around', 'Play Around'),
         ('play_beyond', 'Play Beyond'),
         ('other_feet', 'Other (Feet)'),
 
-        # For Hands
+        # Distribution from Hands ( kicks )
         ('side_kick', 'Side Kick'),
         ('from_hands', 'From Hands'),
         ('drop_kick', 'Drop Kick'),
 
-        # For Throw
+        # Dstribution from Hands  ( Throws ) 
         ('over_arm', 'Over Arm'),
         ('under_arm', 'Under Arm'),
         ('side_arm', 'Side Arm'),
