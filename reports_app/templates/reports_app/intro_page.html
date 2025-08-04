@@ -1,0 +1,95 @@
+{% block report_content %}
+
+    {% if report_type == 'post-match-summary' %}
+    <div style="min-height: 100vh; display: flex; justify-content: center; align-items: center; background-color: #f5f9ff; font-family: Arial, sans-serif;">
+
+        <div style="background-color: #e6f0ff; padding: 30px; width: 850px; height: 450px; box-shadow: 0 0 10px rgba(0,0,0,0.2); position: relative; color: #003366;">
+
+            <!-- Company Name and Logo at Top Right -->
+            <div style="position: absolute; top: 20px; right: 30px; text-align: right;">
+                <strong style="font-size: 16px; font-style: italic;">{{ company }}</strong><br>
+                <img src="{% static 'goalkeeping_app/azamfc_logo.png' %}" style="height: 60px; margin-top: 5px;">
+            </div>
+
+            <!-- Post Match Summary Content -->
+            <div style="text-align: center;">
+                <h1 style="font-size: 44px; font-weight: bold; margin-top: 60px; margin-bottom: 120px;">{{ title }}</h1>
+
+                <!-- Match Result and Teams -->
+                <div style="display: flex; justify-content: center; align-items: center; font-size: 26px; font-weight: bold; margin-bottom: 30px;">
+                    <div style="text-align: right; margin-right: 40px;">
+                        {% if home_team.logo %}
+                            <img src="{{ home_team.logo.url }}" alt="{{ home_team.name }}" style="height: 60px;"><br>
+                        {% endif %}
+                        {{ home_team.name }}
+                    </div>
+
+                    <div style="margin: 0 20px;">
+                        {{ home_score }} - {{ away_score }}
+                    </div>
+
+                    <div style="text-align: left; margin-left: 20px;">
+                        {% if away_team.logo %}
+                            <img src="{{ away_team.logo.url }}" alt="{{ away_team.name }}" style="height: 60px;"><br>
+                        {% endif %}
+                        {{ away_team.name }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match Info at Bottom Left -->
+        <div style="position: absolute; bottom: 70px; left: 230px; font-size: 16px; line-height: 0.1; text-align: left;">
+            {% if competition %}<p>{{ competition }}</p>{% endif %}
+            {% if date %}<p>{{ date }}</p>{% endif %}
+            {% if kickoff_time %}<p>{{ kickoff_time }} Kick Off</p>{% endif %}
+            {% if match_number %}<p>Match {{ match_number }}</p>{% endif %}
+            {% if season %}<p>{{ season }}</p>{% endif %}
+            {% if venue %}<p>{{ venue }}</p>{% endif %}
+        </div>
+
+    </div>
+
+    {% else %}
+    
+        <!-- Original block for non-post-match-summary types -->
+        <div style="min-height: 100vh; display: flex; justify-content: center; align-items: center; background-color: #f5f9ff;">
+            <div style="background-color: #e6f0ff; padding: 30px; width: 850px; height: 450px; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
+
+                <!-- Company Name above Logo -->
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <strong style="font-size: 18px; font-style: italic; display: block;">{{ company }}</strong>
+                    <img src="{% static 'goalkeeping_app/azamfc_logo.png' %}" style="height: 70px; margin-top: 5px;">
+                </div>
+
+                <!-- Title -->
+                <h1 style="text-align: center; color: #003366; font-size: 44px; margin-top: 140px;">{{ title }}</h1>
+
+                <!-- Teams -->
+                <div style="display: flex; justify-content: space-around; align-items: center; margin-top: 30px;">
+                    <div style="text-align: center;">
+                        {% if home_team.logo %}
+                            <img src="{{ home_team.logo.url }}" alt="{{ home_team.name }}" style="height: 70px;">
+                        {% endif %}
+                        <p style="font-weight: bold; margin: 5px 0 0;">{{ home_team.name }}</p>
+                    </div>
+
+                    <div style="font-size: 22px; font-weight: bold;">
+                        <br> vs <br> 
+                    </div>
+
+                    <div style="text-align: center;">
+                        {% if away_team.logo %}
+                            <img src="{{ away_team.logo.url }}" alt="{{ away_team.name }}" style="height: 70px;">
+                        {% endif %}
+                        <p style="font-weight: bold; margin: 5px 0 0;">{{ away_team.name }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock %}
+
+
+
