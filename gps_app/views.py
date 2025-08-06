@@ -4,8 +4,8 @@ from io import TextIOWrapper
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .forms import GPSUploadForm
-from .models import GPSRecord, PodAssignment
-from matches_app.models import Match
+from .models import GPSRecord
+from matches_app.models import Match, MatchLineup
 from players_app.models import Player
 
 def upload_gps_data(request):
@@ -16,13 +16,11 @@ def upload_gps_data(request):
             file = TextIOWrapper(request.FILES['csv_file'].file, encoding='utf-8')
             reader = csv.reader(file)
 
-
             # Skip metadata rows (first 9 rows)
             for _ in range(9):
                 next(reader)
 
             headers = next(reader)
-            print("Headers:", headers)
             header_map = {h.strip().strip('"'): i for i, h in enumerate(headers)}
 
             required_column = "Period Name"
@@ -37,12 +35,11 @@ def upload_gps_data(request):
                 pod_number = row[header_map["Player Name"]].strip()
 
                 try:
-                    pod_assignment = PodAssignment.objects.get(match=match, pod_number=pod_number)
-                except PodAssignment.DoesNotExist:
-                    messages.warning(request, f"Pod '{pod_number}' not assigned for this match.")
+                    lineup = MatchLineup.objects.get(match=match, pod_number=pod_number)
+                    player = lineup.player
+                except MatchLineup.DoesNotExist:
+                    messages.warning(request, f"Pod '{pod_number}' not assigned to any player for this match.")
                     continue
-
-                player = pod_assignment.player
 
                 try:
                     GPSRecord.objects.create(
@@ -54,7 +51,7 @@ def upload_gps_data(request):
                         max_deceleration=float(row[header_map.get("Max Deceleration", 0)] or 0),
                         acceleration_efforts=int(row[header_map.get("Acceleration Efforts", 0)] or 0),
                         deceleration_efforts=int(row[header_map.get("Deceleration Efforts", 0)] or 0),
-                        #duration=float(row[header_map.get("Duration", 0)] or 0),
+                        #duration=float(row[header_map.get("Duration", 0
                         distance=float(row[header_map.get("Distance", 0)] or 0),
                         player_load=float(row[header_map.get("Player Load", 0)] or 0),
                         meterage_per_minute=float(row[header_map.get("Meterage Per Minute", 0)] or 0),
@@ -79,6 +76,7 @@ def upload_gps_data(request):
         form = GPSUploadForm()
 
     return render(request, 'gps_app/gps_upload.html', {'form': form})
+
 
 
 def gps_dashboard(request):

@@ -1,22 +1,12 @@
 from django.db import models
 from players_app.models import Player
 from matches_app.models import Match
-
-class PodAssignment(models.Model):
-    match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    pod_number = models.CharField(max_length=20)
-    player = models.ForeignKey(Player, on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ('match', 'pod_number')
-
-    def __str__(self):
-        return f"{self.match} - {self.pod_number} = {self.player}"
+from matches_app.models import MatchLineup
 
 class GPSRecord(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
-    pod_number = models.CharField(max_length=20)
+    pod_number = models.ForeignKey(MatchLineup, on_delete=models.CASCADE)
     date_recorded = models.DateField(auto_now_add=True)
 
     # All fields from CSV

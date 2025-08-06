@@ -55,18 +55,15 @@ class MatchLineup(models.Model):
 
     is_starting = models.BooleanField(default=False)
     position = models.CharField(max_length=5, choices=PositionChoices.choices, default=PositionChoices.SUB)
+    pod_number = models.CharField(max_length=20,null=True,blank=True,help_text="GPS Pod number assigned to the player in this match")
 
-    time_entered = models.TimeField(
-        null=True,
-        blank=True,
-        help_text="Time the player entered the field (for subs)"
-    )
+    time_entered = models.TimeField(null=True,blank=True,help_text="Time the player entered the field (for subs)")
 
     class Meta:
-        unique_together = ('match', 'player')
+        unique_together = ('match', 'player', 'pod_number')
 
     def __str__(self):
-        return f"{self.player.name} - {self.get_position_display()} ({'Start' if self.is_starting else 'Sub'})"
+        return f"{self.player.name} - {self.get_position_display()} - {self.pod_number} - ({'Start' if self.is_starting else 'Sub'})"
 
 
 class Substitution(models.Model):
