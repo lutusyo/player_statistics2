@@ -9,7 +9,7 @@ def import_players(file_path):
         df = pd.read_excel(file_path)
 
         # Ensure the Under 17 age group exists
-        age_group_name = 'UNDER 17'
+        age_group_name = 'SENIOR'
         try:
             age_group = AgeGroup.objects.get(name=age_group_name)
         except AgeGroup.DoesNotExist:

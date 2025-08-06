@@ -3,17 +3,14 @@ from django.shortcuts import render, get_object_or_404
 from players_app.models import Player
 from matches_app.models import Match, MatchLineup
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from collections import defaultdict
 from django.db.models import Count, Avg
-import traceback
 from tagging_app.models import PassEvent, GoalkeeperDistributionEvent
 from teams_app.models import Team
 import csv
-from django.http import HttpResponse
-from django.http import FileResponse
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 import io
@@ -23,7 +20,6 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
-
 
 
 def pass_network_page(request, match_id):
@@ -82,11 +78,16 @@ def save_pass_network(request):
 
     return JsonResponse({'status': 'invalid request'})
 
+
 def pass_network_dashboard(request, match_id):
     match = get_object_or_404(Match, id=match_id)
-    players = Player.objects.filter(passes_made__match=match).distinct()
-    
-    player_ids = list(players.values_list('id', flat=True))
+
+    # Get all player IDs involved in passes for this match (from and to)
+    player_ids_from = PassEvent.objects.filter(match=match).values_list('from_player_id', flat=True)
+    player_ids_to = PassEvent.objects.filter(match=match).values_list('to_player_id', flat=True)
+    all_player_ids = set(player_ids_from).union(set(player_ids_to))
+
+    players = Player.objects.filter(id__in=all_player_ids)
     player_names = {p.id: p.name for p in players}
 
     # Matrix: {from_id: {to_id: count}}
@@ -97,9 +98,12 @@ def pass_network_dashboard(request, match_id):
         if p['to_player_id']:
             matrix[p['from_player_id']][p['to_player_id']] = p['count']
 
-    # Top 5 combinations
+    # Top 5 combinations (safe get to avoid KeyError)
     top_combinations = sorted(
-        [(player_names[f], player_names[t], c) for f, tos in matrix.items() for t, c in tos.items()],
+        [
+            (player_names.get(f, f"Unknown ({f})"), player_names.get(t, f"Unknown ({t})"), c)
+            for f, tos in matrix.items() for t, c in tos.items()
+        ],
         key=lambda x: x[2], reverse=True
     )[:5]
 
@@ -111,7 +115,6 @@ def pass_network_dashboard(request, match_id):
         'top_combinations': top_combinations,
     }
     return render(request, 'tagging_app/pass_network_dashboard.html', context)
-
 
 
 def export_pass_network_csv(request, match_id):
@@ -139,18 +142,18 @@ def export_pass_network_csv(request, match_id):
     return response
 
 
-
-
-
-
 def export_pass_network_excel(request, match_id):
     match = get_object_or_404(Match, id=match_id)
     wb = Workbook()
     ws = wb.active
     ws.title = "Pass Network Matrix"
 
-    players = Player.objects.filter(passes_made__match=match).distinct()
-    player_ids = list(players.values_list('id', flat=True))
+    # Get all player IDs involved in passes for this match
+    player_ids_from = PassEvent.objects.filter(match=match).values_list('from_player_id', flat=True)
+    player_ids_to = PassEvent.objects.filter(match=match).values_list('to_player_id', flat=True)
+    all_player_ids = set(player_ids_from).union(set(player_ids_to))
+
+    players = Player.objects.filter(id__in=all_player_ids)
     player_names = {p.id: p.name for p in players}
 
     matrix = defaultdict(lambda: defaultdict(int))
@@ -177,7 +180,6 @@ def export_pass_network_excel(request, match_id):
     return response
 
 
-
 def export_pass_network_pdf(request, match_id):
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
@@ -185,8 +187,13 @@ def export_pass_network_pdf(request, match_id):
     styles = getSampleStyleSheet()
 
     match = get_object_or_404(Match, id=match_id)
-    players = Player.objects.filter(passes_made__match=match).distinct()
-    player_ids = list(players.values_list('id', flat=True))
+
+    # Get all player IDs involved in passes for this match
+    player_ids_from = PassEvent.objects.filter(match=match).values_list('from_player_id', flat=True)
+    player_ids_to = PassEvent.objects.filter(match=match).values_list('to_player_id', flat=True)
+    all_player_ids = set(player_ids_from).union(set(player_ids_to))
+
+    players = Player.objects.filter(id__in=all_player_ids)
     player_names = {p.id: p.name for p in players}
 
     # Matrix

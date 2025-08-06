@@ -1,0 +1,92 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+    .starter-checkbox:checked + label::after {
+        content: "⭐";  /* star icon */
+        color: green;
+        margin-left: 5px;
+    }
+    .sub-checkbox:checked + label::after {
+        content: "↺";  /* reload/rotate arrow icon */
+        color: blue;
+        margin-left: 5px;
+    }
+    .bench-checkbox:checked + label::after {
+        content: "☑";  /* checkbox icon */
+        color: gray;
+        margin-left: 5px;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function (e) {
+            const starterCheckboxes = document.querySelectorAll('input[name$="-is_starting"]');
+            let starterCount = 0;
+            starterCheckboxes.forEach(cb => {
+                if (cb.checked) starterCount++;
+            });
+            if (starterCount > 11) {
+                alert("You can only select a maximum of 11 Starting players.");
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<h2>Lineup for {{ match }}</h2>
+<a href="/admin/matches_app/match/" style="margin-bottom: 20px; display: inline-block;">&larr; Back to Matches</a>
+
+<form method="post">{% csrf_token %}
+    <table>
+        <thead>
+            <tr>
+                <th>Player</th>
+                <th>Position</th>
+                <th>Pod Number</th>
+                <th>Starter ⭐</th>
+                <th>Sub 🔄</th>
+                <th>Bench ☑️</th>
+                <th>Time Entered</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ formset.management_form }}
+            {% for form in formset %}
+                <tr>
+                    <td>{{ form.player }}</td>
+                    <td>{{ form.position }}</td>
+                    <td>{{ form.pod_number }}</td>
+                    <td>
+                        <input type="radio" name="{{ form.prefix }}-role" value="starter" id="{{ form.prefix }}-starter" class="starter-checkbox">
+                        <label for="{{ form.prefix }}-starter"></label>
+                    </td>
+                    <td>
+                        <input type="radio" name="{{ form.prefix }}-role" value="sub" id="{{ form.prefix }}-sub" class="sub-checkbox">
+                        <label for="{{ form.prefix }}-sub"></label>
+                    </td>
+                    <td>
+                        <input type="radio" name="{{ form.prefix }}-role" value="bench" id="{{ form.prefix }}-bench" class="bench-checkbox" checked>
+                        <label for="{{ form.prefix }}-bench"></label>
+                    </td>
+                    <td>{{ form.time_entered }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" class="default">Save Lineup</button>
+</form>
+{% endblock %}
