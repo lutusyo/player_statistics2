@@ -17,3 +17,5 @@ tmp/
 # Deployment-specific
 Passengerfile.json
 passenger_wsgi.py
+
+player_statistics_project/settings.py
