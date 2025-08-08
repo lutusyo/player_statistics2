@@ -101,8 +101,9 @@ class MatchAdmin(admin.ModelAdmin):
 
 ### Lineup Admin ###
 class MatchLineupAdmin(admin.ModelAdmin):
+    
     form = MatchLineupForm
-    list_display = ['match', 'player', 'team', 'position', 'is_starting']
+    list_display = ['match', 'player', 'position', 'is_starting']
     list_filter = ['match', 'team', 'is_starting']
     search_fields = ['player__name']
 

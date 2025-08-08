@@ -55,7 +55,7 @@ class Player(models.Model):
     is_active = models.BooleanField(default=True)
     
     def __str__(self):
-        return self.name
+        return f"{self.name} - {self.age_group}"
 
 # Career stage for each player
 class PlayerCareerStage(models.Model):

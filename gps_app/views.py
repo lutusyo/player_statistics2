@@ -8,6 +8,7 @@ from .models import GPSRecord
 from matches_app.models import Match, MatchLineup
 from players_app.models import Player
 
+
 def upload_gps_data(request):
     if request.method == 'POST':
         form = GPSUploadForm(request.POST, request.FILES)
@@ -16,67 +17,76 @@ def upload_gps_data(request):
             file = TextIOWrapper(request.FILES['csv_file'].file, encoding='utf-8')
             reader = csv.reader(file)
 
-            # Skip metadata rows (first 9 rows)
+            # Skip metadata rows (typically first 9)
             for _ in range(9):
-                next(reader)
+                next(reader, None)
 
-            headers = next(reader)
+            headers = next(reader, None)
+            if not headers:
+                messages.error(request, "CSV header row missing.")
+                return redirect('gps_app:gps_upload')
+
             header_map = {h.strip().strip('"'): i for i, h in enumerate(headers)}
-
             required_column = "Period Name"
+
             if required_column not in header_map:
                 messages.error(request, f"'{required_column}' column not found in CSV. Found: {list(header_map.keys())}")
                 return redirect('gps_app:gps_upload')
 
+            created_count = 0
             for row in reader:
                 if row[header_map["Period Name"]].strip() != "Session":
                     continue
 
                 pod_number = row[header_map["Player Name"]].strip()
-
-                try:
-                    lineup = MatchLineup.objects.get(match=match, pod_number=pod_number)
-                    player = lineup.player
-                except MatchLineup.DoesNotExist:
-                    messages.warning(request, f"Pod '{pod_number}' not assigned to any player for this match.")
+                lineup = MatchLineup.objects.filter(match=match, pod_number=pod_number).first()
+                if not lineup:
+                    print(f"⚠️  No lineup found for pod {pod_number} in match {match}")
                     continue
+
+                if GPSRecord.objects.filter(match=match, lineup=lineup).exists():
+                    print(f"⏭️  GPS data already exists for player {lineup.player.name} in this match.")
+                    continue
+
+                def get_float(col): return float(row[header_map.get(col, -1)] or 0) if col in header_map else 0
+                def get_int(col): return int(row[header_map.get(col, -1)] or 0) if col in header_map else 0
 
                 try:
                     GPSRecord.objects.create(
                         match=match,
-                        player=player,
+                        player=lineup.player,
+                        lineup=lineup,
                         pod_number=pod_number,
-                        max_velocity=float(row[header_map.get("Max Velocity", 0)] or 0),
-                        max_acceleration=float(row[header_map.get("Max Acceleration", 0)] or 0),
-                        max_deceleration=float(row[header_map.get("Max Deceleration", 0)] or 0),
-                        acceleration_efforts=int(row[header_map.get("Acceleration Efforts", 0)] or 0),
-                        deceleration_efforts=int(row[header_map.get("Deceleration Efforts", 0)] or 0),
-                        #duration=float(row[header_map.get("Duration", 0
-                        distance=float(row[header_map.get("Distance", 0)] or 0),
-                        player_load=float(row[header_map.get("Player Load", 0)] or 0),
-                        meterage_per_minute=float(row[header_map.get("Meterage Per Minute", 0)] or 0),
-                        player_load_per_minute=float(row[header_map.get("Player Load Per Minute", 0)] or 0),
-                        max_heart_rate=float(row[header_map.get("Max Heart Rate", 0)] or 0),
-                        avg_heart_rate=float(row[header_map.get("Avg Heart Rate", 0)] or 0),
-                        sprint_distance=float(row[header_map.get("Sprint Distance", 0)] or 0),
-                        sprint_efforts=int(row[header_map.get("Sprint Efforts", 0)] or 0),
-                        jogging_distance=float(row[header_map.get("Jogging Distance", 0)] or 0),
-                        walking_distance=float(row[header_map.get("Walking Distance", 0)] or 0),
-                        high_speed_distance=float(row[header_map.get("High Speed Distance", 0)] or 0),
-                        high_speed_efforts=int(row[header_map.get("High Speed Efforts", 0)] or 0),
-                        impacts=int(row[header_map.get("Impacts", 0)] or 0),
+                        max_velocity=get_float("Max Velocity"),
+                        max_acceleration=get_float("Max Acceleration"),
+                        max_deceleration=get_float("Max Deceleration"),
+                        acceleration_efforts=get_int("Acceleration Efforts"),
+                        deceleration_efforts=get_int("Deceleration Efforts"),
+                        distance=get_float("Distance"),
+                        player_load=get_float("Player Load"),
+                        meterage_per_minute=get_float("Meterage Per Minute"),
+                        player_load_per_minute=get_float("Player Load Per Minute"),
+                        max_heart_rate=get_float("Max Heart Rate"),
+                        avg_heart_rate=get_float("Avg Heart Rate"),
+                        sprint_distance=get_float("Sprint Distance"),
+                        sprint_efforts=get_int("Sprint Efforts"),
+                        jogging_distance=get_float("Jogging Distance"),
+                        walking_distance=get_float("Walking Distance"),
+                        high_speed_distance=get_float("High Speed Distance"),
+                        high_speed_efforts=get_int("High Speed Efforts"),
+                        impacts=get_int("Impacts"),
                     )
+                    created_count += 1
                 except Exception as e:
-                    messages.error(request, f"Error processing row for pod {pod_number}: {str(e)}")
+                    messages.error(request, f"❌ Error processing pod {pod_number}: {str(e)}")
                     continue
 
-            messages.success(request, "GPS data uploaded successfully.")
+            messages.success(request, f"✅ GPS data uploaded successfully. {created_count} records created.")
             return redirect('gps_app:gps_dashboard')
     else:
         form = GPSUploadForm()
 
     return render(request, 'gps_app/gps_upload.html', {'form': form})
-
 
 
 def gps_dashboard(request):
@@ -90,7 +100,6 @@ def gps_dashboard(request):
     if match_filter:
         records = records.filter(match__id=match_filter)
 
-    # Pie Data (movement distances)
     pie_labels = ['Jogging', 'Walking', 'High Speed']
     pie_data = [
         sum(r.jogging_distance for r in records),
@@ -98,7 +107,6 @@ def gps_dashboard(request):
         sum(r.high_speed_distance for r in records),
     ]
 
-    # Radar Data (averaged performance metrics)
     radar_labels = ['Max Velocity', 'Sprint Distance', 'Efforts', 'Player Load']
     radar_data = [
         sum(r.max_velocity for r in records) / len(records) if records else 0,
@@ -107,7 +115,6 @@ def gps_dashboard(request):
         sum(r.player_load for r in records) / len(records) if records else 0,
     ]
 
-    # Trend Data: Sprint Distance over Time
     trend_data = {}
     for r in records:
         date = r.match.date.strftime('%Y-%m-%d')
@@ -139,4 +146,3 @@ def gps_match_detail(request, match_id):
         'records': records,
     }
     return render(request, 'gps_app/gps_match_detail.html', context)
-
