@@ -1,6 +1,7 @@
 from django import forms
 from .models import Match, MatchLineup
-from players_app.models import Player  # Make sure Player is imported
+from players_app.models import Player
+
 
 class MatchForm(forms.ModelForm):
     time = forms.TimeField(
@@ -19,24 +20,36 @@ class MatchLineupForm(forms.ModelForm):
         input_formats=['%H:%M']
     )
 
+    pod_number = forms.CharField(
+        required=False,
+        label="Pod Number",
+        help_text="Optional: Assign Catapult pod number (e.g., Demo 2)",
+        widget=forms.TextInput(attrs={'placeholder': 'e.g., Demo 2'})
+    )
+
     class Meta:
         model = MatchLineup
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
-        super(MatchLineupForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.required = False
 
-        # If a match is selected (e.g. from a dropdown during creation)
+
+        # ✅ Make all fields optional
+        for field in self.fields.values():
+            field.required = False
+
+        # Filter players based on selected match
         if 'match' in self.data:
             try:
                 match_id = int(self.data.get('match'))
-                from matches_app.models import Match
                 match = Match.objects.get(id=match_id)
                 self.fields['player'].queryset = Player.objects.filter(team__in=[match.home_team, match.away_team])
             except (ValueError, Match.DoesNotExist):
                 pass
-        elif self.instance.pk:
-            # Editing an existing lineup entry
+        elif self.instance.pk and self.instance.match:
             match = self.instance.match
             self.fields['player'].queryset = Player.objects.filter(team__in=[match.home_team, match.away_team])
 

@@ -46,25 +46,36 @@ class Match(models.Model):
 
     def __str__(self):
         return f"{self.home_team.name} vs {self.away_team.name} ({self.date})"
-
-
 class MatchLineup(models.Model):
-    match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    player = models.ForeignKey(Player, on_delete=models.CASCADE)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    match = models.ForeignKey(Match, on_delete=models.CASCADE, null=True, blank=True)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True, blank=True)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True, blank=True)
 
     is_starting = models.BooleanField(default=False)
-    position = models.CharField(max_length=5, choices=PositionChoices.choices, default=PositionChoices.SUB)
-    pod_number = models.CharField(max_length=20,null=True,blank=True,help_text="GPS Pod number assigned to the player in this match")
-
-    time_entered = models.TimeField(null=True,blank=True,help_text="Time the player entered the field (for subs)")
+    position = models.CharField(
+        max_length=5,
+        choices=PositionChoices.choices,
+        default=PositionChoices.SUB,
+        blank=True,
+        null=True
+    )
+    pod_number = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        help_text="GPS Pod number assigned to the player in this match"
+    )
+    time_entered = models.TimeField(
+        null=True,
+        blank=True,
+        help_text="Time the player entered the field (for subs)"
+    )
 
     class Meta:
         unique_together = ('match', 'player', 'pod_number')
 
     def __str__(self):
-        return f"{self.player.name} - {self.get_position_display()} - {self.pod_number} - ({'Start' if self.is_starting else 'Sub'})"
-
+        return f"{self.player.name if self.player else 'No Player'} - {self.get_position_display() if self.position else 'No Position'} - {self.pod_number or 'No Pod'} - ({'Start' if self.is_starting else 'Sub'})"
 
 class Substitution(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)

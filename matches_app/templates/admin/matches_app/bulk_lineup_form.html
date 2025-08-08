@@ -51,42 +51,60 @@
 <a href="/admin/matches_app/match/" style="margin-bottom: 20px; display: inline-block;">&larr; Back to Matches</a>
 
 <form method="post">{% csrf_token %}
-    <table>
-        <thead>
-            <tr>
-                <th>Player</th>
-                <th>Position</th>
-                <th>Pod Number</th>
-                <th>Starter ⭐</th>
-                <th>Sub 🔄</th>
-                <th>Bench ☑️</th>
-                <th>Time Entered</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{ formset.management_form }}
-            {% for form in formset %}
-                <tr>
-                    <td>{{ form.player }}</td>
-                    <td>{{ form.position }}</td>
-                    <td>{{ form.pod_number }}</td>
-                    <td>
-                        <input type="radio" name="{{ form.prefix }}-role" value="starter" id="{{ form.prefix }}-starter" class="starter-checkbox">
-                        <label for="{{ form.prefix }}-starter"></label>
-                    </td>
-                    <td>
-                        <input type="radio" name="{{ form.prefix }}-role" value="sub" id="{{ form.prefix }}-sub" class="sub-checkbox">
-                        <label for="{{ form.prefix }}-sub"></label>
-                    </td>
-                    <td>
-                        <input type="radio" name="{{ form.prefix }}-role" value="bench" id="{{ form.prefix }}-bench" class="bench-checkbox" checked>
-                        <label for="{{ form.prefix }}-bench"></label>
-                    </td>
-                    <td>{{ form.time_entered }}</td>
-                </tr>
+  {{ formset.management_form }}
+  <table>
+    <thead>
+      <tr>
+        <th>Player</th>
+        <th>Position</th>
+        <th>Pod Number</th>
+        <th>Starter ⭐</th>
+        <th>Sub 🔄</th>
+        <th>Bench ☑️</th>
+        <th>Time Entered</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for form in formset %}
+      <tr>
+        <td>{{ form.player }}</td>
+        <td>{{ form.position }}</td>
+        <td>{{ form.pod_number }}</td>
+        <td>
+          <input type="radio" name="{{ form.prefix }}-role" value="starter" id="{{ form.prefix }}-starter" class="starter-checkbox"
+            {% if form.instance.is_starting %} checked {% endif %}>
+          <label for="{{ form.prefix }}-starter"></label>
+        </td>
+        <td>
+          <input type="radio" name="{{ form.prefix }}-role" value="sub" id="{{ form.prefix }}-sub" class="sub-checkbox"
+            {% if not form.instance.is_starting and form.instance.time_entered %} checked {% endif %}>
+          <label for="{{ form.prefix }}-sub"></label>
+        </td>
+        <td>
+          <input type="radio" name="{{ form.prefix }}-role" value="bench" id="{{ form.prefix }}-bench" class="bench-checkbox"
+            {% if not form.instance.is_starting and not form.instance.time_entered %} checked {% endif %}>
+          <label for="{{ form.prefix }}-bench"></label>
+        </td>
+        <td>{{ form.time_entered }}</td>
+      </tr>
+      {% if form.errors %}
+      <tr>
+        <td colspan="7" style="color: red; text-align: left;">
+          <ul>
+            {% for field, errors in form.errors.items %}
+              <li><strong>{{ field }}:</strong> {{ errors|join:", " }}</li>
             {% endfor %}
-        </tbody>
-    </table>
-    <button type="submit" class="default">Save Lineup</button>
+            {% if form.non_field_errors %}
+              <li><strong>Errors:</strong> {{ form.non_field_errors|join:", " }}</li>
+            {% endif %}
+          </ul>
+        </td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+  <button type="submit" class="default">Save Lineup</button>
 </form>
+
 {% endblock %}

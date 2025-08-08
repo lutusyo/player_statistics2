@@ -22,6 +22,8 @@ class MatchLineupBulkForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if match:
             self.fields['time_entered'].initial = match.time
+            self.fields['pod_number'].initial = "Demo 2"  # default for new entries
+
             # Filter players by age groups of both teams
             home_age_group = match.home_team.age_group
             away_age_group = match.away_team.age_group
@@ -51,47 +53,67 @@ class MatchAdmin(admin.ModelAdmin):
         away_age_group = match.away_team.age_group
         players = Player.objects.filter(age_group__in=[home_age_group, away_age_group])
 
+        existing_lineups = MatchLineup.objects.filter(match=match)
+        existing_players = existing_lineups.values_list('player_id', flat=True)
+        remaining_players = players.exclude(id__in=existing_players)
+
+        # Create initial data for players not already in lineup
+        extra_forms = [{
+            'player': player,
+            'time_entered': match.time,
+            'pod_number': 'Demo 2',
+        } for player in remaining_players]
+
         LineupFormSet = modelformset_factory(
             MatchLineup,
             form=MatchLineupBulkForm,
-            extra=len(players),  # ✅ Generate 1 form per player
+            extra=len(extra_forms),
             can_delete=True
         )
 
-        initial_data = []
-        for player in players:
-            initial_data.append({
-                'player': player,
-                'time_entered': match.time,
-            })
-
         if request.method == 'POST':
-            formset = LineupFormSet(request.POST, queryset=MatchLineup.objects.none(), form_kwargs={'match': match})
+            formset = LineupFormSet(
+                request.POST,
+                queryset=existing_lineups,
+                initial=extra_forms,
+                form_kwargs={'match': match}
+            )
             if formset.is_valid():
                 for form in formset.forms:
-                    instance = form.save(commit=False)
-                    instance.match = match
-                    instance.team = instance.player.age_group.team_set.first() if instance.player.age_group else None
+                    if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                        instance = form.save(commit=False)
+                        instance.match = match
+                        instance.team = instance.player.age_group.team_set.first() if instance.player.age_group else None
 
-                    role = request.POST.get(f"{form.prefix}-role")
-                    if role == 'starter':
-                        instance.is_starting = True
-                        instance.time_entered = None
-                    elif role == 'sub':
-                        instance.is_starting = False
-                        instance.time_entered = match.time
-                    else:
-                        instance.is_starting = False
-                        instance.time_entered = None
+                        # Determine role from radio input
+                        role = request.POST.get(f"{form.prefix}-role")
+                        if role == 'starter':
+                            instance.is_starting = True
+                            instance.time_entered = None
+                        elif role == 'sub':
+                            instance.is_starting = False
+                            instance.time_entered = match.time
+                        else:
+                            instance.is_starting = False
+                            instance.time_entered = None
 
-                    instance.save()
+                        try:
+                            instance.save()
+                        except Exception as e:
+                            messages.warning(request, f"Error saving {instance.player.name}: {str(e)}")
 
                 messages.success(request, "Lineup saved successfully.")
                 return redirect('admin:matches_app_match_changelist')
             else:
+                for form in formset:
+                    print(form.errors)
                 messages.error(request, "There were errors in the form.")
         else:
-            formset = LineupFormSet(queryset=MatchLineup.objects.none(), initial=initial_data, form_kwargs={'match': match})
+            formset = LineupFormSet(
+                queryset=existing_lineups,
+                initial=extra_forms,
+                form_kwargs={'match': match}
+            )
 
         return render(request, 'admin/matches_app/bulk_lineup_form.html', {
             'formset': formset,
@@ -101,7 +123,6 @@ class MatchAdmin(admin.ModelAdmin):
 
 ### Lineup Admin ###
 class MatchLineupAdmin(admin.ModelAdmin):
-    
     form = MatchLineupForm
     list_display = ['match', 'player', 'position', 'is_starting']
     list_filter = ['match', 'team', 'is_starting']
