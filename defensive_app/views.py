@@ -6,17 +6,22 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
 
+
 def tagging_panel(request, match_id):
     match = get_object_or_404(Match, id=match_id)
 
-    # Get lineup players — adjust this if you have lineup model
-    players = Player.objects.all()  # Filter as needed for lineup
+    # Get lineup players — filter as needed
+    players = Player.objects.all()
 
-    # Ensure PlayerDefensiveStats objects exist for each player & match
+    # Ensure PlayerDefensiveStats exists for each player in match
     for player in players:
         PlayerDefensiveStats.objects.get_or_create(match=match, player=player)
 
-    stats = PlayerDefensiveStats.objects.filter(match=match)
+    # Query all defensive stats for this match
+    stats_qs = PlayerDefensiveStats.objects.filter(match=match).select_related('player')
+
+    # Build dictionary: {player_id: PlayerDefensiveStats instance}
+    stats = {stat.player.id: stat for stat in stats_qs}
 
     events = [
         ("aerial_duel_won", "Aerial Duel Won"),
@@ -40,9 +45,10 @@ def tagging_panel(request, match_id):
     return render(request, 'defensive_app/tagging_panel.html', {
         'match': match,
         'players': players,
-        'stats': stats,
+        'stats': stats,  # dictionary instead of queryset
         'events': events,
     })
+
 
 @csrf_exempt
 def record_event(request, match_id):
@@ -68,9 +74,6 @@ def record_event(request, match_id):
 
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
 
-from django.shortcuts import render, get_object_or_404
-from .models import PlayerDefensiveStats
-from matches_app.models import Match
 
 def defensive_summary(request, match_id):
     match = get_object_or_404(Match, id=match_id)

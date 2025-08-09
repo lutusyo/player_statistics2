@@ -1,9 +1,14 @@
 from django.urls import path
-from .views import match_reports, weekly_reports, monthly_reports, player_reports, intro_page
+from .views import match_reports, weekly_reports, monthly_reports, player_reports, intro_page, match_summary_stats
+
 
 app_name = 'reports_app'
 
 urlpatterns = [
+
+    # 0
+    path('match-summary/<int:match_id>/', match_reports.match_summary_view, name='match_summary'),
+    path('match-summary/<int:match_id>/summary-stats/', match_summary_stats.match_summary_stats_view, name='match_summary_stats'),
 
     # 1. intro pages
     path('intro/<str:report_type>/<int:match_id>/', intro_page.intro_page_view, name='intro_page'),
@@ -25,3 +30,4 @@ urlpatterns = [
     #path('team/<str:team>/monthly/', monthly_reports.monthly_report_pdf, name='monthly_report_pdf'),
     #path('team/<str:team>/weekly/', weekly_reports.weekly_reports_pdf, name='weekly_report_pdf'),
 ]
+

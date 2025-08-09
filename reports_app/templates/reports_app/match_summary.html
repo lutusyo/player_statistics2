@@ -1,0 +1,38 @@
+<h2>{{ match.date }} - {{ match.venue }}</h2>
+<h3>{{ match.home_team.name }} {{ home_goals }} - {{ away_goals }} {{ match.away_team.name }}</h3>
+
+<div class="teams">
+    <div class="team">
+        <h4>{{ match.home_team.name }}</h4>
+        <p><strong>Starting XI</strong></p>
+        <ul>
+        {% for player in home_starting %}
+            <li>{{ player.player.name }} ({{ player.position }})</li>
+        {% endfor %}
+        </ul>
+
+        <p><strong>Substitutes</strong></p>
+        <ul>
+        {% for player in home_subs %}
+            <li>{{ player.player.name }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+
+    <div class="team">
+        <h4>{{ match.away_team.name }}</h4>
+        <p><strong>Starting XI</strong></p>
+        <ul>
+        {% for player in away_starting %}
+            <li>{{ player.player.name }} ({{ player.position }})</li>
+        {% endfor %}
+        </ul>
+
+        <p><strong>Substitutes</strong></p>
+        <ul>
+        {% for player in away_subs %}
+            <li>{{ player.player.name }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
