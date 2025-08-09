@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block content %}
+<h2>Out of possession</h2>
+
+<table border="1" cellspacing="0" cellpadding="5" style="width:100%; border-collapse: collapse;">
+    <thead>
+        <tr style="background-color:#007bff; color:white;">
+            <th>Player</th>
+            {% for field, label in event_fields %}
+                <th>{{ label }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for stat in stats %}
+            <tr>
+                <td>{{ stat.player.name }}</td>
+                {% for field, label in event_fields %}
+                    <td>{{ stat|attr:field }}</td>
+                {% endfor %}
+            </tr>
+        {% empty %}
+            <tr><td colspan="{{ event_fields|length|add:'1' }}">No data available</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

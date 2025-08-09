@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'reports_app',
     'tagging_app',
     'goalkeeping_app',
+    'defensive_app',
 ]
 
 MIDDLEWARE = [

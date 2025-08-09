@@ -22,6 +22,9 @@ urlpatterns = [
 
     #tagging_app
     path('tagging/', include('tagging_app.urls')),
+
+    #defensive_app
+    path('defensive/', include('defensive_app.urls')),
  
 
 
