@@ -52,11 +52,14 @@ def upload_gps_data(request):
                 def get_int(col): return int(row[header_map.get(col, -1)] or 0) if col in header_map else 0
 
                 try:
+                    
+                    duration = row[header_map.get("Duration", -1)].strip() if "Duration" in header_map else "00:00:00"
+                    
                     GPSRecord.objects.create(
                         match=match,
                         player=lineup.player,
                         lineup=lineup,
-                        pod_number=pod_number,
+                        duration=duration,
                         max_velocity=get_float("Max Velocity"),
                         max_acceleration=get_float("Max Acceleration"),
                         max_deceleration=get_float("Max Deceleration"),

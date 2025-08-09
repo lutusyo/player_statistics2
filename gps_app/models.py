@@ -11,7 +11,7 @@ class GPSRecord(models.Model):
 
     # Required core metrics
     distance = models.FloatField()
-    duration = models.CharField(max_length=20)
+    duration = models.CharField(null=True, blank=True, max_length=20)
     max_velocity = models.FloatField()
     meterage_per_minute = models.FloatField(null=True, blank=True)
     player_load = models.FloatField()
