@@ -22,9 +22,13 @@
 
             <div>
                 {% if user.is_authenticated and user.username == 'Azam2' %}
-                    <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}">Attempt to Goal Tag</a><br>
-                    <a href="{% url 'tagging_app:enter_pass_network' match.id %}">Pass Network Tag</a><br>
-                    <a href="{% url 'tagging_app:enter_goalkeeper_distribution' match.id %}">Goalkeeper Distribution Tag</a>
+                    <li>
+                        <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}">Attempt to Goal Tag</a><br>
+                        <a href="{% url 'tagging_app:enter_pass_network' match.id %}">Pass Network Tag</a><br>
+                        <a href="{% url 'tagging_app:enter_goalkeeper_distribution' match.id %}">Goalkeeper Distribution Tag</a>
+                        <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive</a>
+                    </li>
+
                 {% endif %}
             </div>
 

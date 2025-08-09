@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h1>Matches with GPS Data</h1>
+<ul>
+{% for match in matches %}
+  <li>
+    <a href="{% url 'gps_app:gps_match_detail' match.id %}">
+      {{ match.date }} - {{ match.opponent }} ({{ match.gps_count }} records)
+    </a>
+  </li>
+{% empty %}
+  <li>No matches with GPS data found.</li>
+{% endfor %}
+</ul>
+
+{% endblock %}

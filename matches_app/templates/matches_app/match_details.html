@@ -84,10 +84,10 @@
     <a href="{% url 'tagging_app:attempt_to_goal_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
         📊 View Goal Attempts
     </a> | 
-    <a href="#" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
+    <a href="{% url 'tagging_app:goalkeeper_distribution_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
         📊 View Goalkeeping Distribution
     </a> | 
-    <a href="#" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
+    <a href="{% url 'defensive_app:defensive_summary' match.id  %}"  style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
         📊 View Other statistics
     </a> 
 

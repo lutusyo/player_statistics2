@@ -10,7 +10,7 @@ from datetime import date
 from django.db.models import Q
 from teams_app.models import Team, AgeGroup
 from .models import MatchLineup, Match
-from tagging_app.models import AttemptToGoal
+from tagging_app.models import AttemptToGoal, GoalkeeperDistributionEvent
 from collections import Counter
 
 from collections import defaultdict

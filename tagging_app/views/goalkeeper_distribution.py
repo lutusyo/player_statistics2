@@ -14,6 +14,8 @@ from teams_app.models import Team
 from django.http import FileResponse
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from django.http import HttpResponse
+import io
 
 
 def goalkeeper_distribution_page(request, match_id):
@@ -53,6 +55,20 @@ def save_goalkeeper_distribution(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'invalid'})
 
+def goalkeeper_distribution_dashboard(request, match_id):
+    # Get match info
+    match = get_object_or_404(Match, id=match_id)
+    
+    # Get goalkeeper distribution data for this match
+    distributions = GoalkeeperDistributionEvent.objects.filter(match=match)
+    
+    context = {
+        'match': match,
+        'distributions': distributions,
+    }
+    return render(request, 'tagging_app/goalkeeper_distribution_dashboard.html', context)
+
+
 
 def export_goalkeeper_distribution_csv(request, match_id):
     response = HttpResponse(content_type='text/csv')
@@ -61,7 +77,7 @@ def export_goalkeeper_distribution_csv(request, match_id):
     writer = csv.writer(response)
     writer.writerow(['Goalkeeper', 'Distribution Type', 'Target Player'])
 
-    distributions = GoalkeeperDistribution.objects.filter(match_id=match_id)
+    distributions = GoalkeeperDistributionEvent.objects.filter(match_id=match_id)
     for d in distributions:
         writer.writerow([d.goalkeeper.name, d.distribution_type, d.target_player.name])
     return response
@@ -73,7 +89,7 @@ def export_goalkeeper_distribution_pdf(request, match_id):
     c = canvas.Canvas(buffer, pagesize=A4)
     c.drawString(100, 800, f"Goalkeeper Distribution Report for Match {match_id}")
     
-    events = GoalkeeperDistribution.objects.filter(match_id=match_id)
+    events = GoalkeeperDistributionEvent.objects.filter(match_id=match_id)
     y = 750
     for e in events:
         c.drawString(100, y, f"{e.goalkeeper.name} - {e.distribution_type} ➡ {e.target_player.name}")

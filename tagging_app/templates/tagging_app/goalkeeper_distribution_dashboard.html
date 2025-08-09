@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="padding: 20px;">
+    <h2>Goalkeeper Distribution - {{ match.name }} ({{ match.date }})</h2>
+    
+    {% if distributions %}
+        <table border="1" cellpadding="8" style="border-collapse: collapse; width: 100%;">
+            <thead>
+                <tr>
+                    <th>Goalkeeper</th>
+                    <th>Short Passes</th>
+                    <th>Long Passes</th>
+                    <th>Throws</th>
+                    <th>Total Distributions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dist in distributions %}
+                <tr>
+                    <td>{{ dist.goalkeeper.name }}</td>
+                    <td>{{ dist.short_passes }}</td>
+                    <td>{{ dist.long_passes }}</td>
+                    <td>{{ dist.throws }}</td>
+                    <td>{{ dist.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No goalkeeper distribution data available for this match.</p>
+    {% endif %}
+    
+    <br>
+    <a href="{% url 'matches_app:match_detail' match.id %}">⬅ Back to Match</a>
+</div>
+{% endblock %}

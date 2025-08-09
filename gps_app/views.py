@@ -9,6 +9,7 @@ from matches_app.models import Match, MatchLineup
 from players_app.models import Player
 
 
+
 def upload_gps_data(request):
     if request.method == 'POST':
         form = GPSUploadForm(request.POST, request.FILES)
@@ -91,61 +92,59 @@ def upload_gps_data(request):
 
     return render(request, 'gps_app/gps_upload.html', {'form': form})
 
+from django.db.models import Count
 
-def gps_dashboard(request):
-    records = GPSRecord.objects.all()
-
-    player_filter = request.GET.get('player')
-    match_filter = request.GET.get('match')
-
-    if player_filter:
-        records = records.filter(player__id=player_filter)
-    if match_filter:
-        records = records.filter(match__id=match_filter)
-
-    pie_labels = ['Jogging', 'Walking', 'High Speed']
-    pie_data = [
-        sum(r.jogging_distance for r in records),
-        sum(r.walking_distance for r in records),
-        sum(r.high_speed_distance for r in records),
-    ]
-
-    radar_labels = ['Max Velocity', 'Sprint Distance', 'Efforts', 'Player Load']
-    radar_data = [
-        sum(r.max_velocity for r in records) / len(records) if records else 0,
-        sum(r.sprint_distance for r in records) / len(records) if records else 0,
-        sum(r.sprint_efforts for r in records) / len(records) if records else 0,
-        sum(r.player_load for r in records) / len(records) if records else 0,
-    ]
-
-    trend_data = {}
-    for r in records:
-        date = r.match.date.strftime('%Y-%m-%d')
-        trend_data[date] = trend_data.get(date, 0) + r.sprint_distance
-
-    trend_labels = list(trend_data.keys())
-    trend_values = list(trend_data.values())
+def gps_matches_list(request):
+    # List matches with at least one GPS record, annotated with record counts
+    matches = Match.objects.annotate(gps_count=Count('gps_records')).filter(gps_count__gt=0).order_by('-date')
 
     context = {
-        'records': records,
-        'pie_labels': json.dumps(pie_labels),
-        'pie_data': json.dumps(pie_data),
-        'radar_labels': json.dumps(radar_labels),
-        'radar_data': json.dumps(radar_data),
-        'trend_labels': json.dumps(trend_labels),
-        'trend_values': json.dumps(trend_values),
-        'players': Player.objects.all(),
-        'matches': Match.objects.all(),
+        'matches': matches,
     }
-    return render(request, 'gps_app/gps_dashboard.html', context)
+    return render(request, 'gps_app/gps_list.html', context)
+
 
 
 def gps_match_detail(request, match_id):
     match = get_object_or_404(Match, id=match_id)
-    records = GPSRecord.objects.filter(match=match)
+    records = GPSRecord.objects.filter(match=match).select_related('player')
+
+    # Example of data aggregation: total distance, average heart rates, etc.
+    total_distance = sum(r.distance for r in records)
+    avg_max_velocity = sum(r.max_velocity for r in records) / records.count() if records.exists() else 0
+
+    # Prepare JSON data for charts (adapt fields as needed)
+    pie_labels = ['Standing', 'Walking', 'Jogging', 'Running', 'Sprinting']
+    pie_data = [
+        sum(r.standing_distance or 0 for r in records),
+        sum(r.walking_distance or 0 for r in records),
+        sum(r.jogging_distance or 0 for r in records),
+        sum(r.running_distance or 0 for r in records),
+        sum(r.sprinting_distance or 0 for r in records),
+    ]
+
+    radar_labels = [
+        'Max Velocity', 'Sprint Distance', 'Sprint Efforts', 'Player Load',
+        'Acceleration Efforts', 'Deceleration Efforts', 'Impacts'
+    ]
+    radar_data = [
+        sum(r.max_velocity for r in records) / records.count() if records.exists() else 0,
+        sum(r.sprint_distance for r in records) / records.count() if records.exists() else 0,
+        sum(r.sprint_efforts for r in records) / records.count() if records.exists() else 0,
+        sum(r.player_load for r in records) / records.count() if records.exists() else 0,
+        sum(r.acceleration_efforts for r in records) / records.count() if records.exists() else 0,
+        sum(r.deceleration_efforts for r in records) / records.count() if records.exists() else 0,
+        sum(r.impacts or 0 for r in records) / records.count() if records.exists() else 0,
+    ]
 
     context = {
         'match': match,
         'records': records,
+        'total_distance': total_distance,
+        'avg_max_velocity': avg_max_velocity,
+        'pie_labels': json.dumps(pie_labels),
+        'pie_data': json.dumps(pie_data),
+        'radar_labels': json.dumps(radar_labels),
+        'radar_data': json.dumps(radar_data),
     }
     return render(request, 'gps_app/gps_match_detail.html', context)
