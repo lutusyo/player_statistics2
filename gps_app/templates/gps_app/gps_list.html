@@ -6,12 +6,19 @@
 <ul>
 {% for match in matches %}
   <li>
-    <a href="{% url 'gps_app:gps_match_detail' match.id %}">
-      {{ match.date }} - {{ match.opponent }} ({{ match.gps_count }} records)
-    </a>
+    {% if match.gps_count > 0 %}
+      <!-- GPS data exists: link to view GPS data -->
+      <a href="{% url 'gps_app:gps_data' match.id %}">
+        {{ match.date }} - {{ match.opponent }} ({{ match.gps_count }} records)
+      </a>
+    {% else %}
+      <!-- No GPS data: link to upload GPS CSV for this match -->
+      {{ match.date }} - {{ match.opponent }} - 
+      <a href="{% url 'gps_app:gps_upload' %}?match_id={{ match.id }}">Upload GPS Data</a>
+    {% endif %}
   </li>
 {% empty %}
-  <li>No matches with GPS data found.</li>
+  <li>No matches found.</li>
 {% endfor %}
 </ul>
 

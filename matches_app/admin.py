@@ -15,12 +15,15 @@ from players_app.models import Player
 class MatchLineupBulkForm(forms.ModelForm):
     class Meta:
         model = MatchLineup
-        fields = ['player', 'position', 'pod_number', 'is_starting', 'time_entered']
+        fields = ['match', 'player', 'position', 'pod_number', 'is_starting', 'time_entered']
 
     def __init__(self, *args, **kwargs):
         match = kwargs.pop('match', None)
         super().__init__(*args, **kwargs)
         if match:
+            self.initial['match'] = match
+            self.fields['match'].initial = match
+            self.fields['match'].widget = forms.HiddenInput()
             self.fields['time_entered'].initial = match.time
             self.fields['pod_number'].initial = "Demo 2"  # default for new entries
 
@@ -78,35 +81,22 @@ class MatchAdmin(admin.ModelAdmin):
                 initial=extra_forms,
                 form_kwargs={'match': match}
             )
+
             if formset.is_valid():
+                # ✅ Assign match & team AFTER validation, safe to use cleaned_data
                 for form in formset.forms:
-                    if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
-                        instance = form.save(commit=False)
-                        instance.match = match
-                        instance.team = instance.player.age_group.team_set.first() if instance.player.age_group else None
+                    if form.cleaned_data and form.cleaned_data.get('player'):
+                        if form.instance.pk is None:  # New record
+                            form.instance.match = match
+                        form.instance.team = form.cleaned_data['player'].age_group.team_set.first()
 
-                        # Determine role from radio input
-                        role = request.POST.get(f"{form.prefix}-role")
-                        if role == 'starter':
-                            instance.is_starting = True
-                            instance.time_entered = None
-                        elif role == 'sub':
-                            instance.is_starting = False
-                            instance.time_entered = match.time
-                        else:
-                            instance.is_starting = False
-                            instance.time_entered = None
-
-                        try:
-                            instance.save()
-                        except Exception as e:
-                            messages.warning(request, f"Error saving {instance.player.name}: {str(e)}")
-
+                formset.save()
                 messages.success(request, "Lineup saved successfully.")
                 return redirect('admin:matches_app_match_changelist')
             else:
                 for form in formset:
-                    print(form.errors)
+                    if form.errors:
+                        print(form.errors)
                 messages.error(request, "There were errors in the form.")
         else:
             formset = LineupFormSet(

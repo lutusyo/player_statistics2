@@ -7,6 +7,7 @@ from .forms import GPSUploadForm
 from .models import GPSRecord
 from matches_app.models import Match, MatchLineup
 from players_app.models import Player
+from django.db.models import Count
 
 
 
@@ -31,8 +32,63 @@ def upload_gps_data(request):
             required_column = "Period Name"
 
             if required_column not in header_map:
-                messages.error(request, f"'{required_column}' column not found in CSV. Found: {list(header_map.keys())}")
+                messages.error(
+                    request,
+                    f"'{required_column}' column not found in CSV. Found: {list(header_map.keys())}"
+                )
                 return redirect('gps_app:gps_upload')
+
+            # CSV → model mapping
+            csv_field_map = {
+                "Player Name": "player_name",
+                "Period Name": "period_name",
+                "Period Number": "period_number",
+                "Max Acceleration": "max_acceleration",
+                "Max Deceleration": "max_deceleration",
+                "Acceleration Efforts": "acceleration_efforts",
+                "Deceleration Efforts": "deceleration_efforts",
+                "Accel + Decel Efforts": "accel_decel_efforts",
+                "Accel + Decel Efforts Per Minute": "accel_decel_efforts_per_minute",
+                "Duration": "duration",
+                "Distance": "distance",
+                "Player Load": "player_load",
+                "Max Velocity": "max_velocity",
+                "Max Vel (% Max)": "max_vel_percent_max",
+                "Meterage Per Minute": "meterage_per_minute",
+                "Player Load Per Minute": "player_load_per_minute",
+                "Work/Rest Ratio": "work_rest_ratio",
+                "Max Heart Rate": "max_heart_rate",
+                "Avg Heart Rate": "avg_heart_rate",
+                "Max HR (% Max)": "max_hr_percent_max",
+                "Avg HR (% Max)": "avg_hr_percent_max",
+                "HR Exertion": "hr_exertion",
+                "Red Zone": "red_zone",
+                "Heart Rate Band 1 Duration": "heart_rate_band_1_duration",
+                "Heart Rate Band 2 Duration": "heart_rate_band_2_duration",
+                "Heart Rate Band 3 Duration": "heart_rate_band_3_duration",
+                "Heart Rate Band 4 Duration": "heart_rate_band_4_duration",
+                "Heart Rate Band 5 Duration": "heart_rate_band_5_duration",
+                "Heart Rate Band 6 Duration": "heart_rate_band_6_duration",
+                "Energy": "energy",
+                "High Metabolic Load Distance": "high_metabolic_load_distance",
+                "Standing Distance": "standing_distance",
+                "Walking Distance": "walking_distance",
+                "Jogging Distance": "jogging_distance",
+                "Running Distance": "running_distance",
+                "HI Distance": "hi_distance",
+                "Sprint Distance": "sprint_distance",
+                "Sprint Efforts": "sprint_efforts",
+                "Sprint Dist Per Min": "sprint_dist_per_min",
+                "High Speed Distance": "high_speed_distance",
+                "High Speed Efforts": "high_speed_efforts",
+                "High Speed Distance Per Minute": "high_speed_distance_per_minute",
+                "Impacts": "impacts",
+                "Athlete Tags": "athlete_tags",
+                "Activity Tags": "activity_tags",
+                "Game Tags": "game_tags",
+                "Athlete Participation Tags": "athlete_participation_tags",
+                "Period Tags": "period_tags",
+            }
 
             created_count = 0
             for row in reader:
@@ -42,43 +98,32 @@ def upload_gps_data(request):
                 pod_number = row[header_map["Player Name"]].strip()
                 lineup = MatchLineup.objects.filter(match=match, pod_number=pod_number).first()
                 if not lineup:
-                    print(f"⚠️  No lineup found for pod {pod_number} in match {match}")
+                    print(f"⚠️ No lineup found for pod {pod_number} in match {match}")
                     continue
 
                 if GPSRecord.objects.filter(match=match, lineup=lineup).exists():
-                    print(f"⏭️  GPS data already exists for player {lineup.player.name} in this match.")
+                    print(f"⏭️ GPS data already exists for player {lineup.player.name} in this match.")
                     continue
 
-                def get_float(col): return float(row[header_map.get(col, -1)] or 0) if col in header_map else 0
-                def get_int(col): return int(row[header_map.get(col, -1)] or 0) if col in header_map else 0
+                record_data = {}
+                for csv_col, model_field in csv_field_map.items():
+                    idx = header_map.get(csv_col)
+                    if idx is not None and idx < len(row):
+                        value = row[idx].strip()
+                        # Convert numeric values
+                        if value.replace('.', '', 1).isdigit():
+                            if '.' in value:
+                                value = float(value)
+                            else:
+                                value = int(value)
+                        record_data[model_field] = value or None
 
                 try:
-                    
-                    duration = row[header_map.get("Duration", -1)].strip() if "Duration" in header_map else "00:00:00"
-                    
                     GPSRecord.objects.create(
                         match=match,
                         player=lineup.player,
                         lineup=lineup,
-                        duration=duration,
-                        max_velocity=get_float("Max Velocity"),
-                        max_acceleration=get_float("Max Acceleration"),
-                        max_deceleration=get_float("Max Deceleration"),
-                        acceleration_efforts=get_int("Acceleration Efforts"),
-                        deceleration_efforts=get_int("Deceleration Efforts"),
-                        distance=get_float("Distance"),
-                        player_load=get_float("Player Load"),
-                        meterage_per_minute=get_float("Meterage Per Minute"),
-                        player_load_per_minute=get_float("Player Load Per Minute"),
-                        max_heart_rate=get_float("Max Heart Rate"),
-                        avg_heart_rate=get_float("Avg Heart Rate"),
-                        sprint_distance=get_float("Sprint Distance"),
-                        sprint_efforts=get_int("Sprint Efforts"),
-                        jogging_distance=get_float("Jogging Distance"),
-                        walking_distance=get_float("Walking Distance"),
-                        high_speed_distance=get_float("High Speed Distance"),
-                        high_speed_efforts=get_int("High Speed Efforts"),
-                        impacts=get_int("Impacts"),
+                        **record_data
                     )
                     created_count += 1
                 except Exception as e:
@@ -92,7 +137,6 @@ def upload_gps_data(request):
 
     return render(request, 'gps_app/gps_upload.html', {'form': form})
 
-from django.db.models import Count
 
 def gps_matches_list(request):
     # List matches with at least one GPS record, annotated with record counts
@@ -115,13 +159,15 @@ def gps_match_detail(request, match_id):
 
     # Prepare JSON data for charts (adapt fields as needed)
     pie_labels = ['Standing', 'Walking', 'Jogging', 'Running', 'Sprinting']
+
     pie_data = [
         sum(r.standing_distance or 0 for r in records),
         sum(r.walking_distance or 0 for r in records),
         sum(r.jogging_distance or 0 for r in records),
         sum(r.running_distance or 0 for r in records),
-        sum(r.sprinting_distance or 0 for r in records),
+        sum(r.sprint_distance or 0 for r in records),
     ]
+
 
     radar_labels = [
         'Max Velocity', 'Sprint Distance', 'Sprint Efforts', 'Player Load',

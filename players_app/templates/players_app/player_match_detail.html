@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="d-flex" style="gap: 20px;">
+    <!-- Sidebar -->
+    <div style="min-width: 250px; border-right: 1px solid #ccc; padding-right: 15px;">
+        <h4>{{ player.full_name }} - Matches</h4>
+        <ul class="list-group">
+            <li class="list-group-item {% if not selected_match %}active{% endif %}">
+                <a href="{% url 'players_app:player_match_detail' player.id 'total' %}">Total</a>
+            </li>
+            {% for match in player_matches %}
+            <li class="list-group-item {% if selected_match and match.id == selected_match.id %}active{% endif %}">
+                <a href="{% url 'players_app:player_match_detail' player.id match.id %}">
+                    vs {{ match.away_team }}
+                </a>
+                <br>
+                <small>
+                    <a href="{% url 'gps_app:gps_data' match.id %}">{{ match.date }}</a>
+                </small>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Main content -->
+    <div style="flex-grow: 1;">
+        {% if selected_match %}
+            <h2>{{ player.full_name }} - Match Details</h2>
+            <h4>{{ selected_match.get_team_display }} vs {{ selected_match.opponent }} ({{ selected_match.date }})</h4>
+
+            <!-- Full GPS Data Table -->
+            {% if gps_records %}
+            <div class="table-responsive" style="max-height: 600px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; padding: 10px;">
+                <table class="table table-striped table-bordered table-hover table-sm align-middle">
+                    <thead class="table-dark sticky-top">
+                        <tr>
+                            <th>Player</th>
+                            <th>Player Name</th>
+                            <th>Period Name</th>
+                            <th>Period Number</th>
+                            <th>Max Acceleration</th>
+                            <th>Max Deceleration</th>
+                            <th>Acceleration Efforts</th>
+                            <th>Deceleration Efforts</th>
+                            <th>Accel + Decel Efforts</th>
+                            <th>Accel + Decel Efforts Per Minute</th>
+                            <th>Duration</th>
+                            <th>Distance</th>
+                            <th>Player Load</th>
+                            <th>Max Velocity</th>
+                            <th>Max Vel (% Max)</th>
+                            <th>Meterage Per Minute</th>
+                            <th>Player Load Per Minute</th>
+                            <th>Work/Rest Ratio</th>
+                            <th>Max Heart Rate</th>
+                            <th>Avg Heart Rate</th>
+                            <th>Max HR (% Max)</th>
+                            <th>Avg HR (% Max)</th>
+                            <th>HR Exertion</th>
+                            <th>Red Zone</th>
+                            <th>Heart Rate Band 1 Duration</th>
+                            <th>Heart Rate Band 2 Duration</th>
+                            <th>Heart Rate Band 3 Duration</th>
+                            <th>Heart Rate Band 4 Duration</th>
+                            <th>Heart Rate Band 5 Duration</th>
+                            <th>Heart Rate Band 6 Duration</th>
+                            <th>Energy</th>
+                            <th>High Metabolic Load Distance</th>
+                            <th>Standing Distance</th>
+                            <th>Walking Distance</th>
+                            <th>Jogging Distance</th>
+                            <th>Running Distance</th>
+                            <th>HI Distance</th>
+                            <th>Sprint Distance</th>
+                            <th>Sprint Efforts</th>
+                            <th>Sprint Dist Per Min</th>
+                            <th>High Speed Distance</th>
+                            <th>High Speed Efforts</th>
+                            <th>High Speed Distance Per Minute</th>
+                            <th>Impacts</th>
+                            <th>Athlete Tags</th>
+                            <th>Activity Tags</th>
+                            <th>Game Tags</th>
+                            <th>Athlete Participation Tags</th>
+                            <th>Period Tags</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in gps_records %}
+                        <tr>
+                            <td class="d-flex align-items-center gap-2">
+                                {% if r.player.photo %}
+                                    <img src="{{ r.player.photo.url }}" alt="{{ r.player.name }}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 50%;">
+                                {% else %}
+                                    <div style="width: 32px; height: 32px; background: #ccc; border-radius: 50%;"></div>
+                                {% endif %}
+                                <span>{{ r.player.name }}</span>
+                            </td>
+                            <td>{{ r.player_name }}</td>
+                            <td>{{ r.period_name }}</td>
+                            <td>{{ r.period_number }}</td>
+                            <td>{{ r.max_acceleration }}</td>
+                            <td>{{ r.max_deceleration }}</td>
+                            <td>{{ r.acceleration_efforts }}</td>
+                            <td>{{ r.deceleration_efforts }}</td>
+                            <td>{{ r.accel_decel_efforts }}</td>
+                            <td>{{ r.accel_decel_efforts_per_minute }}</td>
+                            <td>{{ r.duration }}</td>
+                            <td>{{ r.distance }}</td>
+                            <td>{{ r.player_load }}</td>
+                            <td>{{ r.max_velocity }}</td>
+                            <td>{{ r.max_vel_percent_max }}</td>
+                            <td>{{ r.meterage_per_minute }}</td>
+                            <td>{{ r.player_load_per_minute }}</td>
+                            <td>{{ r.work_rest_ratio }}</td>
+                            <td>{{ r.max_heart_rate }}</td>
+                            <td>{{ r.avg_heart_rate }}</td>
+                            <td>{{ r.max_hr_percent_max }}</td>
+                            <td>{{ r.avg_hr_percent_max }}</td>
+                            <td>{{ r.hr_exertion }}</td>
+                            <td>{{ r.red_zone }}</td>
+                            <td>{{ r.heart_rate_band_1_duration }}</td>
+                            <td>{{ r.heart_rate_band_2_duration }}</td>
+                            <td>{{ r.heart_rate_band_3_duration }}</td>
+                            <td>{{ r.heart_rate_band_4_duration }}</td>
+                            <td>{{ r.heart_rate_band_5_duration }}</td>
+                            <td>{{ r.heart_rate_band_6_duration }}</td>
+                            <td>{{ r.energy }}</td>
+                            <td>{{ r.high_metabolic_load_distance }}</td>
+                            <td>{{ r.standing_distance }}</td>
+                            <td>{{ r.walking_distance }}</td>
+                            <td>{{ r.jogging_distance }}</td>
+                            <td>{{ r.running_distance }}</td>
+                            <td>{{ r.hi_distance }}</td>
+                            <td>{{ r.sprint_distance }}</td>
+                            <td>{{ r.sprint_efforts }}</td>
+                            <td>{{ r.sprint_dist_per_min }}</td>
+                            <td>{{ r.high_speed_distance }}</td>
+                            <td>{{ r.high_speed_efforts }}</td>
+                            <td>{{ r.high_speed_distance_per_minute }}</td>
+                            <td>{{ r.impacts }}</td>
+                            <td>{{ r.athlete_tags }}</td>
+                            <td>{{ r.activity_tags }}</td>
+                            <td>{{ r.game_tags }}</td>
+                            <td>{{ r.athlete_participation_tags }}</td>
+                            <td>{{ r.period_tags }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <p>No GPS data for this player in this match.</p>
+            {% endif %}
+
+            <!-- Defensive Duels Chart -->
+            <h3 class="mt-4">Defensive Duels</h3>
+            <canvas id="defensiveDuelsChart" width="400" height="200"></canvas>
+
+            <!-- Attempt Outcomes Chart -->
+            <h3 class="mt-4">Attempt Outcomes</h3>
+            <canvas id="attemptOutcomesChart" width="400" height="200"></canvas>
+
+        {% else %}
+            <h2>{{ player.full_name }} - Aggregated Stats (Total)</h2>
+
+            <h3>GPS Data Summary per Match</h3>
+            {% if gps_per_match %}
+                <table class="table table-bordered table-sm">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Home Team</th>
+                            <th>Away Team</th>
+                            <th>Total Distance</th>
+                            <th>Avg Max Velocity</th>
+                            <th>Total Sprint Distance</th>
+                            <th>Total Player Load</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rec in gps_per_match %}
+                        <tr>
+                            <td><a href="{% url 'gps_app:gps_data' rec.match__id %}">{{ rec.match__date }}</a></td>
+                            <td>{{ rec.match__home_team__name }}</td>
+                            <td>{{ rec.match__away_team__name }}</td>
+                            <td>{{ rec.total_distance|default:"0" }}</td>
+                            <td>{{ rec.avg_max_velocity|default:"0" }}</td>
+                            <td>{{ rec.total_sprint_distance|default:"0" }}</td>
+                            <td>{{ rec.total_player_load|default:"0" }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <th colspan="3">Total</th>
+                            <th>{{ gps_agg.total_distance|default:"0" }}</th>
+                            <th>{{ gps_agg.avg_max_velocity|default:"0" }}</th>
+                            <th>{{ gps_agg.total_sprint_distance|default:"0" }}</th>
+                            <th>{{ gps_agg.total_player_load|default:"0" }}</th>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3 class="mt-4">Defensive Duels (Aggregated)</h3>
+                <canvas id="defensiveDuelsChart" width="400" height="200"></canvas>
+
+                <h3 class="mt-4">Attempt Outcomes (Aggregated)</h3>
+                <canvas id="attemptOutcomesChart" width="400" height="200"></canvas>
+            {% else %}
+                <p>No GPS data available.</p>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  {% if selected_match %}
+  const defensiveLabels = {{ defensive_duels_keys|safe }};
+  const defensiveData = {{ defensive_duels_values|safe }};
+
+  const ctxDef = document.getElementById('defensiveDuelsChart').getContext('2d');
+  const defensiveChart = new Chart(ctxDef, {
+      type: 'bar',
+      data: {
+          labels: defensiveLabels,
+          datasets: [{
+              label: 'Count',
+              data: defensiveData,
+              backgroundColor: 'rgba(54, 162, 235, 0.7)',
+          }]
+      },
+      options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } }
+      }
+  });
+  {% else %}
+  const defensiveLabels = [
+      'Aerial Duel Won', 'Aerial Duel Lost', 'Tackle Won', 'Tackle Lost', 'Physical Duel Won', 'Physical Duel Lost'
+  ];
+  const defensiveData = [
+      {{ defensive_stats_agg.total_aerial_won|default:"0" }},
+      {{ defensive_stats_agg.total_aerial_lost|default:"0" }},
+      {{ defensive_stats_agg.total_tackle_won|default:"0" }},
+      {{ defensive_stats_agg.total_tackle_lost|default:"0" }},
+      {{ defensive_stats_agg.total_physical_won|default:"0" }},
+      {{ defensive_stats_agg.total_physical_lost|default:"0" }},
+  ];
+
+  const ctxDef = document.getElementById('defensiveDuelsChart').getContext('2d');
+  const defensiveChart = new Chart(ctxDef, {
+      type: 'pie',
+      data: {
+          labels: defensiveLabels,
+          datasets: [{
+              label: 'Count',
+              data: defensiveData,
+              backgroundColor: [
+                  'rgba(255, 99, 132, 0.7)',
+                  'rgba(54, 162, 235, 0.7)',
+                  'rgba(255, 206, 86, 0.7)',
+                  'rgba(75, 192, 192, 0.7)',
+                  'rgba(153, 102, 255, 0.7)',
+                  'rgba(255, 159, 64, 0.7)'
+              ],
+          }]
+      },
+      options: { responsive: true }
+  });
+  {% endif %}
+
+  const ctxAttempt = document.getElementById('attemptOutcomesChart').getContext('2d');
+  const attemptChart = new Chart(ctxAttempt, {
+      type: 'pie',
+      data: {
+          labels: {{ outcome_labels|safe }},
+          datasets: [{
+              label: 'Attempt Outcomes',
+              data: {{ outcome_counts|safe }},
+              backgroundColor: [
+                  'rgba(255, 99, 132, 0.7)',
+                  'rgba(54, 162, 235, 0.7)',
+                  'rgba(255, 206, 86, 0.7)',
+                  'rgba(75, 192, 192, 0.7)',
+                  'rgba(153, 102, 255, 0.7)',
+                  'rgba(255, 159, 64, 0.7)'
+              ],
+          }]
+      },
+      options: { responsive: true }
+  });
+</script>
+{% endblock %}
