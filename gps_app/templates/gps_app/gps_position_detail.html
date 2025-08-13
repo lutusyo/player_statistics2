@@ -1,0 +1,104 @@
+
+{% load static %}
+
+
+<style>
+  /* Your existing styles for container, tables, headers... */
+
+  /* Position toggle buttons */
+  .position-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  .position-button {
+    padding: 0.5rem 1.2rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    background-color: var(--team-blue);
+    transition: background-color 0.3s ease;
+  }
+  .position-button:hover {
+    background-color: #0b5ed7;
+  }
+
+  /* Hidden tables by default */
+  .position-table {
+    display: none;
+    margin-top: 1rem;
+  }
+
+  /* Show active table */
+  .position-table.active {
+    display: block;
+  }
+</style>
+
+<div class="container my-4">
+
+  {% if records %}
+    <!-- Position filter buttons -->
+    <div class="position-buttons" role="group" aria-label="Filter tables by player position">
+      <button class="position-button" data-position="forwards">Forwards</button>
+      <button class="position-button" data-position="midfielders">Midfielders</button>
+      <button class="position-button" data-position="defenders">Defenders</button>
+      <button class="position-button" data-position="goalkeepers">Goalkeepers</button>
+    </div>
+
+    <!-- Tables per position -->
+
+    <!-- Forward Table -->
+    <div id="forwards" class="position-table" aria-live="polite">
+      <h3>Forwards</h3>
+      {% include 'gps_app/partials/position_table.html' with records=forwards %}
+    </div>
+
+    <!-- Midfielder Table -->
+    <div id="midfielders" class="position-table" aria-live="polite">
+      <h3>Midfielders</h3>
+      {% include 'gps_app/partials/position_table.html' with records=midfielders %}
+    </div>
+
+    <!-- Defender Table -->
+    <div id="defenders" class="position-table" aria-live="polite">
+      <h3>Defenders</h3>
+      {% include 'gps_app/partials/position_table.html' with records=defenders %}
+    </div>
+
+    <!-- Goalkeeper Table -->
+    <div id="goalkeepers" class="position-table" aria-live="polite">
+      <h3>Goalkeepers</h3>
+      {% include 'gps_app/partials/position_table.html' with records=goalkeepers %}
+    </div>
+
+  {% else %}
+    <p class="alert alert-warning">No GPS data available for this match.</p>
+    <p><a href="{% url 'gps_app:gps_dashboard' %}" class="btn btn-primary">Upload CSV file</a></p>
+  {% endif %}
+
+</div>
+
+<script>
+  // JS for toggling tables on button click
+  document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.position-button');
+    const tables = document.querySelectorAll('.position-table');
+
+    buttons.forEach(button => {
+      button.addEventListener('click', () => {
+        const pos = button.getAttribute('data-position');
+        tables.forEach(table => {
+          if (table.id === pos) {
+            table.classList.toggle('active');
+          } else {
+            table.classList.remove('active');
+          }
+        });
+      });
+    });
+  });
+</script>

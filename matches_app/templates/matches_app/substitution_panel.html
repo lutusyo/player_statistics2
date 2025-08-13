@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Substitution Panel - {{ match }}</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 15px;
+    background: #f9f9f9;
+  }
+  h1, h2 {
+    margin-bottom: 5px;
+  }
+  .timer {
+    background: #222;
+    color: #eee;
+    font-size: 24px;
+    font-weight: bold;
+    padding: 10px;
+    width: 180px;
+    text-align: center;
+    border-radius: 5px;
+    user-select: none;
+    margin-bottom: 15px;
+  }
+  .btn {
+    cursor: pointer;
+    border: none;
+    background-color: #007BFF;
+    color: white;
+    padding: 7px 14px;
+    border-radius: 4px;
+    margin-right: 8px;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+  }
+  .btn:hover {
+    background-color: #0056b3;
+  }
+  .btn-secondary {
+    background-color: #6c757d;
+  }
+  .btn-secondary:hover {
+    background-color: #4e555b;
+  }
+  .lists-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .list-box {
+    background: white;
+    border-radius: 5px;
+    padding: 10px;
+    flex: 1 1 300px;
+    max-width: 350px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  }
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .player-list {
+    max-height: 350px;
+    overflow-y: auto;
+  }
+  .player-item {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding: 6px 4px;
+  }
+  .player-item:last-child {
+    border-bottom: none;
+  }
+  .player-photo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    border: 1px solid #ddd;
+  }
+  .player-info {
+    flex-grow: 1;
+  }
+  .player-name {
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .player-jersey {
+    font-size: 13px;
+    color: #666;
+  }
+  .selection-highlight {
+    background-color: #cce5ff;
+  }
+  .hidden {
+    display: none;
+  }
+  .substitution-step {
+    margin-top: 20px;
+    padding: 15px;
+    background: #e9f0ff;
+    border-radius: 5px;
+  }
+  .time-input {
+    width: 60px;
+    font-size: 14px;
+    padding: 3px 6px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    margin-right: 10px;
+  }
+  .selected-player-display {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+  }
+  .selected-player-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #999;
+  }
+  .undo-info {
+    font-size: 12px;
+    color: #666;
+  }
+  .error-message {
+    color: red;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Substitution Panel</h1>
+<h2>{{ match.home_team.name }} vs {{ match.away_team.name }} — {{ match.date }}</h2>
+
+<div class="timer" id="match-timer">00:00</div>
+<div>
+  <button class="btn" id="btn-start">Start</button>
+  <button class="btn btn-secondary" id="btn-pause">Pause</button>
+  <button class="btn btn-secondary" id="btn-finish">Finish</button>
+</div>
+
+<hr />
+
+<div class="lists-container">
+  <div class="list-box">
+    <div class="list-header">
+      <strong>1) Currently On Pitch</strong>
+      <button class="btn btn-secondary btn-toggle" data-list="currently_on_pitch">Show</button>
+    </div>
+    <div class="player-list hidden" id="list-currently_on_pitch"></div>
+  </div>
+
+  <div class="list-box">
+    <div class="list-header">
+      <strong>2) Currently On Subs</strong>
+      <button class="btn btn-secondary btn-toggle" data-list="currently_on_subs">Show</button>
+    </div>
+    <div class="player-list hidden" id="list-currently_on_subs"></div>
+  </div>
+
+  <div class="list-box">
+    <div class="list-header">
+      <strong>3) Bench (Static)</strong>
+      <button class="btn btn-secondary btn-toggle" data-list="bench">Show</button>
+    </div>
+    <div class="player-list hidden" id="list-bench"></div>
+  </div>
+
+  <div class="list-box">
+    <div class="list-header">
+      <strong>4) Already Played & Out</strong>
+      <button class="btn btn-secondary btn-toggle" data-list="already_played_and_out">Show</button>
+    </div>
+    <div class="player-list hidden" id="list-already_played_and_out"></div>
+  </div>
+
+  <div class="list-box">
+    <div class="list-header">
+      <strong>5) Starting Eleven (Static)</strong>
+      <button class="btn btn-secondary btn-toggle" data-list="starting_eleven">Show</button>
+    </div>
+    <div class="player-list hidden" id="list-starting_eleven"></div>
+  </div>
+
+  <div class="list-box">
+    <div class="list-header">
+      <strong>6) Subs This Match</strong>
+      <button class="btn btn-secondary btn-toggle" data-list="subs_this_match">Show</button>
+    </div>
+    <div class="player-list hidden" id="list-subs_this_match"></div>
+  </div>
+
+  <div class="list-box">
+    <div class="list-header">
+      <strong>7) Player Exchanges (Substitutions)</strong>
+      <button class="btn btn-secondary btn-toggle" data-list="subs_exchanges">Show</button>
+    </div>
+    <div class="player-list hidden" id="list-subs_exchanges"></div>
+  </div>
+
+  <div class="list-box">
+    <div class="list-header">
+      <strong>8) Subs But Didn't Play</strong>
+      <button class="btn btn-secondary btn-toggle" data-list="subs_not_played">Show</button>
+    </div>
+    <div class="player-list hidden" id="list-subs_not_played"></div>
+  </div>
+</div>
+
+<!-- Substitution flow UI -->
+<div class="substitution-step" id="substitution-flow" style="display:none;">
+  <h3>Substitution in progress</h3>
+
+  <div id="step-1">
+    <p>Select player <strong>going out</strong>:</p>
+    <div id="select-out-list" class="player-list"></div>
+  </div>
+
+  <div id="step-2" style="display:none;">
+    <p>Selected <strong>out</strong> player:</p>
+    <div class="selected-player-display" id="selected-out-player"></div>
+    <label>Time Out (minute): 
+      <input type="number" id="time-out-input" class="time-input" min="0" max="120" />
+    </label>
+    <button class="btn" id="confirm-out">Confirm Out</button>
+    <button class="btn btn-secondary" id="cancel-out">Cancel</button>
+  </div>
+
+  <div id="step-3" style="display:none;">
+    <p>Select player <strong>coming in</strong>:</p>
+    <div id="select-in-list" class="player-list"></div>
+  </div>
+
+  <div id="step-4" style="display:none;">
+    <p>Selected <strong>in</strong> player:</p>
+    <div class="selected-player-display" id="selected-in-player"></div>
+    <p>Time In is set to the Time Out of player going out (not editable)</p>
+    <button class="btn" id="confirm-in">Confirm In</button>
+    <button class="btn btn-secondary" id="cancel-in">Cancel</button>
+  </div>
+
+  <div class="error-message" id="error-msg"></div>
+</div>
+
+<button class="btn" id="start-substitution-btn">Start Substitution</button>
+
+<script>
+  // --- VARIABLES ---
+  let substitutionStep = 0; // 0 = idle, 1 = select out, 2 = confirm out, 3 = select in, 4 = confirm in
+  let selectedOutPlayer = null;
+  let selectedInPlayer = null;
+  let substitutionMinute = null;
+  let matchTime = 0; // in seconds
+  let timerInterval = null;
+  let matchFinished = false;
+
+  const matchId = {{ match.id }};
+  
+  // --- TIMER FUNCTIONS ---
+  function updateTimerDisplay() {
+    const minutes = Math.floor(matchTime / 60).toString().padStart(2,'0');
+    const seconds = (matchTime % 60).toString().padStart(2,'0');
+    document.getElementById('match-timer').textContent = `${minutes}:${seconds}`;
+  }
+
+  function timerTick() {
+    if (!matchFinished) {
+      matchTime++;
+      updateTimerDisplay();
+    }
+  }
+
+  document.getElementById('btn-start').addEventListener('click', () => {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(timerTick, 1000);
+    matchFinished = false;
+  });
+
+  document.getElementById('btn-pause').addEventListener('click', () => {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  });
+
+  document.getElementById('btn-finish').addEventListener('click', () => {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    matchFinished = true;
+    alert("Match finished! Updating players time_out accordingly...");
+
+    // Update remaining players on pitch time_out to current match time
+    fetch(`/matches_app/api/matches/${matchId}/finalize/`, {
+      method: 'POST',
+      headers: {'X-CSRFToken': getCookie('csrftoken')}
+    })
+    .then(resp => resp.json())
+    .then(data => {
+      if (data.success) {
+        loadAllLists();
+      }
+    });
+  });
+
+  // --- UTILITIES ---
+  function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+
+  // --- LIST TOGGLE BUTTONS ---
+  document.querySelectorAll('.btn-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const listName = btn.dataset.list;
+      const listDiv = document.getElementById('list-' + listName);
+      const isHidden = listDiv.classList.contains('hidden');
+      if (isHidden) {
+        listDiv.classList.remove('hidden');
+        btn.textContent = 'Hide';
+      } else {
+        listDiv.classList.add('hidden');
+        btn.textContent = 'Show';
+      }
+    });
+  });
+
+  // --- LOAD ALL LISTS ---
+  async function loadAllLists() {
+    try {
+      const resp = await fetch(`/matches_app/api/matches/${matchId}/substitutions/lists/`);
+      const data = await resp.json();
+
+      renderList('currently_on_pitch', data.currently_on_pitch);
+      renderList('currently_on_subs', data.currently_on_subs);
+      renderList('bench', data.bench);
+      renderList('already_played_and_out', data.already_played_and_out);
+      renderList('starting_eleven', data.starting_eleven);
+      renderList('subs_this_match', data.subs_this_match);
+      renderSubsExchanges(data.subs_exchanges);
+      renderList('subs_not_played', data.subs_not_played);
+    } catch(err) {
+      console.error("Error loading lists:", err);
+    }
+  }
+
+  function renderList(listName, players) {
+    const container = document.getElementById('list-' + listName);
+    container.innerHTML = '';
+    if (!players.length) {
+      container.innerHTML = '<em>No players</em>';
+      return;
+    }
+    players.forEach(pl => {
+      const div = document.createElement('div');
+      div.classList.add('player-item');
+      div.dataset.lineupId = pl.lineup_id || '';
+      div.dataset.playerId = pl.player_id || '';
+
+      const img = document.createElement('img');
+      img.src = pl.photo_url || 'https://via.placeholder.com/36';
+      img.className = 'player-photo';
+      div.appendChild(img);
+
+      const info = document.createElement('div');
+      info.className = 'player-info';
+
+      const name = document.createElement('div');
+      name.className = 'player-name';
+      name.textContent = pl.name;
+      info.appendChild(name);
+
+      const jersey = document.createElement('div');
+      jersey.className = 'player-jersey';
+      jersey.textContent = `#${pl.jersey_number || 'N/A'}`;
+      info.appendChild(jersey);
+
+      div.appendChild(info);
+
+      container.appendChild(div);
+    });
+  }
+
+  function renderSubsExchanges(subs) {
+    const container = document.getElementById('list-subs_exchanges');
+    container.innerHTML = '';
+    if (!subs.length) {
+      container.innerHTML = '<em>No substitutions made yet</em>';
+      return;
+    }
+    subs.forEach(sub => {
+      const div = document.createElement('div');
+      div.classList.add('player-item');
+
+      const outImg = document.createElement('img');
+      outImg.src = sub.player_out_photo || 'https://via.placeholder.com/36';
+      outImg.className = 'player-photo';
+      div.appendChild(outImg);
+
+      const outName = document.createElement('div');
+      outName.className = 'player-info';
+      outName.innerHTML = `<strong>OUT:</strong> ${sub.player_out_name} (#${sub.player_out_jersey})`;
+      div.appendChild(outName);
+
+      const inImg = document.createElement('img');
+      inImg.src = sub.player_in_photo || 'https://via.placeholder.com/36';
+      inImg.className = 'player-photo';
+      div.appendChild(inImg);
+
+      const inName = document.createElement('div');
+      inName.className = 'player-info';
+      inName.innerHTML = `<strong>IN:</strong> ${sub.player_in_name} (#${sub.player_in_jersey})`;
+      div.appendChild(inName);
+
+      const minSpan = document.createElement('span');
+      minSpan.style.marginLeft = 'auto';
+      minSpan.textContent = `Min: ${sub.minute}`;
+      div.appendChild(minSpan);
+
+      container.appendChild(div);
+    });
+  }
+
+  // --- SUBSTITUTION FLOW LOGIC ---
+  const substitutionFlowDiv = document.getElementById('substitution-flow');
+  const startSubBtn = document.getElementById('start-substitution-btn');
+  const selectOutList = document.getElementById('select-out-list');
+  const step1Div = document.getElementById('step-1');
+  const step2Div = document.getElementById('step-2');
+  const step3Div = document.getElementById('step-3');
+  const step4Div = document.getElementById('step-4');
+  const selectedOutPlayerDiv = document.getElementById('selected-out-player');
+  const selectedInPlayerDiv = document.getElementById('selected-in-player');
+  const timeOutInput = document.getElementById('time-out-input');
+  const confirmOutBtn = document.getElementById('confirm-out');
+  const cancelOutBtn = document.getElementById('cancel-out');
+  const confirmInBtn = document.getElementById('confirm-in');
+  const cancelInBtn = document.getElementById('cancel-in');
+  const errorMsg = document.getElementById('error-msg');
+
+  startSubBtn.addEventListener('click', () => {
+    substitutionStep = 1;
+    selectedOutPlayer = null;
+    selectedInPlayer = null;
+    substitutionMinute = null;
+    errorMsg.textContent = '';
+    startSubBtn.style.display = 'none';
+    substitutionFlowDiv.style.display = 'block';
+    step1Div.style.display = 'block';
+    step2Div.style.display = 'none';
+    step3Div.style.display = 'none';
+    step4Div.style.display = 'none';
+
+    loadOutPlayers();
+  });
+
+  function loadOutPlayers() {
+    fetch(`/matches_app/api/matches/${matchId}/substitutions/lists/`)
+      .then(resp => resp.json())
+      .then(data => {
+        const players = data.currently_on_pitch;
+        renderSelectablePlayers(selectOutList, players, 'out');
+      });
+  }
+
+  function renderSelectablePlayers(container, players, role) {
+    container.innerHTML = '';
+    if (!players.length) {
+      container.innerHTML = '<em>No players available</em>';
+      return;
+    }
+    players.forEach(pl => {
+      const div = document.createElement('div');
+      div.classList.add('player-item');
+      div.style.cursor = 'pointer';
+      div.dataset.playerId = pl.player_id;
+
+      const img = document.createElement('img');
+      img.src = pl.photo_url || 'https://via.placeholder.com/36';
+      img.className = 'player-photo';
+      div.appendChild(img);
+
+      const info = document.createElement('div');
+      info.className = 'player-info';
+
+      const name = document.createElement('div');
+      name.className = 'player-name';
+      name.textContent = pl.name;
+      info.appendChild(name);
+
+      const jersey = document.createElement('div');
+      jersey.className = 'player-jersey';
+      jersey.textContent = `#${pl.jersey_number || 'N/A'}`;
+      info.appendChild(jersey);
+
+      div.appendChild(info);
+
+      div.addEventListener('click', () => {
+        if (role === 'out') {
+          selectOutPlayer(pl, div);
+        } else if (role === 'in') {
+          selectInPlayer(pl, div);
+        }
+      });
+
+      container.appendChild(div);
+    });
+  }
+
+  function selectOutPlayer(player, element) {
+    selectedOutPlayer = player;
+    // Highlight selected
+    Array.from(selectOutList.children).forEach(c => c.classList.remove('selection-highlight'));
+    element.classList.add('selection-highlight');
+
+    // Show confirm out step
+    step1Div.style.display = 'none';
+    step2Div.style.display = 'block';
+
+    selectedOutPlayerDiv.innerHTML = `
+      <img src="${player.photo_url || 'https://via.placeholder.com/50'}" class="selected-player-photo" />
+      <div>
+        <div><strong>${player.name}</strong></div>
+        <div>Jersey #${player.jersey_number || 'N/A'}</div>
+      </div>
+    `;
+    timeOutInput.value = Math.floor(matchTime / 60); // default to current match minute
+    substitutionMinute = Math.floor(matchTime / 60);
+  }
+
+  confirmOutBtn.addEventListener('click', () => {
+    const inputVal = parseInt(timeOutInput.value);
+    if (isNaN(inputVal) || inputVal < 0 || inputVal > 120) {
+      errorMsg.textContent = 'Please enter a valid minute (0-120)';
+      return;
+    }
+    substitutionMinute = inputVal;
+    errorMsg.textContent = '';
+
+    // Proceed to select in player step
+    step2Div.style.display = 'none';
+    step3Div.style.display = 'block';
+
+    loadInPlayers();
+  });
+
+  cancelOutBtn.addEventListener('click', () => {
+    substitutionStep = 0;
+    selectedOutPlayer = null;
+    substitutionMinute = null;
+    errorMsg.textContent = '';
+    substitutionFlowDiv.style.display = 'none';
+    startSubBtn.style.display = 'inline-block';
+  });
+
+  function loadInPlayers() {
+    fetch(`/matches_app/api/matches/${matchId}/substitutions/lists/`)
+      .then(resp => resp.json())
+      .then(data => {
+        const players = data.currently_on_subs;
+        renderSelectablePlayers(document.getElementById('select-in-list'), players, 'in');
+      });
+  }
+
+  function selectInPlayer(player, element) {
+    selectedInPlayer = player;
+    // Highlight selected
+    Array.from(document.getElementById('select-in-list').children).forEach(c => c.classList.remove('selection-highlight'));
+    element.classList.add('selection-highlight');
+
+    // Show confirm in step
+    step3Div.style.display = 'none';
+    step4Div.style.display = 'block';
+
+    selectedInPlayerDiv.innerHTML = `
+      <img src="${player.photo_url || 'https://via.placeholder.com/50'}" class="selected-player-photo" />
+      <div>
+        <div><strong>${player.name}</strong></div>
+        <div>Jersey #${player.jersey_number || 'N/A'}</div>
+      </div>
+    `;
+  }
+
+  confirmInBtn.addEventListener('click', () => {
+    if (!selectedOutPlayer || !selectedInPlayer || substitutionMinute === null) {
+      errorMsg.textContent = 'Incomplete substitution data';
+      return;
+    }
+    errorMsg.textContent = '';
+
+    fetch(`/matches_app/api/matches/${matchId}/substitutions/record/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken'),
+      },
+      body: JSON.stringify({
+        player_out_id: selectedOutPlayer.player_id,
+        player_in_id: selectedInPlayer.player_id,
+        minute: substitutionMinute,
+      }),
+    })
+    .then(resp => resp.json())
+    .then(data => {
+      if (data.success) {
+        alert('Substitution recorded successfully!');
+        substitutionStep = 0;
+        selectedOutPlayer = null;
+        selectedInPlayer = null;
+        substitutionMinute = null;
+        substitutionFlowDiv.style.display = 'none';
+        startSubBtn.style.display = 'inline-block';
+
+        loadAllLists();
+      } else {
+        errorMsg.textContent = 'Failed to record substitution';
+      }
+    })
+    .catch(() => {
+      errorMsg.textContent = 'Error communicating with server';
+    });
+  });
+
+  cancelInBtn.addEventListener('click', () => {
+    substitutionStep = 0;
+    selectedInPlayer = null;
+    errorMsg.textContent = '';
+    substitutionFlowDiv.style.display = 'none';
+    startSubBtn.style.display = 'inline-block';
+  });
+
+  // Auto-refresh all lists every 10 seconds
+  setInterval(() => {
+    if (substitutionStep === 0) { // Only refresh if idle
+      loadAllLists();
+    }
+  }, 10000);
+
+  // Initial load
+  loadAllLists();
+  updateTimerDisplay();
+</script>
+
+</body>
+</html>

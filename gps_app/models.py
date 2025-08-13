@@ -58,4 +58,4 @@ class GPSRecord(models.Model):
 
 
     def __str__(self):
-        return f"{self.match} | {self.player} | {self.date_recorded}"
+        return f"{self.match} | {self.player} | {self.match.date}"

@@ -1,85 +1,218 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block content %}
-<h2>Lineup for Match on {{ match.date }}</h2>
-
-<div class="lineup-container">
-    <!-- Football Field Area -->
-    <div class="field">
-        {% for player in starting_players %}
-            <div class="player-position" style="top:{{ player.position_y }}%; left:{{ player.position_x }}%;">
-                <img src="{{ player.player.photo.url }}" class="player-photo" alt="{{ player.player.name }}">
-                <p>{{ player.player.name }}</p>
-            </div>
-        {% endfor %}
-    </div>
-
-    <!-- Right Sidebar for Substitutes -->
-    <div class="substitutes-sidebar">
-        <h3>Substitutes</h3>
-        {% for sub in substitutes %}
-            <div class="sub-player">
-                <img src="{{ sub.player.photo.url }}" class="sub-photo" alt="{{ sub.player.name }}">
-                <p>{{ sub.player.name }}</p>
-            </div>
-        {% endfor %}
-    </div>
-</div>
-
 <style>
-.lineup-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    position: relative;
-}
-
-.field {
-    width: 70%;
-    height: 600px;
-    background: url("{% static 'images/football_field.jpg' %}") no-repeat center;
-    background-size: cover;
-    position: relative;
-    border: 2px solid #3a3a3a;
-    margin-right: 20px;
-}
-
-.player-position {
-    position: absolute;
-    text-align: center;
-    transform: translate(-50%, -50%);
-    color: white;
-}
-
-.player-photo {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: 2px solid white;
-}
-
-.substitutes-sidebar {
-    width: 25%;
-    background: #f4f4f4;
-    padding: 10px;
-    border-radius: 10px;
-    height: 600px;
-    overflow-y: auto;
-}
-
-.sub-player {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.sub-photo {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
+    .hidden { display: none; }
+    .player-card {
+        border: 1px solid #ccc;
+        padding: 8px;
+        margin: 4px;
+        text-align: center;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: 0.3s;
+    }
+    .player-card.selected {
+        background-color: #4CAF50;
+        color: white;
+    }
+    .step-container {
+        max-width: 800px;
+        margin: auto;
+    }
+    .buttons {
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .spinner {
+        display: none;
+        margin-left: 10px;
+    }
 </style>
 
+<div class="step-container">
+
+    <!-- STEP 1: SELECT PLAYERS -->
+    <div id="step1">
+        <h2>Select Players</h2>
+        <p>Select exactly 11 starters, then optionally select substitutes.</p>
+        <div id="players-list" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+            {% for player in players %}
+            <div class="player-card" data-id="{{ player.id }}">
+                <img src="{{ player.photo.url }}" alt="{{ player.name }}" style="width:100%;border-radius:6px;">
+                <p>{{ player.name }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        <div>
+            <small>Selected starters: <span id="starters-count">0</span>/11</small>
+        </div>
+        <div>
+            <small>Selected substitutes: <span id="bench-count">0</span></small>
+        </div>
+        <div class="buttons">
+            <span></span>
+            <button id="next-btn" disabled>Next →</button>
+        </div>
+    </div>
+
+    <!-- STEP 2: ASSIGN POSITIONS & GPS PODS -->
+    <div id="step2" class="hidden">
+        <h2>Assign Positions & GPS Pods</h2>
+        <form id="lineup-form">
+            <div id="assignments"></div>
+            <div class="buttons">
+                <button type="button" id="back-btn">← Back</button>
+                <button type="submit" id="save-btn">Save Lineup</button>
+                <span class="spinner" id="loading-spinner">⏳ Saving...</span>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    let starters = [];
+    let bench = [];
+
+    document.querySelectorAll('.player-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const id = card.dataset.id;
+
+            // Remove if already selected (in starters or bench)
+            if (starters.includes(id)) {
+                starters = starters.filter(pid => pid !== id);
+                card.classList.remove('selected');
+                updateCounts();
+                updateNextBtn();
+                return;
+            }
+            if (bench.includes(id)) {
+                bench = bench.filter(pid => pid !== id);
+                card.classList.remove('selected');
+                updateCounts();
+                updateNextBtn();
+                return;
+            }
+
+            // Add new selection: fill starters first (max 11), then bench
+            if (starters.length < 11) {
+                starters.push(id);
+                card.classList.add('selected');
+            } else {
+                bench.push(id);
+                card.classList.add('selected');
+            }
+            updateCounts();
+            updateNextBtn();
+        });
+    });
+
+    function updateCounts() {
+        document.getElementById('starters-count').innerText = starters.length;
+        document.getElementById('bench-count').innerText = bench.length;
+    }
+
+    function updateNextBtn() {
+        document.getElementById('next-btn').disabled = starters.length !== 11;
+    }
+
+    // NEXT → Step 2
+    document.getElementById('next-btn').addEventListener('click', () => {
+        const assignmentsDiv = document.getElementById('assignments');
+        assignmentsDiv.innerHTML = "";
+
+        // Positions & GPS pods for starters (positions required)
+        starters.forEach(id => {
+            const playerCard = document.querySelector(`.player-card[data-id="${id}"]`);
+            const name = playerCard.querySelector('p').innerText;
+
+            assignmentsDiv.innerHTML += `
+                <div style="display:flex;align-items:center;margin-bottom:10px;">
+                    <span style="width:150px;">${name}</span>
+                    <select name="position_${id}" required>
+                        <option value="">Select Position</option>
+                        <option value="GK">GK</option>
+                        <option value="RB">RB</option>
+                        <option value="RCB">RCB</option>
+                        <option value="LCB">LCB</option>
+                        <option value="LB">LB</option>
+                        <option value="RM">RM</option>
+                        <option value="CM">CM</option>
+                        <option value="LM">LM</option>
+                        <option value="RW">RW</option>
+                        <option value="LW">LW</option>
+                        <option value="ST">ST</option>
+                    </select>
+
+                    <input type="text" name="gps_${id}" placeholder="GPS Pod #" style="margin-left:10px;width:100px;">
+                </div>
+            `;
+        });
+
+        // Bench players — no position, optional GPS pod only
+        if (bench.length) {
+            assignmentsDiv.innerHTML += `<h3>Bench Players (no position required)</h3>`;
+            bench.forEach(id => {
+                const playerCard = document.querySelector(`.player-card[data-id="${id}"]`);
+                const name = playerCard.querySelector('p').innerText;
+                assignmentsDiv.innerHTML += `
+                    <div style="display:flex;align-items:center;margin-bottom:10px;">
+                        <span style="width:150px;">${name}</span>
+                        <input type="text" name="gps_${id}" placeholder="GPS Pod #" style="margin-left:10px;width:100px;">
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+    });
+
+    // ← BACK
+    document.getElementById('back-btn').addEventListener('click', () => {
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step1').classList.remove('hidden');
+    });
+
+    // SAVE LINEUP FORM
+    document.getElementById('lineup-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        document.getElementById('loading-spinner').style.display = 'inline';
+
+        const formData = new FormData();
+        formData.append('match_id', '{{ match.id }}');
+
+        // Append starters
+        starters.forEach(id => {
+            formData.append('starters[]', id);
+            formData.append(`position_${id}`, e.target[`position_${id}`]?.value || '');
+            formData.append(`gps_${id}`, e.target[`gps_${id}`]?.value || '');
+        });
+
+        // Append bench
+        bench.forEach(id => {
+            formData.append('bench[]', id);
+            formData.append(`gps_${id}`, e.target[`gps_${id}`]?.value || '');
+        });
+
+        fetch("{% url 'matches_app:match_lineup' match.id %}", {
+            method: "POST",
+            body: formData,
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('loading-spinner').style.display = 'none';
+            alert("Lineup saved successfully!");
+            window.location.href = "{% url 'matches_app:substitution_panel' match.id %}";
+        })
+        .catch(err => {
+            document.getElementById('loading-spinner').style.display = 'none';
+            alert("Error saving lineup");
+        });
+    });
+</script>
 {% endblock %}

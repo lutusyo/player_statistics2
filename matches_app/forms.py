@@ -14,10 +14,11 @@ class MatchForm(forms.ModelForm):
 
 
 class MatchLineupForm(forms.ModelForm):
-    time_entered = forms.TimeField(
+    # Changed time_entered to time_in as a TimeField with optional input
+    time_in = forms.TimeField(
         required=False,
         widget=forms.TimeInput(format='%H:%M'),
-        input_formats=['%H:%M']
+        input_formats=['%H:%M', '%H:%M:%S']
     )
 
     pod_number = forms.CharField(
@@ -36,24 +37,20 @@ class MatchLineupForm(forms.ModelForm):
         for field in self.fields.values():
             field.required = False
 
-
-        # ✅ Make all fields optional
-        for field in self.fields.values():
-            field.required = False
-
         # Filter players based on selected match
         if 'match' in self.data:
             try:
                 match_id = int(self.data.get('match'))
                 match = Match.objects.get(id=match_id)
-                self.fields['player'].queryset = Player.objects.filter(team__in=[match.home_team, match.away_team])
+                self.fields['player'].queryset = Player.objects.filter(age_group__team__in=[match.home_team, match.away_team])
             except (ValueError, Match.DoesNotExist):
                 pass
         elif self.instance.pk and self.instance.match:
             match = self.instance.match
-            self.fields['player'].queryset = Player.objects.filter(team__in=[match.home_team, match.away_team])
+            self.fields['player'].queryset = Player.objects.filter(age_group__team__in=[match.home_team, match.away_team])
+
 
         # Help texts
         self.fields['is_starting'].help_text = "Tick this for Starting XI"
         self.fields['position'].help_text = "Select playing position"
-        self.fields['time_entered'].help_text = "Only fill if this is a substitute"
+        self.fields['time_in'].help_text = "Only fill if this is a substitute (minute they came in)"

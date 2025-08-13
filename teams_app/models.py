@@ -10,7 +10,6 @@ class AgeGroup(models.Model):
         return self.name
 
 class Team(models.Model): 
-
     TEAM_TYPE_CHOICES = [
         ('OUR_TEAM', 'Our Team'),
         ('OPPONENT', 'Opponent Team'),

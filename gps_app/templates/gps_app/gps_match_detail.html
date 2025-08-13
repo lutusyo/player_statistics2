@@ -1,139 +1,337 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container my-4">
-    <h2 class="mb-4 text-center">
-        {{ match.home_team }} vs {{ match.away_team }} 
-        <small class="text-muted">({{ match.date }})</small>
-    </h2>
 
-    {% if records %}
-    <div class="table-responsive" style="max-height: 600px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; padding: 10px;">
-        <table class="table table-striped table-bordered table-hover table-sm align-middle">
-            <thead class="table-dark sticky-top">
-                <tr>
-                    <th>Player</th>
-                    <th>Player Name</th>
-                    <th>Period Name</th>
-                    <th>Period Number</th>
-                    <th>Max Acceleration</th>
-                    <th>Max Deceleration</th>
-                    <th>Acceleration Efforts</th>
-                    <th>Deceleration Efforts</th>
-                    <th>Accel + Decel Efforts</th>
-                    <th>Accel + Decel Efforts Per Minute</th>
-                    <th>Duration</th>
-                    <th>Distance</th>
-                    <th>Player Load</th>
-                    <th>Max Velocity</th>
-                    <th>Max Vel (% Max)</th>
-                    <th>Meterage Per Minute</th>
-                    <th>Player Load Per Minute</th>
-                    <th>Work/Rest Ratio</th>
-                    <th>Max Heart Rate</th>
-                    <th>Avg Heart Rate</th>
-                    <th>Max HR (% Max)</th>
-                    <th>Avg HR (% Max)</th>
-                    <th>HR Exertion</th>
-                    <th>Red Zone</th>
-                    <th>Heart Rate Band 1 Duration</th>
-                    <th>Heart Rate Band 2 Duration</th>
-                    <th>Heart Rate Band 3 Duration</th>
-                    <th>Heart Rate Band 4 Duration</th>
-                    <th>Heart Rate Band 5 Duration</th>
-                    <th>Heart Rate Band 6 Duration</th>
-                    <th>Energy</th>
-                    <th>High Metabolic Load Distance</th>
-                    <th>Standing Distance</th>
-                    <th>Walking Distance</th>
-                    <th>Jogging Distance</th>
-                    <th>Running Distance</th>
-                    <th>HI Distance</th>
-                    <th>Sprint Distance</th>
-                    <th>Sprint Efforts</th>
-                    <th>Sprint Dist Per Min</th>
-                    <th>High Speed Distance</th>
-                    <th>High Speed Efforts</th>
-                    <th>High Speed Distance Per Minute</th>
-                    <th>Impacts</th>
-                    <th>Athlete Tags</th>
-                    <th>Activity Tags</th>
-                    <th>Game Tags</th>
-                    <th>Athlete Participation Tags</th>
-                    <th>Period Tags</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in records %}
-                <tr>
-                    <td class="d-flex align-items-center gap-2">
-                        <a href="{% url 'players_app:player_match_detail' r.player.id match.id %}">
-                            {% if r.player.photo %}
-                                <img src="{{ r.player.photo.url }}" alt="{{ r.player.full_name }}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 50%;">
-                            {% else %}
-                                <div style="width: 32px; height: 32px; background: #ccc; border-radius: 50%;"></div>
-                            {% endif %}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{% url 'players_app:player_match_detail' r.player.id match.id %}" style="text-decoration: none; color: inherit;">
-                            {{ r.player.name|slice:":7" }}{% if r.player.name|length > 7 %}...{% endif %}
-                        </a>
-                    </td>
-                    <td>{{ r.period_name }}</td>
-                    <td>{{ r.period_number }}</td>
-                    <td>{{ r.max_acceleration }}</td>
-                    <td>{{ r.max_deceleration }}</td>
-                    <td>{{ r.acceleration_efforts }}</td>
-                    <td>{{ r.deceleration_efforts }}</td>
-                    <td>{{ r.accel_decel_efforts }}</td>
-                    <td>{{ r.accel_decel_efforts_per_minute }}</td>
-                    <td>{{ r.duration }}</td>
-                    <td>{{ r.distance }}</td>
-                    <td>{{ r.player_load }}</td>
-                    <td>{{ r.max_velocity }}</td>
-                    <td>{{ r.max_vel_percent_max }}</td>
-                    <td>{{ r.meterage_per_minute }}</td>
-                    <td>{{ r.player_load_per_minute }}</td>
-                    <td>{{ r.work_rest_ratio }}</td>
-                    <td>{{ r.max_heart_rate }}</td>
-                    <td>{{ r.avg_heart_rate }}</td>
-                    <td>{{ r.max_hr_percent_max }}</td>
-                    <td>{{ r.avg_hr_percent_max }}</td>
-                    <td>{{ r.hr_exertion }}</td>
-                    <td>{{ r.red_zone }}</td>
-                    <td>{{ r.heart_rate_band_1_duration }}</td>
-                    <td>{{ r.heart_rate_band_2_duration }}</td>
-                    <td>{{ r.heart_rate_band_3_duration }}</td>
-                    <td>{{ r.heart_rate_band_4_duration }}</td>
-                    <td>{{ r.heart_rate_band_5_duration }}</td>
-                    <td>{{ r.heart_rate_band_6_duration }}</td>
-                    <td>{{ r.energy }}</td>
-                    <td>{{ r.high_metabolic_load_distance }}</td>
-                    <td>{{ r.standing_distance }}</td>
-                    <td>{{ r.walking_distance }}</td>
-                    <td>{{ r.jogging_distance }}</td>
-                    <td>{{ r.running_distance }}</td>
-                    <td>{{ r.hi_distance }}</td>
-                    <td>{{ r.sprint_distance }}</td>
-                    <td>{{ r.sprint_efforts }}</td>
-                    <td>{{ r.sprint_dist_per_min }}</td>
-                    <td>{{ r.high_speed_distance }}</td>
-                    <td>{{ r.high_speed_efforts }}</td>
-                    <td>{{ r.high_speed_distance_per_minute }}</td>
-                    <td>{{ r.impacts }}</td>
-                    <td>{{ r.athlete_tags }}</td>
-                    <td>{{ r.activity_tags }}</td>
-                    <td>{{ r.game_tags }}</td>
-                    <td>{{ r.athlete_participation_tags }}</td>
-                    <td>{{ r.period_tags }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<style>
+
+
+
+
+
+  /* Team Colors */
+  :root {
+    --team-blue: #0d6efd;      /* Bootstrap primary blue */
+    --team-gold: #FFD700;      /* Gold */
+    --team-white: #ffffff;
+  }
+
+  /* Container tweaks */
+  .container {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  /* Header area */
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .team-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+  }
+
+  .page-title {
+    flex-grow: 1;
+    text-align: center;
+    font-weight: 700;
+    color: var(--team-blue);
+    font-size: 1.8rem;
+  }
+
+  .page-date {
+    font-size: 1rem;
+    color: gray;
+    font-weight: 400;
+  }
+
+  /* Info box about GPS data */
+  .info-box {
+    background: var(--team-blue);
+    color: var(--team-white);
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    line-height: 1.4;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+  }
+
+  /* Table container */
+  .table-responsive {
+    max-height: 600px;
+    overflow-y: auto;
+    border: 1px solid var(--team-blue);
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  /* Table styles */
+  table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    background-color: var(--team-blue);
+    color: var(--team-white);
+    font-weight: 700;
+    border-bottom: 3px solid var(--team-gold);
+    z-index: 10;
+    padding: 8px 10px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #f9faff;
+  }
+
+  tbody tr:hover {
+    background-color: #e0e7ff;
+  }
+
+  tbody td {
+    padding: 6px 10px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    color: #333;
+  }
+
+  /* Sticky first column: Player photo */
+  tbody td:first-child,
+  thead th:first-child {
+    position: sticky;
+    left: 0;
+    background-color: var(--team-white);
+    z-index: 9;
+    border-right: 2px solid var(--team-blue);
+  }
+
+  /* Sticky second column: Player Name */
+  tbody td:nth-child(2),
+  thead th:nth-child(2) {
+    position: sticky;
+    left: 60px; /* width of first column */
+    background-color: var(--team-white);
+    z-index: 9;
+    border-right: 2px solid var(--team-blue);
+    font-weight: 600;
+    color: var(--team-blue);
+  }
+
+  /* Fixed widths for sticky columns */
+  thead th:first-child,
+  tbody td:first-child {
+    width: 60px;
+    min-width: 60px;
+  }
+
+  thead th:nth-child(2),
+  tbody td:nth-child(2) {
+    width: 130px;
+    min-width: 130px;
+  }
+
+  /* Player image styling */
+  .player-photo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid var(--team-blue);
+  }
+
+  /* Links for player names */
+  a.player-link {
+    text-decoration: none;
+    color: var(--team-blue);
+  }
+
+  a.player-link:hover {
+    text-decoration: underline;
+    color: var(--team-gold);
+  }
+
+  /* Button styling */
+  .btn-primary {
+    background-color: var(--team-blue);
+    border-color: var(--team-blue);
+  }
+
+  .btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+  }
+
+  /* Scrollbar styling for table container (optional, for modern browsers) */
+  .table-responsive::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+
+  .table-responsive::-webkit-scrollbar-thumb {
+    background-color: var(--team-blue);
+    border-radius: 4px;
+  }
+</style>
+
+<div class="container my-4">
+
+  <div class="page-header">
+    <!-- Replace 'team_logo.png' with your static file path or URL -->
+    <img src="{% static 'accounts_app/images/logo.png' %}" alt="Azam FC Logo" style="height: 100px;">
+    <div class="page-title">
+      {{ match.home_team }} vs {{ match.away_team }}
+      <div class="page-date">{{ match.date }}</div>
     </div>
-    {% else %}
-        <p class="alert alert-warning">No GPS data available for this match.</p>
-        <p><a href="{% url 'gps_app:gps_dashboard' %}" class="btn btn-primary">Upload CSV file</a></p>
-    {% endif %}
+  </div>
+
+  <div class="info-box" role="region" aria-label="GPS Data Importance">
+    <strong>Why GPS Data Matters:</strong>  
+    Monitoring players’ GPS data helps optimize performance, tailor training loads, and crucially, prevent injuries by tracking fatigue and workload. It supports smarter recovery strategies and keeps the team at peak condition.
+  </div>
+
+  {% if records %}
+    <div class="table-responsive" >
+      <table class="table table-striped table-bordered table-hover table-sm align-middle">
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Player Name</th>
+            <th>Period Name</th>
+            <th>Period Number</th>
+            <th>Max Acceleration</th>
+            <th>Max Deceleration</th>
+            <th>Acceleration Efforts</th>
+            <th>Deceleration Efforts</th>
+            <th>Accel + Decel Efforts</th>
+            <th>Accel + Decel Efforts Per Minute</th>
+            <th>Duration</th>
+            <th>Distance</th>
+            <th>Player Load</th>
+            <th>Max Velocity</th>
+            <th>Max Vel (% Max)</th>
+            <th>Meterage Per Minute</th>
+            <th>Player Load Per Minute</th>
+            <th>Work/Rest Ratio</th>
+            <th>Max Heart Rate</th>
+            <th>Avg Heart Rate</th>
+            <th>Max HR (% Max)</th>
+            <th>Avg HR (% Max)</th>
+            <th>HR Exertion</th>
+            <th>Red Zone</th>
+            <th>Heart Rate Band 1 Duration</th>
+            <th>Heart Rate Band 2 Duration</th>
+            <th>Heart Rate Band 3 Duration</th>
+            <th>Heart Rate Band 4 Duration</th>
+            <th>Heart Rate Band 5 Duration</th>
+            <th>Heart Rate Band 6 Duration</th>
+            <th>Energy</th>
+            <th>High Metabolic Load Distance</th>
+            <th>Standing Distance</th>
+            <th>Walking Distance</th>
+            <th>Jogging Distance</th>
+            <th>Running Distance</th>
+            <th>HI Distance</th>
+            <th>Sprint Distance</th>
+            <th>Sprint Efforts</th>
+            <th>Sprint Dist Per Min</th>
+            <th>High Speed Distance</th>
+            <th>High Speed Efforts</th>
+            <th>High Speed Distance Per Minute</th>
+            <th>Impacts</th>
+            <th>Athlete Tags</th>
+            <th>Activity Tags</th>
+            <th>Game Tags</th>
+            <th>Athlete Participation Tags</th>
+            <th>Period Tags</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in records %}
+            <tr>
+              <td class="d-flex align-items-center justify-content-center gap-2">
+                <a href="{% url 'players_app:player_match_detail' r.player.id match.id %}">
+                  {% if r.player.photo %}
+                    <img src="{{ r.player.photo.url }}" alt="{{ r.player.full_name }}" class="player-photo">
+                  {% else %}
+                    <div style="width: 32px; height: 32px; background: #ccc; border-radius: 50%;"></div>
+                  {% endif %}
+                </a>
+              </td>
+              <td>
+                <a href="{% url 'players_app:player_match_detail' r.player.id match.id %}" class="player-link" title="{{ r.player.name }}">
+                  {{ r.player.name|slice:":7" }}{% if r.player.name|length > 7 %}...{% endif %}
+                </a>
+              </td>
+              <td>{{ r.period_name }}</td>
+              <td>{{ r.period_number }}</td>
+              <td>{{ r.max_acceleration }}</td>
+              <td>{{ r.max_deceleration }}</td>
+              <td>{{ r.acceleration_efforts }}</td>
+              <td>{{ r.deceleration_efforts }}</td>
+              <td>{{ r.accel_decel_efforts }}</td>
+              <td>{{ r.accel_decel_efforts_per_minute }}</td>
+              <td>{{ r.duration }}</td>
+              <td>{{ r.distance }}</td>
+              <td>{{ r.player_load }}</td>
+              <td>{{ r.max_velocity }}</td>
+              <td>{{ r.max_vel_percent_max }}</td>
+              <td>{{ r.meterage_per_minute }}</td>
+              <td>{{ r.player_load_per_minute }}</td>
+              <td>{{ r.work_rest_ratio }}</td>
+              <td>{{ r.max_heart_rate }}</td>
+              <td>{{ r.avg_heart_rate }}</td>
+              <td>{{ r.max_hr_percent_max }}</td>
+              <td>{{ r.avg_hr_percent_max }}</td>
+              <td>{{ r.hr_exertion }}</td>
+              <td>{{ r.red_zone }}</td>
+              <td>{{ r.heart_rate_band_1_duration }}</td>
+              <td>{{ r.heart_rate_band_2_duration }}</td>
+              <td>{{ r.heart_rate_band_3_duration }}</td>
+              <td>{{ r.heart_rate_band_4_duration }}</td>
+              <td>{{ r.heart_rate_band_5_duration }}</td>
+              <td>{{ r.heart_rate_band_6_duration }}</td>
+              <td>{{ r.energy }}</td>
+              <td>{{ r.high_metabolic_load_distance }}</td>
+              <td>{{ r.standing_distance }}</td>
+              <td>{{ r.walking_distance }}</td>
+              <td>{{ r.jogging_distance }}</td>
+              <td>{{ r.running_distance }}</td>
+              <td>{{ r.hi_distance }}</td>
+              <td>{{ r.sprint_distance }}</td>
+              <td>{{ r.sprint_efforts }}</td>
+              <td>{{ r.sprint_dist_per_min }}</td>
+              <td>{{ r.high_speed_distance }}</td>
+              <td>{{ r.high_speed_efforts }}</td>
+              <td>{{ r.high_speed_distance_per_minute }}</td>
+              <td>{{ r.impacts }}</td>
+              <td>{{ r.athlete_tags }}</td>
+              <td>{{ r.activity_tags }}</td>
+              <td>{{ r.game_tags }}</td>
+              <td>{{ r.athlete_participation_tags }}</td>
+              <td>{{ r.period_tags }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="alert alert-warning">No GPS data available for this match.</p>
+    <p><a href="{% url 'gps_app:gps_dashboard' %}" class="btn btn-primary">Upload CSV file</a></p>
+  {% endif %}
+
 </div>
+
+
+{% include 'gps_app/gps_position_detail.html' %}
+
+
 {% endblock %}

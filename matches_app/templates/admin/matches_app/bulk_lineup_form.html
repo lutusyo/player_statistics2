@@ -61,7 +61,7 @@
         <th>Starter ⭐</th>
         <th>Sub 🔄</th>
         <th>Bench ☑️</th>
-        <th>Time Entered</th>
+        <th>Time In</th>
       </tr>
     </thead>
     <tbody>
@@ -71,21 +71,25 @@
         <td>{{ form.position }}</td>
         <td>{{ form.pod_number }}</td>
         <td>
-          <input type="radio" name="{{ form.prefix }}-role" value="starter" id="{{ form.prefix }}-starter" class="starter-checkbox"
-            {% if form.instance.is_starting %} checked {% endif %}>
-          <label for="{{ form.prefix }}-starter"></label>
+          {{ form.is_starting }}
         </td>
         <td>
-          <input type="radio" name="{{ form.prefix }}-role" value="sub" id="{{ form.prefix }}-sub" class="sub-checkbox"
-            {% if not form.instance.is_starting and form.instance.time_entered %} checked {% endif %}>
-          <label for="{{ form.prefix }}-sub"></label>
+          {# "Sub" means is_starting is False and time_in > 0 #}
+          <input type="checkbox" disabled
+            {% if not form.instance.is_starting and form.instance.time_in %}
+                checked
+            {% endif %}
+          />
         </td>
         <td>
-          <input type="radio" name="{{ form.prefix }}-role" value="bench" id="{{ form.prefix }}-bench" class="bench-checkbox"
-            {% if not form.instance.is_starting and not form.instance.time_entered %} checked {% endif %}>
-          <label for="{{ form.prefix }}-bench"></label>
+          {# "Bench" means is_starting False and time_in is None or 0 #}
+          <input type="checkbox" disabled
+            {% if not form.instance.is_starting and not form.instance.time_in %}
+                checked
+            {% endif %}
+          />
         </td>
-        <td>{{ form.time_entered }}</td>
+        <td>{{ form.time_in }}</td>
       </tr>
       {% if form.errors %}
       <tr>
