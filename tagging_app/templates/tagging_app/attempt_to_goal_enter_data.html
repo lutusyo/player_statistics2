@@ -34,8 +34,8 @@
   }
 </style>
 
-<h2>{{ match }}</h2>|<a href="{% url 'matches_app:substitution_panel' match.id %}">SUBS</a>
-
+<h2>{{ match }}</h2>
+<a href="{% url 'matches_app:substitution_panel' match.id %}";>SUB</a>
 
 <div>
   <h3>Time: <span id="timer-display">00:00</span></h3>
@@ -46,6 +46,8 @@
   </div>
 </div>
 
+<hr>
+<a href="{% url 'matches_app:substitution_panel' match.id %}";></a>
 
 <hr>
 
@@ -210,7 +212,8 @@ document.querySelectorAll('.delivery-btn').forEach(btn => {
         timestamp: now.toISOString()
       };
 
-      fetch("{% url 'tagging_app:save_attempt_to_goal' match.id %}", {
+      fetch("{% url 'tagging_app:save_attempt_to_goal'  %}", {
+      
         method: "POST",
         headers: {
           "Content-Type": "application/json",

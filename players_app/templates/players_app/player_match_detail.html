@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
+
+<link rel="stylesheet" href="{% static 'css/gps.css' %}" >
+
+
 <div class="d-flex" style="gap: 20px;">
     <!-- Sidebar -->
     <div style="min-width: 250px; border-right: 1px solid #ccc; padding-right: 15px;">
@@ -213,82 +217,5 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  {% if selected_match %}
-  const defensiveLabels = {{ defensive_duels_keys|safe }};
-  const defensiveData = {{ defensive_duels_values|safe }};
 
-  const ctxDef = document.getElementById('defensiveDuelsChart').getContext('2d');
-  const defensiveChart = new Chart(ctxDef, {
-      type: 'bar',
-      data: {
-          labels: defensiveLabels,
-          datasets: [{
-              label: 'Count',
-              data: defensiveData,
-              backgroundColor: 'rgba(54, 162, 235, 0.7)',
-          }]
-      },
-      options: {
-          responsive: true,
-          scales: { y: { beginAtZero: true } }
-      }
-  });
-  {% else %}
-  const defensiveLabels = [
-      'Aerial Duel Won', 'Aerial Duel Lost', 'Tackle Won', 'Tackle Lost', 'Physical Duel Won', 'Physical Duel Lost'
-  ];
-  const defensiveData = [
-      {{ defensive_stats_agg.total_aerial_won|default:"0" }},
-      {{ defensive_stats_agg.total_aerial_lost|default:"0" }},
-      {{ defensive_stats_agg.total_tackle_won|default:"0" }},
-      {{ defensive_stats_agg.total_tackle_lost|default:"0" }},
-      {{ defensive_stats_agg.total_physical_won|default:"0" }},
-      {{ defensive_stats_agg.total_physical_lost|default:"0" }},
-  ];
-
-  const ctxDef = document.getElementById('defensiveDuelsChart').getContext('2d');
-  const defensiveChart = new Chart(ctxDef, {
-      type: 'pie',
-      data: {
-          labels: defensiveLabels,
-          datasets: [{
-              label: 'Count',
-              data: defensiveData,
-              backgroundColor: [
-                  'rgba(255, 99, 132, 0.7)',
-                  'rgba(54, 162, 235, 0.7)',
-                  'rgba(255, 206, 86, 0.7)',
-                  'rgba(75, 192, 192, 0.7)',
-                  'rgba(153, 102, 255, 0.7)',
-                  'rgba(255, 159, 64, 0.7)'
-              ],
-          }]
-      },
-      options: { responsive: true }
-  });
-  {% endif %}
-
-  const ctxAttempt = document.getElementById('attemptOutcomesChart').getContext('2d');
-  const attemptChart = new Chart(ctxAttempt, {
-      type: 'pie',
-      data: {
-          labels: {{ outcome_labels|safe }},
-          datasets: [{
-              label: 'Attempt Outcomes',
-              data: {{ outcome_counts|safe }},
-              backgroundColor: [
-                  'rgba(255, 99, 132, 0.7)',
-                  'rgba(54, 162, 235, 0.7)',
-                  'rgba(255, 206, 86, 0.7)',
-                  'rgba(75, 192, 192, 0.7)',
-                  'rgba(153, 102, 255, 0.7)',
-                  'rgba(255, 159, 64, 0.7)'
-              ],
-          }]
-      },
-      options: { responsive: true }
-  });
-</script>
 {% endblock %}

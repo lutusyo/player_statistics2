@@ -91,7 +91,7 @@ Object.keys(passCounts).forEach(playerId => {
 
 // 🎯 Pass tracking
 function recordPass(fromPlayerId, toPlayerId, fromTeamId, toTeamId, isSuccessful = true, isPossessionRegained = false) {
-    fetch('/tagging/save-pass-network/', {
+    fetch("{% url 'tagging_app:save_pass_network' %}", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

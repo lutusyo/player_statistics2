@@ -1,0 +1,161 @@
+/* Team Colors */
+:root {
+  --team-blue: #0d6efd;      /* Bootstrap primary blue */
+  --team-gold: #FFD700;      /* Gold */
+  --team-white: #ffffff;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Layout */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.page-title {
+  flex-grow: 1;
+  text-align: center;
+  font-weight: 700;
+  color: var(--team-blue);
+  font-size: 1.8rem;
+}
+
+.page-date {
+  font-size: 1rem;
+  color: gray;
+  font-weight: 400;
+}
+
+/* Sidebar */
+.sidebar {
+  min-width: 250px;
+  border-right: 2px solid var(--team-blue);
+  padding-right: 15px;
+}
+
+.sidebar h4 {
+  color: var(--team-blue);
+  font-weight: bold;
+}
+
+.sidebar .list-group-item.active {
+  background-color: var(--team-blue);
+  color: var(--team-white);
+  border-color: var(--team-blue);
+}
+
+.sidebar .list-group-item a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.sidebar .list-group-item a:hover {
+  color: var(--team-gold);
+}
+
+/* Info Box */
+.info-box {
+  background: var(--team-blue);
+  color: var(--team-white);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+/* Table */
+.table-responsive {
+  max-height: 600px;
+  overflow-y: auto;
+  border: 1px solid var(--team-blue);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background-color: var(--team-blue);
+  color: var(--team-white);
+  font-weight: 700;
+  border-bottom: 3px solid var(--team-gold);
+  z-index: 10;
+  padding: 8px 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f9faff;
+}
+
+tbody tr:hover {
+  background-color: #e0e7ff;
+}
+
+tbody td {
+  padding: 6px 10px;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+  color: #333;
+}
+
+/* Sticky first two columns */
+tbody td:first-child,
+thead th:first-child {
+  position: sticky;
+  left: 0;
+  background-color: var(--team-white);
+  z-index: 9;
+  border-right: 2px solid var(--team-blue);
+}
+
+tbody td:nth-child(2),
+thead th:nth-child(2) {
+  position: sticky;
+  left: 60px;
+  background-color: var(--team-white);
+  z-index: 9;
+  border-right: 2px solid var(--team-blue);
+  font-weight: 600;
+  color: var(--team-blue);
+}
+
+/* Player Image */
+.player-photo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--team-blue);
+}
+
+/* Links */
+a.player-link {
+  text-decoration: none;
+  color: var(--team-blue);
+}
+
+a.player-link:hover {
+  text-decoration: underline;
+  color: var(--team-gold);
+}
+
+/* Scrollbar Styling */
+.table-responsive::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background-color: var(--team-blue);
+  border-radius: 4px;
+}

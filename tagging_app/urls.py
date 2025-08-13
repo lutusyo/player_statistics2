@@ -14,17 +14,17 @@ urlpatterns = [
 
     # Attempt to Goal
     path('match/<int:match_id>/attempt-to-goal/', attempt_to_goal.enter_attempt_to_goal, name='enter_attempt_to_goal'),
-    path('match/<int:match_id>/save-attempt-to-goal/', attempt_to_goal.save_attempt_to_goal, name='save_attempt_to_goal'),
+    path('match/save-attempt-to-goal/', attempt_to_goal.save_attempt_to_goal, name='save_attempt_to_goal'),
     path('match/<int:match_id>/attempt-to-goal-dashboard/', attempt_to_goal.attempt_to_goal_dashboard, name='attempt_to_goal_dashboard'),
     path('match/<int:match_id>/csv/export-attempt-to-goal-csv/',attempt_to_goal.export_attempt_to_goal_csv, name='export_attempt_to_goal_csv'),
-    path('match/<int:match_id>/csv/export-attempt-to-goal-pdf/',attempt_to_goal.export_attempt_to_goal_pdf, name='export_attempt_to_goal_pdf'),
+    path('match/<int:match_id>/pdf/export-attempt-to-goal-pdf/',attempt_to_goal.export_attempt_to_goal_pdf, name='export_attempt_to_goal_pdf'),
     # acros multiple device
     path('match/<int:match_id>/live_state/', attempt_to_goal.get_live_tagging_state, name='get_live_tagging_state'),
 
     
     # Passing Network
     path('match/<int:match_id>/pass-network/', pass_network.pass_network_page, name='enter_pass_network'),
-    path('match/<int:match_id>/save-pass-network/', pass_network.save_pass_network, name='save_pass_network'),
+    path('match/save-pass-network/', pass_network.save_pass_network, name='save_pass_network'),
     path('match/<int:match_id>/pass-network-dashboard/', pass_network.pass_network_dashboard, name='pass_network_dashboard'),
     path('match/<int:match_id>/csv/export-pass-network-csv/', pass_network.export_pass_network_csv, name='export_pass_network_csv'),
     path('match/<int:match_id>/excel/export-pass-network-excel/', pass_network.export_pass_network_excel, name='export_pass_network_excel'),
