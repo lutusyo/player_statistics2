@@ -78,9 +78,19 @@
 
     <hr style="margin: 40px 0;">
 
-    <a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
+    <!--reports_app:ntro_page-->
+
+    <a href="{% url 'reports_app:intro_page' 'pass_network' match.id %}" 
+        style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
         📊 View Pass Network
-    </a> | 
+    </a>
+
+
+    <!--<a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
+        📊 View Pass Network
+    </a> | -->
+
+
     <a href="{% url 'tagging_app:attempt_to_goal_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
         📊 View Goal Attempts
     </a> | 

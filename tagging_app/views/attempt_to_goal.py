@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from collections import defaultdict
 from django.db.models import Count
-from tagging_app.models import AttemptToGoal, BodyPartChoices, DeliveryTypeChoices, OutcomeChoices
+from tagging_app.models import AttemptToGoal, DeliveryTypeChoices, OutcomeChoices
 import traceback
 
 from tagging_app.models import PassEvent, GoalkeeperDistributionEvent
@@ -56,7 +56,6 @@ def enter_attempt_to_goal(request, match_id):
         'match': match,
         'lineup': lineup,
         'players': players,
-        'body_parts': BodyPartChoices.choices,
         'delivery_types': DeliveryTypeChoices.choices,
         'outcomes': OutcomeChoices.choices,
         'outcome_counts': outcome_counts,
@@ -86,7 +85,6 @@ def save_attempt_to_goal(request):
                 minute=data['minute'],
                 second=data['second'],
                 outcome=data['outcome'],
-                body_part=data['body_part'],
                 delivery_type=data['delivery_type'],
                 assist_by_id=data.get('assist_by_id'),
                 pre_assist_by_id=data.get('pre_assist_by_id'),
@@ -123,7 +121,6 @@ def get_live_tagging_state(request, match_id):
     data = [{
         'player_name': a.player.name,
         'outcome': a.outcome,
-        'body_part': a.body_part,
         'delivery_type': a.delivery_type,
         'minute': a.minute,
         'second': a.second
@@ -186,7 +183,6 @@ def export_attempt_to_goal_csv(request, match_id):
     for a in attempts:
         writer.writerow([
             a.player.name if a.player else 'N/A',
-            a.body_part,
             a.delivery_type,
             a.x,
             a.y

@@ -81,12 +81,6 @@
     {% endfor %}
   </div>
 
-  <h3>Select Body Part</h3>
-  <div id="body-part-panel" class="tag-panel">
-    {% for value, label in body_parts %}
-      <button class="body-part-btn" data-body-part="{{ value }}">{{ label }}</button>
-    {% endfor %}
-  </div>
 
   <h3>Select Delivery Type</h3>
   <div id="delivery-panel" class="tag-panel">
@@ -105,7 +99,7 @@
 let timer = 0;
 let interval = null;
 let isPaused = false;
-let selectedPlayer = null, selectedOutcome = null, selectedBodyPart = null, selectedDeliveryType = null;
+let selectedPlayer = null, selectedOutcome = null, selectedDeliveryType = null;
 const matchId = {{ match.id }};
 
 // Utilities
@@ -151,7 +145,7 @@ window.onload = function () {
       const log = document.getElementById('event-log');
       log.innerHTML = '';
       data.events.forEach(ev => {
-        log.innerHTML += `<div><b>${ev.player_name}</b> - ${ev.outcome} - ${ev.body_part} - ${ev.delivery_type} at ${String(ev.minute).padStart(2,'0')}:${String(ev.second).padStart(2,'0')}</div>`;
+        log.innerHTML += `<div><b>${ev.player_name}</b> - ${ev.outcome} - ${ev.delivery_type} at ${String(ev.minute).padStart(2,'0')}:${String(ev.second).padStart(2,'0')}</div>`;
       });
     });
 };
@@ -183,14 +177,6 @@ document.querySelectorAll('.outcome-btn').forEach(btn => {
   };
 });
 
-// Body Part
-document.querySelectorAll('.body-part-btn').forEach(btn => {
-  btn.onclick = () => {
-    selectedBodyPart = btn.dataset.bodyPart;
-    clearSelected('.body-part-btn');
-    btn.classList.add('selected');
-  };
-});
 
 // Delivery Type
 document.querySelectorAll('.delivery-btn').forEach(btn => {
@@ -199,13 +185,12 @@ document.querySelectorAll('.delivery-btn').forEach(btn => {
     clearSelected('.delivery-btn');
     btn.classList.add('selected');
 
-    if (selectedPlayer && selectedOutcome && selectedBodyPart && selectedDeliveryType) {
+    if (selectedPlayer && selectedOutcome && selectedDeliveryType) {
       const now = new Date();
       const data = {
         match_id: matchId,
         player_id: selectedPlayer,
         outcome: selectedOutcome,
-        body_part: selectedBodyPart,
         delivery_type: selectedDeliveryType,
         minute: Math.floor(timer / 60),
         second: timer % 60,
@@ -225,13 +210,12 @@ document.querySelectorAll('.delivery-btn').forEach(btn => {
       .then(json => {
         if (json.status === 'ok') {
           const log = document.getElementById('event-log');
-          log.innerHTML = `<div><b>${json.player_name}</b> - ${selectedOutcome} - ${selectedBodyPart} - ${selectedDeliveryType} at ${formatTime(timer)}</div>` + log.innerHTML;
+          log.innerHTML = `<div><b>${json.player_name}</b> - ${selectedOutcome} - ${selectedDeliveryType} at ${formatTime(timer)}</div>` + log.innerHTML;
 
           // Reset selections
           selectedPlayer = selectedOutcome = selectedBodyPart = selectedDeliveryType = null;
           clearSelected('.player-btn');
           clearSelected('.outcome-btn');
-          clearSelected('.body-part-btn');
           clearSelected('.delivery-btn');
           document.getElementById('tagging-section').style.display = 'none';
 

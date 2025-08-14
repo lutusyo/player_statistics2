@@ -3,12 +3,6 @@ from players_app.models import Player
 from matches_app.models import Match
 from teams_app.models import Team
 
-class BodyPartChoices(models.TextChoices):
-    LEFT = 'Left Foot', 'Left Foot'
-    RIGHT = 'Right Foot', 'Right Foot'
-    HEAD = 'Head', 'Head'
-    OTHER = 'Other', 'Other'
-
 class DeliveryTypeChoices(models.TextChoices):
     PASS = 'Pass', 'Pass'
     CROSS = 'Cross', 'Cross'
@@ -20,7 +14,6 @@ class OutcomeChoices(models.TextChoices):
     ON_TARGET_SAVED = 'On Target Saved', 'On Target Saved'
     ON_TARGET_GOAL = 'On Target Goal', 'On Target Goal'
     BLOCKED = 'Blocked', 'Blocked'
-    ERROR = 'Player Error', 'Player Error'
 
     ### ATTEMPT TO GOAL TAGGING ###
 
@@ -28,21 +21,14 @@ class AttemptToGoal(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     player = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='attempts')
-
     minute = models.PositiveIntegerField(default=0)
     second = models.PositiveIntegerField(default=0)
-
-    body_part = models.CharField(max_length=20, choices=BodyPartChoices.choices)
     delivery_type = models.CharField(max_length=20, choices=DeliveryTypeChoices.choices)
-    
     outcome = models.CharField(max_length=30, choices=OutcomeChoices.choices)
-
     x = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="X position on pitch (0–100)")  # pitch zone
     y = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Y position on pitch (0–100)")
-
     assist_by = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='assists')
     pre_assist_by = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='pre_assists')
-
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

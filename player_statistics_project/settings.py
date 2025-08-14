@@ -150,8 +150,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 
 
-STATIC_URL = '/static_player_statistics2/'
-#STATIC_URL = '/static/'
+#STATIC_URL = '/static_player_statistics2/'
+STATIC_URL = '/static/'
 STATIC_ROOT = '/home/afcportal/public_html/static_player_statistics2/'
 
 
