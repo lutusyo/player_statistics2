@@ -1,194 +1,187 @@
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Passing Network Tagging</title>
-    <style>
-        .player-btn, .opponent-btn {
-            padding: 10px 20px;
-            margin: 5px;
-            background-color: lightblue;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .opponent-btn {
-            background-color: lightcoral;
-        }
-        .player-btn.active {
-            background-color: green !important;
-            color: white;
-        }
-        #timer {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-<body>
-<h2>Passing Network Tagging: {{ match }}</h2>
 
-<div id="timer">Time: <span id="minute">0</span>:<span id="second">0</span></div>
+<title>Passing Network Tagging</title>
+<style>
+    #pass-network .player-btn, #pass-network .opponent-btn {
+        padding: 10px 20px;
+        margin: 5px;
+        background-color: lightblue;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+    #pass-network .opponent-btn {
+        background-color: lightcoral;
+    }
+    #pass-network .player-btn.active {
+        background-color: green !important;
+        color: white;
+    }
+    #pass-network #timer {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+</style>
 
-<h3>{{ our_team.name }} Players</h3>
-<div id="our-players">
-    {% for p in our_players %}
-        <button class="player-btn"
-                id="player-{{ p.player.id }}"
-                data-player-id="{{ p.player.id }}"
-                data-team-id="{{ our_team.id }}">
-            {{ p.player.name }} (<span class="pass-count">0</span>)
+<div id="pass-network">
+    <div id="our-players">
+        {% for p in our_players %}
+            <button class="player-btn"
+                    id="player-{{ p.player.id }}"
+                    data-player-id="{{ p.player.id }}"
+                    data-team-id="{{ our_team.id }}">
+                {{ p.player.name }} (<span class="pass-count">0</span>)
+            </button>
+        {% endfor %}
+    </div>
+
+    <div>
+        <button class="opponent-btn" id="opponent-btn" data-team-id="{{ opponent_team.id }}">
+            {{ opponent_team.name }} Ball Intercept
         </button>
-    {% endfor %}
-</div>
+    </div>
 
-<h3>{{ opponent_team.name }}</h3>
-<div>
-    <button class="opponent-btn" id="opponent-btn" data-team-id="{{ opponent_team.id }}">
-        {{ opponent_team.name }} Ball Intercept
-    </button>
+    <p><strong>Last Pass:</strong> <span id="last-pass"></span></p>
 </div>
-
-<p><strong>Last Pass:</strong> <span id="last-pass"></span></p>
 
 <script>
-const matchId = {{ match.id }};
-let lastPlayerId = null;
-let lastTeamId = null;
-let minute = 0;
-let second = 0;
+window.PassNetwork = {
+    matchId: {{ match.id }},
+    lastPlayerId: null,
+    lastTeamId: null,
+    minute: 0,
+    second: 0,
+    passCounts: JSON.parse(localStorage.getItem('passCounts') || '{}'),
 
-// ⏱ Timer logic
-let startTimestamp = localStorage.getItem('startTimestamp');
-if (!startTimestamp) {
-    startTimestamp = new Date().toISOString();
-    localStorage.setItem('startTimestamp', startTimestamp);
-}
-function updateTimer() {
-    const start = new Date(startTimestamp);
-    const now = new Date();
-    const diff = Math.floor((now - start) / 1000);
-    const m = Math.floor(diff / 60);
-    const s = diff % 60;
-    document.getElementById("minute").textContent = m;
-    document.getElementById("second").textContent = s;
-    minute = m;
-    second = s;
-}
-setInterval(updateTimer, 1000);
-updateTimer();
+    init: function () {
+        this.restoreCounts();
+        this.bindEvents();
+        this.updateTimer();
+        setInterval(this.updateTimer.bind(this), 1000);
+    },
 
-// 🔁 Restore counts and styles
-const passCounts = JSON.parse(localStorage.getItem('passCounts') || '{}');
-Object.keys(passCounts).forEach(playerId => {
-    const btn = document.getElementById(`player-${playerId}`);
-    if (btn) {
-        btn.querySelector('.pass-count').textContent = passCounts[playerId];
-        if (passCounts[playerId] > 0) btn.classList.add('active');
-    }
-});
-
-// 🎯 Pass tracking
-function recordPass(fromPlayerId, toPlayerId, fromTeamId, toTeamId, isSuccessful = true, isPossessionRegained = false) {
-    fetch("{% url 'tagging_app:save_pass_network' %}", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken'),
-        },
-        body: JSON.stringify({
-            match_id: matchId,
-            from_player_id: fromPlayerId,
-            to_player_id: toPlayerId,
-            from_team_id: fromTeamId,
-            to_team_id: toTeamId,
-            minute: minute,
-            second: second,
-            x_start: null,
-            y_start: null,
-            x_end: null,
-            y_end: null,
-            is_successful: isSuccessful,
-            is_possession_regained: isPossessionRegained
-        })
-    }).then(response => response.json()).then(data => {
-        if (data.status === 'success') {
-            document.getElementById('last-pass').textContent = `From ${fromPlayerId} → To ${toPlayerId || 'Opponent Intercept'}`;
-            updatePassCount(fromPlayerId, data.count);
-            highlightButton(toPlayerId);
-        } else {
-            alert("Failed to save: " + data.message);
+    updateTimer: function () {
+        let startTimestamp = localStorage.getItem('passNetworkStartTimestamp');
+        if (!startTimestamp) {
+            startTimestamp = new Date().toISOString();
+            localStorage.setItem('passNetworkStartTimestamp', startTimestamp);
         }
-    }).catch(error => {
-        console.error("Fetch error:", error);
-        alert("Failed to save due to network error.");
-    });
-}
+        const start = new Date(startTimestamp);
+        const now = new Date();
+        const diff = Math.floor((now - start) / 1000);
+        this.minute = Math.floor(diff / 60);
+        this.second = diff % 60;
+    },
 
-// ✅ Count increment and localStorage
-function updatePassCount(playerId, newCount) {
-    const btn = document.getElementById(`player-${playerId}`);
-    if (!btn) return;
-    const countSpan = btn.querySelector('.pass-count');
-    countSpan.textContent = newCount;
+    restoreCounts: function () {
+        Object.keys(this.passCounts).forEach(playerId => {
+            const btn = document.getElementById(`player-${playerId}`);
+            if (btn) {
+                btn.querySelector('.pass-count').textContent = this.passCounts[playerId];
+                if (this.passCounts[playerId] > 0) btn.classList.add('active');
+            }
+        });
+    },
 
-    passCounts[playerId] = newCount;
-    localStorage.setItem('passCounts', JSON.stringify(passCounts));
-}
+    bindEvents: function () {
+        document.querySelectorAll('#pass-network .player-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const playerId = btn.dataset.playerId;
+                const teamId = btn.dataset.teamId;
 
-// ✅ Visual active highlight
-function highlightButton(playerId) {
-    document.querySelectorAll('.player-btn').forEach(btn => btn.classList.remove('active'));
-    if (playerId) {
+                if (this.lastPlayerId) {
+                    this.recordPass(this.lastPlayerId, playerId, this.lastTeamId, teamId);
+                }
+
+                this.lastPlayerId = playerId;
+                this.lastTeamId = teamId;
+                this.highlightButton(playerId);
+            });
+        });
+
+        document.querySelector('#pass-network #opponent-btn').addEventListener('click', () => {
+            const opponentTeamId = document.getElementById('opponent-btn').dataset.teamId;
+            if (this.lastPlayerId && this.lastTeamId) {
+                this.recordPass(this.lastPlayerId, null, this.lastTeamId, opponentTeamId, false, false);
+                this.lastPlayerId = null;
+                this.lastTeamId = null;
+                this.highlightButton(null);
+            }
+        });
+    },
+
+    recordPass: function (fromPlayerId, toPlayerId, fromTeamId, toTeamId, isSuccessful = true, isPossessionRegained = false) {
+        fetch("{% url 'tagging_app:save_pass_network' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': this.getCookie('csrftoken'),
+            },
+            body: JSON.stringify({
+                match_id: this.matchId,
+                from_player_id: fromPlayerId,
+                to_player_id: toPlayerId,
+                from_team_id: fromTeamId,
+                to_team_id: toTeamId,
+                minute: this.minute,
+                second: this.second,
+                x_start: null,
+                y_start: null,
+                x_end: null,
+                y_end: null,
+                is_successful: isSuccessful,
+                is_possession_regained: isPossessionRegained
+            })
+        }).then(response => response.json()).then(data => {
+            if (data.status === 'success') {
+                document.getElementById('last-pass').textContent = `From ${fromPlayerId} → To ${toPlayerId || 'Opponent Intercept'}`;
+                this.updatePassCount(fromPlayerId, data.count);
+                this.highlightButton(toPlayerId);
+            } else {
+                alert("Failed to save: " + data.message);
+            }
+        }).catch(error => {
+            console.error("Fetch error:", error);
+            alert("Failed to save due to network error.");
+        });
+    },
+
+    updatePassCount: function (playerId, newCount) {
         const btn = document.getElementById(`player-${playerId}`);
-        if (btn) btn.classList.add('active');
-    }
-}
+        if (!btn) return;
+        const countSpan = btn.querySelector('.pass-count');
+        countSpan.textContent = newCount;
+        this.passCounts[playerId] = newCount;
+        localStorage.setItem('passCounts', JSON.stringify(this.passCounts));
+    },
 
-// 🎯 Player click behavior
-document.querySelectorAll('.player-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const playerId = btn.dataset.playerId;
-        const teamId = btn.dataset.teamId;
-
-        if (lastPlayerId) {
-            recordPass(lastPlayerId, playerId, lastTeamId, teamId);
+    highlightButton: function (playerId) {
+        document.querySelectorAll('#pass-network .player-btn').forEach(btn => btn.classList.remove('active'));
+        if (playerId) {
+            const btn = document.getElementById(`player-${playerId}`);
+            if (btn) btn.classList.add('active');
         }
+    },
 
-        lastPlayerId = playerId;
-        lastTeamId = teamId;
-        highlightButton(playerId);
-    });
-});
-
-// ⚠️ Opponent button logic
-document.getElementById('opponent-btn').addEventListener('click', () => {
-    const opponentTeamId = document.getElementById('opponent-btn').dataset.teamId;
-    if (lastPlayerId && lastTeamId) {
-        recordPass(lastPlayerId, null, lastTeamId, opponentTeamId, false, false);
-        lastPlayerId = null;
-        lastTeamId = null;
-        highlightButton(null);
-    }
-});
-
-// 🍪 CSRF helper
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let c of cookies) {
-            const cookie = c.trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+    getCookie: function (name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let c of cookies) {
+                const cookie = c.trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
             }
         }
+        return cookieValue;
     }
-    return cookieValue;
-}
-</script>
+};
 
-</body>
-</html>
+// Initialize after DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.PassNetwork.init();
+});
+</script>

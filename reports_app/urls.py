@@ -12,14 +12,14 @@ urlpatterns = [
 
     # 1. intro pages
     path('intro/<str:report_type>/<int:match_id>/', intro_page.intro_page_view, name='intro_page'),
-    # 1. /reports_app/intro/goalkeeping/5/
-    # 2. /reports_app/intro/in-possession/5/
-    # 3. /reports_app/intro/set-plays/5/
-    # 4. /reports_app/intro/out-of-possession/
-    # 5. /reports_app/intro/
-    # 6. /reports_app/intro/
-    # 7. /reports_app/intro/
-    # 8. /reports_app/intro/
+    # 1. /reports_app/intro/post-match-summary/1/
+    # 2. /reports_app/intro/in-possession/1/
+    # 3. /reports_app/intro/out-of-possession/1/
+    # 4. /reports_app/intro/goalkeeping/1/
+    # 5. /reports_app/intro/set-plays/1/
+    # 6. /reports_app/intro/individual-in-possession/1/
+    # 7. /reports_app/intro/individual-out-of-possession/1/
+    # 8. /reports_app/intro/individual-physical/1/
 
     # How to put them in html
     # <a href="{% url 'reports_app:intro_page' report_type='in-possession' match_id=match.id %}">IN POSSESSION</a>

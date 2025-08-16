@@ -26,11 +26,11 @@
                     {% if user.is_authenticated and user.username == 'Azam2' %}
 
                     <li>
-                        <a href="{% url 'matches_app:match_lineup' match.id %}">CREATE LINEUP</a>|
-                        <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}">Attempt to Goal Tag</a>|
-                        <a href="{% url 'tagging_app:enter_pass_network' match.id %}">Pass Network Tag</a>|
+                    <li>
+                        <a href="{% url 'lineup_app:create_lineup' match.id %}">CREATE LINEUP</a>|
+                        <a href="{% url 'tagging_app:tagging_base' match.id %}">Goal and Pass Tagging </a>|
                         <a href="{% url 'tagging_app:enter_goalkeeper_distribution' match.id %}">Goalkeeper Distribution Tag</a>|
-                        <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive</a>|
+                        <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive</a>
                     </li>
 
                     {% endif %}

@@ -2,6 +2,7 @@
 <link rel="stylesheet" href="{% static 'matches_app/css/lineup.css' %}">
 
 <div class="lineup-wrapper">
+  
   <div class="pitch">
     {% for stat in player_stats %}
       {% if stat.is_starting %}
@@ -11,9 +12,6 @@
         </div>
       {% endif %}
     {% endfor %}
-    <div class="club-logo">
-      <img src="{% static 'matches_app/img/azam_logo.png' %}" alt="Club Logo">
-    </div>
   </div>
 
   <div class="subs-panel">

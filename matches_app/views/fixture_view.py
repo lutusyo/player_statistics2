@@ -9,9 +9,10 @@ from datetime import date
 
 from django.db.models import Q
 from teams_app.models import Team, AgeGroup
-from matches_app.models import MatchLineup, Match
+from lineup_app.models import MatchLineup
 from tagging_app.models import AttemptToGoal, GoalkeeperDistributionEvent
 from collections import Counter
+from matches_app.models import Match
 
 from collections import defaultdict
 from matches_app.views.get_match_goals import get_match_goals

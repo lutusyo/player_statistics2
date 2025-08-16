@@ -1,4 +1,3 @@
-{% extends 'base.html' %}
 {% load static %}
 {% load custom_filters %}
 
@@ -34,38 +33,20 @@
   }
 </style>
 
-<h2>{{ match }}</h2>
 <a href="{% url 'matches_app:substitution_panel' match.id %}";>SUB</a>
-
-<div>
-  <h3>Time: <span id="timer-display">00:00</span></h3>
-  <div class="timer-controls">
-    <button id="pause-btn">Pause</button>
-    <button id="resume-btn">Resume</button>
-    <button id="reset-btn">Reset</button>
-  </div>
-</div>
-
-<hr>
-<a href="{% url 'matches_app:substitution_panel' match.id %}";></a>
-
 <hr>
 
-<h3>Select Player</h3>
 <div class="tag-panel" id="player-panel">
  
   {% for player in players %}
     {% with total=outcome_counts|get_item_or:player.id %}
       {% with count=total.total|default:0 %}
         <button class="player-btn" data-player-id="{{ player.id }}">
-          {{ player.name }} <span class="count-badge">{{ count }}</span>
+          {{ player.name|slice:":10"  }} <span class="count-badge">{{ count }}</span>
         </button>
       {% endwith %}
     {% endwith %}
   {% endfor %}
-
- 
-
 
 </div>
 

@@ -15,8 +15,7 @@ class OutcomeChoices(models.TextChoices):
     ON_TARGET_GOAL = 'On Target Goal', 'On Target Goal'
     BLOCKED = 'Blocked', 'Blocked'
 
-    ### ATTEMPT TO GOAL TAGGING ###
-
+    # ATTEMPT TO GOAL TAGGING
 class AttemptToGoal(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
@@ -34,8 +33,7 @@ class AttemptToGoal(models.Model):
     def __str__(self):
         return f"{self.player} | {self.outcome} | {self.minute}:{self.second:02d}"
 
-    ### PASSING NETWORK ###
-
+    # PASSING NETWORK
 class PassEvent(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     from_player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='passes_made')

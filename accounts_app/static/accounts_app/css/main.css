@@ -2724,7 +2724,10 @@ body {
 #header-wrapper {
     background-color: var(--azam-blue);
     color: var(--azam-white);
-    padding: 2em 0 1.5em 0; /* reduced height */
+    padding: 0em 0 0em 0; /* reduced height */
+	position: fixed;
+	width: 100%;
+	top: 0;
 }
 
 /* Logo */

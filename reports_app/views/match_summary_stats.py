@@ -1,7 +1,8 @@
 # reports_app/views/match_summary_stats.py
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Count, Q, Sum, F
-from matches_app.models import Match, MatchLineup, Substitution
+from matches_app.models import Match
+from lineup_app.models import MatchLineup, Substitution
 from tagging_app.models import AttemptToGoal, PassEvent, GoalkeeperDistributionEvent  # adjust import path if needed
 from defensive_app.models import PlayerDefensiveStats  # if in other app adjust or remove
 from teams_app.models import Team

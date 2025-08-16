@@ -5,7 +5,8 @@ from collections import defaultdict
 from django.http import Http404
 
 from teams_app.models import AgeGroup
-from matches_app.models import Match, MatchLineup
+from matches_app.models import Match
+from lineup_app.models import MatchLineup
 from gps_app.models import GPSRecord
 from tagging_app.models import AttemptToGoal, PassEvent, GoalkeeperDistributionEvent
 

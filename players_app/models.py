@@ -20,7 +20,9 @@ COMPETITION_CHOICES = [
 
 # Player model
 class Player(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=50)
+    second_name = models.CharField(max_length=50, default='Second_name')
+    surname = models.CharField(max_length=50, default='surname')
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='players')
     birthdate = models.DateField(null=True, blank=True)
     place_of_birth = models.CharField(max_length=100, default="Tanzania")

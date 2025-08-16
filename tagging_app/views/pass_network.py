@@ -1,7 +1,8 @@
 # tagging_app/views/pass_network.py
 from django.shortcuts import render, get_object_or_404
 from players_app.models import Player
-from matches_app.models import Match, MatchLineup
+from matches_app.models import Match
+from lineup_app.models import MatchLineup
 from django.utils import timezone
 from django.http import JsonResponse, HttpResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -20,25 +21,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
-
-
-def pass_network_page(request, match_id):
-    match = get_object_or_404(Match, id=match_id)
-
-    our_team = match.home_team  # or logic to detect viewer's team
-    opponent_team = match.away_team
-
-    our_players = MatchLineup.objects.filter(match=match, team=our_team, is_starting=True)
-    opponent_players = MatchLineup.objects.filter(match=match, team=opponent_team, is_starting=True)
-
-    context = {
-        'match': match,
-        'our_team': our_team,
-        'opponent_team': opponent_team,
-        'our_players': our_players,
-        'opponent_players': opponent_players,
-    }
-    return render(request, 'tagging_app/pass_network_enter_data.html', context)
+from tagging_app.views.goal_and_pass_enter import tagging_base_view
 
 
 @csrf_exempt

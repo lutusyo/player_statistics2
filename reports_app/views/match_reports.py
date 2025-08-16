@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from matches_app.models import Match, MatchLineup, Substitution
+from lineup_app.models import Match, MatchLineup, Substitution
 from tagging_app.models import AttemptToGoal, PassEvent  # adjust to your app name
 
 def match_summary_view(request, match_id):

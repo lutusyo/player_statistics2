@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from players_app.models import Player
-from matches_app.models import Match, MatchLineup
+from matches_app.models import Match
+from lineup_app.models import MatchLineup
 from django.utils import timezone
 from django.http import JsonResponse, HttpResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt

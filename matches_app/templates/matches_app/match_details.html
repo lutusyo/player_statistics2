@@ -1,94 +1,125 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block content %}
-<div class="container" style="max-width: 900px; margin: auto;">
+<div class="container mt-4">
+    <h2>{{ match.home_team.name }} vs {{ match.away_team.name }}</h2>
+    <p class="text-muted">{{ match.date|date:"M d, Y" }}</p>
 
-    <!-- Match Title -->
-    <h2 style="text-align: center; margin-bottom: 20px;">
-        {{ home_team_name }} vs {{ away_team_name }}
-    </h2>
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="matchTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">Info</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab">Summary</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab">Stats</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="lineup-tab" data-bs-toggle="tab" data-bs-target="#lineup" type="button" role="tab">Line-up</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="h2h-tab" data-bs-toggle="tab" data-bs-target="#h2h" type="button" role="tab">H2H</button>
+        </li>
+    </ul>
 
-    <!-- Match Info Grid -->
-    <div style="
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 10px;
-        background: #f9f9f9;
-        padding: 15px 20px;
-        border-radius: 10px;
-        font-size: 14px;
-        margin-bottom: 30px;
-    ">
-        <div><strong>📅 Date:</strong> {{ match.date }}</div>
-        <div><strong>🕒 Time:</strong>{{ match.time|time:"H:i" }}</div>
-        <div><strong>📍 Venue:</strong> {{ match.venue }}</div>
-        <div><strong>🏆 Competition:</strong> {{ match.get_competition_type_display }}</div>
-        <div><strong>📅 Season:</strong> {{ match.season }}</div>
-    </div>
+    <!-- Tab Content -->
+    <div class="tab-content mt-3" id="matchTabsContent">
+        <!-- Info Tab -->
+        <div class="tab-pane fade show active" id="info" role="tabpanel">
+            <h5>Match Information</h5>
+            <p><strong>Date:</strong> {{ match.date }}</p>
+            <p><strong>Venue:</strong> {{ match.venue }}</p>
+            <p><strong>Competition:</strong> {{ match.competition }}</p>
+        </div>
 
-    <!-- Score Section -->
-    <div style="display: flex; align-items: center; justify-content: center; gap: 30px; margin-bottom: 30px;">
-        <div style="text-align: center;">
-            {% if match.home_team.logo %}
-                <img src="{{ match.home_team.logo.url }}" alt="Home Team Logo" height="60">
+        <!-- Summary Tab -->
+        <div class="tab-pane fade" id="summary" role="tabpanel">
+            <h5>Match Summary</h5>
+            {% if match.summary %}
+                <p>{{ match.summary }}</p>
+            {% else %}
+                <p>No summary available yet.</p>
             {% endif %}
-            <div>{{ home_team_name }}</div>
         </div>
 
-        <div style="font-size: 22px; font-weight: bold;">
-            {{ home_team_goals|default:0 }} - {{ away_team_goals|default:0 }}
+        <!-- Stats Tab -->
+        <div class="tab-pane fade" id="stats" role="tabpanel">
+            <h5>Match Stats</h5>
+            <p>Shots, passes, duels, etc. will go here.</p>
         </div>
 
-        <div style="text-align: center;">
-            {% if match.away_team.logo %}
-                <img src="{{ match.away_team.logo.url }}" alt="Away Team Logo" height="60">
+        <!-- Lineup Tab -->
+        <div class="tab-pane fade" id="lineup" role="tabpanel">
+            <h5>Line-up</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>{{ match.home_team.name }}</h6>
+                    <ul>
+                        {% for player in home_lineup %}
+                            <li>{{ player.full_name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>{{ match.away_team.name }}</h6>
+                    <ul>
+                        {% for player in away_lineup %}
+                            <li>{{ player.full_name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- H2H Tab -->
+        <div class="tab-pane fade" id="h2h" role="tabpanel">
+            <h5>Head-to-Head</h5>
+            {% if h2h_results %}
+                <ul>
+                    {% for result in h2h_results %}
+                        <li>{{ result }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No past meetings available.</p>
             {% endif %}
-            <div>{{ away_team_name }}</div>
         </div>
     </div>
+</div>
 
-    <!-- Include Line up -->
-    {% include "matches_app/starting_and_subs.html" %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var triggerTabList = [].slice.call(document.querySelectorAll('#matchTabs button'))
+    triggerTabList.forEach(function(triggerEl) {
+        var tabTrigger = new bootstrap.Tab(triggerEl)
 
-    <!-- Goals Timeline -->
-    <h3>⚽ Goals Timeline</h3>
+        triggerEl.addEventListener('click', function (event) {
+            event.preventDefault()
+            tabTrigger.show()
+        })
+    })
+});
+</script>
 
-    {% if goals %}
-        <p style="font-size: 18px; font-weight: bold; color: green; margin-top: -10px;">
-            Total Goals: {{ goals|length }}
-        </p>
-        <ul style="line-height: 1.8;">
-            {% for goal in goals %}
-                <li>
-                    {{ goal.minute }}':
-                    {% if goal.is_own_goal %}
-                        🥅 Own Goal by {{ goal.scorer }}
-                    {% else %}
-                        {{ goal.scorer }}
-                        {% if goal.assist_by %}(Assist: {{ goal.assist_by }}){% endif %}
-                    {% endif %}
-                    ({{ goal.team_name }})
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>0 - 0</p>
-    {% endif %}
+
+
 
     <hr style="margin: 40px 0;">
 
     <!--reports_app:ntro_page-->
 
-    <a href="{% url 'reports_app:intro_page' 'pass_network' match.id %}" 
+    <!--<a href="{% url 'reports_app:intro_page' 'pass_network' match.id %}" 
         style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
         📊 View Pass Network
-    </a>
+    </a>-->
 
 
-    <!--<a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
+    <a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
         📊 View Pass Network
-    </a> | -->
+    </a> | 
 
 
     <a href="{% url 'tagging_app:attempt_to_goal_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
@@ -103,3 +134,5 @@
 
 </div>
 {% endblock %}
+
+

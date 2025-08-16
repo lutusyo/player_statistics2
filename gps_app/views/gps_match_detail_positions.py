@@ -5,13 +5,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from gps_app.forms import GPSUploadForm
 from gps_app.models import GPSRecord
-from matches_app.models import Match, MatchLineup
+from matches_app.models import Match
+from lineup_app.models import MatchLineup, Substitution
 from players_app.models import Player
 from django.db.models import Count
-
-
-
-
 
 
 def gps_position_detail(request, match_id):

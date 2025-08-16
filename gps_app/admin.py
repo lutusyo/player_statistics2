@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import GPSRecord
-from matches_app.models import MatchLineup
+from lineup_app.models import MatchLineup
 
 @admin.register(GPSRecord)
 class GPSRecordAdmin(admin.ModelAdmin):

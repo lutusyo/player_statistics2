@@ -1,6 +1,8 @@
 from django.db import models
 from players_app.models import Player
-from matches_app.models import Match, MatchLineup  # you can import both in one line
+from matches_app.models import Match
+from lineup_app.models import MatchLineup, Substitution, PositionChoices
+
 
 class GPSRecord(models.Model):
     match = models.ForeignKey(Match, related_name='gps_records', on_delete=models.CASCADE)

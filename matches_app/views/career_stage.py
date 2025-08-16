@@ -9,11 +9,12 @@ from datetime import date
 
 from django.db.models import Q
 from teams_app.models import Team, AgeGroup
-from matches_app.models import MatchLineup, Match
+from lineup_app.models import MatchLineup, PositionChoices
 from tagging_app.models import AttemptToGoal, GoalkeeperDistributionEvent
 from collections import Counter
 
 from collections import defaultdict
+from matches_app.models import Match
 
 # position coordinates (x: left-right %, y: top-bottom %)
 POSITION_COORDINATES = {
@@ -32,8 +33,6 @@ POSITION_COORDINATES = {
     'RW': {'x': 80, 'y': 30},
     'ST': {'x': 50, 'y': 20},
 }
-
-
 
 
 @login_required

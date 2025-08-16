@@ -5,16 +5,6 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Django-related
-db.sqlite3
-*.sqlite3
-/media/
-
 # Logs and temporary files
 tmp/
 *.log
-
-# Deployment-specific
-Passengerfile.json
-passenger_wsgi.py
-
