@@ -6,74 +6,79 @@
 
 {% block content %}
 <style>
-  /* Grid for players */
-  #player-panel {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-  }
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
 
-  /* Full-width on mobile */
-  @media (max-width: 768px) {
-    #player-panel {
-      grid-template-columns: 1fr;
-    }
-  }
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Fill screen */
+  overflow: hidden;
+}
 
-  .player-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    background-color: lightblue;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
-    text-align: center;
-    font-weight: bold;
-  }
+.header, .timer {
+  flex: 0 0 auto;
+  padding: 10px;
+}
 
-  .player-btn img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 5px;
-  }
+.panels {
+  flex: 1 1 auto; /* Take remaining space */
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two panels side by side */
+  gap: 10px;
+  padding: 10px;
+  overflow-y: auto; /* Scroll if too tall */
+}
 
-  .player-btn.selected {
-    background-color: #28a745 !important;
-    color: white !important;
-  }
+/* Player grids inside each panel */
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4x4 layout */
+  gap: 10px;
+}
 
-  .tag-panel {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+/* Mobile view: stack everything */
+@media (max-width: 768px) {
+  .panels {
+    grid-template-columns: 1fr; /* Single column */
   }
+  .player-grid {
+    grid-template-columns: repeat(2, 1fr); /* smaller grid for mobile */
+  }
+}
 
-  .timer-controls button {
-    margin-right: 10px;
-  }
+/* Player buttons styling */
+.player-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background-color: lightblue;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  text-align: center;
+  font-weight: bold;
+}
 
-  .event-log {
-    max-height: 200px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin-top: 15px;
-  }
+.player-btn img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 5px;
+}
 
-  .count-badge {
-    background-color: #007bff;
-    color: white;
-    border-radius: 10px;
-    padding: 2px 8px;
-    font-size: 0.75em;
-    margin-left: 5px;
-  }
+.player-btn.active, .player-btn.selected {
+  background-color: green !important;
+  color: white;
+}
 </style>
+
 
 <a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>
 <hr>

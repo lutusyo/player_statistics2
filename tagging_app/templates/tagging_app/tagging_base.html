@@ -6,21 +6,30 @@
 
 {% block content %}
 
+<div class="container">
+  <div class="header">
     <h2>{{ match }}</h2>
-
-    <!-- Shared Timer -->
-    <div>
-    <h3>Time: <span id="timer-display">00:00</span></h3>
-    <div class="timer-controls">
-        <button id="pause-btn">Pause</button>
-        <button id="resume-btn">Resume</button>
-        <button id="reset-btn">Reset</button>
+    <div class="timer">
+      <h3>Time: <span id="timer-display">00:00</span></h3>
+      <button id="pause-btn">Pause</button>
+      <button id="resume-btn">Resume</button>
+      <button id="reset-btn">Reset</button>
     </div>
+  </div>
+
+  <div class="panels">
+    <!-- Panel 1: Attempt to Goal -->
+    <div id="attempt-panel">
+      {% include "tagging_app/attempt_to_goal_enter_data.html" %}
     </div>
 
-    <hr>
-    {% include "tagging_app/attempt_to_goal_enter_data.html" %}
-    <hr>
-    {% include "tagging_app/pass_network_enter_data.html" %}
+    <!-- Panel 2: Pass Network -->
+    <div id="pass-panel">
+      {% include "tagging_app/pass_network_enter_data.html" %}
+    </div>
+  </div>
+</div>
+
 
 {% endblock %}
+
