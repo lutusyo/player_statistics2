@@ -207,7 +207,7 @@
         .then(data => {
             document.getElementById('loading-spinner').style.display = 'none';
             alert("Lineup saved successfully!");
-            window.location.href = "{% url 'matches_app:substitution_panel' match.id %}";
+            window.location.href = "{% url 'lineup_app:substitution_panel' match.id %}";
         })
         .catch(err => {
             document.getElementById('loading-spinner').style.display = 'none';

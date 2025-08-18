@@ -1,24 +1,96 @@
+{# Extend the base player template #}
 {% extends 'player_base.html' %}
+
+{# Load static files so you can use static CSS/JS paths #}
 {% load static %}
 
-
-
-
-
+{# Extra content for the <head> section #}
 {% block extra_head %}
+    {# Page title will be the player’s name #}
+    {% block title %}{{ player.name }}{% endblock %}
 
-{% block title %}{{ player.name }}{% endblock %}
+    {# Load custom CSS file for player styling #}
+    <link rel="stylesheet" href="{% static 'players_app/css/player.css' %}">
 
-<link rel="stylesheet" href="{% static 'players_app/css/player.css' %}">
+    {# Inline CSS for toggle, filters, and layout #}
+    <style>
+    /* Toggle buttons container */
+    .toggle-buttons {
+        display: flex;
+        gap: 15px;
+        margin: 20px 0;
+        justify-content: center;
+    }
+    /* Toggle button styles */
+    .toggle-buttons button {
+        padding: 10px 20px;
+        border: none;
+        background: #eee;
+        cursor: pointer;
+        font-weight: bold;
+        border-radius: 8px;
+        transition: 0.3s;
+    }
+    /* Active state for toggle buttons */
+    .toggle-buttons button.active {
+        background: #007bff;
+        color: white;
+    }
+    /* Sections hidden by default */
+    .section {
+        display: none;
+    }
+    /* Show active section */
+    .section.active {
+        display: block;
+    }
+    /* Filters container (seasons & competitions) */
+    .filter-container {
+        margin: 20px 0;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+    /* Styling dropdown filters */
+    .filter-container select {
+        padding: 5px 10px;
+    }
+    /* Stats table styling */
+    .stats-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    .stats-table th, .stats-table td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+    .stats-table th {
+        background: #f5f5f5;
+    }
+    /* Center player photo */
+    .player-photo-centered {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 15px;
+    }
+    /* Style player photo */
+    .player-photo-centered img {
+        max-width: 220px;
+        border-radius: 12px;
+    }
+    </style>
 {% endblock %}
 
 
 {% block player_content %}
 <div class="player-detail-wrapper">
-    <!-- Sidebar -->
+    <!-- Sidebar with related players -->
     <div class="player-sidebar">
-        <h3> All ({{ player.age_group }}) players</h3>
+        <h3>All ({{ player.age_group }}) players</h3>
         <ul class="sidebar-player-list">
+            {# Loop through related players and show photo + link #}
             {% for related in related_players %}
                 <li>
                     <a href="{% url 'players_app:player_detail' related.id %}">
@@ -30,40 +102,129 @@
         </ul>
     </div>
 
-    <!-- Main Profile Content -->
+    <!-- Main content container -->
     <div class="player-profile-container">
+
+        <!-- Player Image (shared between Profile & Stats view) -->
         <div class="player-photo-centered">
             <img src="{{ player.photo.url }}" alt="{{ player.name }}">
         </div>
 
-        <div class="player-attributes-grid">
-            <div class="attribute-block">
-                <p class="label">Position</p>
-                <p class="value blue-text">{{ player.position }}</p>
-            </div>
-            <div class="attribute-block">
-                <p class="label">Shirt</p>
-                <p class="value blue-text">{{ player.jersey_number }}</p>
-            </div>
-            <div class="attribute-block">
-                <p class="label">Birthdate</p>
-                <p class="value blue-text">{{ player.birthdate }}</p>
-            </div>
-            <div class="attribute-block">
-                <p class="label">Height</p>
-                <p class="value blue-text">{{ player.height }} cm</p>
-            </div>
-            <div class="attribute-block">
-                <p class="label">Weight</p>
-                <p class="value blue-text">{{ player.weight }} kg</p>
-            </div>
-            <div class="attribute-block">
-                <p class="label">Preferred Foot</p>
-                <p class="value blue-text">{{ player.foot_preference }}</p>
-            </div>
+        <!-- Toggle buttons: Profile | Stats -->
+        <div class="toggle-buttons">
+            <button id="profileBtn" class="active">Profile</button>
+            <button id="statsBtn">Stats</button>
         </div>
 
-        {% include "matches_app/player_timeline.html" %}
+        <!-- Profile Section (default visible) -->
+        <div id="profileSection" class="section active">
+            <div class="player-attributes-grid">
+                <div class="attribute-block">
+                    <p class="label">Position</p>
+                    <p class="value blue-text">{{ player.position }}</p>
+                </div>
+                <div class="attribute-block">
+                    <p class="label">Shirt</p>
+                    <p class="value blue-text">{{ player.jersey_number }}</p>
+                </div>
+                <div class="attribute-block">
+                    <p class="label">Birthdate</p>
+                    <p class="value blue-text">{{ player.birthdate }}</p>
+                </div>
+                <div class="attribute-block">
+                    <p class="label">Height</p>
+                    <p class="value blue-text">{{ player.height }} cm</p>
+                </div>
+                <div class="attribute-block">
+                    <p class="label">Weight</p>
+                    <p class="value blue-text">{{ player.weight }} kg</p>
+                </div>
+                <div class="attribute-block">
+                    <p class="label">Preferred Foot</p>
+                    <p class="value blue-text">{{ player.foot_preference }}</p>
+                </div>
+            </div>
+
+            {# Include timeline from matches app #}
+            {% include "matches_app/player_timeline.html" %}
+        </div>
+
+        <!-- Stats Section (hidden by default) -->
+        <div id="statsSection" class="section">
+            
+            <!-- Filters for season and competition -->
+            <div class="filter-container">
+                <select id="seasonFilter">
+                    <option value="all">All Seasons</option>
+                    {% for season in seasons %}
+                        <option value="{{ season.id }}">{{ season.name }}</option>
+                    {% endfor %}
+                </select>
+
+                <select id="competitionFilter">
+                    <option value="all">All Competitions</option>
+                    {% for comp in competitions %}
+                        <option value="{{ comp.id }}">{{ comp.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Stats Table -->
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>Competition</th>
+                        <th>Appearances</th>
+                        <th>Minutes</th>
+                        <th>Goals</th>
+                        <th>Assists</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {# Loop through player stats per competition #}
+                    {% for stat in player_stats %}
+                    <tr>
+                        <td>{{ stat.competition__name }}</td>
+                        <td>{{ stat.appearances }}</td>
+                        <td>{{ stat.minutes }}</td>
+                        <td>{{ stat.goals }}</td>
+                        <td>{{ stat.assists }}</td>
+                    </tr>
+                    {% endfor %}
+                    
+                    {# Totals row #}
+                    <tr>
+                        <td><strong>Total</strong></td>
+                        <td><strong>{{ totals.appearances }}</strong></td>
+                        <td><strong>{{ totals.minutes }}</strong></td>
+                        <td><strong>{{ totals.goals }}</strong></td>
+                        <td><strong>{{ totals.assists }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 </div>
+
+<!-- Toggle logic (switch Profile <-> Stats) -->
+<script>
+document.getElementById("profileBtn").addEventListener("click", function() {
+    // Show profile, hide stats
+    document.getElementById("profileSection").classList.add("active");
+    document.getElementById("statsSection").classList.remove("active");
+    // Update button active state
+    this.classList.add("active");
+    document.getElementById("statsBtn").classList.remove("active");
+});
+
+document.getElementById("statsBtn").addEventListener("click", function() {
+    // Show stats, hide profile
+    document.getElementById("statsSection").classList.add("active");
+    document.getElementById("profileSection").classList.remove("active");
+    // Update button active state
+    this.classList.add("active");
+    document.getElementById("profileBtn").classList.remove("active");
+});
+</script>
 {% endblock %}

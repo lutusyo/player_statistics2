@@ -1,22 +1,17 @@
-import csv
-import json
-from io import TextIOWrapper
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from gps_app.forms import GPSUploadForm
-from gps_app.models import GPSRecord
-from matches_app.models import Match
-from lineup_app.models import MatchLineup
-from players_app.models import Player
 from django.db.models import Count
-
+from django.shortcuts import render
+from matches_app.models import Match
 
 
 def gps_matches_list(request):
-    # List matches with at least one GPS record, annotated with record counts
-    matches = Match.objects.annotate(gps_count=Count('gps_records')).filter(gps_count__gt=0).order_by('-date')
+    """
+    List matches that have at least one GPS record,
+    annotated with the number of GPS records.
+    """
+    matches = (
+        Match.objects.annotate(gps_count=Count('gps_records', distinct=True))
+        .filter(gps_count__gt=0)
+        .order_by('-date')
+    )
 
-    context = {
-        'matches': matches,
-    }
-    return render(request, 'gps_app/gps_list.html', context)
+    return render(request, 'gps_app/gps_list.html', {'matches': matches})

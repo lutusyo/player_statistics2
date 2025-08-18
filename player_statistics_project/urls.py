@@ -27,7 +27,7 @@ urlpatterns = [
     path('defensive/', include('defensive_app.urls')),
 
     #lineup
-    path('lineup_app', include('lineup_app.urls')),
+    path('lineup_app/', include('lineup_app.urls')),
  
 
 

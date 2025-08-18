@@ -14,8 +14,7 @@ app_name = 'matches_app'
 
 urlpatterns = [
 
-    # Substitution panel page
-    path('matches/<int:match_id>/substitution/', substitution_panel, name='substitution_panel'),
+    
 
     ## API endpoints for substitution
 

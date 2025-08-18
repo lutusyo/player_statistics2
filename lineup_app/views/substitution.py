@@ -28,7 +28,7 @@ def _serialize_lineup(lineup):
 @require_http_methods(["GET"])
 def substitution_panel(request, match_id):
     match = get_object_or_404(Match, id=match_id)
-    return render(request, "matches_app/substitution_panel.html", {"match": match})
+    return render(request, "lineup_app/substitution_panel.html", {"match": match})
 
 
 @require_http_methods(["GET"])
