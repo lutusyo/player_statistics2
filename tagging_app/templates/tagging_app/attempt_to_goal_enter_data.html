@@ -1,17 +1,62 @@
 {% load static %}
-{% load custom_filters %}
 
+
+{% load static %}
+{% load custom_filters %}
 
 {% block content %}
 <style>
+  /* Grid for players */
+  #player-panel {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  /* Full-width on mobile */
+  @media (max-width: 768px) {
+    #player-panel {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .player-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: lightblue;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .player-btn img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 5px;
+  }
+
+  .player-btn.selected {
+    background-color: #28a745 !important;
+    color: white !important;
+  }
+
   .tag-panel {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
   }
+
   .timer-controls button {
     margin-right: 10px;
   }
+
   .event-log {
     max-height: 200px;
     overflow-y: auto;
@@ -19,6 +64,7 @@
     padding: 10px;
     margin-top: 15px;
   }
+
   .count-badge {
     background-color: #007bff;
     color: white;
@@ -27,27 +73,27 @@
     font-size: 0.75em;
     margin-left: 5px;
   }
-  .selected {
-    background-color: #28a745 !important;
-    color: white !important;
-  }
 </style>
 
-<a href="{% url 'lineup_app:substitution_panel' match.id %}";>SUB</a>
+<a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>
 <hr>
 
 <div class="tag-panel" id="player-panel">
- 
   {% for player in players %}
     {% with total=outcome_counts|get_item_or:player.id %}
       {% with count=total.total|default:0 %}
         <button class="player-btn" data-player-id="{{ player.id }}">
-          {{ player.name|slice:":10"  }} <span class="count-badge">{{ count }}</span>
+          {% if player.photo %}
+            <img src="{{ player.photo.url }}" alt="{{ player.name }}">
+          {% else %}
+            <img src="{% static 'default_player.png' %}" alt="{{ player.name }}">
+          {% endif %}
+          {{ player.name|slice:":10" }}
+          <span class="count-badge">{{ count }}</span>
         </button>
       {% endwith %}
     {% endwith %}
   {% endfor %}
-
 </div>
 
 <div id="tagging-section" style="display:none;">
@@ -62,7 +108,6 @@
     {% endfor %}
   </div>
 
-
   <h3>Select Delivery Type</h3>
   <div id="delivery-panel" class="tag-panel">
     {% for value, label in delivery_types %}
@@ -75,6 +120,9 @@
 
 <h3>Live Event Log</h3>
 <div class="event-log" id="event-log"></div>
+
+
+
 
 <script>
 let timer = 0;

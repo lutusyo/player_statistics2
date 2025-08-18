@@ -1,27 +1,63 @@
 {% load static %}
 
+{% load static %}
+
 <title>Passing Network Tagging</title>
 <style>
-    #pass-network .player-btn, #pass-network .opponent-btn {
-        padding: 10px 20px;
-        margin: 5px;
-        background-color: lightblue;
-        border: none;
-        cursor: pointer;
-        border-radius: 5px;
+#pass-network {
+    margin: 20px 0;
+}
+
+/* Grid for our players */
+#our-players {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+/* Full-width on mobile */
+@media (max-width: 768px) {
+    #our-players {
+        grid-template-columns: 1fr;
     }
-    #pass-network .opponent-btn {
-        background-color: lightcoral;
-    }
-    #pass-network .player-btn.active {
-        background-color: green !important;
-        color: white;
-    }
-    #pass-network #timer {
-        font-size: 20px;
-        font-weight: bold;
-        margin-bottom: 20px;
-    }
+}
+
+/* Player button with photo */
+.player-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: lightblue;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.player-btn img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 5px;
+}
+
+.player-btn.active {
+    background-color: green !important;
+    color: white;
+}
+
+.opponent-btn {
+    padding: 10px 20px;
+    margin-top: 10px;
+    background-color: lightcoral;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
 </style>
 
 <div id="pass-network">
@@ -31,7 +67,13 @@
                     id="player-{{ p.player.id }}"
                     data-player-id="{{ p.player.id }}"
                     data-team-id="{{ our_team.id }}">
-                {{ p.player.name }} (<span class="pass-count">0</span>)
+                {% if p.player.photo %}
+                    <img src="{{ p.player.photo.url }}" alt="{{ p.player.name }}">
+                {% else %}
+                    <img src="{% static 'default_player.png' %}" alt="{{ p.player.name }}">
+                {% endif %}
+                {{ p.player.name }}
+                <span class="pass-count">0</span>
             </button>
         {% endfor %}
     </div>
@@ -44,6 +86,7 @@
 
     <p><strong>Last Pass:</strong> <span id="last-pass"></span></p>
 </div>
+
 
 <script>
 window.PassNetwork = {
