@@ -49,7 +49,7 @@
                             {% if match.home_team.logo %}
                                 <img src="{{ match.home_team.logo.url }}" alt="{{ home_team_name }} logo">
                             {% endif %}
-                            <div>{{ match.get_team_display }}</div>
+                            <div>{{ match.home_team }}</div>
                         </div>
 
                         <!--<div class="vs">
@@ -65,10 +65,10 @@
 
 
                         <div class="team">
-                            {% if match.opponent_logo %}
-                                <img src="{{ match.opponent_logo.url }}" alt="{{ match.opponent }} logo">
+                            {% if match.away_team.logo %}
+                                <img src="{{ match.away_team.logo.url }}" alt="{{ match.away_team.logo }} logo">
                             {% endif %}
-                            <div>{{ match.opponent }}</div>
+                            <div>{{ match.away_team }}</div>
                         </div>
                     </div>
                 </div>

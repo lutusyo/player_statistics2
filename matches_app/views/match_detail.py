@@ -19,26 +19,34 @@ from lineup_app.views.match_lineup_view_with_uwanja import POSITION_COORDS
 
 
 
-# position coordinates (x: left-right %, : top-bottom %)
-
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from lineup_app.models import MatchLineup, POSITION_COORDS
+from lineup_app.views.match_lineup_view_with_uwanja import POSITION_COORDS
+#from matches_app.models import Match
+from tagging_app.models import AttemptToGoal
 
 @login_required
 def match_detail(request, match_id):
     match = get_object_or_404(Match, pk=match_id)
 
-    # Get all attempts with outcome 'On Target Goal' for this match
-    goals_qs = AttemptToGoal.objects.filter(match=match, outcome='On Target Goal').select_related('player', 'team', 'assist_by')
+    # Goals
+    goals_qs = AttemptToGoal.objects.filter(
+        match=match, outcome='On Target Goal'
+    ).select_related('player', 'team', 'assist_by')
 
-    # Get home and away players IDs for this match
-    home_player_ids = MatchLineup.objects.filter(match=match, team=match.home_team).values_list('player_id', flat=True)
-    away_player_ids = MatchLineup.objects.filter(match=match, team=match.away_team).values_list('player_id', flat=True)
+    home_player_ids = MatchLineup.objects.filter(
+        match=match, team=match.home_team
+    ).values_list('player_id', flat=True)
+    away_player_ids = MatchLineup.objects.filter(
+        match=match, team=match.away_team
+    ).values_list('player_id', flat=True)
 
     home_goals = 0
     away_goals = 0
     goals = []
 
     for goal in goals_qs:
-        # Determine if goal belongs to home or away by player team or by lineup player ID
         if goal.player_id in home_player_ids:
             home_goals += 1
             team_name = match.home_team.name
@@ -46,7 +54,6 @@ def match_detail(request, match_id):
             away_goals += 1
             team_name = match.away_team.name
         else:
-            # fallback if player not in lineup, fallback to AttemptToGoal team FK
             if goal.team_id == match.home_team_id:
                 home_goals += 1
                 team_name = match.home_team.name
@@ -61,15 +68,40 @@ def match_detail(request, match_id):
             'second': goal.second,
             'scorer': goal.player.name if goal.player else "Unknown",
             'assist_by': goal.assist_by.name if goal.assist_by else None,
-            'is_own_goal': False,  # Adjust here if you have own goal info
+            'is_own_goal': False,
             'team_name': team_name,
         })
 
+    # -------- LINEUP WITH COORDINATES --------
+    def prepare_lineup(team, mirror=False):
+        players = MatchLineup.objects.filter(match=match, team=team, is_starting=True).select_related("player")
+        lineup = []
+        for ml in players:
+            coords = POSITION_COORDS.get(ml.position, {"top": 50, "left": 50})
+            top = coords["top"]
+            if mirror:  # flip for away team
+                top = 100 - top
+            lineup.append({
+                "id": ml.player.id,
+                "name": ml.player.name,
+                "number": getattr(ml.player, "jersey_number", ""),
+                "top": top,
+                "left": coords["left"],
+            })
+        return lineup
+
+    home_lineup = prepare_lineup(match.home_team)
+    away_lineup = prepare_lineup(match.away_team, mirror=True)
+    lineup = home_lineup + away_lineup
+
     return render(request, 'matches_app/match_details.html', {
         'match': match,
+        'lineup': lineup,
         'home_team_name': match.home_team.name,
         'away_team_name': match.away_team.name,
         'home_team_goals': home_goals,
         'away_team_goals': away_goals,
         'goals': goals,
+        'home_lineup': home_lineup,
+        'away_lineup': away_lineup,
     })

@@ -22,6 +22,8 @@ urlpatterns = [
     path('match/<int:match_id>/pdf/export-attempt-to-goal-pdf/',attempt_to_goal.export_attempt_to_goal_pdf, name='export_attempt_to_goal_pdf'),
     # acros multiple device
     path('match/<int:match_id>/live_state/', attempt_to_goal.get_live_tagging_state, name='get_live_tagging_state'),
+    # update substitute api
+    
 
     # Passing Network
     #path('match/<int:match_id>/pass-network/', pass_network.pass_network_page, name='enter_pass_network'),

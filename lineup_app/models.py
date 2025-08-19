@@ -20,6 +20,22 @@ class PositionChoices(models.TextChoices):
     SUB = 'SUB', 'Substitute'
 
 
+    # Map position codes to pitch coordinates (% from top, % from left)
+POSITION_COORDS = {
+    "GK":  {"top": 5,  "left": 45},
+    "RB":  {"top": 25, "left": 80},
+    "RCB": {"top": 25, "left": 60},
+    "LCB": {"top": 25, "left": 40},
+    "LB":  {"top": 25, "left": 20},
+    "RM":  {"top": 50, "left": 75},
+    "CM":  {"top": 50, "left": 55},
+    "LM":  {"top": 50, "left": 35},
+    "RW":  {"top": 75, "left": 70},
+    "LW":  {"top": 75, "left": 30},
+    "ST":  {"top": 75, "left": 50},
+}
+
+
 class MatchLineup(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE, null=True, blank=True, help_text='Match this player is registered for')
     player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True, blank=True, help_text='Player registered for this match')

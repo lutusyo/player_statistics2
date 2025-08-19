@@ -1,83 +1,8 @@
 {% load static %}
 
-
-{% load static %}
 {% load custom_filters %}
 
 {% block content %}
-<style>
-body, html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* Fill screen */
-  overflow: hidden;
-}
-
-.header, .timer {
-  flex: 0 0 auto;
-  padding: 10px;
-}
-
-.panels {
-  flex: 1 1 auto; /* Take remaining space */
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* Two panels side by side */
-  gap: 10px;
-  padding: 10px;
-  overflow-y: auto; /* Scroll if too tall */
-}
-
-/* Player grids inside each panel */
-.player-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4x4 layout */
-  gap: 10px;
-}
-
-/* Mobile view: stack everything */
-@media (max-width: 768px) {
-  .panels {
-    grid-template-columns: 1fr; /* Single column */
-  }
-  .player-grid {
-    grid-template-columns: repeat(2, 1fr); /* smaller grid for mobile */
-  }
-}
-
-/* Player buttons styling */
-.player-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  background-color: lightblue;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  text-align: center;
-  font-weight: bold;
-}
-
-.player-btn img {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 5px;
-}
-
-.player-btn.active, .player-btn.selected {
-  background-color: green !important;
-  color: white;
-}
-</style>
 
 
 <a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>

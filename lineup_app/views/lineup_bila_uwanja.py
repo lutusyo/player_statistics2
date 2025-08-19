@@ -4,7 +4,7 @@ from django.db import transaction
 from players_app.models import Player
 from lineup_app.models import Match, MatchLineup, PositionChoices
 
-def match_lineup_view_during_match(request, match_id):
+def match_lineup_view(request, match_id):
     match = get_object_or_404(Match, id=match_id)
     
     players_qs = Player.objects.filter(team__in=[match.home_team, match.away_team]).order_by('name')

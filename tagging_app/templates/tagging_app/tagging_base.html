@@ -2,15 +2,107 @@
 {% load static %}
 {% load custom_filters %}
 
-{% block header %}{% endblock %}
-
 {% block content %}
+
+{% block header %} {% endblock %}
+<style>
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  font-size: 12px; /* smaller text */
+}
+
+.header, .timer {
+  flex: 0 0 auto;
+  padding: 5px;
+}
+
+.panels {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* two panels side by side */
+  gap: 5px;
+  padding: 5px;
+  overflow: hidden;
+}
+
+/* Tagging panel box */
+.tag-panel {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 5px;
+  overflow-y: auto;
+  font-size: 11px;
+}
+
+/* Compact player grid */
+.player-grid, #our-players, #outcome-panel, #delivery-panel {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); /* show more players in row */
+  gap: 5px;
+}
+
+/* Smaller player buttons */
+.player-btn, .outcome-btn, .delivery-btn, .opponent-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background-color: #e6f2ff;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 11px;
+  min-height: 70px; /* smaller boxes */
+}
+
+.player-btn img {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  margin-bottom: 3px;
+  object-fit: cover;
+}
+
+.count-badge, .pass-count {
+  font-size: 10px;
+  background: #333;
+  color: #fff;
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin-top: 2px;
+}
+
+.player-btn.active, .player-btn.selected {
+  background-color: green !important;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .panels {
+    grid-template-columns: 1fr; /* stack vertically on mobile */
+  }
+  .player-grid, #our-players, #outcome-panel, #delivery-panel {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+</style>
+
 
 <div class="container">
   <div class="header">
-    <h2>{{ match }}</h2>
+    <h4>{{ match }}</h4>
     <div class="timer">
-      <h3>Time: <span id="timer-display">00:00</span></h3>
+      Time: <span id="timer-display">00:00</span>
       <button id="pause-btn">Pause</button>
       <button id="resume-btn">Resume</button>
       <button id="reset-btn">Reset</button>
@@ -18,18 +110,15 @@
   </div>
 
   <div class="panels">
-    <!-- Panel 1: Attempt to Goal -->
-    <div id="attempt-panel">
+    <!-- Attempt to Goal Panel -->
+    <div class="tag-panel">
       {% include "tagging_app/attempt_to_goal_enter_data.html" %}
     </div>
 
-    <!-- Panel 2: Pass Network -->
-    <div id="pass-panel">
+    <!-- Pass Network Panel -->
+    <div class="tag-panel">
       {% include "tagging_app/pass_network_enter_data.html" %}
     </div>
   </div>
 </div>
-
-
 {% endblock %}
-
