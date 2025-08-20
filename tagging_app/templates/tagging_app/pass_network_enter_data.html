@@ -3,33 +3,67 @@
 {% load static %}
 
 <title>Passing Network Tagging</title>
+<style>
+.opponent-btn.active {
+  background-color: green !important;
+  color: white !important;
+  border-color: green !important;
+}
+</style>
+
 
 <div id="pass-network">
-    <div id="our-players">
-        {% for p in our_players %}
-            <button class="player-btn"
-                    id="player-{{ p.player.id }}"
-                    data-player-id="{{ p.player.id }}"
-                    data-team-id="{{ our_team.id }}">
-                {% if p.player.photo %}
-                    <img src="{{ p.player.photo.url }}" alt="{{ p.player.name }}">
-                {% else %}
-                    <img src="{% static 'default_player.png' %}" alt="{{ p.player.name }}">
-                {% endif %}
-                {{ p.player.name }}
-                <span class="pass-count">0</span>
-            </button>
-        {% endfor %}
-    </div>
 
-    <div>
-        <button class="opponent-btn" id="opponent-btn" data-team-id="{{ opponent_team.id }}">
-            {{ opponent_team.name }} Ball Intercept
-        </button>
-    </div>
-
-    <p><strong>Last Pass:</strong> <span id="last-pass"></span></p>
+  <!-- Opponent button at the top -->
+<div style="margin-bottom: 12px; text-align: center;">
+    <button class="opponent-btn" id="opponent-btn" data-team-id="{{ opponent_team.id }}"
+      style="position: relative; padding-right: 30px; font-size: 12px; min-width: 140px; min-height: 50px; border-radius: 8px;">
+        {{ opponent_team.name }} Ball Intercept
+        <span class="pass-count" id="opponent-pass-count" 
+          style="position: absolute; top: 5px; right: 8px; background: #0073e6; color: white; border-radius: 12px; padding: 2px 8px; font-size: 12px;">
+          0
+        </span>
+    </button>
 </div>
+
+
+  <!-- Players buttons in 4 columns grid -->
+  <div id="our-players" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+    {% for p in our_players %}
+        <button class="player-btn"
+                id="player-{{ p.player.id }}"
+                data-player-id="{{ p.player.id }}"
+                data-team-id="{{ our_team.id }}"
+                style="
+                    background-image: url('{% if p.player.photo %}{{ p.player.photo.url }}{% else %}{% static 'default_player.png' %}{% endif %}');
+                    background-size: cover;
+                    background-position: center;
+                    color: #0073e6; /* keeps text blue */
+                    padding: 8px;
+                    border: 2px solid #0073e6;
+                    border-radius: 10px;
+                    font-weight: 600;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-end;
+                    min-height: 90px;
+                    font-size: 11px;
+                    text-shadow: 1px 1px 3px rgba(255,255,255,0.8);
+                ">
+            <span style="background: rgba(255,255,255,0.7); border-radius: 4px; padding: 2px 6px; align-self: flex-start;">
+                {{ p.player.name }}
+            </span>
+            <span class="pass-count" style="background: rgba(0,0,0,0.6); color: white; font-size: 10px; padding: 2px 5px; border-radius: 6px; margin-top: 4px;">
+                0
+            </span>
+        </button>
+
+    {% endfor %}
+  </div>
+
+  <p><strong>Last Pass:</strong> <span id="last-pass"></span></p>
+</div>
+
 
 
 <script>
@@ -86,7 +120,6 @@ window.PassNetwork = {
                 this.highlightButton(playerId);
             });
         });
-
         document.querySelector('#pass-network #opponent-btn').addEventListener('click', () => {
             const opponentTeamId = document.getElementById('opponent-btn').dataset.teamId;
             if (this.lastPlayerId && this.lastTeamId) {
@@ -94,8 +127,19 @@ window.PassNetwork = {
                 this.lastPlayerId = null;
                 this.lastTeamId = null;
                 this.highlightButton(null);
+
+                // Increase opponent pass count locally and update UI
+                if (!this.opponentPassCount) this.opponentPassCount = 0;
+                this.opponentPassCount++;
+                document.getElementById('opponent-pass-count').textContent = this.opponentPassCount;
+
+                // Toggle active class for opponent button
+                const opponentBtn = document.getElementById('opponent-btn');
+                opponentBtn.classList.add('active');
+                setTimeout(() => opponentBtn.classList.remove('active'), 500); // reset color after 0.5s
             }
         });
+        
     },
 
     recordPass: function (fromPlayerId, toPlayerId, fromTeamId, toTeamId, isSuccessful = true, isPossessionRegained = false) {

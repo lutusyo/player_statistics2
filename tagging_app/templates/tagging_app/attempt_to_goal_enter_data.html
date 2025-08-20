@@ -1,58 +1,89 @@
 {% load static %}
-
 {% load custom_filters %}
 
 {% block content %}
 
+<div id="attempt-to-goal" class="tag-panel" style="padding: 10px;">
 
-<a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>
-<hr>
+  <!-- Players list -->
 
-<div class="tag-panel" id="player-panel">
-  {% for player in players %}
-    {% with total=outcome_counts|get_item_or:player.id %}
-      {% with count=total.total|default:0 %}
-        <button class="player-btn" data-player-id="{{ player.id }}">
-          {% if player.photo %}
-            <img src="{{ player.photo.url }}" alt="{{ player.name }}">
-          {% else %}
-            <img src="{% static 'default_player.png' %}" alt="{{ player.name }}">
-          {% endif %}
-          {{ player.name|slice:":10" }}
+  <div id="our-players" style="
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); 
+  gap: 12px;
+">
+
+    {% for player in players %}
+      {% with total=outcome_counts|get_item_or:player.id %}
+        {% with count=total.total|default:0 %}
+          <button class="player-btn" data-player-id="{{ player.id }}"
+            style="
+              display: flex; 
+              flex-direction: column; 
+              align-items: center; 
+              justify-content: flex-end;  /* text at bottom */
+              padding: 8px; 
+              background-color: #e6f2ff; 
+              border: 2px solid #0073e6; 
+              cursor: pointer;
+              border-radius: 10px; 
+              font-size: 11px; 
+              min-height: 90px; 
+              font-weight: 500; 
+              transition: all 0.2s ease-in-out;
+              color: #0073e6;
+
+              background-image: url({% if player.photo %}{{ player.photo.url }}{% else %}{% static 'default_player.png' %}{% endif %});
+              background-size: cover;
+              background-position: center;
+              background-repeat: no-repeat;
+            ">
+            <span style="background: rgba(255,255,255,0.75); width: 100%; border-radius: 0 0 10px 10px; text-align: center; padding: 2px 4px;">
+              {{ player.name|slice:":10" }}
+            </span>
+            <span class="count-badge"
+                  style="font-size: 11px; background: #333; color: #fff; padding: 3px 5px;
+                        border-radius: 6px; margin-top: 4px;">
+              {{ count }}
+            </span>
+          </button>
+
+        {% endwith %}
+      {% endwith %}
+    {% endfor %}
+  </div>
+
+  <!-- Outcome panel, initially hidden -->
+  <div id="outcome-panel" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
+    {% for value, label in outcomes %}
+      {% with count=total_outcome_counts|get_item:value|stringformat:"s"|default:0 %}
+        <button class="outcome-btn" data-outcome="{{ value }}"
+          style="display: flex; flex-direction: column; align-items: center; justify-content: center;
+                 padding: 12px; background-color: #e6f2ff; border: 2px solid #0073e6; cursor: pointer;
+                 border-radius: 10px; font-size: 13px; font-weight: 600; transition: all 0.2s ease-in-out; color: #0073e6;">
+          {{ label }}
           <span class="count-badge">{{ count }}</span>
         </button>
       {% endwith %}
-    {% endwith %}
-  {% endfor %}
-</div>
-
-<div id="tagging-section" style="display:none;">
-  <h3>Select Outcome</h3>
-  <div id="outcome-panel" class="tag-panel">
-    {% for value, label in outcomes %}
-      {% with count=total_outcome_counts|get_item:value|stringformat:"s"|default:0 %}
-        <button class="outcome-btn" data-outcome="{{ value }}">
-          {{ label }} <span class="count-badge">{{ count }}</span>
-        </button>
-      {% endwith %}
     {% endfor %}
   </div>
 
-  <h3>Select Delivery Type</h3>
-  <div id="delivery-panel" class="tag-panel">
+  <!-- Delivery panel, initially hidden -->
+  <div id="delivery-panel" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
     {% for value, label in delivery_types %}
-      <button class="delivery-btn" data-delivery-type="{{ value }}">{{ label }}</button>
+      <button class="delivery-btn" data-delivery-type="{{ value }}"
+        style="display: flex; flex-direction: column; align-items: center; justify-content: center;
+               padding: 12px; background-color: #e6f2ff; border: 2px solid #0073e6; cursor: pointer;
+               border-radius: 10px; font-size: 13px; font-weight: 600; transition: all 0.2s ease-in-out; color: #0073e6;">
+        {{ label }}
+      </button>
     {% endfor %}
   </div>
+
+  <hr style="margin: 12px 0;">
+  <h3>Live Event Log</h3>
+  <div class="event-log" id="event-log" style="max-height: 250px; overflow-y: auto; border: 1px solid #ccc; padding: 6px; border-radius: 6px;"></div>
 </div>
-
-<hr>
-
-<h3>Live Event Log</h3>
-<div class="event-log" id="event-log"></div>
-
-
-
 
 <script>
 let timer = 0;
@@ -61,7 +92,6 @@ let isPaused = false;
 let selectedPlayer = null, selectedOutcome = null, selectedDeliveryType = null;
 const matchId = {{ match.id }};
 
-// Utilities
 function formatTime(seconds) {
   let m = String(Math.floor(seconds / 60)).padStart(2, '0');
   let s = String(seconds % 60).padStart(2, '0');
@@ -69,7 +99,7 @@ function formatTime(seconds) {
 }
 
 function updateTimerDisplay() {
-  document.getElementById('timer-display').innerText = formatTime(timer);
+  document.getElementById('timer-display')?.innerText && (document.getElementById('timer-display').innerText = formatTime(timer));
   sessionStorage.setItem('tagging-timer', timer);
 }
 
@@ -86,13 +116,11 @@ function clearSelected(selector) {
   document.querySelectorAll(selector).forEach(btn => btn.classList.remove('selected'));
 }
 
-// Restore time + fetch live state from backend
 window.onload = function () {
   timer = parseInt(sessionStorage.getItem('tagging-timer')) || 0;
   updateTimerDisplay();
   startTimer();
 
-  // Fetch live state
   fetch(`/tagging/live_state/${matchId}/`)
     .then(res => res.json())
     .then(data => {
@@ -100,7 +128,6 @@ window.onload = function () {
         timer = data.timer;
         updateTimerDisplay();
       }
-
       const log = document.getElementById('event-log');
       log.innerHTML = '';
       data.events.forEach(ev => {
@@ -109,35 +136,42 @@ window.onload = function () {
     });
 };
 
-document.getElementById('pause-btn').onclick = () => isPaused = true;
-document.getElementById('resume-btn').onclick = () => isPaused = false;
-document.getElementById('reset-btn').onclick = () => {
-  timer = 0;
-  updateTimerDisplay();
-  sessionStorage.setItem('tagging-timer', 0);
-};
-
-// Player
+// Player click - show outcomes only, hide players & delivery
 document.querySelectorAll('.player-btn').forEach(btn => {
   btn.onclick = () => {
     selectedPlayer = btn.dataset.playerId;
-    document.getElementById('tagging-section').style.display = 'block';
+
+    // Show outcomes, hide others
+    document.getElementById('our-players').style.display = 'none';
+    document.getElementById('outcome-panel').style.display = 'grid';
+    document.getElementById('delivery-panel').style.display = 'none';
+
     clearSelected('.player-btn');
+    clearSelected('.outcome-btn');
+    clearSelected('.delivery-btn');
+
     btn.classList.add('selected');
   };
 });
 
-// Outcome
+// Outcome click - show delivery only, hide players & outcomes
 document.querySelectorAll('.outcome-btn').forEach(btn => {
   btn.onclick = () => {
     selectedOutcome = btn.dataset.outcome;
+
+    // Show delivery, hide others
+    document.getElementById('our-players').style.display = 'none';
+    document.getElementById('outcome-panel').style.display = 'none';
+    document.getElementById('delivery-panel').style.display = 'grid';
+
     clearSelected('.outcome-btn');
+    clearSelected('.delivery-btn');
+
     btn.classList.add('selected');
   };
 });
 
-
-// Delivery Type
+// Delivery click - save and reset to initial
 document.querySelectorAll('.delivery-btn').forEach(btn => {
   btn.onclick = () => {
     selectedDeliveryType = btn.dataset.deliveryType;
@@ -156,8 +190,7 @@ document.querySelectorAll('.delivery-btn').forEach(btn => {
         timestamp: now.toISOString()
       };
 
-      fetch("{% url 'tagging_app:save_attempt_to_goal'  %}", {
-      
+      fetch("{% url 'tagging_app:save_attempt_to_goal' %}", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -171,14 +204,16 @@ document.querySelectorAll('.delivery-btn').forEach(btn => {
           const log = document.getElementById('event-log');
           log.innerHTML = `<div><b>${json.player_name}</b> - ${selectedOutcome} - ${selectedDeliveryType} at ${formatTime(timer)}</div>` + log.innerHTML;
 
-          // Reset selections
-          selectedPlayer = selectedOutcome = selectedBodyPart = selectedDeliveryType = null;
+          // Reset selections and show players only
+          selectedPlayer = selectedOutcome = selectedDeliveryType = null;
           clearSelected('.player-btn');
           clearSelected('.outcome-btn');
           clearSelected('.delivery-btn');
-          document.getElementById('tagging-section').style.display = 'none';
 
-          // Update count badges
+          document.getElementById('our-players').style.display = 'grid';
+          document.getElementById('outcome-panel').style.display = 'none';
+          document.getElementById('delivery-panel').style.display = 'none';
+
           updateCounts(json.updated_counts, json.player_id);
         } else {
           alert(json.message);
@@ -188,14 +223,12 @@ document.querySelectorAll('.delivery-btn').forEach(btn => {
   };
 });
 
-// Update counts live
 function updateCounts(updatedCounts, playerId) {
   const playerBtn = document.querySelector(`.player-btn[data-player-id="${playerId}"]`);
   if (playerBtn) {
     const badge = playerBtn.querySelector('.count-badge');
     if (badge) badge.textContent = updatedCounts.total || 0;
   }
-
   for (const outcome in updatedCounts) {
     if (outcome === 'total') continue;
     const btn = document.querySelector(`.outcome-btn[data-outcome="${outcome}"]`);
@@ -206,4 +239,6 @@ function updateCounts(updatedCounts, playerId) {
   }
 }
 </script>
+
+
 {% endblock %}

@@ -2,14 +2,15 @@
 {% load static %}
 {% load custom_filters %}
 
-{% block content %}
+{% block header %}{% endblock %}
 
-{% block header %} {% endblock %}
+{% block content %}
 <style>
 body, html {
   margin: 0;
   padding: 0;
   height: 100%;
+  font-size: 14px;
 }
 
 .container {
@@ -17,106 +18,138 @@ body, html {
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
-  font-size: 12px; /* smaller text */
-}
-
-.header, .timer {
-  flex: 0 0 auto;
-  padding: 5px;
+  font-size: 14px;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px 15px;
 }
 
 .panels {
   flex: 1 1 auto;
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* two panels side by side */
-  gap: 5px;
-  padding: 5px;
-  overflow: hidden;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  padding: 15px 0;
+  max-width: 100%; /* avoid overflow */
+  overflow: visible;
 }
 
-/* Tagging panel box */
+/* On mobile: stack panels vertically */
+@media (max-width: 768px) {
+  .panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Panel styling */
 .tag-panel {
   border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 5px;
+  border-radius: 10px;
+  padding: 20px;
   overflow-y: auto;
-  font-size: 11px;
+  background: #fafafa;
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Compact player grid */
+/* On smaller mobiles, allow panel height to shrink */
+@media (max-width: 480px) {
+  .tag-panel {
+    min-height: auto;
+    max-height: 70vh; /* keep it reasonable */
+  }
+}
+
+/* Grid inside panels for buttons */
 .player-grid, #our-players, #outcome-panel, #delivery-panel {
   display: grid;
-  grid-template-columns: repeat(6, 1fr); /* show more players in row */
-  gap: 5px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 14px;
+  margin-top: 10px;
 }
 
-/* Smaller player buttons */
+/* Buttons */
 .player-btn, .outcome-btn, .delivery-btn, .opponent-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  padding: 16px;
   background-color: #e6f2ff;
-  border: none;
+  border: 2px solid #0073e6;
   cursor: pointer;
-  border-radius: 5px;
-  font-size: 11px;
-  min-height: 70px; /* smaller boxes */
+  border-radius: 10px;
+  font-size: 15px;
+  min-height: 140px;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+  text-align: center;
+  word-wrap: break-word;
+}
+
+.player-btn:hover, .outcome-btn:hover, .delivery-btn:hover, .opponent-btn:hover {
+  background-color: #0073e6;
+  color: white;
 }
 
 .player-btn img {
-  width: 35px;
-  height: 35px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  margin-bottom: 3px;
+  margin-bottom: 8px;
   object-fit: cover;
+  border: 2px solid #0073e6;
+  background: white;
 }
 
+/* Badge styling */
 .count-badge, .pass-count {
-  font-size: 10px;
+  font-size: 14px;
   background: #333;
   color: #fff;
-  padding: 2px 4px;
-  border-radius: 3px;
-  margin-top: 2px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  margin-top: 8px;
 }
 
+/* Selected button */
 .player-btn.active, .player-btn.selected {
   background-color: green !important;
   color: white;
 }
 
-@media (max-width: 768px) {
-  .panels {
-    grid-template-columns: 1fr; /* stack vertically on mobile */
+/* Mobile tweaks for buttons and fonts */
+@media (max-width: 480px) {
+  .player-btn, .outcome-btn, .delivery-btn, .opponent-btn {
+    padding: 10px;
+    font-size: 13px;
+    min-height: 110px;
   }
-  .player-grid, #our-players, #outcome-panel, #delivery-panel {
-    grid-template-columns: repeat(4, 1fr);
+  .player-btn img {
+    width: 60px;
+    height: 60px;
+  }
+  .count-badge, .pass-count {
+    font-size: 12px;
+    padding: 4px 6px;
   }
 }
 </style>
 
+{% block footer %}{% endblock %}
 
 <div class="container">
-  <div class="header">
-    <h4>{{ match }}</h4>
-    <div class="timer">
-      Time: <span id="timer-display">00:00</span>
-      <button id="pause-btn">Pause</button>
-      <button id="resume-btn">Resume</button>
-      <button id="reset-btn">Reset</button>
-    </div>
-  </div>
-
   <div class="panels">
     <!-- Attempt to Goal Panel -->
     <div class="tag-panel">
+      <h3>Attempt to Goal</h3>
       {% include "tagging_app/attempt_to_goal_enter_data.html" %}
     </div>
 
     <!-- Pass Network Panel -->
     <div class="tag-panel">
+      <h3>Passing Network</h3>
       {% include "tagging_app/pass_network_enter_data.html" %}
     </div>
   </div>
