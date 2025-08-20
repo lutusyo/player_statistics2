@@ -2,10 +2,14 @@
 from django.urls import path
 from .views  import attempt_to_goal, goalkeeper_distribution, pass_network, tagging_view
 from tagging_app.views.goal_and_pass_enter import tagging_base_view
+from tagging_app.views import current_players
 
 app_name = 'tagging_app'
 
 urlpatterns = [
+
+    path("current_players/<int:match_id>/", current_players.api_current_players, name="api_current_players"),
+
     # tagging_Dashboards
     path('dashboard/', tagging_view.tagging_dashboard, name='dashboard'),
     # Each section has five-5 urls of the view to:

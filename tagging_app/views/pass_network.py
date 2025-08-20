@@ -24,6 +24,8 @@ from openpyxl.utils import get_column_letter
 from tagging_app.views.goal_and_pass_enter import tagging_base_view
 
 
+
+
 @csrf_exempt
 def save_pass_network(request):
     if request.method == 'POST':

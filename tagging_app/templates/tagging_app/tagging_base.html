@@ -11,6 +11,11 @@ body, html {
   padding: 0;
   height: 100%;
   font-size: 14px;
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
 }
 
 .container {
@@ -30,7 +35,7 @@ body, html {
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   padding: 15px 0;
-  max-width: 100%; /* avoid overflow */
+  max-width: 100%;
   overflow: visible;
 }
 
@@ -57,14 +62,14 @@ body, html {
 @media (max-width: 480px) {
   .tag-panel {
     min-height: auto;
-    max-height: 70vh; /* keep it reasonable */
+    max-height: 70vh;
   }
 }
 
 /* Grid inside panels for buttons */
 .player-grid, #our-players, #outcome-panel, #delivery-panel {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* smaller min size */
   gap: 14px;
   margin-top: 10px;
 }
@@ -75,24 +80,28 @@ body, html {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: 12px 10px;
   background-color: #e6f2ff;
   border: 2px solid #0073e6;
   cursor: pointer;
   border-radius: 10px;
   font-size: 15px;
-  min-height: 140px;
+  /* Remove fixed min-height, allow auto */
+  min-height: auto;
   font-weight: 600;
   transition: all 0.2s ease-in-out;
   text-align: center;
   word-wrap: break-word;
+  max-width: 100%;
 }
 
+/* Hover effect */
 .player-btn:hover, .outcome-btn:hover, .delivery-btn:hover, .opponent-btn:hover {
   background-color: #0073e6;
   color: white;
 }
 
+/* Player button photos */
 .player-btn img {
   width: 80px;
   height: 80px;
@@ -101,6 +110,8 @@ body, html {
   object-fit: cover;
   border: 2px solid #0073e6;
   background: white;
+  max-width: 100%;
+  height: auto; /* keep aspect ratio */
 }
 
 /* Badge styling */
@@ -111,6 +122,7 @@ body, html {
   padding: 6px 8px;
   border-radius: 6px;
   margin-top: 8px;
+  white-space: nowrap;
 }
 
 /* Selected button */
@@ -119,11 +131,12 @@ body, html {
   color: white;
 }
 
-/* Mobile tweaks for buttons and fonts */
+/* Mobile tweaks */
 @media (max-width: 480px) {
   .player-btn, .outcome-btn, .delivery-btn, .opponent-btn {
-    padding: 10px;
+    padding: 8px 6px;
     font-size: 13px;
+    /* Make buttons taller so easier to tap */
     min-height: 110px;
   }
   .player-btn img {
@@ -135,6 +148,42 @@ body, html {
     padding: 4px 6px;
   }
 }
+
+/* For your player buttons with circular photo backgrounds but small heights */
+/* Override those inline styles in your template for better responsiveness */
+.player-btn {
+  width: 100%;
+  max-width: 120px;
+  height: auto !important; /* override fixed 5px or 10px height */
+  min-height: 100px;
+  border-radius: 12px;
+  position: relative;
+}
+
+/* For badges positioned absolute in your template, make sure parent has position relative */
+.player-btn {
+  position: relative;
+}
+
+/* Make the event log scroll nicely on small screens */
+#event-log {
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 6px;
+  border-radius: 6px;
+  word-break: break-word;
+  font-size: 13px;
+}
+
+/* Responsive text in event log */
+@media (max-width: 480px) {
+  #event-log {
+    font-size: 12px;
+    max-height: 150px;
+  }
+}
+
 </style>
 
 {% block footer %}{% endblock %}

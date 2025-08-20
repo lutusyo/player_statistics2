@@ -5,56 +5,8 @@
 
 <div id="attempt-to-goal" class="tag-panel" style="padding: 10px;">
 
-  <!-- Players list -->
-
-  <div id="our-players" style="
-  display: grid; 
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); 
-  gap: 12px;
-">
-
-    {% for player in players %}
-      {% with total=outcome_counts|get_item_or:player.id %}
-        {% with count=total.total|default:0 %}
-          <button class="player-btn" data-player-id="{{ player.id }}"
-            style="
-              display: flex; 
-              flex-direction: column; 
-              align-items: center; 
-              justify-content: flex-end;  /* text at bottom */
-              padding: 8px; 
-              background-color: #e6f2ff; 
-              border: 2px solid #0073e6; 
-              cursor: pointer;
-              border-radius: 10px; 
-              font-size: 11px; 
-              min-height: 90px; 
-              font-weight: 500; 
-              transition: all 0.2s ease-in-out;
-              color: #0073e6;
-
-              background-image: url({% if player.photo %}{{ player.photo.url }}{% else %}{% static 'default_player.png' %}{% endif %});
-              background-size: cover;
-              background-position: center;
-              background-repeat: no-repeat;
-            ">
-            <span style="background: rgba(255,255,255,0.75); width: 100%; border-radius: 0 0 10px 10px; text-align: center; padding: 2px 4px;">
-              {{ player.name|slice:":10" }}
-            </span>
-            <span class="count-badge"
-                  style="font-size: 11px; background: #333; color: #fff; padding: 3px 5px;
-                        border-radius: 6px; margin-top: 4px;">
-              {{ count }}
-            </span>
-          </button>
-
-        {% endwith %}
-      {% endwith %}
-    {% endfor %}
-  </div>
-
-  <!-- Outcome panel, initially hidden -->
-  <div id="outcome-panel" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
+  <!-- Outcome panel: initially visible -->
+  <div id="outcome-panel" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
     {% for value, label in outcomes %}
       {% with count=total_outcome_counts|get_item:value|stringformat:"s"|default:0 %}
         <button class="outcome-btn" data-outcome="{{ value }}"
@@ -68,7 +20,65 @@
     {% endfor %}
   </div>
 
-  <!-- Delivery panel, initially hidden -->
+  <!-- Players list: initially hidden -->
+  <div id="our-players" style="
+    display: none;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+  ">
+    {% for player in players %}
+      {% with total=outcome_counts|get_item_or:player.id %}
+        {% with count=total.total|default:0 %}
+          <button class="player-btn" data-player-id="{{ player.id }}"
+            style="
+              width: 90px;
+              height: 5px;
+              border-radius: 50%;
+              border: 2px solid #0073e6;
+              background-image: url('{% if player.photo %}{{ player.photo.url }}{% else %}{% static 'default_player.png' %}{% endif %}');
+              background-size: cover;
+              background-position: center;
+              position: relative;
+              font-size: 8px;
+              font-weight: bold;
+              color: white;
+              text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+              display: flex;
+              align-items: flex-end;
+              justify-content: center;
+            ">
+            <span style="
+              background: rgba(0, 0, 0, 0.5);
+              width: 100%;
+              text-align: center;
+              border-bottom-left-radius: 50%;
+              border-bottom-right-radius: 50%;
+              padding: 1px 2px;
+            ">
+              {{ player.name|truncatechars:8 }}
+            </span>
+            <span class="count-badge"
+                  style="
+                    position: absolute;
+                    top: -5px;
+                    right: -5px;
+                    background: #0073e6;
+                    color: white;
+                    font-size: 8px;
+                    padding: 1px 4px;
+                    border-radius: 10px;
+                    border: 1px solid white;
+                  ">
+              {{ count }}
+            </span>
+          </button>
+        {% endwith %}
+      {% endwith %}
+    {% endfor %}
+  </div>
+
+  <!-- Delivery panel: initially hidden -->
   <div id="delivery-panel" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
     {% for value, label in delivery_types %}
       <button class="delivery-btn" data-delivery-type="{{ value }}"
@@ -136,45 +146,44 @@ window.onload = function () {
     });
 };
 
-// Player click - show outcomes only, hide players & delivery
-document.querySelectorAll('.player-btn').forEach(btn => {
-  btn.onclick = () => {
-    selectedPlayer = btn.dataset.playerId;
-
-    // Show outcomes, hide others
-    document.getElementById('our-players').style.display = 'none';
-    document.getElementById('outcome-panel').style.display = 'grid';
-    document.getElementById('delivery-panel').style.display = 'none';
-
-    clearSelected('.player-btn');
-    clearSelected('.outcome-btn');
-    clearSelected('.delivery-btn');
-
-    btn.classList.add('selected');
-  };
-});
-
-// Outcome click - show delivery only, hide players & outcomes
+// 1. Outcome click → Show players
 document.querySelectorAll('.outcome-btn').forEach(btn => {
   btn.onclick = () => {
     selectedOutcome = btn.dataset.outcome;
 
-    // Show delivery, hide others
-    document.getElementById('our-players').style.display = 'none';
     document.getElementById('outcome-panel').style.display = 'none';
-    document.getElementById('delivery-panel').style.display = 'grid';
+    document.getElementById('our-players').style.display = 'grid';
+    document.getElementById('delivery-panel').style.display = 'none';
 
     clearSelected('.outcome-btn');
+    clearSelected('.player-btn');
     clearSelected('.delivery-btn');
 
     btn.classList.add('selected');
   };
 });
 
-// Delivery click - save and reset to initial
+// 2. Player click → Show delivery options
+document.querySelectorAll('.player-btn').forEach(btn => {
+  btn.onclick = () => {
+    selectedPlayer = btn.dataset.playerId;
+
+    document.getElementById('outcome-panel').style.display = 'none';
+    document.getElementById('our-players').style.display = 'none';
+    document.getElementById('delivery-panel').style.display = 'grid';
+
+    clearSelected('.player-btn');
+    clearSelected('.delivery-btn');
+
+    btn.classList.add('selected');
+  };
+});
+
+// 3. Delivery click → Save & reset
 document.querySelectorAll('.delivery-btn').forEach(btn => {
   btn.onclick = () => {
     selectedDeliveryType = btn.dataset.deliveryType;
+
     clearSelected('.delivery-btn');
     btn.classList.add('selected');
 
@@ -204,14 +213,13 @@ document.querySelectorAll('.delivery-btn').forEach(btn => {
           const log = document.getElementById('event-log');
           log.innerHTML = `<div><b>${json.player_name}</b> - ${selectedOutcome} - ${selectedDeliveryType} at ${formatTime(timer)}</div>` + log.innerHTML;
 
-          // Reset selections and show players only
           selectedPlayer = selectedOutcome = selectedDeliveryType = null;
           clearSelected('.player-btn');
           clearSelected('.outcome-btn');
           clearSelected('.delivery-btn');
 
-          document.getElementById('our-players').style.display = 'grid';
-          document.getElementById('outcome-panel').style.display = 'none';
+          document.getElementById('outcome-panel').style.display = 'grid';
+          document.getElementById('our-players').style.display = 'none';
           document.getElementById('delivery-panel').style.display = 'none';
 
           updateCounts(json.updated_counts, json.player_id);
@@ -239,6 +247,5 @@ function updateCounts(updatedCounts, playerId) {
   }
 }
 </script>
-
 
 {% endblock %}

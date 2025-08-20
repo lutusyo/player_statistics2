@@ -31,11 +31,13 @@ from tagging_app.models import AttemptToGoal  # Adjust if in different app
 
 
 
-
 def enter_attempt_to_goal(request, match_id):
     match = get_object_or_404(Match, id=match_id)
     lineup = MatchLineup.objects.filter(match=match, is_starting=True).select_related('player')
     players = [entry.player for entry in lineup]
+
+    player_positions_order = ['Forward', 'Midfielder', 'Defender']
+
 
     # Outcome counts per player
     outcome_counts = {}
@@ -59,6 +61,7 @@ def enter_attempt_to_goal(request, match_id):
         'players': players,
         'delivery_types': DeliveryTypeChoices.choices,
         'outcomes': OutcomeChoices.choices,
+        'player_positions_order': player_positions_order,
         'outcome_counts': outcome_counts,
         'total_outcome_counts': total_outcome_dict,
     }
