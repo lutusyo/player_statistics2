@@ -6,6 +6,9 @@
     <h2>{{ match.home_team.name }} vs {{ match.away_team.name }}</h2>
     <p class="text-muted">{{ match.date|date:"M d, Y" }}</p>
 
+    <!-- ✅ Live Match Time -->
+    <p><strong>Match Time:</strong> <span id="match-time">Loading...</span></p>
+
     <!-- Tabs -->
     <ul class="nav nav-tabs" id="matchTabs" role="tablist">
         <li class="nav-item" role="presentation">
@@ -32,7 +35,7 @@
             <h5>Match Information</h5>
             <p><strong>Date:</strong> {{ match.date }}</p>
             <p><strong>Venue:</strong> {{ match.venue }}</p>
-            <p><strong>Competition:</strong> {{ match.competition }}</p>
+            <p><strong>Competition:</strong> {{ match.competition_type }}</p>
         </div>
 
         <!-- Summary Tab -->
@@ -49,8 +52,52 @@
         <div class="tab-pane fade" id="stats" role="tabpanel">
             <h5>Match Stats</h5>
             <p>Shots, passes, duels, etc. will go here.</p>
+
+            <h6>General Stats</h6>
+            <table class="table table-bordered text-center">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>{{ match.home_team.name }}</th>
+                        <th>{{ match.away_team.name }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Shots (on target)</td>
+                        <td>{{ stats.home.shots_on }}</td>
+                        <td>{{ stats.away.shots_on }}</td>
+                    </tr>
+                    <tr>
+                        <td>Shots (off target)</td>
+                        <td>{{ stats.home.shots_off }}</td>
+                        <td>{{ stats.away.shots_off }}</td>
+                    </tr>
+                    <tr>
+                        <td>Corners</td>
+                        <td>{{ stats.home.corners }}</td>
+                        <td>{{ stats.away.corners }}</td>
+                    </tr>
+                    <tr>
+                        <td>Fouls</td>
+                        <td>{{ stats.home.fouls }}</td>
+                        <td>{{ stats.away.fouls }}</td>
+                    </tr>
+                    <tr>
+                        <td>Yellow Cards</td>
+                        <td>{{ stats.home.yellow }}</td>
+                        <td>{{ stats.away.yellow }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h6>Passing</h6>
+            <ul>
+                <li>{{ match.home_team.name }}: {{ stats.home.total_passes }} passes ({{ stats.home.pass_accuracy }}% accuracy)</li>
+                <li>{{ match.away_team.name }}: {{ stats.away.total_passes }} passes ({{ stats.away.pass_accuracy }}% accuracy)</li>
+            </ul>
+            <a href="{% url 'tagging_app:pass_network_dashboard' match.id %}">🔗 View Pass Network</a>
         </div>
-        
 
         <!-- Lineup Tab -->
         <div class="tab-pane fade" id="lineup" role="tabpanel">
@@ -99,8 +146,6 @@
             </div>
         </div>
 
-
-
         <!-- H2H Tab -->
         <div class="tab-pane fade" id="h2h" role="tabpanel">
             <h5>Head-to-Head</h5>
@@ -128,38 +173,36 @@ document.addEventListener("DOMContentLoaded", function() {
             tabTrigger.show()
         })
     })
+
+    // ✅ Live Match Time Script
+    const matchId = {{ match.id }};
+    function updateMatchTime() {
+      fetch(`/matches/match/${matchId}/time/`)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById("match-time").innerText = `${data.minute}' (${data.status})`;
+        })
+        .catch(error => console.error("Error fetching match time:", error));
+    }
+    setInterval(updateMatchTime, 10000);
+    updateMatchTime();
 });
 </script>
 
+<hr style="margin: 40px 0;">
 
-
-
-    <hr style="margin: 40px 0;">
-
-    <!--reports_app:ntro_page-->
-
-    <!--<a href="{% url 'reports_app:intro_page' 'pass_network' match.id %}" 
-        style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
-        📊 View Pass Network
-    </a>-->
-
-
-    <a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
-        📊 View Pass Network
-    </a> | 
-
-
-    <a href="{% url 'tagging_app:attempt_to_goal_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
-        📊 View Goal Attempts
-    </a> | 
-    <a href="{% url 'tagging_app:goalkeeper_distribution_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
-        📊 View Goalkeeping Distribution
-    </a> | 
-    <a href="{% url 'defensive_app:defensive_summary' match.id  %}"  style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
-        📊 View Other statistics
-    </a> 
+<a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
+    📊 View Pass Network
+</a> | 
+<a href="{% url 'tagging_app:attempt_to_goal_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
+    📊 View Goal Attempts
+</a> | 
+<a href="{% url 'tagging_app:goalkeeper_distribution_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
+    📊 View Goalkeeping Distribution
+</a> | 
+<a href="{% url 'defensive_app:defensive_summary' match.id  %}"  style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
+    📊 View Other statistics
+</a> 
 
 </div>
 {% endblock %}
-
-

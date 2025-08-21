@@ -33,8 +33,14 @@ from tagging_app.models import AttemptToGoal  # Adjust if in different app
 
 def enter_attempt_to_goal(request, match_id):
     match = get_object_or_404(Match, id=match_id)
-    lineup = MatchLineup.objects.filter(match=match, is_starting=True).select_related('player')
+    from django.db.models import Q
+
+    # Only players currently on the pitch
+    lineup = MatchLineup.objects.filter(match=match, time_in__isnull=False, time_out__isnull=True
+    ).select_related('player', 'team').order_by('order', 'player__name')
+
     players = [entry.player for entry in lineup]
+
 
     player_positions_order = ['Forward', 'Midfielder', 'Defender']
 
@@ -211,3 +217,19 @@ def export_attempt_to_goal_pdf(request, match_id):
     c.save()
     buffer.seek(0)
     return FileResponse(buffer, as_attachment=True, filename='attempt_to_goal.pdf')
+
+
+
+@require_GET
+def get_outcome_counts(request, match_id):
+    """Return total counts of each outcome for a match (all players)."""
+    match = get_object_or_404(Match, id=match_id)
+
+    outcome_counts = (
+        AttemptToGoal.objects.filter(match=match)
+        .values('outcome')
+        .annotate(count=Count('id'))
+    )
+    counts_dict = {row['outcome']: row['count'] for row in outcome_counts}
+
+    return JsonResponse(counts_dict)

@@ -1,0 +1,263 @@
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+
+<div id="tagging-panel" style="padding: 10px;">
+
+  <!-- TIMER DISPLAY -->
+  <div>
+      <strong>Timer:</strong> <span id="timer-display">00:00</span>
+  </div>
+
+  <!-- Passing Network: Opponent -->
+  <div style="margin: 12px 0; text-align:center;">
+    <button class="opponent-btn" id="opponent-btn" data-team-id="{{ opponent_team.id }}"
+        style="position: relative; padding-right: 30px; font-size: 12px; min-width: 140px; min-height: 50px; border-radius: 8px;">
+        {{ opponent_team.name }} Ball Intercept
+        <span class="pass-count" id="opponent-pass-count"
+              style="position: absolute; top: 5px; right: 8px; background: #0073e6; color: white; border-radius: 12px; padding: 2px 8px; font-size: 12px;">
+            0
+        </span>
+    </button>
+  </div>
+
+  <!-- Attempt to Goal: Outcome Panel -->
+  <div id="outcome-panel" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
+    {% for value, label in outcomes %}
+      {% with count=total_outcome_counts|get_item:value|stringformat:"s"|default:0 %}
+        <button class="outcome-btn" data-outcome="{{ value }}"
+          style="display: flex; flex-direction: column; align-items: center; justify-content: center;
+                 padding: 12px; background-color: #e6f2ff; border: 2px solid #0073e6; cursor: pointer;
+                 border-radius: 10px; font-size: 13px; font-weight: 600; transition: all 0.2s ease-in-out; color: #0073e6;">
+          {{ label }}
+          <span class="count-badge">{{ count }}</span>
+        </button>
+      {% endwith %}
+    {% endfor %}
+  </div>
+
+  <!-- On-field Players: Circular buttons with photos -->
+  <div id="our-players" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px;">
+    <!-- Loaded dynamically via JS -->
+  </div>
+
+  <!-- Delivery panel -->
+  <div id="delivery-panel" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
+    {% for value, label in delivery_types %}
+      <button class="delivery-btn" data-delivery-type="{{ value }}"
+        style="display: flex; flex-direction: column; align-items: center; justify-content: center;
+               padding: 12px; background-color: #e6f2ff; border: 2px solid #0073e6; cursor: pointer;
+               border-radius: 10px; font-size: 13px; font-weight: 600; transition: all 0.2s ease-in-out; color: #0073e6;">
+        {{ label }}
+      </button>
+    {% endfor %}
+  </div>
+
+  <hr style="margin: 12px 0;">
+  <h3>Live Event Log</h3>
+  <div id="event-log" style="max-height: 250px; overflow-y: auto; border: 1px solid #ccc; padding: 6px; border-radius: 6px;"></div>
+
+  <!-- Last Pass -->
+  <p><strong>Last Pass:</strong> <span id="last-pass"></span></p>
+
+</div>
+
+<script>
+let timer = 0;
+let interval = null;
+let isPaused = false;
+let selectedPlayer = null, selectedOutcome = null, selectedDeliveryType = null;
+let lastPassPlayerId = null, lastPassTeamId = null;
+const matchId = {{ match.id }};
+let passCounts = JSON.parse(localStorage.getItem('passCounts') || '{}');
+let opponentPassCount = 0;
+
+// TIMER
+function formatTime(seconds) {
+    let m = String(Math.floor(seconds / 60)).padStart(2,'0');
+    let s = String(seconds % 60).padStart(2,'0');
+    return `${m}:${s}`;
+}
+function updateTimerDisplay() {
+    document.getElementById('timer-display').innerText = formatTime(timer);
+    sessionStorage.setItem('tagging-timer', timer);
+}
+function startTimer() {
+    interval = setInterval(() => { if(!isPaused){ timer++; updateTimerDisplay(); } }, 1000);
+}
+
+// CLEAR SELECTION
+function clearSelected(selector) {
+    document.querySelectorAll(selector).forEach(btn => btn.classList.remove('selected','active'));
+}
+
+// SELECT PLAYER
+function selectPlayer(btn, playerId) {
+    selectedPlayer = playerId;
+    document.getElementById('outcome-panel').style.display = 'none';
+    document.getElementById('our-players').style.display = 'none';
+    document.getElementById('delivery-panel').style.display = 'grid';
+    clearSelected('.player-btn');
+    clearSelected('.delivery-btn');
+    btn.classList.add('selected');
+}
+
+// FETCH ON-FIELD PLAYERS AND CREATE CIRCULAR BUTTONS WITH PASS COUNTS
+function refreshOnFieldPlayers() {
+    fetch("{% url 'tagging_app:api_current_players' match.id %}")
+
+
+    .then(res => res.json())
+    .then(data => {
+        const container = document.getElementById('our-players');
+        container.innerHTML = '';
+        data.players.forEach(p => {
+            const btn = document.createElement('button');
+            btn.className = 'player-btn';
+            btn.id = `player-${p.id}`;
+            btn.dataset.playerId = p.id;
+            btn.dataset.teamId = p.team_id;
+            btn.style.cssText = `
+                width:90px;height:90px;border-radius:50%;border:2px solid #0073e6;
+                background-image:url('${p.photo_url || "{% static 'default_player.png' %}"}');
+                background-size:cover;background-position:center;
+                position:relative;display:flex;align-items:flex-end;justify-content:center;
+                font-size:10px;font-weight:bold;color:white;text-shadow:0 0 2px rgba(0,0,0,0.8);
+            `;
+            btn.innerHTML = `
+                <span style="background:rgba(0,0,0,0.5);width:100%;text-align:center;border-bottom-left-radius:50%;border-bottom-right-radius:50%;padding:1px 2px;">
+                    ${p.name.length>8?p.name.substring(0,8):p.name}
+                </span>
+                <span class="pass-count" style="position:absolute;top:-5px;right:-5px;background:#0073e6;color:white;font-size:8px;padding:1px 4px;border-radius:10px;border:1px solid white;">
+                    ${passCounts[p.id] || 0}
+                </span>
+            `;
+            container.appendChild(btn);
+        });
+    });
+}
+
+// LIVE EVENT LOG
+function updateEventLog() {
+    fetch("{% url 'tagging_app:get_live_tagging_state' match.id %}")
+    .then(res=>res.json())
+    .then(data=>{
+        const log = document.getElementById('event-log');
+        log.innerHTML = '';
+        data.events.forEach(ev=>{
+            log.innerHTML += `<div><b>${ev.player_name}</b> - ${ev.outcome} - ${ev.delivery_type} at ${String(ev.minute).padStart(2,'0')}:${String(ev.second).padStart(2,'0')}</div>`;
+        });
+    });
+}
+
+// SAVE ATTEMPT (TAGGING PANEL)
+function saveAttempt(outcome, playerId, deliveryType) {
+    const now = new Date();
+    const data = { match_id: matchId, player_id: playerId, outcome, delivery_type: deliveryType, minute: Math.floor(timer/60), second: timer%60, timestamp: now.toISOString() };
+    fetch("{% url 'tagging_app:save_attempt_to_goal' %}", {
+        method:'POST', headers:{"Content-Type":"application/json","X-CSRFToken": '{{ csrf_token }}'}, body:JSON.stringify(data)
+    }).then(res=>res.json()).then(json=>{
+        if(json.status==='ok'){
+            updateEventLog(); refreshOnFieldPlayers();
+            selectedPlayer=selectedOutcome=selectedDeliveryType=null;
+            document.getElementById('outcome-panel').style.display='grid';
+            document.getElementById('our-players').style.display='grid';
+            document.getElementById('delivery-panel').style.display='none';
+        } else alert(json.message);
+    });
+}
+
+// RECORD PASS (PASS NETWORK)
+function recordPass(fromPlayerId,toPlayerId,fromTeamId,toTeamId,isSuccessful=true,isPossessionRegained=false){
+    fetch("{% url 'tagging_app:save_pass_network' %}",{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')},
+        body:JSON.stringify({match_id:matchId,from_player_id:fromPlayerId,to_player_id:toPlayerId,from_team_id:fromTeamId,to_team_id:toTeamId,minute:Math.floor(timer/60),second:timer%60,x_start:null,y_start:null,x_end:null,y_end:null,is_successful:isSuccessful,is_possession_regained:isPossessionRegained})
+    }).then(res=>res.json()).then(data=>{
+        if(data.status==='success'){
+            document.getElementById('last-pass').textContent=`From ${fromPlayerId} → To ${toPlayerId||'Opponent Intercept'}`;
+            updatePassCount(fromPlayerId,data.count);
+        } else alert("Failed: "+data.message);
+    }).catch(err=>{console.error(err); alert("Network error");});
+}
+
+// UPDATE PASS COUNT
+function updatePassCount(playerId,newCount){
+    const btn = document.getElementById(`player-${playerId}`);
+    if(!btn) return;
+    btn.querySelector('.pass-count').textContent=newCount;
+    passCounts[playerId]=newCount;
+    localStorage.setItem('passCounts',JSON.stringify(passCounts));
+}
+
+// HIGHLIGHT BUTTON
+function highlightButton(playerId){
+    document.querySelectorAll('#our-players .player-btn').forEach(btn=>btn.classList.remove('active','selected'));
+    if(playerId){
+        const btn = document.getElementById(`player-${playerId}`);
+        if(btn) btn.classList.add('active');
+    }
+}
+
+// CSRF COOKIE
+function getCookie(name){let cookieValue=null;if(document.cookie&&document.cookie!==''){const cookies=document.cookie.split(';');for(let c of cookies){const cookie=c.trim();if(cookie.substring(0,name.length+1)===(name+'=')){cookieValue=decodeURIComponent(cookie.substring(name.length+1));break;}}}return cookieValue;}
+
+// EVENT LISTENERS
+document.addEventListener('DOMContentLoaded',()=>{
+    // TIMER
+    timer = parseInt(sessionStorage.getItem('tagging-timer'))||0;
+    updateTimerDisplay();
+    startTimer();
+    
+    // LOAD PLAYERS AND LOG
+    refreshOnFieldPlayers();
+    updateEventLog();
+    setInterval(refreshOnFieldPlayers,10000);
+    
+    // OUTCOME BUTTON
+    document.getElementById('outcome-panel').addEventListener('click',e=>{
+        const btn=e.target.closest('.outcome-btn'); if(!btn) return;
+        selectedOutcome=btn.dataset.outcome;
+        document.getElementById('outcome-panel').style.display='none';
+        document.getElementById('our-players').style.display='grid';
+        document.getElementById('delivery-panel').style.display='none';
+        clearSelected('.outcome-btn'); btn.classList.add('selected');
+    });
+
+    // PLAYER BUTTON (SELECT)
+    document.getElementById('our-players').addEventListener('click',e=>{
+        const btn=e.target.closest('.player-btn'); if(!btn) return;
+        const playerId=btn.dataset.playerId, teamId=btn.dataset.teamId;
+        // PASS NETWORK
+        if(lastPassPlayerId){ recordPass(lastPassPlayerId,playerId,lastPassTeamId,teamId); }
+        lastPassPlayerId=playerId; lastPassTeamId=teamId;
+        highlightButton(playerId);
+        // ATTEMPT TO GOAL
+        selectPlayer(btn,playerId);
+    });
+
+    // DELIVERY BUTTON
+    document.getElementById('delivery-panel').addEventListener('click',e=>{
+        const btn=e.target.closest('.delivery-btn'); if(!btn) return;
+        selectedDeliveryType=btn.dataset.deliveryType;
+        if(selectedPlayer && selectedOutcome && selectedDeliveryType){ saveAttempt(selectedOutcome,selectedPlayer,selectedDeliveryType); }
+    });
+
+    // OPPONENT BUTTON
+    document.getElementById('opponent-btn').addEventListener('click',()=>{
+        const opponentTeamId=document.getElementById('opponent-btn').dataset.teamId;
+        if(lastPassPlayerId && lastPassTeamId){
+            recordPass(lastPassPlayerId,null,lastPassTeamId,opponentTeamId,false,false);
+            lastPassPlayerId=null; lastPassTeamId=null; highlightButton(null);
+            opponentPassCount++;
+            document.getElementById('opponent-pass-count').textContent=opponentPassCount;
+            const opponentBtn=document.getElementById('opponent-btn');
+            opponentBtn.classList.add('active');
+            setTimeout(()=>opponentBtn.classList.remove('active'),500);
+        }
+    });
+});
+</script>
+
+{% endblock %}

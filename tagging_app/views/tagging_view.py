@@ -31,4 +31,4 @@ def tagging_dashboard(request):
         'gk_summary': gk_summary,
         'attempt_summary': attempt_summary,
     }
-    return render(request, 'tagging_app/tagging_dashboard.html', context)
+    return render(request, 'tagging_app/merge.html', context)

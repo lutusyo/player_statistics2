@@ -27,55 +27,7 @@
     gap: 12px;
     margin-top: 12px;
   ">
-    {% for player in players %}
-      {% with total=outcome_counts|get_item_or:player.id %}
-        {% with count=total.total|default:0 %}
-          <button class="player-btn" data-player-id="{{ player.id }}"
-            style="
-              width: 90px;
-              height: 5px;
-              border-radius: 50%;
-              border: 2px solid #0073e6;
-              background-image: url('{% if player.photo %}{{ player.photo.url }}{% else %}{% static 'default_player.png' %}{% endif %}');
-              background-size: cover;
-              background-position: center;
-              position: relative;
-              font-size: 8px;
-              font-weight: bold;
-              color: white;
-              text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
-              display: flex;
-              align-items: flex-end;
-              justify-content: center;
-            ">
-            <span style="
-              background: rgba(0, 0, 0, 0.5);
-              width: 100%;
-              text-align: center;
-              border-bottom-left-radius: 50%;
-              border-bottom-right-radius: 50%;
-              padding: 1px 2px;
-            ">
-              {{ player.name|truncatechars:8 }}
-            </span>
-            <span class="count-badge"
-                  style="
-                    position: absolute;
-                    top: -5px;
-                    right: -5px;
-                    background: #0073e6;
-                    color: white;
-                    font-size: 8px;
-                    padding: 1px 4px;
-                    border-radius: 10px;
-                    border: 1px solid white;
-                  ">
-              {{ count }}
-            </span>
-          </button>
-        {% endwith %}
-      {% endwith %}
-    {% endfor %}
+    <!-- Buttons loaded dynamically via JS -->
   </div>
 
   <!-- Delivery panel: initially hidden -->
@@ -102,6 +54,7 @@ let isPaused = false;
 let selectedPlayer = null, selectedOutcome = null, selectedDeliveryType = null;
 const matchId = {{ match.id }};
 
+// Format seconds → MM:SS
 function formatTime(seconds) {
   let m = String(Math.floor(seconds / 60)).padStart(2, '0');
   let s = String(seconds % 60).padStart(2, '0');
@@ -109,7 +62,8 @@ function formatTime(seconds) {
 }
 
 function updateTimerDisplay() {
-  document.getElementById('timer-display')?.innerText && (document.getElementById('timer-display').innerText = formatTime(timer));
+  document.getElementById('timer-display')?.innerText && 
+    (document.getElementById('timer-display').innerText = formatTime(timer));
   sessionStorage.setItem('tagging-timer', timer);
 }
 
@@ -126,29 +80,143 @@ function clearSelected(selector) {
   document.querySelectorAll(selector).forEach(btn => btn.classList.remove('selected'));
 }
 
-window.onload = function () {
-  timer = parseInt(sessionStorage.getItem('tagging-timer')) || 0;
-  updateTimerDisplay();
-  startTimer();
+// Select player function
+function selectPlayer(btn, playerId) {
+  selectedPlayer = playerId;
 
-  fetch(`/tagging/live_state/${matchId}/`)
+  document.getElementById('outcome-panel').style.display = 'none';
+  document.getElementById('our-players').style.display = 'none';
+  document.getElementById('delivery-panel').style.display = 'grid';
+
+  clearSelected('.player-btn');
+  clearSelected('.delivery-btn');
+
+  btn.classList.add('selected');
+}
+
+// Fetch currently on-field players
+function refreshOnFieldPlayers() {
+    fetch(`/tagging/api_current_on_field_players/${matchId}/`)
     .then(res => res.json())
     .then(data => {
-      if (data.timer > timer) {
-        timer = data.timer;
-        updateTimerDisplay();
-      }
-      const log = document.getElementById('event-log');
-      log.innerHTML = '';
-      data.events.forEach(ev => {
-        log.innerHTML += `<div><b>${ev.player_name}</b> - ${ev.outcome} - ${ev.delivery_type} at ${String(ev.minute).padStart(2,'0')}:${String(ev.second).padStart(2,'0')}</div>`;
-      });
+        const container = document.getElementById('our-players');
+        container.innerHTML = ''; // clear old buttons
+        data.players.forEach(p => {
+            const btn = document.createElement('button');
+            btn.className = 'player-btn';
+            btn.dataset.playerId = p.id;
+            btn.style.width = '90px';
+            btn.style.height = '90px';
+            btn.style.borderRadius = '50%';
+            btn.style.border = '2px solid #0073e6';
+            btn.style.backgroundImage = `url('${p.photo_url || "{% static 'default_player.png' %}"}')`;
+            btn.style.backgroundSize = 'cover';
+            btn.style.backgroundPosition = 'center';
+            btn.style.position = 'relative';
+            btn.style.display = 'flex';
+            btn.style.alignItems = 'flex-end';
+            btn.style.justifyContent = 'center';
+            btn.style.fontSize = '8px';
+            btn.style.fontWeight = 'bold';
+            btn.style.color = 'white';
+            btn.style.textShadow = '0 0 2px rgba(0, 0, 0, 0.8)';
+
+            const nameSpan = document.createElement('span');
+            nameSpan.style.background = 'rgba(0, 0, 0, 0.5)';
+            nameSpan.style.width = '100%';
+            nameSpan.style.textAlign = 'center';
+            nameSpan.style.borderBottomLeftRadius = '50%';
+            nameSpan.style.borderBottomRightRadius = '50%';
+            nameSpan.style.padding = '1px 2px';
+            nameSpan.textContent = p.name.length > 8 ? p.name.substring(0,8) : p.name;
+
+            btn.appendChild(nameSpan);
+
+            container.appendChild(btn);
+        });
     });
+}
+
+// Update live event log
+function updateEventLog() {
+    fetch(`/tagging/live_state/${matchId}/`)
+      .then(res => res.json())
+      .then(data => {
+          const log = document.getElementById('event-log');
+          log.innerHTML = '';
+          data.events.forEach(ev => {
+              log.innerHTML += `<div><b>${ev.player_name}</b> - ${ev.outcome} - ${ev.delivery_type} at ${String(ev.minute).padStart(2,'0')}:${String(ev.second).padStart(2,'0')}</div>`;
+          });
+      });
+}
+
+// ✅ NEW: Refresh outcome counts
+function refreshOutcomeCounts() {
+    fetch(`/tagging/match/${matchId}/api/outcome-counts/`)
+      .then(res => res.json())
+      .then(data => {
+          document.querySelectorAll('.outcome-btn').forEach(btn => {
+              const outcome = btn.dataset.outcome;
+              const badge = btn.querySelector('.count-badge');
+              badge.textContent = data[outcome] || 0;
+          });
+      });
+}
+
+// Save attempt
+function saveAttempt(outcome, playerId, deliveryType) {
+    const now = new Date();
+    const data = {
+        match_id: matchId,
+        player_id: playerId,
+        outcome: outcome,
+        delivery_type: deliveryType,
+        minute: Math.floor(timer / 60),
+        second: timer % 60,
+        timestamp: now.toISOString()
+    };
+
+    fetch("{% url 'tagging_app:save_attempt_to_goal' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": '{{ csrf_token }}'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(json => {
+        if (json.status === 'ok') {
+            updateEventLog();
+            refreshOnFieldPlayers();
+            refreshOutcomeCounts();   // ✅ update counts live
+
+            selectedPlayer = selectedOutcome = selectedDeliveryType = null;
+
+            document.getElementById('outcome-panel').style.display = 'grid';
+            document.getElementById('our-players').style.display = 'none';
+            document.getElementById('delivery-panel').style.display = 'none';
+        } else {
+            alert(json.message);
+        }
+    });
+}
+
+// Initialize page
+window.onload = function () {
+    timer = parseInt(sessionStorage.getItem('tagging-timer')) || 0;
+    updateTimerDisplay();
+    startTimer();
+
+    refreshOnFieldPlayers();
+    updateEventLog();
+    refreshOutcomeCounts(); // also refresh on load
 };
 
-// 1. Outcome click → Show players
-document.querySelectorAll('.outcome-btn').forEach(btn => {
-  btn.onclick = () => {
+// Outcome click → show players
+document.getElementById('outcome-panel').addEventListener('click', function(e) {
+  if (e.target.classList.contains('outcome-btn') || e.target.closest('.outcome-btn')) {
+    const btn = e.target.closest('.outcome-btn');
     selectedOutcome = btn.dataset.outcome;
 
     document.getElementById('outcome-panel').style.display = 'none';
@@ -160,92 +228,27 @@ document.querySelectorAll('.outcome-btn').forEach(btn => {
     clearSelected('.delivery-btn');
 
     btn.classList.add('selected');
-  };
+  }
 });
 
-// 2. Player click → Show delivery options
-document.querySelectorAll('.player-btn').forEach(btn => {
-  btn.onclick = () => {
-    selectedPlayer = btn.dataset.playerId;
-
-    document.getElementById('outcome-panel').style.display = 'none';
-    document.getElementById('our-players').style.display = 'none';
-    document.getElementById('delivery-panel').style.display = 'grid';
-
-    clearSelected('.player-btn');
-    clearSelected('.delivery-btn');
-
-    btn.classList.add('selected');
-  };
+// Player click → show delivery options (event delegation)
+document.getElementById('our-players').addEventListener('click', function(e) {
+  if (e.target.classList.contains('player-btn') || e.target.closest('.player-btn')) {
+    const btn = e.target.closest('.player-btn');
+    selectPlayer(btn, btn.dataset.playerId);
+  }
 });
 
-// 3. Delivery click → Save & reset
-document.querySelectorAll('.delivery-btn').forEach(btn => {
-  btn.onclick = () => {
+// Delivery click → save attempt (event delegation)
+document.getElementById('delivery-panel').addEventListener('click', function(e) {
+  if (e.target.classList.contains('delivery-btn') || e.target.closest('.delivery-btn')) {
+    const btn = e.target.closest('.delivery-btn');
     selectedDeliveryType = btn.dataset.deliveryType;
-
-    clearSelected('.delivery-btn');
-    btn.classList.add('selected');
-
     if (selectedPlayer && selectedOutcome && selectedDeliveryType) {
-      const now = new Date();
-      const data = {
-        match_id: matchId,
-        player_id: selectedPlayer,
-        outcome: selectedOutcome,
-        delivery_type: selectedDeliveryType,
-        minute: Math.floor(timer / 60),
-        second: timer % 60,
-        timestamp: now.toISOString()
-      };
-
-      fetch("{% url 'tagging_app:save_attempt_to_goal' %}", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": '{{ csrf_token }}'
-        },
-        body: JSON.stringify(data)
-      })
-      .then(res => res.json())
-      .then(json => {
-        if (json.status === 'ok') {
-          const log = document.getElementById('event-log');
-          log.innerHTML = `<div><b>${json.player_name}</b> - ${selectedOutcome} - ${selectedDeliveryType} at ${formatTime(timer)}</div>` + log.innerHTML;
-
-          selectedPlayer = selectedOutcome = selectedDeliveryType = null;
-          clearSelected('.player-btn');
-          clearSelected('.outcome-btn');
-          clearSelected('.delivery-btn');
-
-          document.getElementById('outcome-panel').style.display = 'grid';
-          document.getElementById('our-players').style.display = 'none';
-          document.getElementById('delivery-panel').style.display = 'none';
-
-          updateCounts(json.updated_counts, json.player_id);
-        } else {
-          alert(json.message);
-        }
-      });
+        saveAttempt(selectedOutcome, selectedPlayer, selectedDeliveryType);
     }
-  };
+  }
 });
-
-function updateCounts(updatedCounts, playerId) {
-  const playerBtn = document.querySelector(`.player-btn[data-player-id="${playerId}"]`);
-  if (playerBtn) {
-    const badge = playerBtn.querySelector('.count-badge');
-    if (badge) badge.textContent = updatedCounts.total || 0;
-  }
-  for (const outcome in updatedCounts) {
-    if (outcome === 'total') continue;
-    const btn = document.querySelector(`.outcome-btn[data-outcome="${outcome}"]`);
-    if (btn) {
-      const badge = btn.querySelector('.count-badge');
-      if (badge) badge.textContent = updatedCounts[outcome];
-    }
-  }
-}
 </script>
 
 {% endblock %}

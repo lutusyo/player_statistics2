@@ -1,10 +1,107 @@
-{% extends "base.html" %}
+
 {% load static %}
 {% load custom_filters %}
 
 {% block title %}Attempt to Goal Dashboard{% endblock %}
 
-{% block content %}
+
+<style>
+  /* General page styling */
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f6fa;
+    color: #333;
+  }
+
+  h2 {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: #2f3640;
+    border-bottom: 2px solid #3498db;
+    display: inline-block;
+    padding-bottom: 5px;
+  }
+
+  ul {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 20px;
+  }
+
+  ul li {
+    background-color: #ffffff;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  ul li strong {
+    color: #3498db;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+  }
+
+  thead {
+    background-color: #3498db;
+    color: #fff;
+  }
+
+  thead th {
+    padding: 12px;
+    text-align: left;
+  }
+
+  tbody td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  tbody tr:hover {
+    background-color: #f1f1f1;
+  }
+
+  @media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+      display: block;
+    }
+    thead tr {
+      display: none;
+    }
+    tbody tr {
+      margin-bottom: 15px;
+      border-bottom: 2px solid #ddd;
+      padding: 10px;
+    }
+    tbody td {
+      text-align: right;
+      padding-left: 50%;
+      position: relative;
+    }
+    tbody td::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 15px;
+      width: 45%;
+      font-weight: bold;
+      text-align: left;
+    }
+  }
+</style>
+
+<h2>Top Scorers</h2>
 <ul>
   {% for player, goals in top_scorers %}
     <li><strong>{{ player }}</strong>: {{ goals }} goal{{ goals|pluralize }}</li>
@@ -13,10 +110,8 @@
   {% endfor %}
 </ul>
 
-<hr>
-
-<h2>GOAL ATTEMPTS</h2>
-<table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+<h2>Goal Attempts</h2>
+<table>
   <thead>
     <tr>
       <th>Player</th>
@@ -29,13 +124,13 @@
   <tbody>
     {% for player in players %}
       <tr>
-        <td>{{ player.name }}</td>
-        <td>{{ outcomes_matrix|get_item:player.id|get_item:"On Target Goal"|default:0 }}</td>
-        <td>{{ outcomes_matrix|get_item:player.id|get_item:"On Target Saved"|default:0 }}</td>
-        <td>{{ outcomes_matrix|get_item:player.id|get_item:"Off Target"|default:0 }}</td>
-        <td>{{ outcomes_matrix|get_item:player.id|get_item:"Blocked"|default:0 }}</td>
+        <td data-label="Player">{{ player.name }}</td>
+        <td data-label="On Target Goal">{{ outcomes_matrix|get_item:player.id|get_item:"On Target Goal"|default:0 }}</td>
+        <td data-label="On Target Saved">{{ outcomes_matrix|get_item:player.id|get_item:"On Target Saved"|default:0 }}</td>
+        <td data-label="Off Target">{{ outcomes_matrix|get_item:player.id|get_item:"Off Target"|default:0 }}</td>
+        <td data-label="Blocked">{{ outcomes_matrix|get_item:player.id|get_item:"Blocked"|default:0 }}</td>
       </tr>
     {% endfor %}
   </tbody>
 </table>
-{% endblock %}
+

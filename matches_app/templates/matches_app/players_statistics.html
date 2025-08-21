@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "matches_app/matches_base.html" %}
 {% load static %}
 
 {% block title %}Match Statistics{% endblock %}
@@ -32,23 +32,19 @@
 </div>
 
 <div class="stats-table-section">
-    <h2 style="text-align: center; margin-top: 30px;">{{ team_selected|upper }} STATISTICS {{ selected_season }}</h2>
+    <h2 class="stats-heading">{{ team_selected|upper }} STATISTICS {{ selected_season }}</h2>
 
     <table class="stats-table">
         <thead>
             <tr>
                 <th>PLAYER</th>
                 <th colspan="2">Local Friendly</th>
-                <th colspan="2">International Friendly</th>
-                <th colspan="2">NBC Youth League</th>
-                <th colspan="2">TOTAL</th>
+
             </tr>
             <tr>
                 <th></th>
                 <th>AP</th><th>GL</th>
-                <th>AP</th><th>GL</th>
-                <th>AP</th><th>GL</th>
-                <th>AP</th><th>GL</th>
+
             </tr>
         </thead>
         <tbody>
@@ -57,39 +53,14 @@
                 <td>{{ item.player.name }}</td>
                 <td>{{ item.local_ap }}</td>
                 <td>{{ item.local_gl }}</td>
-                <td>{{ item.int_ap }}</td>
-                <td>{{ item.int_gl }}</td>
-                <td>{{ item.nbc_ap }}</td>
-                <td>{{ item.nbc_gl }}</td>
-                <td><strong>{{ item.total_ap }}</strong></td>
-                <td><strong>{{ item.total_gl }}</strong></td>
+
             </tr>
             {% empty %}
             <tr>
-                <td colspan="9" style="text-align: center;">No stats found for selected filters.</td>
+                <td colspan="9" class="no-data">No stats found for selected filters.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-
-<style>
-.stats-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-.stats-table th, .stats-table td {
-    border: 1px solid #ccc;
-    padding: 8px 10px;
-    text-align: center;
-}
-.stats-table thead {
-    background-color: #0c1d36;
-    color: white;
-}
-.stats-table tbody tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-</style>
 {% endblock %}

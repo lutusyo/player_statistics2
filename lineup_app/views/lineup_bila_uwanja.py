@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.db import transaction
+from django.utils import timezone   # ✅ import timezone
 from players_app.models import Player
 from lineup_app.models import Match, MatchLineup, PositionChoices
 
@@ -10,17 +11,11 @@ def match_lineup_view(request, match_id):
     players_qs = Player.objects.filter(team__in=[match.home_team, match.away_team]).order_by('name')
 
     if request.method == "POST":
-        # Expect two lists from your form:
-        # starters[] = list of 11 player ids who start
-        # bench[] = list of bench player ids available for substitution
-
         starters = request.POST.getlist('starters[]')
         bench = request.POST.getlist('bench[]')
 
         if not starters or len(starters) != 11:
             return JsonResponse({'error': 'You must select exactly 11 starters.'}, status=400)
-
-        # bench can be empty or any number (like 7, 9, etc)
 
         with transaction.atomic():
             # Delete existing lineup for this match
@@ -46,13 +41,11 @@ def match_lineup_view(request, match_id):
                     is_starting=True,
                     position=position,
                     pod_number=pod_number,
-                    time_in=0,
+                    time_in=0,  # ✅ starting players always at minute 0
                 )
 
-            # Create MatchLineup for bench players (subs not started)
+            # Create MatchLineup for bench players
             for pid in bench:
-                # Bench players usually don't have a position assigned because they start off pitch,
-                # but you can allow or require position if you want
                 position = request.POST.get(f'position_{pid}') or ""
                 pod_number = request.POST.get(f'gps_{pid}') or None
 
@@ -68,8 +61,13 @@ def match_lineup_view(request, match_id):
                     is_starting=False,
                     position=position,
                     pod_number=pod_number,
-                    time_in=None,  # Not yet played
+                    time_in=None,  # ✅ bench players not yet entered
                 )
+
+            # ✅ Start the match clock once the lineup is confirmed
+            if not match.start_time:
+                match.start_time = timezone.now()
+                match.save()
 
         return JsonResponse({'success': True})
 

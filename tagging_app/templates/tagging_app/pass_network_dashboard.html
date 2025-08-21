@@ -31,24 +31,26 @@
                 {% for p in players %}
                     <th>{{ p.name|slice:":10" }}</th>
                 {% endfor %}
+                <th>Total Pass</th>  <!-- New column -->
             </tr>
         </thead>
+        
         <tbody>
-            {% for row_player in players %}
-            <tr>
-                <th>{{ row_player.name|slice:":10" }}</th>
-                {% for col_player in players %}
-                    {% if row_player.id == col_player.id %}
-                        <td class="black-cell"></td>
-                    {% else %}
-                        <td>
-                            {{ matrix|get_item:row_player.id|get_item:col_player.id|default:"0" }}
-                        </td>
-                    {% endif %}
-                {% endfor %}
-            </tr>
+        {% for item in players_totals %}
+        <tr>
+            <th>{{ item.player.name|slice:":10" }}</th>
+            {% for col_player in players %}
+                {% if item.player.id == col_player.id %}
+                    <td class="black-cell"></td>
+                {% else %}
+                    <td>{{ matrix|get_item:item.player.id|get_item:col_player.id|default:"0" }}</td>
+                {% endif %}
             {% endfor %}
+            <td>{{ item.total_pass }}</td> <!-- Total passes from this player -->
+        </tr>
+        {% endfor %}
         </tbody>
+
     </table>
 
     <h3>Top 5 Player to Player Passers</h3>

@@ -5,39 +5,58 @@
 {% block header %}{% endblock %}
 
 {% block content %}
+
+<!-- ✅ Live Match Time -->
+<p style="text-align:center; font-weight:600; font-size:18px; margin:10px 0;">
+    Match Time: <span id="match-time">Loading...</span>
+</p>
+
 <style>
+/* ... your existing styles ... */
+
 body, html {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-size: 14px;
-  box-sizing: border-box;
-}
-
-*, *:before, *:after {
-  box-sizing: inherit;
+  width: 100%;
 }
 
 .container {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: hidden;
-  font-size: 14px;
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 20px 15px;
+  width: 100vw;        /* full width */
+  margin: 0;           /* remove centering */
+  padding: 0;          /* remove padding */
 }
 
 .panels {
-  flex: 1 1 auto;
+  flex: 1;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  padding: 15px 0;
-  max-width: 100%;
-  overflow: visible;
+  gap: 0;              /* optional: remove gap if you want flush edges */
+  height: 100%;
+  width: 100%;
 }
+
+.tag-panel {
+  border: 1px solid #ccc;
+  border-radius: 0;    /* optional: remove rounding if you want edge-to-edge */
+  padding: 20px;
+  overflow-y: auto;
+  background: #fafafa;
+  height: 100%;        /* stretch inside grid */
+  width: 100%;
+}
+
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+
+
+
 
 /* On mobile: stack panels vertically */
 @media (max-width: 768px) {
@@ -46,17 +65,7 @@ body, html {
   }
 }
 
-/* Panel styling */
-.tag-panel {
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 20px;
-  overflow-y: auto;
-  background: #fafafa;
-  min-height: 450px;
-  display: flex;
-  flex-direction: column;
-}
+
 
 /* On smaller mobiles, allow panel height to shrink */
 @media (max-width: 480px) {
@@ -188,6 +197,8 @@ body, html {
 
 {% block footer %}{% endblock %}
 
+<a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>
+
 <div class="container">
   <div class="panels">
     <!-- Attempt to Goal Panel -->
@@ -203,4 +214,22 @@ body, html {
     </div>
   </div>
 </div>
+
+<!-- ✅ Live Match Time Script -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const matchId = {{ match.id }};
+    function updateMatchTime() {
+        fetch(`/matches/match/${matchId}/time/`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("match-time").innerText = `${data.minute}' (${data.status})`;
+        })
+        .catch(error => console.error("Error fetching match time:", error));
+    }
+    setInterval(updateMatchTime, 10000);
+    updateMatchTime();
+});
+</script>
+
 {% endblock %}
