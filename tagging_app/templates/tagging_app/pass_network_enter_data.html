@@ -28,7 +28,8 @@
 
 
   <!-- Players buttons in 4 columns grid -->
-  <div id="our-players" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+  <div id="our-players" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+
     {% for p in our_players %}
         <button class="player-btn"
                 id="player-{{ p.player.id }}"
