@@ -25,7 +25,8 @@
                     <div class="fixture-actions" style="margin-bottom:10px; text-align:center;">
                         {% if match.has_lineup %}
                             <!-- Tagging Links -->
-                            <a href="{% url 'tagging_app:tagging_base' match.id %}" class="btn btn-primary">Goal & Pass Tagging</a>
+                            <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}" class="btn btn-primary">Goal Tagging</a>
+                            <a href="{% url 'tagging_app:pass_network_enter_data' match.id %}">Pass Tagging</a>
                             <a href="{% url 'tagging_app:enter_goalkeeper_distribution' match.id %}" class="btn btn-secondary">Goalkeeper Distribution</a>
                             <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}" class="btn btn-info">Defensive</a>
                         {% else %}

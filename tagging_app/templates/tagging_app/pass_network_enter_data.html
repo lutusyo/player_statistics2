@@ -3,6 +3,8 @@
 {% load static %}
 
 <title>Passing Network Tagging</title>
+
+
 <style>
 .opponent-btn.active {
   background-color: green !important;
@@ -24,7 +26,7 @@
                 data-team-id="{{ our_team.id }}"
                 style="
                     width: 100px;
-                    height: 10px;
+                    height: 100px;
                     border-radius: 50%;
                     border: 2px solid #0073e6;
                     background-image: url('{% if p.player.photo %}{{ p.player.photo.url }}{% else %}{% static 'default_player.png' %}{% endif %}');
@@ -82,7 +84,7 @@
 </div>
 
 
-
+<a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>
 <script>
 window.PassNetwork = {
     matchId: {{ match.id }},

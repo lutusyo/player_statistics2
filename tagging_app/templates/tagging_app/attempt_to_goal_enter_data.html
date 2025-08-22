@@ -1,9 +1,132 @@
 {% load static %}
 {% load custom_filters %}
 
+
+<style>
+  /* General button style */
+  .outcome-btn, .delivery-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background-color: #e6f2ff;
+    border: 2px solid #0073e6;
+    cursor: pointer;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    color: #0073e6;
+    text-align: center;
+  }
+  
+  .outcome-btn .count-badge {
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: normal;
+  }
+  
+  #outcome-panel,
+  #delivery-panel,
+  #our-players {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+  }
+  
+  .player-btn {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 2px solid #0073e6;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+    text-align: center;
+  }
+  
+  .player-btn span {
+    background: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    text-align: center;
+    border-bottom-left-radius: 50%;
+    border-bottom-right-radius: 50%;
+    padding: 2px 3px;
+    font-size: 10px;
+  }
+  
+  /* Responsive layout for tablets and phones */
+  @media (max-width: 768px) {
+    #outcome-panel,
+    #delivery-panel,
+    #our-players {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+  
+    .player-btn {
+      width: 80px;
+      height: 80px;
+      font-size: 7px;
+    }
+  
+    .outcome-btn, .delivery-btn {
+      font-size: 12px;
+      padding: 10px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    #outcome-panel,
+    #delivery-panel,
+    #our-players {
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+  
+    .player-btn {
+      width: 70px;
+      height: 70px;
+      font-size: 6px;
+    }
+  
+    .outcome-btn, .delivery-btn {
+      font-size: 11px;
+      padding: 8px;
+    }
+  }
+
+  .responsive-panel {
+  padding: 12px;
+}
+
+@media (max-width: 480px) {
+  .responsive-panel {
+    padding: 8px;
+  }
+}
+
+
+  </style>
+  
+
+
+
+
 {% block content %}
 
-<div id="attempt-to-goal" class="tag-panel" style="padding: 10px;">
+<div id="attempt-to-goal" class="tag-panel responsive-panel">
+
 
   <!-- Outcome panel: initially visible -->
   <div id="outcome-panel" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
@@ -43,6 +166,9 @@
   </div>
 
 </div>
+
+
+<a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>
 
 <script>
 let timer = 0;

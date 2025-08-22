@@ -3,34 +3,59 @@
 
 {% block content %}
 <style>
-    .hidden { display: none; }
     .player-card {
         border: 1px solid #ccc;
         padding: 8px;
-        margin: 4px;
-        text-align: center;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
         cursor: pointer;
-        border-radius: 8px;
-        transition: 0.3s;
+        transition: background-color 0.2s;
     }
+
     .player-card.selected {
         background-color: #4CAF50;
         color: white;
     }
+
+    .player-card img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 50%;
+        margin-right: 12px;
+    }
+
+    #players-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .player-card p {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
     .step-container {
-        max-width: 800px;
+        max-width: 600px;
         margin: auto;
     }
+
     .buttons {
         margin-top: 20px;
         display: flex;
         justify-content: space-between;
     }
+
     .spinner {
         display: none;
         margin-left: 10px;
     }
 </style>
+
+
 
 <div class="step-container">
 
@@ -38,14 +63,17 @@
     <div id="step1">
         <h2>Select Players</h2>
         <p>Select exactly 11 starters, then optionally select substitutes.</p>
-        <div id="players-list" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+        <div id="players-list">
             {% for player in players %}
             <div class="player-card" data-id="{{ player.id }}">
-                <img src="{{ player.photo.url }}" alt="{{ player.name }}" style="width:100%;border-radius:6px;">
+                <img src="{{ player.photo.url }}" alt="{{ player.name }}">
                 <p>{{ player.name }}</p>
             </div>
             {% endfor %}
         </div>
+        
+        
+        
         <div>
             <small>Selected starters: <span id="starters-count">0</span>/11</small>
         </div>

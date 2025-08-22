@@ -30,6 +30,7 @@ matplotlib.use('Agg')  # non-GUI backend for servers
 import matplotlib.pyplot as plt
 
 
+
 # ---------- SHARED DATA FUNCTION ----------
 def get_pass_network_data(match_id):
     """
@@ -72,6 +73,30 @@ def get_pass_network_data(match_id):
             ball_lost[from_id] += cnt
 
     return players, player_names, matrix, total_passes, ball_lost
+
+
+
+def pass_network_enter_data(request, match_id):
+    players, player_names, matrix, total_passes, ball_lost = get_pass_network_data(match_id)
+
+    # Get team information (optional based on your template)
+    match = get_object_or_404(Match, id=match_id)
+    our_team = match.home_team  # Or determine based on logic
+    opponent_team = match.away_team
+
+    # Pass all required data to the template
+    context = {
+        'match': match,
+        'our_players': [{'player': p} for p in players],  # Wrap like this to match template structure
+        'our_team': our_team,
+        'opponent_team': opponent_team,
+        'matrix': matrix,
+        'total_passes': total_passes,
+        'ball_lost': ball_lost,
+    }
+
+    return render(request, 'tagging_app/pass_network_enter_data.html', context)
+
 
 
 # ---------- SAVE ----------
