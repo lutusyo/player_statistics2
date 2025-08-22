@@ -14,19 +14,6 @@
 
 <div id="pass-network">
 
-  <!-- Opponent button at the top -->
-<div style="margin-bottom: 12px; text-align: center;">
-    <button class="opponent-btn" id="opponent-btn" data-team-id="{{ opponent_team.id }}"
-      style="position: relative; padding-right: 30px; font-size: 12px; min-width: 140px; min-height: 50px; border-radius: 8px;">
-        {{ opponent_team.name }} Ball Intercept
-        <span class="pass-count" id="opponent-pass-count" 
-          style="position: absolute; top: 5px; right: 8px; background: #0073e6; color: white; border-radius: 12px; padding: 2px 8px; font-size: 12px;">
-          0
-        </span>
-    </button>
-</div>
-
-
   <!-- Players buttons in 4 columns grid -->
   <div id="our-players" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
 
@@ -78,6 +65,17 @@
 
 
     {% endfor %}
+      <!-- Opponent button at the top -->
+        <div style="margin-bottom: 12px; text-align: center;">
+            <button class="opponent-btn" id="opponent-btn" data-team-id="{{ opponent_team.id }}"
+            style="position: relative; padding-right: 30px; font-size: 12px; min-width: 140px; min-height: 50px; border-radius: 8px;">
+                {{ opponent_team.name }} Ball Intercept
+                <span class="pass-count" id="opponent-pass-count" 
+                style="position: absolute; top: 5px; right: 8px; background: #0073e6; color: white; border-radius: 12px; padding: 2px 8px; font-size: 12px;">
+                0
+                </span>
+            </button>
+        </div>
   </div>
 
   <p><strong>Last Pass:</strong> <span id="last-pass"></span></p>

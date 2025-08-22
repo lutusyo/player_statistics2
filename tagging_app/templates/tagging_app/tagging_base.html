@@ -6,11 +6,6 @@
 
 {% block content %}
 
-<!-- ✅ Live Match Time -->
-<p style="text-align:center; font-weight:600; font-size:18px; margin:10px 0;">
-    Match Time: <span id="match-time">Loading...</span>
-</p>
-
 <style>
 /* ... your existing styles ... */
 
@@ -197,8 +192,6 @@ body, html {
 
 {% block footer %}{% endblock %}
 
-<a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>
-
 <div class="container">
   <div class="panels">
     <!-- Attempt to Goal Panel -->
@@ -214,6 +207,8 @@ body, html {
     </div>
   </div>
 </div>
+
+<a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>
 
 <!-- ✅ Live Match Time Script -->
 <script>
@@ -233,3 +228,5 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 
 {% endblock %}
+
+
