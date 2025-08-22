@@ -9,7 +9,7 @@ from datetime import date
 
 from django.db.models import Q
 from teams_app.models import Team, AgeGroup
-from lineup_app.models import MatchLineup
+from lineup_app.models import MatchLineup, POSITION_COORDS
 from matches_app.models import Match
 from tagging_app.models import AttemptToGoal, GoalkeeperDistributionEvent
 from collections import Counter
@@ -17,23 +17,7 @@ from collections import Counter
 from collections import defaultdict
 from matches_app.views.get_match_goals import get_match_goals
 
-# position coordinates (x: left-right %, y: top-bottom %)
-POSITION_COORDINATES = {
-    'GK': {'x': 50, 'y': 95},
 
-    'LB': {'x': 15, 'y': 80},
-    'CB': {'x': 40, 'y': 80},
-    'RB': {'x': 65, 'y': 80},
-
-    'DM': {'x': 50, 'y': 65},
-
-    'CM': {'x': 50, 'y': 50},
-    'AM': {'x': 50, 'y': 35},
-
-    'LW': {'x': 20, 'y': 30},
-    'RW': {'x': 80, 'y': 30},
-    'ST': {'x': 50, 'y': 20},
-}
 
 
 @login_required
@@ -47,7 +31,11 @@ def results_view(request, team):
     ).order_by('-date')
 
     for match in past_matches:
+        # Get match goals
         match.home_goals, match.away_goals = get_match_goals(match)
+
+        # Check if lineup exists for this match
+        match.has_lineup = MatchLineup.objects.filter(match=match).exists()
 
     context = {
         "team": team,

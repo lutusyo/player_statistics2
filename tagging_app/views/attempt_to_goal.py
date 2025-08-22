@@ -90,7 +90,7 @@ def save_attempt_to_goal(request):
 
             tag = AttemptToGoal.objects.create(
                 match=match,
-                player=player,
+                player=player if not data.get('is_own_goal') else None,
                 team=lineup_entry.team,
                 minute=data['minute'],
                 second=data['second'],
@@ -98,8 +98,10 @@ def save_attempt_to_goal(request):
                 delivery_type=data['delivery_type'],
                 assist_by_id=data.get('assist_by_id'),
                 pre_assist_by_id=data.get('pre_assist_by_id'),
+                is_own_goal=data.get('is_own_goal', False),
                 timestamp=data['timestamp']
             )
+
 
             # Live outcome counts update
             outcome_counts = AttemptToGoal.objects.filter(player=player, match=match) \

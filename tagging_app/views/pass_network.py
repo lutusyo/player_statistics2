@@ -2,7 +2,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
 
 from collections import defaultdict
 import csv
@@ -32,7 +31,7 @@ import matplotlib.pyplot as plt
 
 
 # ---------- SHARED DATA FUNCTION ----------
-def get_pass_network_data(request, match_id):
+def get_pass_network_data(match_id):
     """
     Returns:
         players: QuerySet of Player (ordered by name)
@@ -43,7 +42,6 @@ def get_pass_network_data(request, match_id):
     """
 
     match = get_object_or_404(Match, id=match_id)
-    # All players who appear in pass events (from or to)
     player_ids_from = PassEvent.objects.filter(match=match).values_list('from_player_id', flat=True)
     player_ids_to = PassEvent.objects.filter(match=match).values_list('to_player_id', flat=True)
     all_player_ids = set(player_ids_from).union(set(player_ids_to))
@@ -51,7 +49,7 @@ def get_pass_network_data(request, match_id):
     players = Player.objects.filter(id__in=all_player_ids).order_by('name')
     player_names = {p.id: p.name for p in players}
 
-    # Build counts in one pass
+    # Build counts
     matrix = defaultdict(lambda: defaultdict(int))
     passes = (
         PassEvent.objects.filter(match=match)
@@ -67,14 +65,9 @@ def get_pass_network_data(request, match_id):
         to_id = p['to_player_id']
         cnt = p['count']
 
-        # Matrix (only when there is a receiver player)
         if to_id:
             matrix[from_id][to_id] = cnt
-
-        # Totals for the passer
         total_passes[from_id] += cnt
-
-        # Ball lost: team changed away from passer's team
         if p['from_team_id'] != p['to_team_id']:
             ball_lost[from_id] += cnt
 
@@ -120,8 +113,7 @@ def save_pass_network(request):
 # ---------- DASHBOARD (HTML) ----------
 def pass_network_dashboard(request, match_id):
     match = get_object_or_404(Match, id=match_id)
-
-    players, player_names, matrix, total_passes, ball_lost = get_pass_network_data(match)
+    players, player_names, matrix, total_passes, ball_lost = get_pass_network_data(match_id)
 
     # Top 5 combinations
     combos = []
@@ -134,6 +126,12 @@ def pass_network_dashboard(request, match_id):
             ))
     top_combinations = sorted(combos, key=lambda x: x[2], reverse=True)[:5]
 
+    # Bar chart data
+    chart_data = {
+        'names': [player_names[p.id] for p in players],
+        'values': [total_passes[p.id] for p in players]
+    }
+
     context = {
         'match': match,
         'players': players,
@@ -142,44 +140,34 @@ def pass_network_dashboard(request, match_id):
         'top_combinations': top_combinations,
         'total_passes': total_passes,
         'ball_lost': ball_lost,
+        'chart_data': chart_data,
     }
     return render(request, 'tagging_app/pass_network_dashboard.html', context)
+
 
 
 # ---------- CSV ----------
 def export_pass_network_csv(request, match_id):
     match = get_object_or_404(Match, id=match_id)
-    players, player_names, matrix, total_passes, ball_lost = get_pass_network_data(match)
+    players, player_names, matrix, total_passes, ball_lost = get_pass_network_data(match_id)
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="pass_network_{match_id}.csv"'
     writer = csv.writer(response)
 
-    # Title
     writer.writerow([f"Passing Matrix - {match}"])
-
-    # Matrix
     header = ["From\\To"] + [player_names[p.id][:10] for p in players]
     writer.writerow(header)
     for row_player in players:
         row = [player_names[row_player.id][:10]]
         for col_player in players:
-            if row_player.id == col_player.id:
-                row.append("—")
-            else:
-                row.append(str(matrix[row_player.id].get(col_player.id, 0)))
+            row.append("—" if row_player.id == col_player.id else str(matrix[row_player.id].get(col_player.id, 0)))
         writer.writerow(row)
 
     writer.writerow([])
-
-    # Totals
     writer.writerow(["Player", "Total Passes", "Ball Lost"])
     for p in players:
-        writer.writerow([
-            player_names[p.id],
-            str(total_passes[p.id]),
-            str(ball_lost[p.id]),
-        ])
+        writer.writerow([player_names[p.id], total_passes[p.id], ball_lost[p.id]])
 
     return response
 
@@ -187,11 +175,9 @@ def export_pass_network_csv(request, match_id):
 # ---------- EXCEL ----------
 def export_pass_network_excel(request, match_id):
     match = get_object_or_404(Match, id=match_id)
-    players, player_names, matrix, total_passes, ball_lost = get_pass_network_data(match)
+    players, player_names, matrix, total_passes, ball_lost = get_pass_network_data(match_id)
 
     wb = Workbook()
-
-    # Matrix Sheet
     ws1 = wb.active
     ws1.title = "Pass Matrix"
     ws1.cell(row=1, column=1, value="From\\To")
@@ -201,18 +187,13 @@ def export_pass_network_excel(request, match_id):
     for row_index, from_player in enumerate(players, start=2):
         ws1.cell(row=row_index, column=1, value=player_names[from_player.id][:10])
         for col_index, to_player in enumerate(players, start=2):
-            value = "—" if from_player.id == to_player.id else matrix[from_player.id].get(to_player.id, 0)
-            ws1.cell(row=row_index, column=col_index, value=value)
+            ws1.cell(row=row_index, column=col_index,
+                     value="—" if from_player.id == to_player.id else matrix[from_player.id].get(to_player.id, 0))
 
-    # Totals Sheet
     ws2 = wb.create_sheet(title="Totals")
     ws2.append(["Player", "Total Passes", "Ball Lost"])
     for p in players:
-        ws2.append([
-            player_names[p.id],
-            total_passes[p.id],
-            ball_lost[p.id],
-        ])
+        ws2.append([player_names[p.id], total_passes[p.id], ball_lost[p.id]])
 
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -225,7 +206,7 @@ def export_pass_network_excel(request, match_id):
 # ---------- PDF ----------
 def export_pass_network_pdf(request, match_id):
     match = get_object_or_404(Match, id=match_id)
-    players, player_names, matrix, total_passes, ball_lost = get_pass_network_data(match)
+    players, player_names, matrix, total_passes, ball_lost = get_pass_network_data(match_id)
 
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)
@@ -233,53 +214,68 @@ def export_pass_network_pdf(request, match_id):
     styles = getSampleStyleSheet()
 
     # Title
-    elements.append(Paragraph(f"Passing Distribution - {match}", styles['Title']))
+    elements.append(Paragraph(f"Passing Network - {match}", styles['Title']))
     elements.append(Spacer(1, 8))
 
-    # Matrix Table
+    # Top 5 Combinations
+    combos = []
+    for f_id, tos in matrix.items():
+        for t_id, c in tos.items():
+            combos.append((player_names.get(f_id, str(f_id)), player_names.get(t_id, str(t_id)), c))
+    top_combinations = sorted(combos, key=lambda x: x[2], reverse=True)[:5]
+
+    elements.append(Paragraph("Top 5 Pass Combinations", styles['Heading2']))
+    combo_data = [["From", "To", "Count"]]
+    for f, t, c in top_combinations:
+        combo_data.append([f, t, str(c)])
+    combo_table = Table(combo_data)
+    combo_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.lightblue),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
+    ]))
+    elements.append(combo_table)
+    elements.append(Spacer(1,12))
+
+    # Pass Matrix
     data = [["From\\To"] + [player_names[p.id][:10] for p in players]]
     for row_player in players:
         row = [player_names[row_player.id][:10]]
         for col_player in players:
-            if row_player.id == col_player.id:
-                row.append("—")
-            else:
-                row.append(str(matrix[row_player.id].get(col_player.id, 0)))
-        row and data.append(row)
+            row.append("—" if row_player.id == col_player.id else str(matrix[row_player.id].get(col_player.id, 0)))
+        data.append(row)
 
     t = Table(data)
     t.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.blue),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('BACKGROUND', (0,0), (-1,0), colors.blue),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
     ]))
+    elements.append(Spacer(1,12))
+    elements.append(Paragraph("Pass Matrix", styles['Heading2']))
     elements.append(t)
-    elements.append(Spacer(1, 12))
+    elements.append(Spacer(1,12))
 
     # Totals Table
     totals_data = [["Player", "Total Passes", "Ball Lost"]]
     for p in players:
-        totals_data.append([
-            player_names[p.id],
-            str(total_passes[p.id]),
-            str(ball_lost[p.id]),
-        ])
-
+        totals_data.append([player_names[p.id], str(total_passes[p.id]), str(ball_lost[p.id])])
     totals_table = Table(totals_data)
     totals_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-        ('FONTSIZE', (0, 0), (-1, -1), 9),
+        ('BACKGROUND', (0,0), (-1,0), colors.darkblue),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.black),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
     ]))
     elements.append(Paragraph("Player Passing Totals", styles['Heading2']))
     elements.append(totals_table)
-    elements.append(Spacer(1, 16))
+    elements.append(Spacer(1,16))
 
-    # Bar Chart: Total Passes per Player
+    # Bar Chart
     if players:
         fig, ax = plt.subplots(figsize=(6, 4))
         names = [player_names[p.id] for p in players]
@@ -298,7 +294,6 @@ def export_pass_network_pdf(request, match_id):
         elements.append(Paragraph("Pass Distribution Chart", styles['Heading2']))
         elements.append(Image(img_buf, width=400, height=250))
 
-    # Build & return
     doc.build(elements)
     buffer.seek(0)
-    return FileResponse(buffer, as_attachment=True, filename='pass_distribution.pdf')
+    return FileResponse(buffer, as_attachment=True, filename='pass_network.pdf')

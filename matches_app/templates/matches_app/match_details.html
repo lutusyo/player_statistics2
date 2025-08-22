@@ -1,6 +1,221 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'matches_app/css/match_details.css' %}">
+
+  <style>
+
+/* =============================== */
+/* Container & Headings */
+/* =============================== */
+
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2, h5, h6 {
+    font-family: 'Segoe UI', sans-serif;
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+/* Paragraphs and Text */
+
+p {
+    font-size: 16px;
+    color: #333;
+    margin: 8px 0;
+}
+
+strong {
+    color: #444;
+}
+
+/* Links */
+
+a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Horizontal Rules */
+
+hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 30px 0;
+}
+
+/* =============================== */
+/* Tab Styling */
+/* =============================== */
+
+.nav-tabs .nav-link {
+    font-weight: 500;
+    color: #555;
+    border: none;
+    background: none;
+    transition: color 0.2s ease;
+}
+
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    font-weight: 600;
+    border-bottom: 2px solid #0d6efd;
+}
+
+.tab-content {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+}
+
+/* =============================== */
+/* General Table Styling */
+/* =============================== */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 15px;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+}
+
+table thead {
+    background-color: #f1f1f1;
+}
+
+table th,
+table td {
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    text-align: left;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* =============================== */
+/* Stats Tab Table Styles */
+/* =============================== */
+
+#stats table {
+    border: 2px solid #1e3a8a;
+    font-family: Arial, sans-serif;
+    color: #1e40af;
+    background-color: #eff6ff;
+}
+
+#stats table thead th {
+    background-color: #3b82f6;
+    color: white;
+    border: 1px solid #1e3a8a;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+#stats table tbody td {
+    border: 1px solid #93c5fd;
+    color: #1e40af;
+    text-align: center;
+    vertical-align: middle;
+    padding: 8px;
+}
+
+#stats table tbody tr:nth-child(even) {
+    background-color: #dbeafe;
+}
+
+#stats table tbody tr:hover {
+    background-color: #bfdbfe;
+    cursor: default;
+}
+
+/* Start 11 column */
+#stats tbody td:nth-child(11) {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2563eb;
+}
+
+/* Yellow Card */
+#stats tbody td:nth-child(12) {
+    color: #ca8a04;
+    font-weight: bold;
+}
+
+/* Red Card */
+#stats tbody td:nth-child(13) {
+    color: #b91c1c;
+    font-weight: bold;
+}
+
+/* =============================== */
+/* Lineup Player Circles */
+/* =============================== */
+
+#pitch-container div {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* =============================== */
+/* Utility Classes */
+/* =============================== */
+
+.text-muted {
+    color: #6c757d;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Responsive tables */
+.table-responsive {
+    overflow-x: auto;
+    margin-top: 10px;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    font-weight: 500;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004a99;
+}
+
+
+</style>
+
+{% endblock %}
+
+
+
+
 {% block content %}
 <div class="container mt-4">
     <h2>{{ match.home_team.name }} vs {{ match.away_team.name }}</h2>
@@ -11,25 +226,26 @@
 
     <!-- Tabs -->
     <ul class="nav nav-tabs" id="matchTabs" role="tablist">
-        <li class="nav-item" role="presentation">
+        <li class="nav-item">
             <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">Info</button>
         </li>
-        <li class="nav-item" role="presentation">
+        <li class="nav-item">
             <button class="nav-link" id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary" type="button" role="tab">Summary</button>
         </li>
-        <li class="nav-item" role="presentation">
+        <li class="nav-item">
             <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab">Stats</button>
         </li>
-        <li class="nav-item" role="presentation">
+        <li class="nav-item">
             <button class="nav-link" id="lineup-tab" data-bs-toggle="tab" data-bs-target="#lineup" type="button" role="tab">Line-up</button>
         </li>
-        <li class="nav-item" role="presentation">
+        <li class="nav-item">
             <button class="nav-link" id="h2h-tab" data-bs-toggle="tab" data-bs-target="#h2h" type="button" role="tab">H2H</button>
         </li>
     </ul>
 
     <!-- Tab Content -->
     <div class="tab-content mt-3" id="matchTabsContent">
+
         <!-- Info Tab -->
         <div class="tab-pane fade show active" id="info" role="tabpanel">
             <h5>Match Information</h5>
@@ -41,62 +257,90 @@
         <!-- Summary Tab -->
         <div class="tab-pane fade" id="summary" role="tabpanel">
             <h5>Match Summary</h5>
-            {% if match.summary %}
-                <p>{{ match.summary }}</p>
+
+            <!-- Final Score -->
+            <h6>Final Score</h6>
+            <p><strong>{{ match.home_team.name }} {{ home_team_goals }} - {{ away_team_goals }} {{ match.away_team.name }}</strong></p>
+
+            <hr>
+
+            <!-- Goals -->
+            <h6>Goals</h6>
+            {% if goals %}
+                <ul class="list-group">
+                    {% for goal in goals %}
+                        <li class="list-group-item">
+                            <strong>{{ goal.minute }}'</strong> — {{ goal.scorer }}
+                            {% if goal.assist_by %}(Assist: {{ goal.assist_by }}){% endif %}
+                            - {{ goal.team_name }}
+                        </li>
+                    {% endfor %}
+                </ul>
             {% else %}
-                <p>No summary available yet.</p>
+                <p>No goals recorded for this match.</p>
             {% endif %}
         </div>
 
         <!-- Stats Tab -->
         <div class="tab-pane fade" id="stats" role="tabpanel">
-            <h5>Match Stats</h5>
-            <p>Shots, passes, duels, etc. will go here.</p>
+            <h5>Player Statistics</h5>
 
-            <h6>General Stats</h6>
-            <table class="table table-bordered text-center">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>{{ match.home_team.name }}</th>
-                        <th>{{ match.away_team.name }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Shots (on target)</td>
-                        <td>{{ stats.home.shots_on }}</td>
-                        <td>{{ stats.away.shots_on }}</td>
-                    </tr>
-                    <tr>
-                        <td>Shots (off target)</td>
-                        <td>{{ stats.home.shots_off }}</td>
-                        <td>{{ stats.away.shots_off }}</td>
-                    </tr>
-                    <tr>
-                        <td>Corners</td>
-                        <td>{{ stats.home.corners }}</td>
-                        <td>{{ stats.away.corners }}</td>
-                    </tr>
-                    <tr>
-                        <td>Fouls</td>
-                        <td>{{ stats.home.fouls }}</td>
-                        <td>{{ stats.away.fouls }}</td>
-                    </tr>
-                    <tr>
-                        <td>Yellow Cards</td>
-                        <td>{{ stats.home.yellow }}</td>
-                        <td>{{ stats.away.yellow }}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- Team Passing Summary -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>{{ match.home_team.name }} Pass Stats:</strong><br>
+                    Total Passes: {{ home_pass_stats.total_passes }}<br>
+                    Ball Lost: {{ home_pass_stats.ball_lost }}
+                </div>
+                <div class="col-md-6">
+                    <strong>{{ match.away_team.name }} Pass Stats:</strong><br>
+                    Total Passes: {{ away_pass_stats.total_passes }}<br>
+                    Ball Lost: {{ away_pass_stats.ball_lost }}
+                </div>
+            </div>
 
-            <h6>Passing</h6>
-            <ul>
-                <li>{{ match.home_team.name }}: {{ stats.home.total_passes }} passes ({{ stats.home.pass_accuracy }}% accuracy)</li>
-                <li>{{ match.away_team.name }}: {{ stats.away.total_passes }} passes ({{ stats.away.pass_accuracy }}% accuracy)</li>
-            </ul>
-            <a href="{% url 'tagging_app:pass_network_dashboard' match.id %}">🔗 View Pass Network</a>
+            {% if player_stats %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Minutes</th>
+                                <th>Shots</th>
+                                <th>Shots On Target</th>
+                                <th>Goals</th>
+                                <th>Assists</th>
+                                <th>Total Passes</th>
+                                <th>Ball Lost</th>
+                                <th>Pass Accuracy (%)</th>
+                                <th>Start 11</th>
+                                <th>Yellow Card</th>
+                                <th>Red Card</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ps in player_stats %}
+                            <tr>
+                                <td>{{ ps.player.name }}</td>
+                                <td>{{ ps.minutes_played }}</td>
+                                <td>{{ ps.shots }}</td>
+                                <td>{{ ps.shots_on }}</td>
+                                <td>{{ ps.goals }}</td>
+                                <td>{{ ps.assists }}</td>
+                                <td>{{ ps.total_passes }}</td>
+                                <td>{{ ps.ball_lost }}</td>
+                                <td>{{ ps.pass_accuracy }}%</td>
+                                <td>{% if ps.is_starting %}✔{% else %}❌{% endif %}</td>
+                                <td>{{ ps.yellow_card }}</td>
+                                <td>{{ ps.red_card }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>No player stats recorded yet.</p>
+            {% endif %}
         </div>
 
         <!-- Lineup Tab -->
@@ -114,8 +358,7 @@
                     padding:5px 8px;
                     border-radius:50%;
                     text-align:center;
-                    font-size:12px;
-                ">
+                    font-size:12px;">
                     {{ player.number }}<br>{{ player.name }}
                 </div>
                 {% endfor %}
@@ -132,8 +375,7 @@
                     padding:5px 8px;
                     border-radius:50%;
                     text-align:center;
-                    font-size:12px;
-                ">
+                    font-size:12px;">
                     {{ player.number }}<br>{{ player.name }}
                 </div>
                 {% endfor %}
@@ -159,15 +401,27 @@
                 <p>No past meetings available.</p>
             {% endif %}
         </div>
-    </div>
+
+    </div> <!-- End of tab-content -->
+</div> <!-- End of container -->
+
+<hr style="margin: 40px 0;">
+
+<!-- External Analytics Links -->
+<div class="text-center">
+    <a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" class="btn btn-primary m-1">📊 View Pass Network</a>
+    <a href="{% url 'tagging_app:attempt_to_goal_dashboard' match.id %}" class="btn btn-primary m-1">📊 View Goal Attempts</a>
+    <a href="{% url 'tagging_app:goalkeeper_distribution_dashboard' match.id %}" class="btn btn-primary m-1">📊 View Goalkeeping Distribution</a>
+    <a href="{% url 'defensive_app:defensive_summary' match.id %}" class="btn btn-primary m-1">📊 View Other Statistics</a>
 </div>
 
+<!-- Scripts -->
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
+    // Enable Bootstrap tab behavior
     var triggerTabList = [].slice.call(document.querySelectorAll('#matchTabs button'))
-    triggerTabList.forEach(function(triggerEl) {
+    triggerTabList.forEach(function (triggerEl) {
         var tabTrigger = new bootstrap.Tab(triggerEl)
-
         triggerEl.addEventListener('click', function (event) {
             event.preventDefault()
             tabTrigger.show()
@@ -177,32 +431,18 @@ document.addEventListener("DOMContentLoaded", function() {
     // ✅ Live Match Time Script
     const matchId = {{ match.id }};
     function updateMatchTime() {
-      fetch(`/matches/match/${matchId}/time/`)
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById("match-time").innerText = `${data.minute}' (${data.status})`;
-        })
-        .catch(error => console.error("Error fetching match time:", error));
+        fetch(`/matches/match/${matchId}/time/`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("match-time").innerText = `${data.minute}' (${data.status})`;
+            })
+            .catch(error => console.error("Error fetching match time:", error));
     }
     setInterval(updateMatchTime, 10000);
     updateMatchTime();
 });
 </script>
 
-<hr style="margin: 40px 0;">
-
-<a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
-    📊 View Pass Network
-</a> | 
-<a href="{% url 'tagging_app:attempt_to_goal_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
-    📊 View Goal Attempts
-</a> | 
-<a href="{% url 'tagging_app:goalkeeper_distribution_dashboard' match.id %}" style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
-    📊 View Goalkeeping Distribution
-</a> | 
-<a href="{% url 'defensive_app:defensive_summary' match.id  %}"  style="padding: 8px 14px; background: #007BFF; color: white; text-decoration: none; border-radius: 5px;">
-    📊 View Other statistics
-</a> 
-
-</div>
+<!-- Chart.js script (optional for future) -->
+{# <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> #}
 {% endblock %}

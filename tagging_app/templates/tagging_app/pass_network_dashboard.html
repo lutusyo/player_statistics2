@@ -1,75 +1,109 @@
 {% load static %}
 {% load custom_filters %}
-
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Pass Network Matrix</title>
+    <title>Pass Network Dashboard - {{ match }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        table, th, td {
-            border: 1px solid #aaa;
-            border-collapse: collapse;
-            text-align: center;
-            padding: 6px;
-        }
-        th {
-            background: #f0f0f0;
-        }
-        td.black-cell {
-            background: #000;
-        }
+        table { border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #333; padding: 6px 10px; text-align: center; }
+        th { background-color: #007bff; color: white; }
     </style>
 </head>
 <body>
-    <h2>Passing Networks</h2>
-    <p>{{ match.date }} - {{ match.stadium }} - {{ match.kickoff }}</p>
+    <h1>Passing Network - {{ match }}</h1>
 
+    <!-- Top 5 Combinations -->
+    <h2>Top 5 Pass Combinations</h2>
     <table>
-        <thead>
+        <tr><th>From</th><th>To</th><th>Count</th></tr>
+        {% for f, t, c in top_combinations %}
             <tr>
-                <th>Passes From → To</th>
-                {% for p in players %}
-                    <th>{{ p.name|slice:":10" }}</th>
-                {% endfor %}
-                <th>Total Pass</th>  <!-- New column -->
+                <td>{{ f }}</td>
+                <td>{{ t }}</td>
+                <td>{{ c }}</td>
             </tr>
-        </thead>
-        
-        <tbody>
-        {% for item in players_totals %}
+        {% endfor %}
+    </table>
+
+    <!-- Pass Matrix -->
+    <h2>Pass Matrix</h2>
+    <table>
         <tr>
-            <th>{{ item.player.name|slice:":10" }}</th>
+            <th>From\To</th>
+            {% for p in players %}
+                <th>{{ player_names|get_item:p.id|slice:":10" }}</th>
+            {% endfor %}
+        </tr>
+        {% for row_player in players %}
+        <tr>
+            <th>{{ player_names|get_item:row_player.id|slice:":10" }}</th>
             {% for col_player in players %}
-                {% if item.player.id == col_player.id %}
-                    <td class="black-cell"></td>
+                {% if row_player.id == col_player.id %}
+                    <td>—</td>
                 {% else %}
-                    <td>{{ matrix|get_item:item.player.id|get_item:col_player.id|default:"0" }}</td>
+                    <td>{{ matrix|get_item:row_player.id|get_item:col_player.id|default:"0" }}</td>
                 {% endif %}
             {% endfor %}
-            <td>{{ item.total_pass }}</td> <!-- Total passes from this player -->
         </tr>
         {% endfor %}
-        </tbody>
-
     </table>
 
-    <h3>Top 5 Player to Player Passers</h3>
+    <!-- Totals -->
+    <h2>Player Passing Totals</h2>
     <table>
+        <tr><th>Player</th><th>Total Passes</th><th>Ball Lost</th></tr>
+        {% for p in players %}
         <tr>
-            <th>Player</th>
-            <th>Passed To</th>
-            <th># Passes</th>
-        </tr>
-        {% for from_name, to_name, count in top_combinations %}
-        <tr>
-            <td>{{ from_name }}</td>
-            <td>{{ to_name }}</td>
-            <td>{{ count }}</td>
+            <td>{{ player_names|get_item:p.id }}</td>
+            <td>{{ total_passes|get_item:p.id|default:"0" }}</td>
+            <td>{{ ball_lost|get_item:p.id|default:"0" }}</td>
         </tr>
         {% endfor %}
     </table>
 
-    <a href="{% url 'tagging_app:export_pass_network_pdf' match.id %}">Download PDF</a> |
-    <a href="{% url 'tagging_app:export_pass_network_csv' match.id %}">Download CSV</a>
+    <!-- Bar Chart -->
+    <h2>Pass Distribution Chart</h2>
+    <div style="width: 300px; height: 180px;"> <!-- fixed container -->
+        <canvas id="passChart"></canvas>
+    </div>
+
+    <script>
+    const ctx = document.getElementById('passChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_data.names|safe }},
+            datasets: [{
+                label: 'Total Passes',
+                data: {{ chart_data.values|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: false, // disable automatic resizing
+            maintainAspectRatio: false,
+            scales: { 
+                y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 } }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+    </script>
+
+
+
+    <!-- Download Links -->
+    <h2>Downloads</h2>
+    <ul>
+        <li><a href="{% url 'tagging_app:export_pass_network_pdf' match.id %}" target="_blank">Download PDF</a></li>
+        <li><a href="{% url 'tagging_app:export_pass_network_csv' match.id %}" target="_blank">Download CSV</a></li>
+        <li><a href="{% url 'tagging_app:export_pass_network_excel' match.id %}" target="_blank">Download Excel</a></li>
+    </ul>
+
 </body>
 </html>

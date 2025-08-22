@@ -72,3 +72,7 @@ class Match(models.Model):
         if self.end_time:
             return "ended"
         return "running"
+    
+    def has_lineup(self):
+        from lineup_app.models import MatchLineup   # import inside to avoid circular import
+        return MatchLineup.objects.filter(match=self).exists()

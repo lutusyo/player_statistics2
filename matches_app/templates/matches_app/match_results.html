@@ -8,78 +8,74 @@
 <link rel="stylesheet" href="{% static 'matches_app/css/results_style.css' %}">
 {% endblock %}
 
-
-
-
-
 {% block match_content %}
+<div class="results-container">
+    
+    <!-- Past Matches -->
+    <hr>
+    <h2 style="text-align: center; margin-top: 40px;">Past Matches</h2>
 
-    <div class="results-container">
-        
-        <!-- Past Matches -->
-        <hr>
-        <h2 style="text-align: center; margin-top: 40px;">Past Matches</h2>
-        {% if past_matches %}
-            {% for match in past_matches %}
+    {% if past_matches %}
+        {% for match in past_matches %}
 
-                <div>
-                    {% if user.is_authenticated and user.username == 'Azam2' %}
-
-                    <li>
-                    <li>
-                        <a href="{% url 'lineup_app:create_lineup' match.id %}">CREATE LINEUP</a>|
-                        <a href="{% url 'tagging_app:tagging_base' match.id %}">Goal and Pass Tagging </a>|
-                        <a href="{% url 'tagging_app:enter_goalkeeper_distribution' match.id %}">Goalkeeper Distribution Tag</a>|
-                        <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive</a>
-                    </li>
-
+            <div>
+                {% if user.is_authenticated and user.username == 'Azam2' %}
+                    
+                    {% if match.has_lineup %}
+                        <li>
+                            <a href="{% url 'tagging_app:tagging_base' match.id %}">Goal and Pass Tagging</a> |
+                            <a href="{% url 'tagging_app:enter_goalkeeper_distribution' match.id %}">Goalkeeper Distribution Tag</a> |
+                            <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive</a>
+                        </li>
+                    {% else %}
+                        <li>
+                            <a href="{% url 'lineup_app:create_lineup' match.id %}">CREATE LINEUP</a>
+                        </li>
                     {% endif %}
-                </div>
 
+                {% endif %}
+            </div>
 
-                <a href="{% url 'matches_app:match_detail' match_id=match.id %}" style="text-decoration: none; color: inherit;">
-                    <div class="results-card">
-                        <div class="results-header">
-                            <div class="results-date">
-                                {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
-                            </div>
-                            <div class="results-venue">{{ match.venue }}</div>
-                            <div class="results-type">{{ match.get_competition_type_display }}</div>
+            <a href="{% url 'matches_app:match_detail' match_id=match.id %}" style="text-decoration: none; color: inherit;">
+                <div class="results-card">
+                    <div class="results-header">
+                        <div class="results-date">
+                            {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
+                        </div>
+                        <div class="results-venue">{{ match.venue }}</div>
+                        <div class="results-type">{{ match.get_competition_type_display }}</div>
+                    </div>
+
+                    <div class="results-body">
+                        <div class="team">
+                            {% if match.our_team_logo %}
+                                <img src="{{ match.our_team_logo.url }}" alt="{{ match.get_team_display }} logo">
+                            {% endif %}
+                            <div>{{ match.get_team_display }}</div>
                         </div>
 
-                        <div class="results-body">
-                            <div class="team">
-                                {% if match.our_team_logo %}
-                                    <img src="{{ match.our_team_logo.url }}" alt="{{ match.get_team_display }} logo">
-                                {% endif %}
-                                <div>{{ match.get_team_display }}</div>
-                            </div>
+                        <div class="vs">
+                            {% if match.home_goals is not None and match.away_goals is not None %}
+                                <strong>{{ match.home_goals }} - {{ match.away_goals }}</strong>
+                            {% else %}
+                                <span style="font-size: 14px; color: gray;">0 - 0</span>
+                            {% endif %}
+                        </div>
 
-                            <div class="vs">
-
-                                {% if match.home_goals is not None and match.away_goals is not None %}
-                                    <strong>{{ match.home_goals }} - {{ match.away_goals }}</strong>
-                                {% else %}
-                                    <span style="font-size: 14px; color: gray;">0 - 0</span>
-                                {% endif %}
-
-                            </div>
-
-
-                            <div class="team">
-                                {% if match.opponent_logo %}
-                                    <img src="{{ match.opponent_logo.url }}" alt="{{ match.opponent }} logo">
-                                {% endif %}
-                                <div>{{ match.opponent }}</div>
-                            </div>
+                        <div class="team">
+                            {% if match.opponent_logo %}
+                                <img src="{{ match.opponent_logo.url }}" alt="{{ match.opponent }} logo">
+                            {% endif %}
+                            <div>{{ match.opponent }}</div>
                         </div>
                     </div>
-                </a>
-            {% endfor %}
-        {% else %}
-            <p style="text-align: center;">No past matches.</p>
-        {% endif %}
+                </div>
+            </a>
 
-    </div>
+        {% endfor %}
+    {% else %}
+        <p style="text-align: center;">No past matches.</p>
+    {% endif %}
 
+</div>
 {% endblock %}
