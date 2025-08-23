@@ -1,74 +1,123 @@
+{% extends 'base.html' %}
 {% load static %}
+
+{% block content %}
 
 <title>Passing Network Tagging</title>
 
 <style>
-.opponent-btn.active {
-  background-color: green !important;
-  color: white !important;
-  border-color: green !important;
-}
-.player-btn.active {
-  outline: 3px solid #28a745;
-}
-
-/* --- Mobile Responsive Adjustments --- */
+/* --- Player grid: fixed 3 columns --- */
 #our-players {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  grid-template-columns: repeat(3, 1fr);  /* always 3 columns */
   gap: 10px;
+  justify-items: center;
+  padding: 5px;
 }
 
-/* Buttons & opponent button */
-.player-btn, .opponent-btn {
-  min-width: 70px;
-  min-height: 70px;
+/* --- Player buttons --- */
+.player-btn {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 2px solid #0073e6;
+  background-size: cover;
+  background-position: center;
+  position: relative;
   font-size: 10px;
-  padding: 4px;
-}
-
-/* Opponent button pass count */
-.opponent-btn .pass-count {
-  font-size: 10px;
-  padding: 1px 4px;
+  padding: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 /* Player name overlay */
 .player-btn span {
+  background: rgba(0,0,0,0.5);
+  width: 100%;
+  text-align: center;
+  border-bottom-left-radius: 50%;
+  border-bottom-right-radius: 50%;
+  padding: 2px 0;
   font-size: 10px;
+  color: white;
+  line-height: 1;
 }
 
-/* Adjust grid gap & size for very small screens */
+/* Pass count badge */
+.player-btn .pass-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #0073e6;
+  color: white;
+  font-size: 8px;
+  padding: 1px 4px;
+  border-radius: 10px;
+  border: 1px solid white;
+}
+
+/* --- Opponent button --- */
+.opponent-btn {
+  min-width: 120px;
+  min-height: 50px;
+  font-size: 12px;
+  border-radius: 8px;
+  position: relative;
+}
+
+/* Opponent pass count */
+.opponent-btn .pass-count {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  background: #0073e6;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 12px;
+}
+
+/* --- Responsive adjustments --- */
 @media (max-width: 480px) {
   #our-players {
-    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-    gap: 6px;
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on small screens */
+    gap: 8px;
   }
+
   .player-btn {
-    min-width: 60px;
-    min-height: 60px;
+    width: 60px;
+    height: 60px;
+    font-size: 9px;
   }
+
   .player-btn span {
-    font-size: 9px;
+    font-size: 8px;
   }
+
+  .player-btn .pass-count {
+    font-size: 7px;
+    padding: 1px 3px;
+  }
+
   .opponent-btn {
-    min-width: 120px;
+    min-width: 100px;
     min-height: 45px;
-    font-size: 11px;
-    padding-right: 25px;
+    font-size: 10px;
+    padding-right: 20px;
   }
+
   .opponent-btn .pass-count {
-    font-size: 9px;
+    font-size: 8px;
     padding: 1px 3px;
   }
 }
-
 </style>
 
 <div id="pass-network">
 
   <!-- Players will be dynamically loaded -->
-  <div id="our-players" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+  <div id="our-players" >
     <p>Loading players...</p>
   </div>
 
@@ -90,6 +139,8 @@
 <a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>
 
 <script>
+/* Your existing PassNetwork JS code remains unchanged */
+
 window.PassNetwork = {
     matchId: {{ match.id }},
     lastPlayerId: null,
@@ -251,9 +302,7 @@ function loadPlayers() {
                   id="player-${p.id}"
                   data-player-id="${p.id}"
                   data-team-id="${p.team_id || ''}"
-                  style="width:90px;height:90px;border-radius:50%;border:2px solid #0073e6;
-                         background-image:url('${p.photo_url || '/static/default_player.png'}');
-                         background-size:cover;background-position:center;position:relative;">
+                  style="background-image:url('${p.photo_url || '/static/default_player.png'}');">
             <span style="background:rgba(0,0,0,0.5);width:100%;text-align:center;
                          border-bottom-left-radius:50%;border-bottom-right-radius:50%;
                          padding:1px 2px;">${p.name}</span>
@@ -272,3 +321,4 @@ document.addEventListener('DOMContentLoaded', () => {
     window.PassNetwork.init();
 });
 </script>
+{% endblock %}
