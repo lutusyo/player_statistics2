@@ -1,9 +1,6 @@
 {% load static %}
 
-{% load static %}
-
 <title>Passing Network Tagging</title>
-
 
 <style>
 .opponent-btn.active {
@@ -11,80 +8,87 @@
   color: white !important;
   border-color: green !important;
 }
-</style>
+.player-btn.active {
+  outline: 3px solid #28a745;
+}
 
+/* --- Mobile Responsive Adjustments --- */
+#our-players {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 10px;
+}
+
+/* Buttons & opponent button */
+.player-btn, .opponent-btn {
+  min-width: 70px;
+  min-height: 70px;
+  font-size: 10px;
+  padding: 4px;
+}
+
+/* Opponent button pass count */
+.opponent-btn .pass-count {
+  font-size: 10px;
+  padding: 1px 4px;
+}
+
+/* Player name overlay */
+.player-btn span {
+  font-size: 10px;
+}
+
+/* Adjust grid gap & size for very small screens */
+@media (max-width: 480px) {
+  #our-players {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 6px;
+  }
+  .player-btn {
+    min-width: 60px;
+    min-height: 60px;
+  }
+  .player-btn span {
+    font-size: 9px;
+  }
+  .opponent-btn {
+    min-width: 120px;
+    min-height: 45px;
+    font-size: 11px;
+    padding-right: 25px;
+  }
+  .opponent-btn .pass-count {
+    font-size: 9px;
+    padding: 1px 3px;
+  }
+}
+
+</style>
 
 <div id="pass-network">
 
-  <!-- Players buttons in 4 columns grid -->
+  <!-- Players will be dynamically loaded -->
   <div id="our-players" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+    <p>Loading players...</p>
+  </div>
 
-    {% for p in our_players %}
-        <button class="player-btn"
-                id="player-{{ p.player.id }}"
-                data-player-id="{{ p.player.id }}"
-                data-team-id="{{ our_team.id }}"
-                style="
-                    width: 100px;
-                    height: 100px;
-                    border-radius: 50%;
-                    border: 2px solid #0073e6;
-                    background-image: url('{% if p.player.photo %}{{ p.player.photo.url }}{% else %}{% static 'default_player.png' %}{% endif %}');
-                    background-size: cover;
-                    background-position: center;
-                    position: relative;
-                    display: flex;
-                    align-items: flex-end;
-                    justify-content: center;
-                    font-size: 10px;
-                    font-weight: bold;
-                    color: white;
-                    text-shadow: 0 0 3px rgba(0,0,0,0.8);
-                ">
-            <span style="
-                background: rgba(0,0,0,0.4);
-                width: 100%;
-                text-align: center;
-                border-bottom-left-radius: 50%;
-                border-bottom-right-radius: 50%;
-                padding: 2px 0;
-            ">
-                {{ p.player.name }}
-            </span>
-
-            <span class="pass-count" style="
-                position: absolute;
-                top: -6px;
-                right: -6px;
-                background: #0073e6;
-                color: white;
-                font-size: 10px;
-                padding: 2px 5px;
-                border-radius: 10px;
-                border: 1px solid white;
-            ">0</span>
-        </button>
-
-
-    {% endfor %}
-      <!-- Opponent button at the top -->
-        <div style="margin-bottom: 12px; text-align: center;">
-            <button class="opponent-btn" id="opponent-btn" data-team-id="{{ opponent_team.id }}"
+  <!-- Opponent button -->
+  <div style="margin: 12px 0; text-align: center;">
+    <button class="opponent-btn" id="opponent-btn" data-team-id="{{ opponent_team.id }}"
             style="position: relative; padding-right: 30px; font-size: 12px; min-width: 140px; min-height: 50px; border-radius: 8px;">
-                {{ opponent_team.name }} Ball Intercept
-                <span class="pass-count" id="opponent-pass-count" 
-                style="position: absolute; top: 5px; right: 8px; background: #0073e6; color: white; border-radius: 12px; padding: 2px 8px; font-size: 12px;">
-                0
-                </span>
-            </button>
-        </div>
+      {{ opponent_team.name }} Ball Intercept
+      <span class="pass-count" id="opponent-pass-count" 
+            style="position: absolute; top: 5px; right: 8px; background: #0073e6; color: white; border-radius: 12px; padding: 2px 8px; font-size: 12px;">
+        0
+      </span>
+    </button>
   </div>
 
   <p><strong>Last Pass:</strong> <span id="last-pass"></span></p>
 </div>
 
-
 <a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>
+
 <script>
 window.PassNetwork = {
     matchId: {{ match.id }},
@@ -96,9 +100,11 @@ window.PassNetwork = {
 
     init: function () {
         this.restoreCounts();
-        this.bindEvents();
+        this.bindOpponentEvent();
         this.updateTimer();
         setInterval(this.updateTimer.bind(this), 1000);
+        loadPlayers(); // first load
+        setInterval(loadPlayers, 10000); // refresh every 10s
     },
 
     updateTimer: function () {
@@ -124,7 +130,7 @@ window.PassNetwork = {
         });
     },
 
-    bindEvents: function () {
+    bindPlayerEvents: function () {
         document.querySelectorAll('#pass-network .player-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const playerId = btn.dataset.playerId;
@@ -139,26 +145,27 @@ window.PassNetwork = {
                 this.highlightButton(playerId);
             });
         });
-        document.querySelector('#pass-network #opponent-btn').addEventListener('click', () => {
-            const opponentTeamId = document.getElementById('opponent-btn').dataset.teamId;
+    },
+
+    bindOpponentEvent: function () {
+        const opponentBtn = document.getElementById('opponent-btn');
+        opponentBtn.addEventListener('click', () => {
+            const opponentTeamId = opponentBtn.dataset.teamId;
             if (this.lastPlayerId && this.lastTeamId) {
                 this.recordPass(this.lastPlayerId, null, this.lastTeamId, opponentTeamId, false, false);
                 this.lastPlayerId = null;
                 this.lastTeamId = null;
                 this.highlightButton(null);
 
-                // Increase opponent pass count locally and update UI
+                // Opponent count
                 if (!this.opponentPassCount) this.opponentPassCount = 0;
                 this.opponentPassCount++;
                 document.getElementById('opponent-pass-count').textContent = this.opponentPassCount;
 
-                // Toggle active class for opponent button
-                const opponentBtn = document.getElementById('opponent-btn');
                 opponentBtn.classList.add('active');
-                setTimeout(() => opponentBtn.classList.remove('active'), 500); // reset color after 0.5s
+                setTimeout(() => opponentBtn.classList.remove('active'), 500);
             }
         });
-        
     },
 
     recordPass: function (fromPlayerId, toPlayerId, fromTeamId, toTeamId, isSuccessful = true, isPossessionRegained = false) {
@@ -230,35 +237,38 @@ window.PassNetwork = {
     }
 };
 
-// Initialize after DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    window.PassNetwork.init();
-});
-
+// Load players dynamically
 function loadPlayers() {
-  fetch(`/tagging/current_players/${matchId}/`)
+  const matchId = window.PassNetwork.matchId;
+  fetch(`/tagging/api_current_on_field_players/${matchId}/`)
     .then(res => res.json())
     .then(data => {
       const container = document.getElementById("our-players");
       container.innerHTML = "";
       data.players.forEach(p => {
         container.innerHTML += `
-          <button class="player-btn" data-player-id="${p.id}"
-            style="width:90px;height:90px;border-radius:50%;border:2px solid #0073e6;
-                   background-image:url('${p.photo_url || '/static/default_player.png'}');
-                   background-size:cover;background-position:center;position:relative;">
-              <span style="background:rgba(0,0,0,0.5);width:100%;text-align:center;
-                           border-bottom-left-radius:50%;border-bottom-right-radius:50%;
-                           padding:1px 2px;">${p.name}</span>
-              <span class="count-badge"
-                    style="position:absolute;top:-5px;right:-5px;background:#0073e6;color:white;
-                           font-size:8px;padding:1px 4px;border-radius:10px;border:1px solid white;">0</span>
+          <button class="player-btn"
+                  id="player-${p.id}"
+                  data-player-id="${p.id}"
+                  data-team-id="${p.team_id || ''}"
+                  style="width:90px;height:90px;border-radius:50%;border:2px solid #0073e6;
+                         background-image:url('${p.photo_url || '/static/default_player.png'}');
+                         background-size:cover;background-position:center;position:relative;">
+            <span style="background:rgba(0,0,0,0.5);width:100%;text-align:center;
+                         border-bottom-left-radius:50%;border-bottom-right-radius:50%;
+                         padding:1px 2px;">${p.name}</span>
+            <span class="pass-count"
+                  style="position:absolute;top:-5px;right:-5px;background:#0073e6;color:white;
+                         font-size:8px;padding:1px 4px;border-radius:10px;border:1px solid white;">0</span>
           </button>`;
       });
+      window.PassNetwork.bindPlayerEvents(); // re-bind clicks
+      window.PassNetwork.restoreCounts();    // restore pass counts
     });
 }
 
-// Refresh every 10s or after substitution is finalized
-setInterval(loadPlayers, 10000);
-
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+    window.PassNetwork.init();
+});
 </script>

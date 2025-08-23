@@ -154,3 +154,18 @@ def api_undo_substitution(request, match_id):
     last_sub.delete()
 
     return JsonResponse({"success": True})
+
+
+# lineup_app/views/substitution.py
+@require_POST
+@transaction.atomic
+def api_finalize_match(request, match_id):
+    match = get_object_or_404(Match, id=match_id)
+    # Update remaining players on pitch
+    lineups = MatchLineup.objects.filter(match=match, time_out__isnull=True)
+    current_minute = request.POST.get("minute")  # or pass in body
+    for lineup in lineups:
+        lineup.time_out = current_minute or 90  # default to 90 if not provided
+        lineup.save()
+    return JsonResponse({"success": True})
+
