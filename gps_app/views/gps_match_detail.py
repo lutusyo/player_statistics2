@@ -17,8 +17,8 @@ def gps_match_detail(request, match_id):
     records = GPSRecord.objects.filter(match=match).select_related('player')
 
     # Example of data aggregation: total distance, average heart rates, etc.
-    total_distance = sum(r.distance for r in records)
-    avg_max_velocity = sum(r.max_velocity for r in records) / records.count() if records.exists() else 0
+    total_distance = sum(r.distance or 0 for r in records)
+    avg_max_velocity = sum(r.max_velocity or 0  for r in records) / records.count() if records.exists() else 0
 
     # Prepare JSON data for charts (adapt fields as needed)
     pie_labels = ['Standing', 'Walking', 'Jogging', 'Running', 'Sprinting']
@@ -37,12 +37,12 @@ def gps_match_detail(request, match_id):
         'Acceleration Efforts', 'Deceleration Efforts', 'Impacts'
     ]
     radar_data = [
-        sum(r.max_velocity for r in records) / records.count() if records.exists() else 0,
-        sum(r.sprint_distance for r in records) / records.count() if records.exists() else 0,
-        sum(r.sprint_efforts for r in records) / records.count() if records.exists() else 0,
-        sum(r.player_load for r in records) / records.count() if records.exists() else 0,
-        sum(r.acceleration_efforts for r in records) / records.count() if records.exists() else 0,
-        sum(r.deceleration_efforts for r in records) / records.count() if records.exists() else 0,
+        sum(r.max_velocity or 0 for r in records) / records.count() if records.exists() else 0,
+        sum(r.sprint_distance or 0 for r in records) / records.count() if records.exists() else 0,
+        sum(r.sprint_efforts or 0 for r in records) / records.count() if records.exists() else 0,
+        sum(r.player_load or 0 for r in records) / records.count() if records.exists() else 0,
+        sum(r.acceleration_efforts or 0 for r in records) / records.count() if records.exists() else 0,
+        sum(r.deceleration_efforts or 0 for r in records) / records.count() if records.exists() else 0,
         sum(r.impacts or 0 for r in records) / records.count() if records.exists() else 0,
     ]
 

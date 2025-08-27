@@ -8,5 +8,5 @@ urlpatterns = [
     path('players/<int:player_id>/', views.player_detail, name='player_detail'),
 
     # player-match-details, allow 'total' for aggregation
-    #path('player/<int:player_id>/match/<str:match_id>/', views.player_match_detail, name='player_match_detail'),
+    path('player/<int:player_id>/match/<str:match_id>/', views.player_match_detail, name='player_match_detail'),
 ]

@@ -84,10 +84,7 @@ def player_detail(request, player_id):
     return render(request, 'players_app/player_detail.html', context)
 
 
-
-
-
-def player_detail(request, player_id, match_id=None):
+def player_match_detail(request, player_id, match_id=None):
     """
     Player profile + aggregated season stats + optional match-level stats
     If match_id is None -> show general player overview
@@ -239,7 +236,7 @@ def player_detail(request, player_id, match_id=None):
     }
     context.update(match_context)
 
-    return render(request, "players_app/player_detail.html", context)
+    return render(request, "players_app/player_match_detail.html", context)
 
 
 

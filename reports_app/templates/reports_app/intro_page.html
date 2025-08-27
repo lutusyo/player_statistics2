@@ -3,32 +3,32 @@
     {% if report_type == 'post-match-summary' %}
     <div style="min-height: 100vh; display: flex; justify-content: center; align-items: center; background-color: #f5f9ff; font-family: Arial, sans-serif;">
 
-        <div style="background-color: #e6f0ff; padding: 30px; width: 850px; height: 450px; box-shadow: 0 0 10px rgba(0,0,0,0.2); position: relative; color: #003366;">
+        <div style="background-color: black; padding: 30px; width: 850px; height: 450px; box-shadow: 0 0 10px rgba(0,0,0,0.2); position: relative; color: #003366;">
 
             <!-- Company Name and Logo at Top Right -->
             <div style="position: absolute; top: 20px; right: 30px; text-align: right;">
-                <strong style="font-size: 16px; font-style: italic;">{{ company }}</strong><br>
-                <img src="{% static 'goalkeeping_app/azamfc_logo.png' %}" style="height: 60px; margin-top: 5px;">
+                <strong style="font-size: 16px; font-style: italic; color: white;">{{ company }}</strong><br>
+                <img src="{% static 'goalkeeping_app/azamfc_logo.png' %}" style="height: 60px; margin-top: 5px; margin-right: 30px;">
             </div>
 
             <!-- Post Match Summary Content -->
             <div style="text-align: center;">
-                <h1 style="font-size: 44px; font-weight: bold; margin-top: 60px; margin-bottom: 120px;">{{ title }}</h1>
+                <h1 style="font-size: 32px; font-weight: bold; margin-top: 60px; margin-bottom: 100px; color: white;">{{ title }}</h1>
 
                 <!-- Match Result and Teams -->
                 <div style="display: flex; justify-content: center; align-items: center; font-size: 26px; font-weight: bold; margin-bottom: 30px;">
-                    <div style="text-align: right; margin-right: 40px;">
+                    <div style="text-align: right; margin-right: 40px; color: white; font-size: 16px;">
                         {% if home_team.logo %}
                             <img src="{{ home_team.logo.url }}" alt="{{ home_team.name }}" style="height: 60px;"><br>
                         {% endif %}
                         {{ home_team.name }}
                     </div>
 
-                    <div style="margin: 0 20px;">
+                    <div style="margin: 0 20px; color: white;">
                         {{ home_score }} - {{ away_score }}
                     </div>
 
-                    <div style="text-align: left; margin-left: 20px;">
+                    <div style="text-align: left; margin-left: 20px; color: white; font-size: 16px" >
                         {% if away_team.logo %}
                             <img src="{{ away_team.logo.url }}" alt="{{ away_team.name }}" style="height: 60px;"><br>
                         {% endif %}
@@ -37,9 +37,10 @@
                 </div>
             </div>
         </div>
+        
 
         <!-- Match Info at Bottom Left -->
-        <div style="position: absolute; bottom: 70px; left: 230px; font-size: 16px; line-height: 0.1; text-align: left;">
+        <div style="position: absolute; bottom: 70px; left: 230px; font-size: 16px; line-height: 0.1; text-align: left; color: white;">
             {% if competition %}<p>{{ competition }}</p>{% endif %}
             {% if date %}<p>{{ date }}</p>{% endif %}
             {% if kickoff_time %}<p>{{ kickoff_time }} Kick Off</p>{% endif %}
@@ -54,16 +55,16 @@
     
         <!-- Original block for non-post-match-summary types -->
         <div style="min-height: 100vh; display: flex; justify-content: center; align-items: center; background-color: #f5f9ff;">
-            <div style="background-color: #e6f0ff; padding: 30px; width: 850px; height: 450px; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
+            <div style="background-color: black; padding: 30px; width: 850px; height: 450px; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
 
                 <!-- Company Name above Logo -->
                 <div style="text-align: center; margin-bottom: 10px;">
-                    <strong style="font-size: 18px; font-style: italic; display: block;">{{ company }}</strong>
+                    <strong style="font-size: 18px; font-style: italic; display: block; color: white;">{{ company }}</strong>
                     <img src="{% static 'goalkeeping_app/azamfc_logo.png' %}" style="height: 70px; margin-top: 5px;">
                 </div>
 
                 <!-- Title -->
-                <h1 style="text-align: center; color: #003366; font-size: 44px; margin-top: 140px;">{{ title }}</h1>
+                <h1 style="text-align: center; color: white; font-size: 44px; margin-top: 140px;">{{ title }}</h1>
 
                 <!-- Teams -->
                 <div style="display: flex; justify-content: space-around; align-items: center; margin-top: 30px;">
@@ -71,25 +72,24 @@
                         {% if home_team.logo %}
                             <img src="{{ home_team.logo.url }}" alt="{{ home_team.name }}" style="height: 70px;">
                         {% endif %}
-                        <p style="font-weight: bold; margin: 5px 0 0;">{{ home_team.name }}</p>
+                        <p style="font-weight: bold; margin: 5px 0 0; color: white;">{{ home_team.name }} </p>
                     </div>
 
-                    <div style="font-size: 22px; font-weight: bold;">
+
+                    <div style="font-size: 22px; font-weight: bold; color: white;">
                         <br> vs <br> 
                     </div>
 
-                    <div style="text-align: center;">
+                    <div style="text-align: center; margin-left: 0;">
                         {% if away_team.logo %}
                             <img src="{{ away_team.logo.url }}" alt="{{ away_team.name }}" style="height: 70px;">
                         {% endif %}
-                        <p style="font-weight: bold; margin: 5px 0 0;">{{ away_team.name }}</p>
+                        <p style="font-weight: bold; margin: 5px 0 0; color: white;"> {{ away_team.name }}</p>
                     </div>
                 </div>
             </div>
         </div>
     {% endif %}
-
-    {% include "tagging_app/pass_network_dashboard.html" %}
 
 {% endblock %}
 

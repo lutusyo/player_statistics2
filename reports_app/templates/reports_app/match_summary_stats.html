@@ -4,222 +4,79 @@
 <head>
   <meta charset="utf-8">
   <title>Match Key Statistics</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body{
-      font-family: "Helvetica Neue", Arial, sans-serif;
-      background: #efeee8;
-      margin: 12px;
-      color:#111;
-    }
-    .container{
-      max-width: 1200px;
-      margin: 0 auto;
-      background: #f3f2ec;
-      border: 6px solid #222;
-      padding: 20px 30px;
-    }
-    .header {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom: 8px;
-    }
-    .team-name { font-size:28px; font-weight:700; color: blue; }
+    body { font-family:"Helvetica Neue",Arial,sans-serif; background:#efeee8; margin:12px; color:#111; }
+    .container { max-width:1200px; margin:0 auto; background:#f3f2ec; border:6px solid #222; padding:20px 30px; }
+
+    /* --- HEADER --- */
+    .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .team-block { display:flex; align-items:center; gap:10px; }
+    .team-name { font-size:28px; font-weight:700; color:#b31b1b; }  /* Home team red */
     .team-away { color:#c89b09; }
-    .score {
-      text-align:center;
-      font-size:60px;
-      font-weight:800;
-      margin: 0 20px;
-    }
-    .possession-area{ margin: 12px 0 22px; display:flex; align-items:center; justify-content:center; }
-    #possessionChart{ width: 680px; height: 40px; }
+    .score { text-align:center; font-size:60px; font-weight:800; margin:0 20px; }
 
-    /* stats listing */
-    .stats-grid {
-      display:grid;
-      grid-template-columns: 1fr 600px 1fr;
-      gap:8px;
-      align-items:center;
-    }
-    .stats-left, .stats-right { padding: 10px; }
-    .stats-middle { padding: 6px 10px; }
-    .stat-row {
-      display:flex;
-      align-items:center;
-      margin:6px 0;
-    }
-    .stat-label{
-      width: 100%;
-      text-align:center;
-      font-weight:600;
-      color:#fff;
-      background:#111;
-      padding:8px 12px;
-      border-radius: 2px;
-    }
-    .bar-container {
-      height: 28px;
-      background: linear-gradient(#f0efe9,#f0efe9);
-      border-radius: 4px;
-      position:relative;
-      margin-left:8px;
-      margin-right:8px;
-    }
-    .bar-left, .bar-right {
-      height: 100%;
-      position:absolute;
-      top:0;
-      bottom:0;
-    }
-    .bar-left { left:0; background: #b31b1b; }
-    .bar-right { right:0; background: #c89b09; }
+    /* --- POSSESSION --- */
+    .possession-area { text-align:center; margin:20px 0; }
+    .possession-title { font-weight:700; margin-bottom:4px; }
+    .possession-bar { display:flex; width:100%; height:22px; border-radius:0; overflow:hidden; }
+    .possession-home { background:#b31b1b; height:100%; text-align:left; font-size:12px; font-weight:700; color:#fff; padding-left:6px; }
+    .possession-away { background:#c89b09; height:100%; text-align:right; font-size:12px; font-weight:700; color:#fff; padding-right:6px; }
 
-    .stat-value {
-      width:120px;
-      text-align:center;
-      font-weight:700;
-      color:#222;
-    }
-
-    /* small */
-    .small-muted { font-size:12px; color:#333; text-align:center; }
+    /* --- STATS GRID --- */
+    .stats-grid { margin-top:20px; }
+    .stat-row { display:flex; align-items:center; font-size:16px; font-weight:600; }
+    .stat-left, .stat-right { width:140px; text-align:center; }
+    .stat-label { flex:1; background:#111; color:#fff; padding:6px 12px; border-radius:2px; text-align:center; }
   </style>
 </head>
 <body>
   <div class="container">
+
+    <!-- Header -->
     <div class="header">
-      <div class="left">
+      <div class="left team-block">
+        {% if home.logo %}<img src="{{ home.logo.url }}" alt="{{ home.name }}" style="height:70px;">{% endif %}
         <div class="team-name">{{ home.name }}</div>
       </div>
 
-      <div class="center">
-        <div style="text-align:center; font-weight:700;">{{ match.date }} - {{ match.venue }}</div>
-        <div class="score">{{ stats.0.home }} &nbsp;&mdash;&nbsp; {{ stats.0.away }}</div>
+      <div class="center" style="display:flex; flex-direction:column; align-items:center;">
+        <div style="font-weight:700;">{{ match.date }} - {{ match.venue }} - {{ match.time }}</div>
+        <div style="margin-top:4px; font-size:20px; font-weight:800; color:#222;">Match Summary - Key Statistics</div>
+        <div class="score">
+          {% for s in stats %}
+            {% if s.label == "Goals" %}
+              {{ s.home }} &mdash; {{ s.away }}
+            {% endif %}
+          {% endfor %}
+        </div>
       </div>
 
-      <div class="right">
+      <div class="right team-block">
         <div class="team-name team-away">{{ away.name }}</div>
+        {% if away.logo %}<img src="{{ away.logo.url }}" alt="{{ away.name }}" style="height:70px;">{% endif %}
       </div>
     </div>
 
+    <!-- Possession -->
     <div class="possession-area">
-      <canvas id="possessionChart"></canvas>
-      <div style="width:140px; margin-left:18px; text-align:center;">
-        <div class="small-muted">Possession</div>
-        <div style="font-weight:800;">{{ possession_home_pct }}% — {{ possession_away_pct }}%</div>
+      <div class="possession-title">Possession</div>
+      <div class="possession-bar">
+        <div class="possession-home" style="width: {{ possession_home_pct }}%">{{ possession_home_pct }}%</div>
+        <div class="possession-away" style="width: {{ possession_away_pct }}%">{{ possession_away_pct }}%</div>
       </div>
     </div>
 
+    <!-- Stats Grid -->
     <div class="stats-grid">
-      <div class="stats-left">
-        {% for s in stats %}
-          <div style="display:flex; align-items:center; justify-content:flex-end; margin:6px 0;">
-            <div style="width:120px; text-align:right; font-weight:700;">{{ s.home }}</div>
-          </div>
-        {% endfor %}
-      </div>
-
-      <div class="stats-middle">
-        {% for s in stats %}
-          <div class="stat-row">
-            <div class="stat-label">{{ s.label }}</div>
-            <div class="bar-container" style="width:360px;">
-              {% comment %}
-                compute ratio: if s.home_val & s.away_val present use them, else fallback to numeric parse from s.home or s.away
-              {% endcomment %}
-              {% with home_val=s.home_val|default:0 away_val=s.away_val|default:0 %}
-                {% if home_val|floatformat:"0"|floatformat and away_val|floatformat:"0"|floatformat %}
-                  {% if home_val|floatformat:"6"|floatformat|add:0 > away_val|floatformat:"6"|floatformat|add:0 %}
-                    {% comment %} left bar covers proportion of total {% endcomment %}
-                  {% endif %}
-                {% endif %}
-              {% endwith %}
-
-              {# We'll compute widths in JS after page load for flexibility #}
-              <div class="bar-left" data-home="{{ s.home_val|default:0 }}" style="width:0%"></div>
-              <div class="bar-right" data-away="{{ s.away_val|default:0 }}" style="width:0%"></div>
-            </div>
-            <div class="stat-value">{{ s.away }}</div>
-          </div>
-        {% endfor %}
-      </div>
-
-      <div class="stats-right">
-        {% for s in stats %}
-          <div style="display:flex; align-items:center; justify-content:flex-start; margin:6px 0;">
-            <div style="width:120px; text-align:left; font-weight:700;">{{ s.away }}</div>
-          </div>
-        {% endfor %}
-      </div>
+      {% for s in stats %}
+        <div class="stat-row">
+          <div class="stat-left">{{ s.home }}</div>
+          <div class="stat-label">{{ s.label }}</div>
+          <div class="stat-right">{{ s.away }}</div>
+        </div>
+      {% endfor %}
     </div>
-    <div style="height:16px;"></div>
-    <div class="small-muted" style="text-align:center;">* Some metrics use heuristic approximations where raw event/GPS models are not present. Replace calculations with your ground-truth models when available.</div>
+
   </div>
-
-<script>
-  // Possession horizontal stacked bar using Chart.js
-  const ctx = document.getElementById('possessionChart').getContext('2d');
-  const possessionHome = {{ possession_home_pct|floatformat:"1" }};
-  const possessionAway = {{ possession_away_pct|floatformat:"1" }};
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Possession'],
-      datasets: [
-        {
-          label: 'Home',
-          data: [possessionHome],
-          backgroundColor: '#b31b1b',
-          stack: 'a'
-        },
-        {
-          label: 'Away',
-          data: [possessionAway],
-          backgroundColor: '#c89b09',
-          stack: 'a'
-        }
-      ]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: false,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        x: {
-          max: 100,
-          display: false
-        },
-        y: { display: false }
-      }
-    }
-  });
-
-  // Compute per-row comparative bars width after DOM loads
-  window.addEventListener('load', () => {
-    const rows = document.querySelectorAll('.bar-container');
-    rows.forEach(container => {
-      const left = container.querySelector('.bar-left');
-      const right = container.querySelector('.bar-right');
-      const home = parseFloat(left.dataset.home) || 0;
-      const away = parseFloat(right.dataset.away) || 0;
-      const total = home + away || 1; // avoid divide by 0
-
-      // for big textual stats like "701 (647)" we used home_val/away_val; ensure your view sets home_val/away_val for numeric comparison
-      const leftPct = (home / total) * 100;
-      const rightPct = (away / total) * 100;
-
-      left.style.width = leftPct + '%';
-      right.style.width = rightPct + '%';
-      // add subtle gradient edges like the original image
-      left.style.boxShadow = 'inset -20px 0 0 rgba(0,0,0,0.12)';
-      right.style.boxShadow = 'inset 20px 0 0 rgba(0,0,0,0.12)';
-    });
-  });
-</script>
 </body>
 </html>

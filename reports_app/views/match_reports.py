@@ -18,8 +18,10 @@ def match_summary_view(request, match_id):
     away_subs = MatchLineup.objects.filter(match=match, team=match.away_team, is_starting=False)
 
     # Substitutions
-    home_substitutions = Substitution.objects.filter(match=match, team=match.home_team)
-    away_substitutions = Substitution.objects.filter(match=match, team=match.away_team)
+    home_substitutions = Substitution.objects.filter(match=match, player_in__team=match.home_team)
+    away_substitutions = Substitution.objects.filter(match=match, player_in__team=match.away_team)
+
+
 
     # Pass Events (for chart)
     pass_events = PassEvent.objects.filter(match=match)

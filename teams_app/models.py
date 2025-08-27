@@ -27,7 +27,9 @@ class Team(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.name} ({self.age_group.name})"
+        if self.age_group:
+            return f"{self.name} ({self.age_group.name})"
+        return self.name
 
 
 class StaffMember(models.Model):

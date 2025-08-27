@@ -90,43 +90,47 @@
     color: #007BFF;
 }
 
-/* Adjust grid to ensure 3 cards per row when possible */
+/* ============================ */
+/* Player List - SMALL CARDS    */
+/* ============================ */
+
 .players-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); /* smaller cards */
+    gap: 12px;
 }
 
-/* Player Card Styles */
 .player-card {
     display: block;
     border: 1px solid #ddd;
-    border-radius: 12px;
+    border-radius: 8px;
     background-color: #fff;
     text-decoration: none;
     color: inherit;
     transition: transform 0.2s, box-shadow 0.2s;
     overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
 .player-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
 .player-photo-box img {
     width: 100%;
-    height: auto;
+    height: 120px;   /* increased from 90px → shows more of player */
+    object-fit: cover;
+    object-position: top center; /* focus on head/top instead of neck */
     display: block;
     border-bottom: 1px solid #eee;
 }
 
 .player-info-box {
-    padding: 12px 15px;
+    padding: 4px 6px;   /* reduced padding */
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 2px; /* tighter spacing */
 }
 
 .name-number {
@@ -135,34 +139,36 @@
     align-items: center;
 }
 
-/* Player name styling: blue */
+/* Player name styling: smaller */
 .player-name {
-    font-weight: 700;
+    font-weight: 600;
     color: #007BFF;
-    font-size: 1.1em;
+    font-size: 0.8em; /* slightly reduced */
 }
 
 /* Jersey number styling */
 .player-number {
-    font-weight: 900;
+    font-weight: 700;
     color: #000000;
-    font-size: 2em;
+    font-size: 1em; /* slightly reduced */
     line-height: 1;
 }
 
 .nationality {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.9em;
+    gap: 3px;
+    font-size: 0.7em; /* smaller nationality text */
     color: #666;
 }
 
 .nationality img {
-    width: 18px;
+    width: 12px; /* smaller flag */
     height: auto;
     border-radius: 2px;
 }
+
+
 
 /* ============================ */
 /* Player Profile Detail Page   */
@@ -265,11 +271,11 @@
     }
 
     .players-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); /* even smaller on mobile */
     }
 
     .player-card {
-        margin-bottom: 15px;
+        margin-bottom: 12px;
     }
 
     .player-attributes-grid {
