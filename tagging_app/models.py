@@ -14,6 +14,8 @@ class OutcomeChoices(models.TextChoices):
     ON_TARGET_SAVED = 'On Target Saved', 'On Target Saved'
     ON_TARGET_GOAL = 'On Target Goal', 'On Target Goal'
     BLOCKED = 'Blocked', 'Blocked'
+    PLAYER_ERROR = 'Player Error', 'Player Error'
+
 
     # ATTEMPT TO GOAL TAGGING
 class AttemptToGoal(models.Model):

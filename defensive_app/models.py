@@ -29,5 +29,8 @@ class PlayerDefensiveStats(models.Model):
     yellow_card = models.PositiveIntegerField(default=0)
     red_card = models.PositiveIntegerField(default=0)
 
+    line_breaks_completed = models.IntegerField(default=0)
+    defensive_line_breaks = models.IntegerField(default=0)
+
     def __str__(self):
         return f"{self.player.name} - {self.match}"

@@ -1,152 +1,46 @@
 {% extends 'base.html' %}
-
 {% load static %}
 {% load custom_filters %}
 
 {% block content %}
-
-
 <style>
-/* 🔹 Base button style (mobile-first) */
-.outcome-btn, .delivery-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 14px;
-  background-color: #e6f2ff;
-  border: 2px solid #0073e6;
-  cursor: pointer;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  transition: all 0.2s ease-in-out;
-  color: #0073e6;
-  text-align: center;
-  min-height: 70px;
-  touch-action: manipulation;
-}
-
-.outcome-btn:active, .delivery-btn:active,
-.player-btn:active {
-  transform: scale(0.96);
-  background-color: #d6eaff;
-}
-
-/* 🔹 Badge for counts */
-.outcome-btn .count-badge {
-  font-size: 13px;
-  margin-top: 6px;
-  font-weight: normal;
-}
-
-/* 🔹 Panels (mobile-first: 2 columns) */
-#outcome-panel,
-#delivery-panel,
-#our-players {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-  margin-top: 14px;
-}
-
-/* 🔹 Player buttons (circle with name) */
-.player-btn {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  border: 2px solid #0073e6;
-  background-size: cover;
-  background-position: center;
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: bold;
-  color: white;
-  text-shadow: 0 0 3px rgba(0,0,0,0.9);
-  overflow: hidden;
-  text-align: center;
-}
-
-.player-btn span {
-  background: rgba(0, 0, 0, 0.55);
-  width: 100%;
-  text-align: center;
-  border-bottom-left-radius: 50%;
-  border-bottom-right-radius: 50%;
-  padding: 3px 4px;
-  font-size: 11px;
-}
-
-/* 🔹 Medium screens (tablets, landscape phones) */
-@media (min-width: 600px) {
-  #outcome-panel,
-  #delivery-panel,
-  #our-players {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-
   .player-btn {
-    width: 110px;
-    height: 110px;
-    font-size: 11px;
-  }
-
-  .outcome-btn, .delivery-btn {
-    font-size: 16px;
-    min-height: 80px;
-  }
-}
-
-/* 🔹 Large screens (desktop, tablets > 900px) */
-@media (min-width: 900px) {
-  #outcome-panel,
-  #delivery-panel,
-  #our-players {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .player-btn {
-    width: 120px;
-    height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    width: 80px;
+    height: 100px;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 4px;
     font-size: 12px;
+    color: #fff;
+    position: relative;
+    text-shadow: 1px 1px 2px #000;
   }
 
-  .outcome-btn, .delivery-btn {
-    font-size: 17px;
-    min-height: 90px;
+  .player-btn span {
+    background-color: rgba(0,0,0,0.5);
+    padding: 2px 4px;
+    border-radius: 4px;
+    margin-top: auto;
   }
-}
 
-/* 🔹 Container padding */
-.responsive-panel {
-  padding: 12px;
-}
-
-@media (max-width: 480px) {
-  .responsive-panel {
-    padding: 10px;
+  .player-btn.selected {
+    border-color: #007bff;
   }
-}
 </style>
 
 
-
-
 <div id="attempt-to-goal" class="tag-panel responsive-panel">
-
-
-  <!-- Outcome panel: initially visible -->
+  <!-- Outcome Panel -->
   <div id="outcome-panel" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
     {% for value, label in outcomes %}
       {% with count=total_outcome_counts|get_item:value|stringformat:"s"|default:0 %}
-        <button class="outcome-btn" data-outcome="{{ value }}"
-          style="display: flex; flex-direction: column; align-items: center; justify-content: center;
-                 padding: 12px; background-color: #e6f2ff; border: 2px solid #0073e6; cursor: pointer;
-                 border-radius: 10px; font-size: 13px; font-weight: 600; transition: all 0.2s ease-in-out; color: #0073e6;">
+        <button class="outcome-btn" data-outcome="{{ value }}">
           {{ label }}
           <span class="count-badge">{{ count }}</span>
         </button>
@@ -154,30 +48,19 @@
     {% endfor %}
   </div>
 
-  <!-- Players list: initially hidden -->
-  <div id="our-players" style="
-    display: none;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-top: 12px;
-  ">
-    <!-- Buttons loaded dynamically via JS -->
-  </div>
+  <!-- On-field Players -->
+  <div id="our-players" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px;"></div>
 
-  <!-- Delivery panel: initially hidden -->
+  <!-- Delivery Options -->
   <div id="delivery-panel" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
     {% for value, label in delivery_types %}
-      <button class="delivery-btn" data-delivery-type="{{ value }}"
-        style="display: flex; flex-direction: column; align-items: center; justify-content: center;
-               padding: 12px; background-color: #e6f2ff; border: 2px solid #0073e6; cursor: pointer;
-               border-radius: 10px; font-size: 13px; font-weight: 600; transition: all 0.2s ease-in-out; color: #0073e6;">
-        {{ label }}
-      </button>
+      <button class="delivery-btn" data-delivery-type="{{ value }}">{{ label }}</button>
     {% endfor %}
   </div>
 
+  <!-- Assist Selection -->
+  <div id="assist-panel" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;"></div>
 </div>
-
 
 <a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>
 
@@ -185,204 +68,192 @@
 let timer = 0;
 let interval = null;
 let isPaused = false;
-let selectedPlayer = null, selectedOutcome = null, selectedDeliveryType = null;
+let selectedPlayer = null, selectedOutcome = null, selectedDeliveryType = null, selectedAssistPlayer = null;
 const matchId = {{ match.id }};
 
-// Format seconds → MM:SS
-function formatTime(seconds) {
-  let m = String(Math.floor(seconds / 60)).padStart(2, '0');
-  let s = String(seconds % 60).padStart(2, '0');
+function formatTime(sec) {
+  const m = String(Math.floor(sec / 60)).padStart(2, '0');
+  const s = String(sec % 60).padStart(2, '0');
   return `${m}:${s}`;
 }
-
 function updateTimerDisplay() {
-  document.getElementById('timer-display')?.innerText && 
-    (document.getElementById('timer-display').innerText = formatTime(timer));
+  const el = document.getElementById('timer-display');
+  if (el) el.innerText = formatTime(timer);
   sessionStorage.setItem('tagging-timer', timer);
 }
-
 function startTimer() {
-  interval = setInterval(() => {
-    if (!isPaused) {
-      timer++;
-      updateTimerDisplay();
-    }
-  }, 1000);
+  interval = setInterval(() => { if (!isPaused) { timer++; updateTimerDisplay(); } }, 1000);
 }
-
 function clearSelected(selector) {
-  document.querySelectorAll(selector).forEach(btn => btn.classList.remove('selected'));
+  document.querySelectorAll(selector).forEach(b => b.classList.remove('selected'));
 }
 
-// Select player function
 function selectPlayer(btn, playerId) {
   selectedPlayer = playerId;
-
   document.getElementById('outcome-panel').style.display = 'none';
   document.getElementById('our-players').style.display = 'none';
   document.getElementById('delivery-panel').style.display = 'grid';
-
   clearSelected('.player-btn');
   clearSelected('.delivery-btn');
-
   btn.classList.add('selected');
 }
 
-// Fetch currently on-field players
+function makePlayerButton(p) {
+  const btn = document.createElement('button');
+  btn.className = 'player-btn';
+  btn.dataset.playerId = p.id;
+  btn.style.backgroundImage = `url('${p.photo_url || "{% static 'default_player.png' %}"}')`;
+  const span = document.createElement('span');
+  span.textContent = p.name.length > 8 ? p.name.substring(0, 8) : p.name;
+  btn.appendChild(span);
+  return btn;
+}
+
 function refreshOnFieldPlayers() {
-    fetch(`/tagging/api_current_on_field_players/${matchId}/`)
+  fetch(`/tagging/api_current_on_field_players/${matchId}/`)
     .then(res => res.json())
     .then(data => {
-        const container = document.getElementById('our-players');
-        container.innerHTML = ''; // clear old buttons
-        data.players.forEach(p => {
-            const btn = document.createElement('button');
-            btn.className = 'player-btn';
-            btn.dataset.playerId = p.id;
-            btn.style.width = '90px';
-            btn.style.height = '90px';
-            btn.style.borderRadius = '50%';
-            btn.style.border = '2px solid #0073e6';
-            btn.style.backgroundImage = `url('${p.photo_url || "{% static 'default_player.png' %}"}')`;
-            btn.style.backgroundSize = 'cover';
-            btn.style.backgroundPosition = 'center';
-            btn.style.position = 'relative';
-            btn.style.display = 'flex';
-            btn.style.alignItems = 'flex-end';
-            btn.style.justifyContent = 'center';
-            btn.style.fontSize = '8px';
-            btn.style.fontWeight = 'bold';
-            btn.style.color = 'white';
-            btn.style.textShadow = '0 0 2px rgba(0, 0, 0, 0.8)';
-
-            const nameSpan = document.createElement('span');
-            nameSpan.style.background = 'rgba(0, 0, 0, 0.5)';
-            nameSpan.style.width = '100%';
-            nameSpan.style.textAlign = 'center';
-            nameSpan.style.borderBottomLeftRadius = '50%';
-            nameSpan.style.borderBottomRightRadius = '50%';
-            nameSpan.style.padding = '1px 2px';
-            nameSpan.textContent = p.name.length > 8 ? p.name.substring(0,8) : p.name;
-
-            btn.appendChild(nameSpan);
-
-            container.appendChild(btn);
-        });
+      const container = document.getElementById('our-players');
+      container.innerHTML = '';
+      data.players.forEach(p => container.appendChild(makePlayerButton(p)));
     });
 }
 
-// Update live event log
-function updateEventLog() {
-    fetch(`/tagging/live_state/${matchId}/`)
-      .then(res => res.json())
-      .then(data => {
-          const log = document.getElementById('event-log');
-          log.innerHTML = '';
-          data.events.forEach(ev => {
-              log.innerHTML += `<div><b>${ev.player_name}</b> - ${ev.outcome} - ${ev.delivery_type} at ${String(ev.minute).padStart(2,'0')}:${String(ev.second).padStart(2,'0')}</div>`;
-          });
-      });
-}
-
-// ✅ NEW: Refresh outcome counts
-function refreshOutcomeCounts() {
-    fetch(`/tagging/match/${matchId}/api/outcome-counts/`)
-      .then(res => res.json())
-      .then(data => {
-          document.querySelectorAll('.outcome-btn').forEach(btn => {
-              const outcome = btn.dataset.outcome;
-              const badge = btn.querySelector('.count-badge');
-              badge.textContent = data[outcome] || 0;
-          });
-      });
-}
-
-// Save attempt
-function saveAttempt(outcome, playerId, deliveryType) {
-    const now = new Date();
-    const data = {
-        match_id: matchId,
-        player_id: playerId,
-        outcome: outcome,
-        delivery_type: deliveryType,
-        minute: Math.floor(timer / 60),
-        second: timer % 60,
-        timestamp: now.toISOString()
-    };
-
-    fetch("{% url 'tagging_app:save_attempt_to_goal' %}", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": '{{ csrf_token }}'
-        },
-        body: JSON.stringify(data)
-    })
+function refreshAssistPlayers() {
+  fetch(`/tagging/api_current_on_field_players/${matchId}/`)
     .then(res => res.json())
-    .then(json => {
-        if (json.status === 'ok') {
-            updateEventLog();
-            refreshOnFieldPlayers();
-            refreshOutcomeCounts();   // ✅ update counts live
+    .then(data => {
+      const container = document.getElementById('assist-panel');
+      container.innerHTML = '';
+      data.players
+        .filter(p => p.id != selectedPlayer)
+        .forEach(p => {
+          const btn = makePlayerButton(p);
+          btn.classList.add('assist-btn');
+          container.appendChild(btn);
+        });
 
-            selectedPlayer = selectedOutcome = selectedDeliveryType = null;
-
-            document.getElementById('outcome-panel').style.display = 'grid';
-            document.getElementById('our-players').style.display = 'none';
-            document.getElementById('delivery-panel').style.display = 'none';
-        } else {
-            alert(json.message);
-        }
+      const skipBtn = document.createElement('button');
+      skipBtn.className = 'outcome-btn';
+      skipBtn.textContent = 'No Assist';
+      skipBtn.onclick = () => {
+        selectedAssistPlayer = null;
+        document.getElementById('assist-panel').style.display = 'none';
+        saveAttempt(selectedOutcome, selectedPlayer, selectedDeliveryType, selectedAssistPlayer);
+      };
+      container.appendChild(skipBtn);
     });
 }
 
-// Initialize page
-window.onload = function () {
-    timer = parseInt(sessionStorage.getItem('tagging-timer')) || 0;
-    updateTimerDisplay();
-    startTimer();
+function updateEventLog() {
+  fetch(`/tagging/live_state/${matchId}/`)
+    .then(res => res.json())
+    .then(data => {
+      const log = document.getElementById('event-log');
+      log.innerHTML = '';
+      data.events.forEach(ev => {
+        log.innerHTML += `<div><b>${ev.player_name}</b> - ${ev.outcome} - ${ev.delivery_type} at ${String(ev.minute).padStart(2,'0')}:${String(ev.second).padStart(2,'0')}</div>`;
+      });
+    });
+}
 
-    refreshOnFieldPlayers();
-    updateEventLog();
-    refreshOutcomeCounts(); // also refresh on load
+function refreshOutcomeCounts() {
+  fetch(`/tagging/match/${matchId}/api/outcome-counts/`)
+    .then(res => res.json())
+    .then(data => {
+      document.querySelectorAll('.outcome-btn').forEach(btn => {
+        const badge = btn.querySelector('.count-badge');
+        badge.textContent = data[btn.dataset.outcome] || 0;
+      });
+    });
+}
+
+function saveAttempt(outcome, playerId, deliveryType, assistPlayerId = null) {
+  if (!outcome || !playerId || !deliveryType) {
+    console.error('Missing data, cannot save attempt');
+    return;
+  }
+  const payload = {
+    match_id: matchId,
+    player_id: playerId,
+    outcome,
+    delivery_type: deliveryType,
+    assist_by_id: assistPlayerId, 
+    minute: Math.floor(timer / 60),
+    second: timer % 60,
+    timestamp: new Date().toISOString()
+  };
+
+  fetch("{% url 'tagging_app:save_attempt_to_goal' %}", {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(json => {
+    if (json.status === 'ok') {
+      updateEventLog();
+      refreshOnFieldPlayers();
+      refreshOutcomeCounts();
+      selectedPlayer = selectedOutcome = selectedDeliveryType = selectedAssistPlayer = null;
+      document.getElementById('outcome-panel').style.display = 'grid';
+      document.getElementById('our-players').style.display = 'none';
+      document.getElementById('delivery-panel').style.display = 'none';
+      document.getElementById('assist-panel').style.display = 'none';
+    } else {
+      alert(json.message);
+    }
+  });
+}
+
+window.onload = () => {
+  timer = parseInt(sessionStorage.getItem('tagging-timer')) || 0;
+  updateTimerDisplay();
+  startTimer();
+  refreshOnFieldPlayers();
+  updateEventLog();
+  refreshOutcomeCounts();
 };
 
-// Outcome click → show players
-document.getElementById('outcome-panel').addEventListener('click', function(e) {
-  if (e.target.classList.contains('outcome-btn') || e.target.closest('.outcome-btn')) {
-    const btn = e.target.closest('.outcome-btn');
-    selectedOutcome = btn.dataset.outcome;
+document.getElementById('outcome-panel').addEventListener('click', e => {
+  const btn = e.target.closest('.outcome-btn');
+  if (!btn) return;
+  selectedOutcome = btn.dataset.outcome;
+  document.getElementById('outcome-panel').style.display = 'none';
+  document.getElementById('our-players').style.display = 'grid';
+  document.getElementById('delivery-panel').style.display = 'none';
+  clearSelected('.outcome-btn');
+  clearSelected('.player-btn');
+  clearSelected('.delivery-btn');
+  btn.classList.add('selected');
+});
 
-    document.getElementById('outcome-panel').style.display = 'none';
-    document.getElementById('our-players').style.display = 'grid';
+document.getElementById('our-players').addEventListener('click', e => {
+  const btn = e.target.closest('.player-btn');
+  if (btn) selectPlayer(btn, btn.dataset.playerId);
+});
+
+document.getElementById('delivery-panel').addEventListener('click', e => {
+  const btn = e.target.closest('.delivery-btn');
+  if (!btn) return;
+  selectedDeliveryType = btn.dataset.deliveryType;
+  if (selectedPlayer && selectedOutcome && selectedDeliveryType) {
     document.getElementById('delivery-panel').style.display = 'none';
-
-    clearSelected('.outcome-btn');
-    clearSelected('.player-btn');
+    document.getElementById('assist-panel').style.display = 'grid';
     clearSelected('.delivery-btn');
-
+    clearSelected('.assist-btn');
     btn.classList.add('selected');
+    refreshAssistPlayers();
   }
 });
 
-// Player click → show delivery options (event delegation)
-document.getElementById('our-players').addEventListener('click', function(e) {
-  if (e.target.classList.contains('player-btn') || e.target.closest('.player-btn')) {
-    const btn = e.target.closest('.player-btn');
-    selectPlayer(btn, btn.dataset.playerId);
-  }
-});
-
-// Delivery click → save attempt (event delegation)
-document.getElementById('delivery-panel').addEventListener('click', function(e) {
-  if (e.target.classList.contains('delivery-btn') || e.target.closest('.delivery-btn')) {
-    const btn = e.target.closest('.delivery-btn');
-    selectedDeliveryType = btn.dataset.deliveryType;
-    if (selectedPlayer && selectedOutcome && selectedDeliveryType) {
-        saveAttempt(selectedOutcome, selectedPlayer, selectedDeliveryType);
-    }
+document.getElementById('assist-panel').addEventListener('click', e => {
+  const btn = e.target.closest('.assist-btn');
+  if (!btn) return;
+  selectedAssistPlayer = btn.dataset.playerId;
+  if (selectedPlayer && selectedOutcome && selectedDeliveryType) {
+    saveAttempt(selectedOutcome, selectedPlayer, selectedDeliveryType, selectedAssistPlayer);
   }
 });
 </script>
-
 {% endblock %}

@@ -1,10 +1,15 @@
 from django.urls import path
-from .views import match_reports, weekly_reports, monthly_reports, player_reports, intro_page, match_summary_stats
+from .views import match_reports, weekly_reports, monthly_reports, player_reports, intro_page, match_summary_stats, full_report
 
 
 app_name = 'reports_app'
 
 urlpatterns = [
+
+
+
+
+    path('full-report/<int:match_id>/', full_report.full_report_view, name='full_report'),
 
     # 0
     path('match-summary/<int:match_id>/', match_reports.match_summary_view, name='match_summary'),
