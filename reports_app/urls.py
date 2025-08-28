@@ -6,32 +6,26 @@ app_name = 'reports_app'
 
 urlpatterns = [
 
-
-
-
     path('full-report/<int:match_id>/', full_report.full_report_view, name='full_report'),
-
     # 0
     path('match-summary/<int:match_id>/', match_reports.match_summary_view, name='match_summary'),
     ## /reports_app/match-summary/6/
     path('match-summary/<int:match_id>/summary-stats/', match_summary_stats.match_summary_stats_view, name='match_summary_stats'),
 
     # 1. intro pages
-    path('intro/<str:report_type>/<int:match_id>/', intro_page.intro_page_view, name='intro_page'),
-    # 1. /reports_app/intro/post-match-summary/1/
-    # 2. /reports_app/intro/in-possession/1/
-    # 3. /reports_app/intro/out-of-possession/1/
-    # 4. /reports_app/intro/goalkeeping/1/
-    # 5. /reports_app/intro/set-plays/1/
-    # 6. /reports_app/intro/individual-in-possession/1/
-    # 7. /reports_app/intro/individual-out-of-possession/1/
-    # 8. /reports_app/intro/individual-physical/1/
+
+    path('intro/post-match-summary/<int:match_id>/', intro_page.post_match_summary_view, name='post_match_summary'),
+    path('intro/in-possession/<int:match_id>/', intro_page.in_possession_view, name='in_possession'),
+    path('intro/out-of-possession/<int:match_id>/', intro_page.out_of_possession_view, name='out_of_possession'),
+    path('intro/goalkeeping/<int:match_id>/', intro_page.goalkeeping_view, name='goalkeeping'),
+    path('intro/set-plays/<int:match_id>/', intro_page.set_plays_view, name='set_plays'),
+    path('intro/individual-in-possession/<int:match_id>/', intro_page.individual_in_possession_view, name='individual_in_possession'),
+    path('intro/individual-out-of-possession/<int:match_id>/', intro_page.individual_out_of_possession_view, name='individual_out_of_possession'),
+    path('intro/individual-physical/<int:match_id>/', intro_page.individual_physical_view, name='individual_physical'),
+
 
     # How to put them in html
     # <a href="{% url 'reports_app:intro_page' report_type='in-possession' match_id=match.id %}">IN POSSESSION</a>
-
-
-
 
     # 2. match details view
     #path('match/<int:match_id>/', match_reports.match_detail_view, name='match_detail_view'),

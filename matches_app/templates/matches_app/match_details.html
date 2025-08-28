@@ -281,66 +281,10 @@ table tbody tr:hover {
             {% endif %}
         </div>
 
+
         <!-- Stats Tab -->
         <div class="tab-pane fade" id="stats" role="tabpanel">
-            <h5>Player Statistics</h5>
-
-            <!-- Team Passing Summary -->
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <strong>{{ match.home_team.name }} Pass Stats:</strong><br>
-                    Total Passes: {{ home_pass_stats.total_passes }}<br>
-                    Ball Lost: {{ home_pass_stats.ball_lost }}
-                </div>
-                <div class="col-md-6">
-                    <strong>{{ match.away_team.name }} Pass Stats:</strong><br>
-                    Total Passes: {{ away_pass_stats.total_passes }}<br>
-                    Ball Lost: {{ away_pass_stats.ball_lost }}
-                </div>
-            </div>
-
-            {% if player_stats %}
-                <div class="table-responsive">
-                    <table class="table table-bordered table-sm text-center">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Name</th>
-                                <th>Minutes</th>
-                                <th>Shots</th>
-                                <th>Shots On Target</th>
-                                <th>Goals</th>
-                                <th>Assists</th>
-                                <th>Total Passes</th>
-                                <th>Ball Lost</th>
-                                <th>Pass Accuracy (%)</th>
-                                <th>Start 11</th>
-                                <th>Yellow Card</th>
-                                <th>Red Card</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for ps in player_stats %}
-                            <tr>
-                                <td>{{ ps.player.name }}</td>
-                                <td>{{ ps.minutes_played }}</td>
-                                <td>{{ ps.shots }}</td>
-                                <td>{{ ps.shots_on }}</td>
-                                <td>{{ ps.goals }}</td>
-                                <td>{{ ps.assists }}</td>
-                                <td>{{ ps.total_passes }}</td>
-                                <td>{{ ps.ball_lost }}</td>
-                                <td>{{ ps.pass_accuracy }}%</td>
-                                <td>{% if ps.is_starting %}✔{% else %}❌{% endif %}</td>
-                                <td>{{ ps.yellow_card }}</td>
-                                <td>{{ ps.red_card }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p>No player stats recorded yet.</p>
-            {% endif %}
+            {% include "matches_app/partials/stats.html" %}
         </div>
 
         <!-- Lineup Tab -->

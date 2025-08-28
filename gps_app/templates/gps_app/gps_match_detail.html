@@ -1,23 +1,8 @@
-{% extends 'base.html' %}
-{% block content %}
+
 
 <link rel="stylesheet" href="{% static 'css/gps.css' %}">
 
 <div class="container my-4">
-
-  <div class="page-header">
-    <!-- Replace 'team_logo.png' with your static file path or URL -->
-    <img src="{% static 'accounts_app/images/logo.png' %}" alt="Azam FC Logo" style="height: 100px;">
-    <div class="page-title">
-      {{ match.home_team }} vs {{ match.away_team }}
-      <div class="page-date">{{ match.date }}</div>
-    </div>
-  </div>
-
-  <div class="info-box" role="region" aria-label="GPS Data Importance">
-    <strong>Why GPS Data Matters:</strong>  
-    Monitoring players’ GPS data helps optimize performance, tailor training loads, and crucially, prevent injuries by tracking fatigue and workload. It supports smarter recovery strategies and keeps the team at peak condition.
-  </div>
 
   {% if records %}
     <div class="table-responsive" >
@@ -155,4 +140,4 @@
 {% include 'gps_app/gps_position_detail.html' %}
 
 
-{% endblock %}
+

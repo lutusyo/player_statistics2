@@ -1,0 +1,106 @@
+{% extends 'reports_app/full_report.html' %}
+
+{% block report_content %}
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Fullscreen container */
+    #ido_fullscreen_container {
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: black;
+        color: white;
+        font-family: Arial, sans-serif;
+        position: relative; /* for absolute logo */
+        text-align: center;
+    }
+
+    /* Company logo top-right */
+    #ido_company_logo {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        text-align: right;
+    }
+
+    #ido_company_logo img {
+        height: 70px;
+        margin-top: 5px;
+    }
+
+    /* Page title */
+    #ido_title {
+        font-size: 48px;
+        margin-bottom: 60px;
+    }
+
+    /* Teams section */
+    #ido_teams {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 80px;
+        margin-top: 20px;
+    }
+
+    .ido_team {
+        text-align: center;
+    }
+
+    .ido_team img {
+        height: 70px;
+    }
+
+    .ido_team_name {
+        font-weight: bold;
+        margin-top: 8px;
+    }
+
+    .ido_vs {
+        font-size: 22px;
+        font-weight: bold;
+    }
+</style>
+
+<div id="ido_fullscreen_container">
+    <!-- Company + Logo at top-right -->
+    <div id="ido_company_logo">
+        <strong>{{ company }}</strong>
+        <br>
+        <img src="{% static 'goalkeeping_app/azamfc_logo.png' %}" alt="Logo">
+    </div>
+
+    <!-- Title -->
+    <h1 id="ido_title">INDIVIDUAL DATA OUT OF POSSESSION</h1>
+
+    <!-- Teams -->
+    <div id="ido_teams">
+        <!-- Home Team -->
+        <div class="ido_team">
+            {% if home_team.logo %}
+                <img src="{{ home_team.logo.url }}" alt="{{ home_team.name }}">
+            {% endif %}
+            <p class="ido_team_name">{{ home_team.name }}</p>
+        </div>
+
+        <!-- VS -->
+        <div class="ido_vs">vs</div>
+
+        <!-- Away Team -->
+        <div class="ido_team">
+            {% if away_team.logo %}
+                <img src="{{ away_team.logo.url }}" alt="{{ away_team.name }}">
+            {% endif %}
+            <p class="ido_team_name">{{ away_team.name }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

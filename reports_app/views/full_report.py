@@ -1,67 +1,65 @@
 from django.shortcuts import render, get_object_or_404
 from matches_app.models import Match
-from teams_app.models import Team
-from django.template.loader import render_to_string
-from .intro_page import get_match_result, REPORT_TITLES  # reuse your logic
-from django.shortcuts import render, get_object_or_404
-from matches_app.models import Match
-
-from reports_app.utils.stats import get_match_stats  # assuming your function is here
-
-
-def render_intro_section(match, report_type):
-    home_score, away_score, result = get_match_result(match)
-    
-    context = {
-        'match': match,
-        'home_team': match.home_team,
-        'away_team': match.away_team,
-        'title': REPORT_TITLES.get(report_type, report_type),
-        'company': 'Azam Fc Analyst',
-        'report_type': report_type,
-        'home_score': home_score,
-        'away_score': away_score,
-        'result': result,
-    }
-
-    if report_type == 'post-match-summary':
-        context.update({
-            'competition': match.competition_type,
-            'venue': match.venue,
-            'date': match.date,
-            'kickoff_time': match.time,
-            'season': match.season,
-        })
-
-        # Add full match stats context
-        match_stats = get_match_stats(match)
-        context.update(match_stats)
-
-    return render_to_string('reports_app/intro_page.html', context)
+from tagging_app.models import AttemptToGoal
+from gps_app.utils.gps_match_detail import get_gps_context
+from reports_app.utils.stats import get_match_stats
+from reports_app.views.intro_page import get_match_result
+from tagging_app.utils.pass_network_utils import get_pass_network_context
+from tagging_app.utils.attempt_to_goal_utils import get_attempt_to_goal_context
+from matches_app.utils.match_details_utils import get_match_detail_context 
 
 
-
-
-
-REPORT_TYPES = [
-    'post-match-summary',
-    'in-possession',
-    'out-of-possession',
-    'goalkeeping',
-    'set-plays',
-    'individual-in-possession',
-    'individual-out-of-possession',
-    'individual-physical',
-]
 
 def full_report_view(request, match_id):
     match = get_object_or_404(Match, id=match_id)
 
-    # Render each intro section
-    intro_sections = [render_intro_section(match, rt) for rt in REPORT_TYPES]
+    # 1. Get scores using your helper
+    home_score, away_score, result = get_match_result(match)
 
-    return render(request, 'reports_app/full_report.html', {
-        'intro_sections': intro_sections,
+
+    # 4. Final unified context
+    context = {
         'match': match,
-    })
+        'home_team': match.home_team,
+        'away_team': match.away_team,
+        'home_score': home_score,
+        'away_score': away_score,
+        'result': result,
+        'competition': match.competition_type,
+        'venue': match.venue,
+        'date': match.date,
+        'kickoff_time': match.time,
+        'season': match.season,
+        'match_number': match.match_number if hasattr(match, 'match_number') else None,
+        'title': 'Full Match Report',
+        'company': 'Azam Fc Analyst',
+        # Add your other report data here:
+        #'in_possession_data': get_in_possession_data(match),
+        #'out_of_possession_data': get_out_of_possession_data(match),
+        # ...
+    }
 
+
+    # 2. Match stats for match_summary.html
+    match_stats_context = get_match_stats(match)  # Must return a dictionary
+    # 5. Merge in match stats and GPS context
+    context.update(match_stats_context)
+
+    # 3. GPS data for individual_physical.html
+    gps_context = get_gps_context(match)
+    context.update(gps_context)
+
+    pass_network_context = get_pass_network_context(match_id)
+    context.update(pass_network_context)
+
+    
+
+    attempt_to_goal_context = get_attempt_to_goal_context(match_id)
+    context.update(attempt_to_goal_context)
+
+    match_detail_context =  get_match_detail_context(match)
+    context.update(match_detail_context)
+    
+
+    # 6. Render full report with all sections
+    return render(request, 'reports_app/full_report.html', context)

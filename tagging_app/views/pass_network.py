@@ -28,6 +28,9 @@ from openpyxl import Workbook
 import matplotlib
 matplotlib.use('Agg')  # non-GUI backend for servers
 import matplotlib.pyplot as plt
+# tagging_app/views/pass_network.py
+from django.shortcuts import render, get_object_or_404
+from tagging_app.utils.pass_network_utils import get_pass_network_context  # ✅ add this
 
 
 
@@ -135,38 +138,10 @@ def save_pass_network(request):
     return JsonResponse({'status': 'invalid request'})
 
 
-# ---------- DASHBOARD (HTML) ----------
+
+
 def pass_network_dashboard(request, match_id):
-    match = get_object_or_404(Match, id=match_id)
-    players, player_names, matrix, total_passes, ball_lost = get_pass_network_data(match_id)
-
-    # Top 5 combinations
-    combos = []
-    for f_id, tos in matrix.items():
-        for t_id, c in tos.items():
-            combos.append((
-                player_names.get(f_id, f"Unknown({f_id})"),
-                player_names.get(t_id, f"Unknown({t_id})"),
-                c
-            ))
-    top_combinations = sorted(combos, key=lambda x: x[2], reverse=True)[:5]
-
-    # Bar chart data
-    chart_data = {
-        'names': [player_names[p.id] for p in players],
-        'values': [total_passes[p.id] for p in players]
-    }
-
-    context = {
-        'match': match,
-        'players': players,
-        'matrix': matrix,
-        'player_names': player_names,
-        'top_combinations': top_combinations,
-        'total_passes': total_passes,
-        'ball_lost': ball_lost,
-        'chart_data': chart_data,
-    }
+    context = get_pass_network_context(match_id)
     return render(request, 'tagging_app/pass_network_dashboard.html', context)
 
 
