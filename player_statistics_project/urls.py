@@ -31,6 +31,9 @@ urlpatterns = [
  
 
     path('performance/', include('perfomance_rating_app.urls')),
+
+    path('training/', include('training_app.urls')),
+
   
 ]
 

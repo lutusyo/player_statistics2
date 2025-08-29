@@ -11,142 +11,144 @@ def safe_div(a, b):
         return 0
 
 def get_second_ball_recoveries(match, team):
-    # Count passes where possession is regained by your team after opponent pass
-    recoveries = PassEvent.objects.filter(
+    return PassEvent.objects.filter(
         match=match,
         to_team=team,
         is_possession_regained=True
     ).exclude(from_team=team).count()
-    return recoveries
+
 
 def get_match_stats(match):
-    home = match.home_team
-    away = match.away_team
+    # Determine teams based on AttemptToGoal data
+    our_attempt = AttemptToGoal.objects.filter(match=match, is_opponent=False).first()
+    opponent_attempt = AttemptToGoal.objects.filter(match=match, is_opponent=True).first()
+
+    our_team = our_attempt.team if our_attempt else match.home_team
+    opponent_team = opponent_attempt.team if opponent_attempt else match.away_team
 
     # --- Goal-related events ---
     all_attempts = AttemptToGoal.objects.filter(match=match)
 
-    home_goals = all_attempts.filter(team=home, outcome='On Target Goal').count()
-    away_goals = all_attempts.filter(team=away, outcome='On Target Goal').count()
+    our_goals = all_attempts.filter(team=our_team, outcome='On Target Goal', is_own_goal=False).count()
+    opponent_goals = all_attempts.filter(team=opponent_team, outcome='On Target Goal', is_own_goal=False).count()
 
-    home_attempts_total = all_attempts.filter(team=home).count()
-    away_attempts_total = all_attempts.filter(team=away).count()
+    our_attempts_total = all_attempts.filter(team=our_team).count()
+    opponent_attempts_total = all_attempts.filter(team=opponent_team).count()
 
-    home_on_target = all_attempts.filter(team=home, outcome__in=['On Target Goal', 'On Target Saved']).count()
-    away_on_target = all_attempts.filter(team=away, outcome__in=['On Target Goal', 'On Target Saved']).count()
+    our_on_target = all_attempts.filter(team=our_team, outcome__in=['On Target Goal', 'On Target Saved']).count()
+    opponent_on_target = all_attempts.filter(team=opponent_team, outcome__in=['On Target Goal', 'On Target Saved']).count()
 
-    home_assists = all_attempts.filter(team=home, outcome='On Target Goal', assist_by__isnull=False).count()
-    away_assists = all_attempts.filter(team=away, outcome='On Target Goal', assist_by__isnull=False).count()
+    our_assists = all_attempts.filter(team=our_team, outcome='On Target Goal', assist_by__isnull=False).count()
+    opponent_assists = all_attempts.filter(team=opponent_team, outcome='On Target Goal', assist_by__isnull=False).count()
 
-    home_crosses = all_attempts.filter(team=home, delivery_type='Cross').count()
-    away_crosses = all_attempts.filter(team=away, delivery_type='Cross').count()
+    our_crosses = all_attempts.filter(team=our_team, delivery_type='Cross').count()
+    opponent_crosses = all_attempts.filter(team=opponent_team, delivery_type='Cross').count()
 
     # --- Pass-related events ---
-    home_passes = PassEvent.objects.filter(match=match, from_team=home)
-    away_passes = PassEvent.objects.filter(match=match, from_team=away)
+    our_passes = PassEvent.objects.filter(match=match, from_team=our_team)
+    opponent_passes = PassEvent.objects.filter(match=match, from_team=opponent_team)
 
-    home_pass_count = home_passes.count()
-    away_pass_count = away_passes.count()
+    our_pass_count = our_passes.count()
+    opponent_pass_count = opponent_passes.count()
 
-    home_pass_completed = home_passes.filter(is_successful=True).count()
-    away_pass_completed = away_passes.filter(is_successful=True).count()
+    our_pass_completed = our_passes.filter(is_successful=True).count()
+    opponent_pass_completed = opponent_passes.filter(is_successful=True).count()
 
-    total_passes = home_pass_count + away_pass_count
-    total_completed = home_pass_completed + away_pass_completed
+    total_passes = our_pass_count + opponent_pass_count
+    total_completed = our_pass_completed + opponent_pass_completed
 
-    home_pass_pct = safe_div(home_pass_completed, home_pass_count)
-    away_pass_pct = safe_div(away_pass_completed, away_pass_count)
+    our_pass_pct = safe_div(our_pass_completed, our_pass_count)
+    opponent_pass_pct = safe_div(opponent_pass_completed, opponent_pass_count)
 
-    possession_home_pct = safe_div(home_pass_completed, total_completed) if total_completed else safe_div(home_pass_count, total_passes)
-    possession_away_pct = 100 - possession_home_pct
+    possession_our_pct = safe_div(our_pass_completed, total_completed) if total_completed else safe_div(our_pass_count, total_passes)
+    possession_opponent_pct = 100 - possession_our_pct
 
-    home_receptions_final_third = PassEvent.objects.filter(match=match, to_team=home, x_end__gte=66).count()
-    away_receptions_final_third = PassEvent.objects.filter(match=match, to_team=away, x_end__lte=34).count()
+    our_receptions_final_third = PassEvent.objects.filter(match=match, to_team=our_team, x_end__gte=66).count()
+    opponent_receptions_final_third = PassEvent.objects.filter(match=match, to_team=opponent_team, x_end__lte=34).count()
 
-    home_ball_progressions = home_passes.filter(
+    our_ball_progressions = our_passes.filter(
         x_start__isnull=False, x_end__isnull=False
     ).filter(x_end__gt=F('x_start') + 10).count()
 
-    away_ball_progressions = away_passes.filter(
+    opponent_ball_progressions = opponent_passes.filter(
         x_start__isnull=False, x_end__isnull=False
     ).filter(x_end__gt=F('x_start') + 10).count()
 
     # --- Defensive stats ---
-    home_def_stats = PlayerDefensiveStats.objects.filter(match=match, player__team=home)
-    away_def_stats = PlayerDefensiveStats.objects.filter(match=match, player__team=away)
+    our_def_stats = PlayerDefensiveStats.objects.filter(match=match, player__team=our_team)
+    opponent_def_stats = PlayerDefensiveStats.objects.filter(match=match, player__team=opponent_team)
 
     def get_defensive_agg(qs, field):
         return qs.aggregate(val=Sum(field))['val'] or 0
 
-    home_forced_turnovers = get_defensive_agg(home_def_stats, 'foul_won')
-    away_forced_turnovers = get_defensive_agg(away_def_stats, 'foul_won')
+    our_forced_turnovers = get_defensive_agg(our_def_stats, 'foul_won')
+    opponent_forced_turnovers = get_defensive_agg(opponent_def_stats, 'foul_won')
 
-    home_def_pressures = get_defensive_agg(home_def_stats, 'tackle_won') + get_defensive_agg(home_def_stats, 'physical_duel_won')
-    away_def_pressures = get_defensive_agg(away_def_stats, 'tackle_won') + get_defensive_agg(away_def_stats, 'physical_duel_won')
+    our_def_pressures = get_defensive_agg(our_def_stats, 'tackle_won') + get_defensive_agg(our_def_stats, 'physical_duel_won')
+    opponent_def_pressures = get_defensive_agg(opponent_def_stats, 'tackle_won') + get_defensive_agg(opponent_def_stats, 'physical_duel_won')
 
-    home_completed_line_breaks = get_defensive_agg(home_def_stats, 'line_breaks_completed')
-    away_completed_line_breaks = get_defensive_agg(away_def_stats, 'line_breaks_completed')
+    our_completed_line_breaks = get_defensive_agg(our_def_stats, 'line_breaks_completed')
+    opponent_completed_line_breaks = get_defensive_agg(opponent_def_stats, 'line_breaks_completed')
 
-    home_defensive_line_breaks = get_defensive_agg(home_def_stats, 'defensive_line_breaks')
-    away_defensive_line_breaks = get_defensive_agg(away_def_stats, 'defensive_line_breaks')
+    our_defensive_line_breaks = get_defensive_agg(our_def_stats, 'defensive_line_breaks')
+    opponent_defensive_line_breaks = get_defensive_agg(opponent_def_stats, 'defensive_line_breaks')
 
-    # Use passing network to get second ball recoveries (possession regained from opponent pass)
-    home_second_balls = get_second_ball_recoveries(match, home)
-    away_second_balls = get_second_ball_recoveries(match, away)
+    # --- Second Ball Recoveries ---
+    our_second_balls = get_second_ball_recoveries(match, our_team)
+    opponent_second_balls = get_second_ball_recoveries(match, opponent_team)
 
     # --- GPS data ---
-    home_gps = GPSRecord.objects.filter(match=match, player__team=home)
-    away_gps = GPSRecord.objects.filter(match=match, player__team=away)
+    our_gps = GPSRecord.objects.filter(match=match, player__team=our_team)
+    opponent_gps = GPSRecord.objects.filter(match=match, player__team=opponent_team)
 
-    home_distance = home_gps.aggregate(total=Sum('distance'))['total'] or 0.0
-    away_distance = away_gps.aggregate(total=Sum('distance'))['total'] or 0.0
+    our_distance = our_gps.aggregate(total=Sum('distance'))['total'] or 0.0
+    opponent_distance = opponent_gps.aggregate(total=Sum('distance'))['total'] or 0.0
 
-    home_zone4_sprint_km = home_gps.aggregate(total=Sum('hi_distance'))['total'] or 0.0
-    away_zone4_sprint_km = away_gps.aggregate(total=Sum('hi_distance'))['total'] or 0.0
+    our_zone4_sprint_km = our_gps.aggregate(total=Sum('hi_distance'))['total'] or 0.0
+    opponent_zone4_sprint_km = opponent_gps.aggregate(total=Sum('hi_distance'))['total'] or 0.0
 
     # --- Lineups & Substitutions ---
-    home_starting = MatchLineup.objects.filter(match=match, team=home, is_starting=True)
-    home_subs = MatchLineup.objects.filter(match=match, team=home, is_starting=False)
-    away_starting = MatchLineup.objects.filter(match=match, team=away, is_starting=True)
-    away_subs = MatchLineup.objects.filter(match=match, team=away, is_starting=False)
+    our_starting = MatchLineup.objects.filter(match=match, team=our_team, is_starting=True)
+    our_subs = MatchLineup.objects.filter(match=match, team=our_team, is_starting=False)
 
-    home_substitutions = Substitution.objects.filter(match=match, player_in__team=home)
-    away_substitutions = Substitution.objects.filter(match=match, player_in__team=away)
+    opponent_starting = MatchLineup.objects.filter(match=match, team=opponent_team, is_starting=True)
+    opponent_subs = MatchLineup.objects.filter(match=match, team=opponent_team, is_starting=False)
+
+    our_substitutions = Substitution.objects.filter(match=match, player_in__team=our_team)
+    opponent_substitutions = Substitution.objects.filter(match=match, player_in__team=opponent_team)
 
     stats = [
-        {'label': 'Goals', 'home': home_goals, 'away': away_goals},
-        {'label': 'Assists (On Target Goals)', 'home': home_assists, 'away': away_assists},
-        {'label': 'Attempts at Goal (On Target)', 'home': f"{home_attempts_total} ({home_on_target})",
-         'away': f"{away_attempts_total} ({away_on_target})"},
-        {'label': 'Total Passes (Complete)', 'home': f"{home_pass_count} ({home_pass_completed})",
-         'away': f"{away_pass_count} ({away_pass_completed})"},
-        {'label': 'Pass Completion %', 'home': f"{home_pass_pct:.1f}%", 'away': f"{away_pass_pct:.1f}%"},
-        {'label': 'Completed Line Breaks', 'home': home_completed_line_breaks, 'away': away_completed_line_breaks},
-        {'label': 'Defensive Line Breaks', 'home': home_defensive_line_breaks, 'away': away_defensive_line_breaks},
-        {'label': 'Receptions in Final Third', 'home': home_receptions_final_third, 'away': away_receptions_final_third},
-        {'label': 'Crosses', 'home': home_crosses, 'away': away_crosses},
-        {'label': 'Ball Progressions', 'home': home_ball_progressions, 'away': away_ball_progressions},
-        {'label': 'Defensive Pressures', 'home': home_def_pressures, 'away': away_def_pressures},
-        {'label': 'Forced Turnovers', 'home': home_forced_turnovers, 'away': away_forced_turnovers},
-        {'label': 'Second Balls', 'home': home_second_balls, 'away': away_second_balls},
-        {'label': 'Total Distance Covered', 'home': f"{home_distance / 1000:.1f} km", 'away': f"{away_distance / 1000:.1f} km"},
-        {'label': 'Zone 4 - Low Speed Sprinting', 'home': f"{home_zone4_sprint_km / 1000:.1f} km", 'away': f"{away_zone4_sprint_km / 1000:.1f} km"},
+        {'label': 'Goals', 'home': our_goals, 'away': opponent_goals},
+        {'label': 'Assists (On Target Goals)', 'home': our_assists, 'away': opponent_assists},
+        {'label': 'Attempts at Goal (On Target)', 'home': f"{our_attempts_total} ({our_on_target})", 'away': f"{opponent_attempts_total} ({opponent_on_target})"},
+        {'label': 'Total Passes (Complete)', 'home': f"{our_pass_count} ({our_pass_completed})", 'away': f"{opponent_pass_count} ({opponent_pass_completed})"},
+        {'label': 'Pass Completion %', 'home': f"{our_pass_pct:.1f}%", 'away': f"{opponent_pass_pct:.1f}%"},
+        {'label': 'Completed Line Breaks', 'home': our_completed_line_breaks, 'away': opponent_completed_line_breaks},
+        {'label': 'Defensive Line Breaks', 'home': our_defensive_line_breaks, 'away': opponent_defensive_line_breaks},
+        {'label': 'Receptions in Final Third', 'home': our_receptions_final_third, 'away': opponent_receptions_final_third},
+        {'label': 'Crosses', 'home': our_crosses, 'away': opponent_crosses},
+        {'label': 'Ball Progressions', 'home': our_ball_progressions, 'away': opponent_ball_progressions},
+        {'label': 'Defensive Pressures', 'home': our_def_pressures, 'away': opponent_def_pressures},
+        {'label': 'Forced Turnovers', 'home': our_forced_turnovers, 'away': opponent_forced_turnovers},
+        {'label': 'Second Balls', 'home': our_second_balls, 'away': opponent_second_balls},
+        {'label': 'Total Distance Covered', 'home': f"{our_distance / 1000:.1f} km", 'away': f"{opponent_distance / 1000:.1f} km"},
+        {'label': 'Zone 4 - Low Speed Sprinting', 'home': f"{our_zone4_sprint_km / 1000:.1f} km", 'away': f"{opponent_zone4_sprint_km / 1000:.1f} km"},
     ]
 
     return {
         'match': match,
-        'home': home,
-        'away': away,
-        'home_goals': home_goals,
-        'away_goals': away_goals,
-        'home_starting': home_starting,
-        'home_subs': home_subs,
-        'away_starting': away_starting,
-        'away_subs': away_subs,
-        'home_substitutions': home_substitutions,
-        'away_substitutions': away_substitutions,
-        'possession_home_pct': round(possession_home_pct, 1),
-        'possession_away_pct': round(possession_away_pct, 1),
+        'our_team': our_team,
+        'opponent_team': opponent_team,
+        'home_goals': our_goals,
+        'away_goals': opponent_goals,
+        'our_starting': our_starting,
+        'our_subs': our_subs,
+        'opponent_starting': opponent_starting,
+        'opponent_subs': opponent_subs,
+        'our_substitutions': our_substitutions,
+        'opponent_substitutions': opponent_substitutions,
+        'possession_home_pct': round(possession_our_pct, 1),
+        'possession_away_pct': round(possession_opponent_pct, 1),
         'stats': stats,
-        'pass_events': PassEvent.objects.filter(match=match),  # used for charts etc.
+        'pass_events': PassEvent.objects.filter(match=match),
     }

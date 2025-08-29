@@ -29,6 +29,10 @@ from matches_app.models import Match
 from players_app.models import Player
 from tagging_app.models import AttemptToGoal  # Adjust if in different app
 from tagging_app.utils.attempt_to_goal_utils import get_attempt_to_goal_context
+from tagging_app.utils.attempt_to_goal_utils_opp import get_opponent_goals_for_match
+
+from django.shortcuts import render
+from tagging_app.utils.attempt_to_goal_utils import get_attempt_to_goal_context
 
 
 def enter_attempt_to_goal(request, match_id):
@@ -148,9 +152,18 @@ def get_live_tagging_state(request, match_id):
 
 
 
+
 def attempt_to_goal_dashboard(request, match_id):
+    
+    # Get full context using your utility
     context = get_attempt_to_goal_context(match_id)
+
+    # Add opponent and our team goals to context
+    context['opponent_goals_count'] = context['opponent_goals'].count()
+    context['our_team_goals_count'] = context['our_team_attempts'].filter(outcome='On Target Goal').count()
+
     return render(request, 'tagging_app/attempt_to_goal_dashboard.html', context)
+
 
 
 

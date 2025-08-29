@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Training Session</title>
+    <style>
+        .player-list {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 600px;
+        }
+        .player-item {
+            width: 200px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Create Training Session</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label>Duration (minutes):</label><br>
+        <input type="number" name="duration" min="1" required><br><br>
+
+        <label>Training Types (hold Ctrl/Cmd to select multiple):</label><br>
+        <select name="training_types" multiple size="5" required>
+            {% for key, value in training_choices %}
+                <option value="{{ key }}">{{ value }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label>Players Attended:</label><br>
+        <div class="player-list">
+            {% for player in players %}
+                <div class="player-item">
+                    <input type="checkbox" name="players" value="{{ player.id }}" id="player{{ player.id }}">
+                    <label for="player{{ player.id }}">{{ player.name }}</label>
+                </div>
+            {% endfor %}
+        </div><br>
+
+        <button type="submit">Save Session</button>
+    </form>
+    <br>
+    <a href="{% url 'training_session_list' %}">Back to sessions list</a>
+</body>
+</html>

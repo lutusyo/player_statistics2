@@ -260,7 +260,11 @@ table tbody tr:hover {
 
             <!-- Final Score -->
             <h6>Final Score</h6>
-            <p><strong>{{ match.home_team.name }} {{ home_team_goals }} - {{ away_team_goals }} {{ match.away_team.name }}</strong></p>
+            <p>
+                <strong>
+                    {{ match.home_team.name }} {{ match.our_team_goals }} - {{ match.opponent_goals }} {{ match.away_team.name }}
+                </strong>
+            </p>
 
             <hr>
 
@@ -270,9 +274,17 @@ table tbody tr:hover {
                 <ul class="list-group">
                     {% for goal in goals %}
                         <li class="list-group-item">
-                            <strong>{{ goal.minute }}'</strong> — {{ goal.scorer }}
-                            {% if goal.assist_by %}(Assist: {{ goal.assist_by }}){% endif %}
-                            - {{ goal.team_name }}
+                            <strong>{{ goal.minute }}'</strong>
+                            — {{ goal.player.name|default:"Unknown" }}
+                            {% if goal.assist_by %}(Assist: {{ goal.assist_by.name }}){% endif %}
+                            — 
+                            {% if goal.team.id == match.home_team.id %}
+                                {{ match.home_team.name }}
+                            {% elif goal.team.id == match.away_team.id %}
+                                {{ match.away_team.name }}
+                            {% else %}
+                                Other
+                            {% endif %}
                         </li>
                     {% endfor %}
                 </ul>
@@ -280,6 +292,9 @@ table tbody tr:hover {
                 <p>No goals recorded for this match.</p>
             {% endif %}
         </div>
+
+
+
 
 
         <!-- Stats Tab -->
@@ -335,16 +350,35 @@ table tbody tr:hover {
         <!-- H2H Tab -->
         <div class="tab-pane fade" id="h2h" role="tabpanel">
             <h5>Head-to-Head</h5>
+
             {% if h2h_results %}
-                <ul>
-                    {% for result in h2h_results %}
-                        <li>{{ result }}</li>
-                    {% endfor %}
-                </ul>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Home</th>
+                            <th>Score</th>
+                            <th>Away</th>
+                            <th>Competition</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for past_match in h2h_results %}
+                            <tr>
+                                <td>{{ past_match.date|date:"Y-m-d" }}</td>
+                                <td>{{ past_match.home_team.name }}</td>
+                                <td>{{ past_match.home_goals }} - {{ past_match.away_goals }}</td>
+                                <td>{{ past_match.away_team.name }}</td>
+                                <td>{{ past_match.get_competition_type_display }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             {% else %}
                 <p>No past meetings available.</p>
             {% endif %}
         </div>
+
 
     </div> <!-- End of tab-content -->
 </div> <!-- End of container -->

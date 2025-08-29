@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'defensive_app',
     'lineup_app',
     'perfomance_rating_app',
+    'training_app',
 ]
 
 MIDDLEWARE = [

@@ -1,23 +1,13 @@
-# matches_app/views.py
-from django.conf import settings
-from django.shortcuts import render, get_object_or_404, redirect
-from players_app.models import PlayerCareerStage, Player
-from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
-from reportlab.lib.pagesizes import A4
+from django.shortcuts import render
+from django.db.models import Q
 from datetime import date
 
-from django.db.models import Q
 from teams_app.models import Team, AgeGroup
-from lineup_app.models import MatchLineup, POSITION_COORDS
+from lineup_app.models import MatchLineup
 from matches_app.models import Match
-from tagging_app.models import AttemptToGoal, GoalkeeperDistributionEvent
-from collections import Counter
-
-from collections import defaultdict
 from matches_app.views.get_match_goals import get_match_goals
-
-
+from tagging_app.utils.attempt_to_goal_utils import get_attempt_to_goal_context
 
 
 @login_required
@@ -31,11 +21,20 @@ def results_view(request, team):
     ).order_by('-date')
 
     for match in past_matches:
-        # Get match goals
+        # Goals from official match result
         match.home_goals, match.away_goals = get_match_goals(match)
 
-        # Check if lineup exists for this match
+        # Check if lineup exists
         match.has_lineup = MatchLineup.objects.filter(match=match).exists()
+
+        # Use updated utility to get attempts context (our team and opponent attempts)
+        context_data = get_attempt_to_goal_context(match.id)
+        
+        # opponent goals count
+        match.opponent_goals = context_data['opponent_goals'].count()
+        
+        # our team goals count - from attempts with outcome "On Target Goal"
+        match.our_team_goals = context_data['our_team_attempts'].filter(outcome='On Target Goal').count()
 
     context = {
         "team": team,

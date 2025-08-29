@@ -99,6 +99,13 @@
     margin: 0 20px;
 }
 
+.opponent-goals {
+    color: red;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+
 /* Responsive tweaks */
 @media (max-width: 600px) {
     .results-header {

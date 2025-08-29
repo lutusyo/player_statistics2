@@ -5,6 +5,46 @@ __pycache__/
 *.pyo
 *.pyd
 
+# Django SQLite database
+*.sqlite3
+
+# Django migration backups
+*.bak
+*.swp
+
 # Logs and temporary files
-tmp/
 *.log
+*.pot
+*.pyc
+*.pyo
+tmp/
+*.tmp
+*.DS_Store
+
+# VSCode settings (optional)
+.vscode/
+
+# JetBrains IDEs (PyCharm, etc.)
+.idea/
+
+# Media / user uploads (optional — if you're storing user uploads locally)
+media/
+
+# Static files collected by collectstatic
+staticfiles/
+static_root/
+
+# Local dev .env files or secrets
+.env
+.env.*
+
+# Coverage reports
+htmlcov/
+.coverage
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Test cache or pytest files
+.cache/
+.pytest_cache/

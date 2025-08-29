@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Training Sessions</title>
+</head>
+<body>
+    <h2>Training Sessions</h2>
+    <a href="{% url 'create_training_session' %}">+ New Session</a>
+    <ul>
+        {% for session in sessions %}
+            <li>
+                {{ session.date }} — {{ session.duration_minutes }} minutes — Types:
+                {% for t_type in session.get_training_types_list %}
+                    <strong>{{ t_type }}</strong>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+                <ul>
+                    {% for attendance in session.attendances.all %}
+                        <li>{{ attendance.player.name }} - {{ "✔" if attendance.attended else "✘" }}</li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% empty %}
+            <li>No training sessions recorded yet.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

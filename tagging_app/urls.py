@@ -1,6 +1,7 @@
 # tagging_app/urls.py
 from django.urls import path
-from tagging_app.views  import attempt_to_goal, goalkeeper_distribution, pass_network, tagging_view, current_players
+from tagging_app.views  import attempt_to_goal, goalkeeper_distribution, pass_network, tagging_view, current_players, attempt_to_goal_opp
+from tagging_app import views
 from tagging_app.views import current_players
 
 app_name = 'tagging_app'
@@ -15,9 +16,21 @@ urlpatterns = [
     # Each section has five-5 urls of the view to:
     # (1)entering data (2)saving data (3)dashboard to view data (4) export  csv file (5) export pdf file
 
-    # Attempt to Goal
-    path('match/<int:match_id>/attempt-to-goal/', attempt_to_goal.enter_attempt_to_goal, name='enter_attempt_to_goal'),
+    # tagging_app/urls.py
+
+
+    # Attempt to Goal enter data: our team
+    path('match/<int:match_id>/attempt_to_goal/', attempt_to_goal.enter_attempt_to_goal, name='enter_attempt_to_goal'),
+
+    # Attempt to Goal enter data: opp team 
+    path('match/<int:match_id>/attempt_to_goal_opp/', attempt_to_goal_opp.enter_attempt_to_goal_opp, name='enter_attempt_to_goal_opp'),
+
+
+
     path('match/save-attempt-to-goal/', attempt_to_goal.save_attempt_to_goal, name='save_attempt_to_goal'),
+
+    path('api/save_opponent_attempt/', attempt_to_goal_opp.save_attempt_to_goal_opp, name='save_opponent_attempt_to_goal'),
+
     path('match/<int:match_id>/attempt-to-goal-dashboard/', attempt_to_goal.attempt_to_goal_dashboard, name='attempt_to_goal_dashboard'),
     path('match/<int:match_id>/csv/export-attempt-to-goal-csv/',attempt_to_goal.export_attempt_to_goal_csv, name='export_attempt_to_goal_csv'),
     path('match/<int:match_id>/pdf/export-attempt-to-goal-pdf/',attempt_to_goal.export_attempt_to_goal_pdf, name='export_attempt_to_goal_pdf'),

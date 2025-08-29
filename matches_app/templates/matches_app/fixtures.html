@@ -29,6 +29,7 @@
                             <a href="{% url 'tagging_app:pass_network_enter_data' match.id %}">Pass Tagging</a>
                             <a href="{% url 'tagging_app:enter_goalkeeper_distribution' match.id %}" class="btn btn-secondary">Goalkeeper Distribution</a>
                             <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}" class="btn btn-info">Defensive</a>
+                            <a href="{% url 'tagging_app:enter_attempt_to_goal_opp' match.id %}" class="btn btn-primary">Opp Goal Attempt Tagging</a>
                         {% else %}
                             <!-- Create Lineup Only -->
                             <a href="{% url 'lineup_app:create_lineup' match.id %}" class="btn btn-warning">Create Lineup</a>
@@ -57,11 +58,15 @@
 
                             <div class="vs">
                                 {% if match.home_goals is not None and match.away_goals is not None %}
-                                    <strong>{{ match.home_goals }} - {{ match.away_goals }}</strong>
+                                    <!-- Official match goals -->
+                                    <strong>{{ match.our_team_goals }} - {{ match.opponent_goals }}</strong>
+                                    <br>
                                 {% else %}
-                                    <span style="font-size: 14px; color: gray;">vs</span>
+                                    <span style="font-size: 14px; color: gray;">0 - 0</span>
                                 {% endif %}
                             </div>
+
+
 
                             <div class="team">
                                 {% if match.away_team.logo %}

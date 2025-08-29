@@ -30,6 +30,7 @@ class AttemptToGoal(models.Model):
     y = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Y position on pitch (0–100)")
     assist_by = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='assists')
     pre_assist_by = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='pre_assists')
+    is_opponent = models.BooleanField(default=False, help_text="Was this attempt by the opponent?")
 
     is_own_goal = models.BooleanField(default=False)  # ✅ NEW
 

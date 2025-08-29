@@ -4,18 +4,27 @@ from tagging_app.models import AttemptToGoal
 from gps_app.utils.gps_match_detail import get_gps_context  # ✅ Add this import
 #from .intro_page import get_match_result, REPORT_TITLES
 from reports_app.utils.stats import get_match_stats
+from tagging_app.utils.attempt_to_goal_utils import get_attempt_to_goal_context
+
 
 
 def post_match_summary_view(request, match_id):
     match = get_object_or_404(Match, id=match_id)
     home_score, away_score, result = get_match_result(match)
 
+    # ✅ Get detailed attempt data
+
+    attempt_context = get_attempt_to_goal_context(match_id)
+    our_team_goals = AttemptToGoal.objects.filter(match=match, team=match.home_team, outcome='On Target Goal')
+    opponent_goals = AttemptToGoal.objects.filter(match=match, team=match.away_team, outcome='On Target Goal')
+
+    # Merge base match context
     context = {
         'match': match,
         'home_team': match.home_team,
         'away_team': match.away_team,
-        'home_score': home_score,
-        'away_score': away_score,
+        'our_team_goals': our_team_goals,
+        'opponent_goals': opponent_goals,
         'result': result,
         'title': REPORT_TITLES['post-match-summary'],
         'company': 'Azam Fc Analyst',
@@ -27,7 +36,21 @@ def post_match_summary_view(request, match_id):
         'match_number': match.match_number if hasattr(match, 'match_number') else None,
     }
 
+    # ✅ Merge the attempt-to-goal context
+
+    # Filter our team's goals (On Target Goal)
+    #our_team_goals = attempt_context['our_team_attempts'].filter(outcome='On Target Goal')
+
+
+
+    context.update({
+    'our_team_goals': our_team_goals,
+    'opponent_goals': attempt_context['opponent_goals'],  # already present
+})
+
+
     return render(request, 'reports_app/intro_pages/post_match_summary.html', context)
+
 
 
 def in_possession_view(request, match_id):
