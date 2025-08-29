@@ -8,10 +8,10 @@ from django.utils import timezone
 ### CHOICES ###
 
 class SeasonChoices(models.TextChoices):
-    SEASON_2022_2023 = "2022/2023", "2022/2023"
-    SEASON_2023_2024 = "2023/2024", "2023/2024"
-    SEASON_2024_2025 = "2024/2025", "2024/2025"
-    SEASON_2025_2026 = "2025/2026", "2025/2026"
+    SEASON_2022_2023 = "2022-2023", "2022-2023"
+    SEASON_2023_2024 = "2023-2024", "2023-2024"
+    SEASON_2024_2025 = "2024-2025", "2024-2025"
+    SEASON_2025_2026 = "2025-2026", "2025-2026"
 
 
 class CompetitionType(models.TextChoices):

@@ -1,0 +1,57 @@
+<!-- performance_rating_app/templates/performance_rating_app/match_performance.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Player Performance - {{ match }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Performance Ratings for {{ match }}</h1>
+    
+    <h2>Player Ratings</h2>
+    <div>
+        {% for rating in ratings %}
+        <div>
+            <h3>{{ rating.player.name }}</h3>
+            <p><strong>Attacking:</strong> <i class="fas fa-star" style="color:gold;"></i> {{ rating.attacking }} / 5</p>
+            <p><strong>Creativity:</strong> <i class="fas fa-star" style="color:gold;"></i> {{ rating.creativity }} / 5</p>
+            <p><strong>Defending:</strong> <i class="fas fa-star" style="color:gold;"></i> {{ rating.defending }} / 5</p>
+            <p><strong>Tactical:</strong> <i class="fas fa-star" style="color:gold;"></i> {{ rating.tactical }} / 5</p>
+            <p><strong>Technical:</strong> <i class="fas fa-star" style="color:gold;"></i> {{ rating.technical }} / 5</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2>Radar Chart</h2>
+    <canvas id="radarChart" width="400" height="400"></canvas>
+    <script>
+        var ctx = document.getElementById('radarChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Attacking', 'Creativity', 'Defending', 'Tactical', 'Technical'],
+                datasets: [{
+                    label: '{{ rating.player.name }}',
+                    data: [
+                        {{ rating.attacking }},
+                        {{ rating.creativity }},
+                        {{ rating.defending }},
+                        {{ rating.tactical }},
+                        {{ rating.technical }}
+                    ],
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                }]
+            },
+            options: {
+                scale: {
+                    ticks: { beginAtZero: true, max: 5 }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
