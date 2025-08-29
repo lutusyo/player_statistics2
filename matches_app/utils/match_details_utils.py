@@ -74,7 +74,7 @@ def get_match_detail_context(match):
 
     # Pass network data - you might need to adjust import and signature
     
-    pass_context = get_pass_network_context(match.id)
+    pass_context = get_pass_network_context(match)
     players = pass_context['players']
     player_names = pass_context['player_names']
     total_passes = pass_context['total_passes']

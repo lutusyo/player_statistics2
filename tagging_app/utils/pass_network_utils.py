@@ -5,8 +5,11 @@ from players_app.models import Player
 from matches_app.models import Match
 from tagging_app.models import PassEvent
 
-def get_pass_network_context(match_id):
-    match = get_object_or_404(Match, id=match_id)
+def get_pass_network_context(match_input):
+    if isinstance(match_input, Match):
+        match = match_input
+    else:
+        match = get_object_or_404(Match, id=match_input)
 
     player_ids_from = PassEvent.objects.filter(match=match).values_list('from_player_id', flat=True)
     player_ids_to = PassEvent.objects.filter(match=match).values_list('to_player_id', flat=True)
@@ -54,7 +57,6 @@ def get_pass_network_context(match_id):
     }
 
     return {
-        'match': match,
         'players': players,
         'matrix': matrix,
         'player_names': player_names,

@@ -1,27 +1,15 @@
-{# Extend the base player template #}
-{% extends 'player_base.html' %}
-
-{# Load static files so you can use static CSS/JS paths #}
 {% load static %}
 
-{# Extra content for the <head> section #}
-{% block extra_head %}
-    {# Page title will be the player’s name #}
-    {% block title %}{{ player.name }}{% endblock %}
-
-    {# Load custom CSS file for player styling #}
-    <link rel="stylesheet" href="{% static 'players_app/css/player.css' %}">
-
-    {# Inline CSS for toggle, filters, and layout #}
-    <style>
-    /* Toggle buttons container */
+{% block title %}{{ player.name }}{% endblock %}
+<link rel="stylesheet" href="{% static 'players_app/css/player.css' %}">
+<style>
+    /* Your existing CSS unchanged */
     .toggle-buttons {
         display: flex;
         gap: 15px;
         margin: 20px 0;
         justify-content: center;
     }
-    /* Toggle button styles */
     .toggle-buttons button {
         padding: 10px 20px;
         border: none;
@@ -31,66 +19,66 @@
         border-radius: 8px;
         transition: 0.3s;
     }
-    /* Active state for toggle buttons */
     .toggle-buttons button.active {
         background: #007bff;
         color: white;
     }
-    /* Sections hidden by default */
-    .section {
-        display: none;
-    }
-    /* Show active section */
-    .section.active {
-        display: block;
-    }
-    /* Filters container (seasons & competitions) */
+    .section { display: none; }
+    .section.active { display: block; }
+
     .filter-container {
-        margin: 20px 0;
         display: flex;
-        gap: 10px;
         justify-content: center;
+        gap: 10px;
+        margin-bottom: 15px;
     }
-    /* Styling dropdown filters */
+
     .filter-container select {
-        padding: 5px 10px;
+        padding: 6px 12px;
+        font-size: 14px;
     }
-    /* Stats table styling */
+
     .stats-table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 10px;
-    }
-    .stats-table th, .stats-table td {
-        padding: 8px;
-        border: 1px solid #ddd;
-        text-align: center;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
     .stats-table th {
-        background: #f5f5f5;
+        background-color: #007bff;
+        color: white;
+        padding: 10px;
+        text-transform: uppercase;
     }
-    /* Center player photo */
+    .stats-table td {
+        padding: 10px;
+        border: 1px solid #ccc;
+        text-align: center;
+        background-color: #fafafa;
+    }
+    .stats-table tr:nth-child(even) td {
+        background-color: #f1f1f1;
+    }
+    .stats-table tr:hover td {
+        background-color: #e1eaff;
+    }
+
     .player-photo-centered {
         display: flex;
         justify-content: center;
         margin-bottom: 15px;
     }
-    /* Style player photo */
     .player-photo-centered img {
         max-width: 220px;
         border-radius: 12px;
     }
-    </style>
-{% endblock %}
+</style>
 
-
-{% block player_content %}
 <div class="player-detail-wrapper">
-    <!-- Sidebar with related players -->
     <div class="player-sidebar">
         <h3>All ({{ player.age_group }}) players</h3>
         <ul class="sidebar-player-list">
-            {# Loop through related players and show photo + link #}
             {% for related in related_players %}
                 <li>
                     <a href="{% url 'players_app:player_detail' related.id %}">
@@ -102,129 +90,145 @@
         </ul>
     </div>
 
-    <!-- Main content container -->
     <div class="player-profile-container">
-
-        <!-- Player Image (shared between Profile & Stats view) -->
         <div class="player-photo-centered">
             <img src="{{ player.photo.url }}" alt="{{ player.name }}">
         </div>
 
-        <!-- Toggle buttons: Profile | Stats -->
         <div class="toggle-buttons">
-            <button id="profileBtn" class="active">Profile</button>
+            <button id="profileBtn">Profile</button>
             <button id="statsBtn">Stats</button>
         </div>
 
-        <!-- Profile Section (default visible) -->
-        <div id="profileSection" class="section active">
+        <div id="profileSection" class="section">
             <div class="player-attributes-grid">
-                <div class="attribute-block">
-                    <p class="label">Position</p>
-                    <p class="value blue-text">{{ player.position }}</p>
-                </div>
-                <div class="attribute-block">
-                    <p class="label">Shirt</p>
-                    <p class="value blue-text">{{ player.jersey_number }}</p>
-                </div>
-                <div class="attribute-block">
-                    <p class="label">Birthdate</p>
-                    <p class="value blue-text">{{ player.birthdate }}</p>
-                </div>
-                <div class="attribute-block">
-                    <p class="label">Height</p>
-                    <p class="value blue-text">{{ player.height }} cm</p>
-                </div>
-                <div class="attribute-block">
-                    <p class="label">Weight</p>
-                    <p class="value blue-text">{{ player.weight }} kg</p>
-                </div>
-                <div class="attribute-block">
-                    <p class="label">Preferred Foot</p>
-                    <p class="value blue-text">{{ player.foot_preference }}</p>
-                </div>
+                <div class="attribute-block"><p class="label">Position</p><p class="value blue-text">{{ player.position }}</p></div>
+                <div class="attribute-block"><p class="label">Shirt</p><p class="value blue-text">{{ player.jersey_number }}</p></div>
+                <div class="attribute-block"><p class="label">Birthdate</p><p class="value blue-text">{{ player.birthdate }}</p></div>
+                <div class="attribute-block"><p class="label">Height</p><p class="value blue-text">{{ player.height }} cm</p></div>
+                <div class="attribute-block"><p class="label">Weight</p><p class="value blue-text">{{ player.weight }} kg</p></div>
+                <div class="attribute-block"><p class="label">Preferred Foot</p><p class="value blue-text">{{ player.foot_preference }}</p></div>
             </div>
-
-            {# Include timeline from matches app #}
             {% include "matches_app/player_timeline.html" %}
         </div>
 
-        <!-- Stats Section (hidden by default) -->
         <div id="statsSection" class="section">
-            
-            <!-- Filters for season and competition -->
             <div class="filter-container">
-                <select id="seasonFilter">
-                    <option value="all">All Seasons</option>
+                <select id="seasonFilter" name="season" onchange="applyFilters()">
+                    <option value="all" {% if selected_season == 'all' %}selected{% endif %}>All Seasons</option>
                     {% for season in seasons %}
-                        <option value="{{ season.id }}">{{ season.name }}</option>
+                        <option value="{{ season }}" {% if selected_season == season %}selected{% endif %}>{{ season }}</option>
                     {% endfor %}
                 </select>
-
-                <select id="competitionFilter">
-                    <option value="all">All Competitions</option>
+                <select id="competitionFilter" name="competition" onchange="applyFilters()">
+                    <option value="all" {% if selected_competition == 'all' %}selected{% endif %}>All Competitions</option>
                     {% for comp in competitions %}
-                        <option value="{{ comp.id }}">{{ comp.name }}</option>
+                        <option value="{{ comp }}" {% if selected_competition == comp %}selected{% endif %}>{{ comp }}</option>
                     {% endfor %}
                 </select>
             </div>
 
-            <!-- Stats Table -->
             <table class="stats-table">
                 <thead>
                     <tr>
                         <th>Competition</th>
-                        <th>Appearances</th>
-                        <th>Minutes</th>
+                        <th>Apps</th>
+                        <th>Mins</th>
                         <th>Goals</th>
                         <th>Assists</th>
+                        <th>Starts</th>
+                        <th>Sub In</th>
+                        <th>Sub Out</th>
+                        <th>Tackles Won</th>
+                        <th>Tackles Lost</th>
+                        <th>Yellow</th>
+                        <th>Red</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {# Loop through player stats per competition #}
-                    {% for stat in player_stats %}
-                    <tr>
-                        <td>{{ stat.competition__name }}</td>
-                        <td>{{ stat.appearances }}</td>
-                        <td>{{ stat.minutes }}</td>
-                        <td>{{ stat.goals }}</td>
-                        <td>{{ stat.assists }}</td>
-                    </tr>
-                    {% endfor %}
-                    
-                    {# Totals row #}
-                    <tr>
-                        <td><strong>Total</strong></td>
-                        <td><strong>{{ totals.appearances }}</strong></td>
-                        <td><strong>{{ totals.minutes }}</strong></td>
-                        <td><strong>{{ totals.goals }}</strong></td>
-                        <td><strong>{{ totals.assists }}</strong></td>
+                    {% if player_stats %}
+                        {% for stat in player_stats %}
+                        <tr>
+                            <td>{{ stat.competition }}</td>
+                            <td>{{ stat.appearances }}</td>
+                            <td>{{ stat.minutes }}</td>
+                            <td>{{ stat.goals }}</td>
+                            <td>{{ stat.assists }}</td>
+                            <td>{{ stat.starts }}</td>
+                            <td>{{ stat.sub_in }}</td>
+                            <td>{{ stat.sub_out }}</td>
+                            <td>{{ stat.tackles_won }}</td>
+                            <td>{{ stat.tackles_lost }}</td>
+                            <td>{{ stat.yellow_cards }}</td>
+                            <td>{{ stat.red_cards }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="12">No stats available.</td></tr>
+                    {% endif %}
+
+                    <tr style="font-weight: bold; background-color: #d9edf7;">
+                        <td>Total</td>
+                        <td>{{ totals.appearances }}</td>
+                        <td>{{ totals.minutes }}</td>
+                        <td>{{ totals.goals }}</td>
+                        <td>{{ totals.assists }}</td>
+                        <td>{{ totals.starts }}</td>
+                        <td>{{ totals.sub_in }}</td>
+                        <td>{{ totals.sub_out }}</td>
+                        <td>{{ totals.tackles_won }}</td>
+                        <td>{{ totals.tackles_lost }}</td>
+                        <td>{{ totals.yellow_cards }}</td>
+                        <td>{{ totals.red_cards }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
-
     </div>
 </div>
 
-<!-- Toggle logic (switch Profile <-> Stats) -->
 <script>
-document.getElementById("profileBtn").addEventListener("click", function() {
-    // Show profile, hide stats
-    document.getElementById("profileSection").classList.add("active");
-    document.getElementById("statsSection").classList.remove("active");
-    // Update button active state
-    this.classList.add("active");
-    document.getElementById("statsBtn").classList.remove("active");
-});
+    // Handles filters
+    function applyFilters() {
+        const season = document.getElementById('seasonFilter').value;
+        const competition = document.getElementById('competitionFilter').value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('season', season);
+        url.searchParams.set('competition', competition);
+        url.searchParams.set('tab', 'stats');  // Stay on stats tab
+        window.location.href = url.toString();
+    }
 
-document.getElementById("statsBtn").addEventListener("click", function() {
-    // Show stats, hide profile
-    document.getElementById("statsSection").classList.add("active");
-    document.getElementById("profileSection").classList.remove("active");
-    // Update button active state
-    this.classList.add("active");
-    document.getElementById("profileBtn").classList.remove("active");
-});
+    // Tab toggle
+    function showSection(tab) {
+        const profileBtn = document.getElementById("profileBtn");
+        const statsBtn = document.getElementById("statsBtn");
+        const profileSection = document.getElementById("profileSection");
+        const statsSection = document.getElementById("statsSection");
+
+        if (tab === 'stats') {
+            statsSection.classList.add("active");
+            profileSection.classList.remove("active");
+            statsBtn.classList.add("active");
+            profileBtn.classList.remove("active");
+        } else {
+            profileSection.classList.add("active");
+            statsSection.classList.remove("active");
+            profileBtn.classList.add("active");
+            statsBtn.classList.remove("active");
+        }
+    }
+
+    // Initialize tab on page load
+    document.addEventListener("DOMContentLoaded", function () {
+        showSection("{{ tab|default:'profile' }}");
+
+        document.getElementById("profileBtn").addEventListener("click", function () {
+            showSection('profile');
+        });
+
+        document.getElementById("statsBtn").addEventListener("click", function () {
+            showSection('stats');
+        });
+    });
 </script>
-{% endblock %}
