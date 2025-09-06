@@ -48,3 +48,34 @@ htmlcov/
 # Test cache or pytest files
 .cache/
 .pytest_cache/
+
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+
+# Django
+*.log
+*.pot
+*.pyc
+*.db
+
+# Virtual environment
+venv/
+env/
+my_env3/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secret settings
+*.env
+

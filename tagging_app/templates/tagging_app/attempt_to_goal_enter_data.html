@@ -176,12 +176,15 @@ function saveAttempt(outcome, playerId, deliveryType, assistPlayerId = null) {
   const payload = {
     match_id: matchId,
     player_id: playerId,
+    team_id: {{ our_team.id }},
     outcome,
     delivery_type: deliveryType,
     assist_by_id: assistPlayerId, 
     minute: Math.floor(timer / 60),
     second: timer % 60,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    is_own_goal: selectedOutcome === "Own Goal",
+    own_goal_for_id: {{ opponent_team.id|default:'null' }},
   };
 
   fetch("{% url 'tagging_app:save_attempt_to_goal' %}", {
@@ -205,6 +208,7 @@ function saveAttempt(outcome, playerId, deliveryType, assistPlayerId = null) {
     }
   });
 }
+
 
 window.onload = () => {
   timer = parseInt(sessionStorage.getItem('tagging-timer')) || 0;

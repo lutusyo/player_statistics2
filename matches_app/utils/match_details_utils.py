@@ -2,14 +2,27 @@ from collections import defaultdict
 from lineup_app.models import MatchLineup, POSITION_COORDS
 from tagging_app.models import AttemptToGoal
 from tagging_app.utils.pass_network_utils import get_pass_network_context
+from tagging_app.utils.attempt_to_goal_utils import get_match_full_context
+from tagging_app.utils.attempt_to_goal_utils_opp import get_opponent_goals_for_match
+
+
+
+
+
 
 def get_match_detail_context(match):
-    # Get all goals (On Target Goal)
+    # Get all goals: normal goals + own goals
     goals_qs = AttemptToGoal.objects.filter(
-        match=match, outcome='On Target Goal'
+        match=match,
+        outcome='On Target Goal'
     ).select_related('player', 'team', 'assist_by')
 
-    # Get player IDs for home and away teams
+    own_goals_qs = AttemptToGoal.objects.filter(
+        match=match,
+        is_own_goal=True
+    ).select_related('player', 'team')
+
+    # Player IDs for teams
     home_player_ids = MatchLineup.objects.filter(
         match=match, team=match.home_team
     ).values_list('player_id', flat=True)
@@ -18,8 +31,9 @@ def get_match_detail_context(match):
         match=match, team=match.away_team
     ).values_list('player_id', flat=True)
 
-    # Count goals for each team and build goal details list
     home_goals, away_goals, goals = 0, 0, []
+
+    # Normal goals
     for goal in goals_qs:
         if goal.player_id in home_player_ids:
             home_goals += 1
@@ -28,7 +42,6 @@ def get_match_detail_context(match):
             away_goals += 1
             team_name = match.away_team.name
         else:
-            # fallback by team_id
             if goal.team_id == match.home_team_id:
                 home_goals += 1
                 team_name = match.home_team.name
@@ -46,6 +59,32 @@ def get_match_detail_context(match):
             'is_own_goal': False,
             'team_name': team_name,
         })
+
+    # Own goals
+    for og in own_goals_qs:
+        if og.team_id == match.home_team_id:
+            # Home scored into their own net → away gets goal
+            away_goals += 1
+            scoring_team_name = match.away_team.name
+        elif og.team_id == match.away_team_id:
+            home_goals += 1
+            scoring_team_name = match.home_team.name
+        else:
+            scoring_team_name = "Unknown"
+
+        goals.append({
+            'minute': og.minute,
+            'second': og.second,
+            'scorer': og.player.name if og.player else "Unknown",
+            'assist_by': None,
+            'is_own_goal': True,
+            'team_name': scoring_team_name,
+        })
+
+    # … keep lineup, stats, pass context, etc. as you had …
+
+    
+
 
     # Prepare lineup with optional mirroring (away team mirrored)
     def prepare_lineup(team, mirror=False):
@@ -127,6 +166,9 @@ def get_match_detail_context(match):
 
     home_pass_stats = calculate_team_passing(home_player_ids)
     away_pass_stats = calculate_team_passing(away_player_ids)
+
+
+
 
     return {
         'lineup': lineup,

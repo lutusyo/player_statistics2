@@ -1,56 +1,33 @@
 from django.shortcuts import render, get_object_or_404
-from matches_app.models import Match
-from tagging_app.models import AttemptToGoal
-from gps_app.utils.gps_match_detail import get_gps_context  # ✅ Add this import
-#from .intro_page import get_match_result, REPORT_TITLES
+from gps_app.utils.gps_match_detail import get_gps_context
 from reports_app.utils.stats import get_match_stats
-from tagging_app.utils.attempt_to_goal_utils import get_attempt_to_goal_context
+from matches_app.models import Match
+from tagging_app.utils.attempt_to_goal_utils_opp import get_opponent_goals_for_match
+from tagging_app.utils.attempt_to_goal_utils import get_match_full_context
 
 
 
-def post_match_summary_view(request, match_id):
-    match = get_object_or_404(Match, id=match_id)
-    home_score, away_score, result = get_match_result(match)
-
-    # ✅ Get detailed attempt data
-
-    attempt_context = get_attempt_to_goal_context(match_id)
-    our_team_goals = AttemptToGoal.objects.filter(match=match, team=match.home_team, outcome='On Target Goal')
-    opponent_goals = AttemptToGoal.objects.filter(match=match, team=match.away_team, outcome='On Target Goal')
-
-    # Merge base match context
-    context = {
-        'match': match,
-        'home_team': match.home_team,
-        'away_team': match.away_team,
-        'our_team_goals': our_team_goals,
-        'opponent_goals': opponent_goals,
-        'result': result,
-        'title': REPORT_TITLES['post-match-summary'],
-        'company': 'Azam Fc Analyst',
-        'competition': match.competition_type,
-        'venue': match.venue,
-        'date': match.date,
-        'kickoff_time': match.time,
-        'season': match.season,
-        'match_number': match.match_number if hasattr(match, 'match_number') else None,
-    }
-
-    # ✅ Merge the attempt-to-goal context
-
-    # Filter our team's goals (On Target Goal)
-    #our_team_goals = attempt_context['our_team_attempts'].filter(outcome='On Target Goal')
 
 
+def get_dynamic_match_result(match, our_team_id):
+    """
+    Returns home_score, away_score, result string, and full context
+    based on get_match_full_context.
+    """
+    full_context = get_match_full_context(match.id, our_team_id)
+    our_team = full_context["our_team"]["obj"]
+    opponent_team = full_context["opponent_team"]["obj"]
 
-    context.update({
-    'our_team_goals': our_team_goals,
-    'opponent_goals': attempt_context['opponent_goals'],  # already present
-})
+    our_goals = full_context["our_team"]["aggregate"]["attempts"]["total_goals"]
+    opponent_goals = full_context["opponent_team"]["aggregate"]["attempts"]["total_goals"]
 
+    # Align scores with home/away
+    if match.home_team.id == our_team_id:
+        home_score, away_score = our_goals, opponent_goals
+    else:
+        home_score, away_score = opponent_goals, our_goals
 
-    return render(request, 'reports_app/intro_pages/post_match_summary.html', context)
-
+    return home_score, away_score, f"{home_score} - {away_score}", full_context
 
 
 def in_possession_view(request, match_id):
@@ -139,77 +116,21 @@ def individual_physical_view(request, match_id):
         **gps_context,
         **stats_context,
     }
-
     return render(request, 'reports_app/intro_pages/individual_physical.html', context)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Mapping slugs to proper titles
-REPORT_TITLES = {
-    'post-match-summary': 'POST MATCH SUMMARY REPORT',
-    'in-possession': 'IN POSSESSION',
-    'out-of-possession': 'OUT OF POSSESSION',
-    'goalkeeping': 'GOALKEEPING',
-    'set-plays': 'SET PLAYS',
-    'individual-in-possession': 'INDIVIDUAL DATA IN POSSESSION',
-    'individual-out-of-possession': 'INDIVIDUAL DATA OUT OF POSSESSION',
-    'individual-physical': 'INDIVIDUAL DATA PHYSICAL',
-}
-
-def get_match_goals(match):
-    """
-    Calculate goals for home and away using AttemptToGoal model.
-    Only counts goals with outcome 'On Target Goal'.
-    """
-    home_goals = AttemptToGoal.objects.filter(
-        match=match,
-        team=match.home_team,
-        outcome='On Target Goal'
-    ).count()
-    
-    away_goals = AttemptToGoal.objects.filter(
-        match=match,
-        team=match.away_team,
-        outcome='On Target Goal'
-    ).count()
-    
-    return home_goals, away_goals
-
-def get_match_result(match):
-    home_goals, away_goals = get_match_goals(match)
-    return home_goals, away_goals, f"{home_goals} - {away_goals}"
-
-def intro_page_view(request, match_id, report_type):
+def intro_page_view(request, match_id, report_type, our_team_id=None):
     match = get_object_or_404(Match, id=match_id)
 
-    # Handle unknown report_type
     if report_type not in REPORT_TITLES:
         return render(request, '404.html', status=404)
 
-    # Calculate goals and result
-    home_score, away_score, result = get_match_result(match)
+    # Default to home team if our_team_id not provided
+    if not our_team_id:
+        our_team_id = match.home_team.id
 
-    # Base context
+    home_score, away_score, result, _ = get_dynamic_match_result(match, our_team_id)
+
     context = {
         'match': match,
         'home_team': match.home_team,
@@ -222,7 +143,6 @@ def intro_page_view(request, match_id, report_type):
         'result': result,
     }
 
-    # Additional context for post-match summary
     if report_type == 'post-match-summary':
         context.update({
             'competition': match.competition_type,
@@ -232,7 +152,6 @@ def intro_page_view(request, match_id, report_type):
             'season': match.season,
         })
 
-    # ✅ Additional context for individual-physical report
     if report_type == 'individual-physical':
         gps_context = get_gps_context(match)
         context.update(gps_context)

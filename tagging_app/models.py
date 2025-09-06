@@ -15,29 +15,38 @@ class OutcomeChoices(models.TextChoices):
     ON_TARGET_GOAL = 'On Target Goal', 'On Target Goal'
     BLOCKED = 'Blocked', 'Blocked'
     PLAYER_ERROR = 'Player Error', 'Player Error'
+    OWN_GOAL = 'Own Goal', 'Own Goal'
 
 
     # ATTEMPT TO GOAL TAGGING
 class AttemptToGoal(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    player = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='attempts')
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)  # Team making the attempt
+    player = models.ForeignKey(
+        Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='attempts'
+    )
     minute = models.PositiveIntegerField(default=0)
     second = models.PositiveIntegerField(default=0)
     delivery_type = models.CharField(max_length=20, choices=DeliveryTypeChoices.choices)
     outcome = models.CharField(max_length=30, choices=OutcomeChoices.choices)
-    x = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="X position on pitch (0–100)")  # pitch zone
-    y = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Y position on pitch (0–100)")
+    x = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    y = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     assist_by = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='assists')
     pre_assist_by = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='pre_assists')
-    is_opponent = models.BooleanField(default=False, help_text="Was this attempt by the opponent?")
-
-    is_own_goal = models.BooleanField(default=False)  # ✅ NEW
+    
+    is_opponent = models.BooleanField(default=False, help_text='This was attempt made by opponent')
+    is_own_goal = models.BooleanField(default=False, help_text='Mark if this attempt is an own Goal')
+    own_goal_for = models.ForeignKey(
+        Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='benefited_from_own_goals',
+        help_text="If this is an own goal, which team benefits from it?"
+    )
 
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.player} | {self.outcome} | {self.minute}:{self.second:02d}"
+        player_name = self.player.name if self.player else "Unknown"
+        return f"{player_name} | {self.outcome} | {self.minute}:{self.second:02d}"
+
 
     # PASSING NETWORK
 class PassEvent(models.Model):

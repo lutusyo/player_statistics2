@@ -7,7 +7,7 @@ from teams_app.models import Team, AgeGroup
 from lineup_app.models import MatchLineup
 from matches_app.models import Match
 from matches_app.views.get_match_goals import get_match_goals
-from tagging_app.utils.attempt_to_goal_utils import get_attempt_to_goal_context
+from tagging_app.utils.attempt_to_goal_utils import get_match_full_context
 
 
 @login_required
@@ -27,11 +27,14 @@ def fixtures_view(request, team):
         # Check for lineup submitted by our team
         match.has_lineup = MatchLineup.objects.filter(match=match, team__in=our_teams).exists()
 
-        # Use updated utility function
-        context_data = get_attempt_to_goal_context(match.id)
+        # Use updated utility function for stats
+        # Select the team we control (our team)
+        our_team = match.home_team if match.home_team in our_teams else match.away_team
+        context_data = get_match_full_context(match.id, our_team.id)
 
-        match.opponent_goals = context_data['opponent_goals'].count()
-        match.our_team_goals = context_data['our_team_attempts'].filter(outcome='On Target Goal').count()
+        # Assign goals to match object
+        match.our_team_goals = context_data["our_team"]["aggregate"]["attempts"]["total_goals"]
+        match.opponent_goals = context_data["opponent_team"]["aggregate"]["attempts"]["total_goals"]
 
     context = {
         'team': team,
@@ -40,3 +43,6 @@ def fixtures_view(request, team):
         'active_tab': 'fixtures',
     }
     return render(request, 'matches_app/fixtures.html', context)
+
+
+

@@ -14,21 +14,18 @@
         <h1 style="font-size: 38px; font-weight: bold; margin: 0;">POST MATCH SUMMARY REPORT</h1>
     </div>
 
-
-
     <!-- Match Result and Teams -->
     <div style="display: flex; justify-content: center; align-items: center; font-size: 26px; font-weight: bold; margin-bottom: 30px;">
         <div style="text-align: right; margin-right: 40px; font-size: 18px;">
             {% if home_team.logo %}
-                <img src="{{ home_team.logo.url }}" alt="{{ home_team.name }}" style="height: 60px;"><br>
+                <img src="{% static 'goalkeeping_app/azamfc_logo.png' %}" alt="{{ home_team.name }}" style="height: 60px;"><br>
             {% endif %}
             {{ home_team.name }}
         </div>
 
         <div style="margin: 0 30px; font-size: 28px;">
-            {{ our_team_goals|length }} - {{ opponent_goals|length }}
+            {{ home_score }} - {{ away_score }}
         </div>
-
 
         <div style="text-align: left; margin-left: 40px; font-size: 18px;">
             {% if away_team.logo %}
@@ -37,8 +34,6 @@
             {{ away_team.name }}
         </div>
     </div>
-
-
 
     <!-- Match Info at Bottom Left -->
     <div style="position: absolute; bottom: 40px; left: 60px; font-size: 16px; line-height: 1.4; text-align: left;">
@@ -49,7 +44,6 @@
         {% if season %}<p>{{ season }}</p>{% endif %}
         {% if venue %}<p>{{ venue }}</p>{% endif %}
     </div>
+
 </div>
 {% endblock %}
-
-

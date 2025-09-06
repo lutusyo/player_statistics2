@@ -1,132 +1,136 @@
 from django.shortcuts import render, get_object_or_404
-from players_app.models import Player
-from matches_app.models import Match
-from lineup_app.models import MatchLineup
-from django.utils import timezone
-from django.http import JsonResponse, HttpResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
-import json
-from collections import defaultdict
+from django.views.decorators.http import require_GET
+from django.http import JsonResponse, HttpResponse, FileResponse
 from django.db.models import Count
-from tagging_app.models import AttemptToGoal, DeliveryTypeChoices, OutcomeChoices
-import traceback
-
-from tagging_app.models import PassEvent, GoalkeeperDistributionEvent
-from teams_app.models import Team
-
+import traceback, json, csv, io
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-import io
-import csv
-
-from collections import Counter
-from django.views.decorators.http import require_GET
-
-from django.shortcuts import render, get_object_or_404
-from collections import defaultdict
-from django.db.models import Count
+from lineup_app.models import MatchLineup
 from matches_app.models import Match
 from players_app.models import Player
-from tagging_app.models import AttemptToGoal  # Adjust if in different app
-from tagging_app.utils.attempt_to_goal_utils import get_attempt_to_goal_context
-from tagging_app.utils.attempt_to_goal_utils_opp import get_opponent_goals_for_match
+from teams_app.models import Team
+from tagging_app.models import AttemptToGoal, DeliveryTypeChoices, OutcomeChoices
+from tagging_app.utils.attempt_to_goal_utils import get_match_full_context
 
-from django.shortcuts import render
-from tagging_app.utils.attempt_to_goal_utils import get_attempt_to_goal_context
 
 
 def enter_attempt_to_goal(request, match_id):
     match = get_object_or_404(Match, id=match_id)
-    from django.db.models import Q
 
-    # Only players currently on the pitch
-    lineup = MatchLineup.objects.filter(match=match, time_in__isnull=False, time_out__isnull=True
-    ).select_related('player', 'team').order_by('order', 'player__name')
+    # Figure out our vs opponent team
+    # (replace with your logic if "our_team" is determined differently)
+    our_team = match.home_team  
+    opponent_team = match.away_team if match.home_team == our_team else match.home_team
+
+    lineup = MatchLineup.objects.filter(
+        match=match, time_in__isnull=False, time_out__isnull=True
+    ).select_related("player", "team").order_by("order", "player__name")
 
     players = [entry.player for entry in lineup]
-
-
-    player_positions_order = ['Forward', 'Midfielder', 'Defender']
-
 
     # Outcome counts per player
     outcome_counts = {}
     for player in players:
         counts = AttemptToGoal.objects.filter(player=player, match=match) \
-            .values('outcome') \
-            .annotate(count=Count('outcome'))
-        outcome_dict = {item['outcome']: item['count'] for item in counts}
-        outcome_dict['total'] = sum(outcome_dict.values())
+            .values("outcome").annotate(count=Count("outcome"))
+        outcome_dict = {item["outcome"]: item["count"] for item in counts}
+        outcome_dict["total"] = sum(outcome_dict.values())
         outcome_counts[player.id] = outcome_dict
 
-    # Total counts for outcomes (all players)
+    # Total counts for outcomes
     total_outcome_counts = AttemptToGoal.objects.filter(match=match) \
-        .values('outcome') \
-        .annotate(count=Count('outcome'))
-    total_outcome_dict = {item['outcome']: item['count'] for item in total_outcome_counts}
+        .values("outcome").annotate(count=Count("outcome"))
+    total_outcome_dict = {item["outcome"]: item["count"] for item in total_outcome_counts}
 
     context = {
-        'match': match,
-        'lineup': lineup,
-        'players': players,
-        'delivery_types': DeliveryTypeChoices.choices,
-        'outcomes': OutcomeChoices.choices,
-        'player_positions_order': player_positions_order,
-        'outcome_counts': outcome_counts,
-        'total_outcome_counts': total_outcome_dict,
+        "match": match,
+        "lineup": lineup,
+        "players": players,
+        "delivery_types": DeliveryTypeChoices.choices,
+        "outcomes": OutcomeChoices.choices,
+        "outcome_counts": outcome_counts,
+        "total_outcome_counts": total_outcome_dict,
+        "our_team": our_team,
+        "opponent_team": opponent_team,
     }
-
-    return render(request, 'tagging_app/attempt_to_goal_enter_data.html', context)
-
+    return render(request, "tagging_app/attempt_to_goal_enter_data.html", context)
 
 
 @csrf_exempt
 def save_attempt_to_goal(request):
-    if request.method == 'POST':
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        match = get_object_or_404(Match, id=data["match_id"])
+
+        player = Player.objects.filter(id=data.get("player_id")).first()
+        team = get_object_or_404(Team, id=data["team_id"])
+
+        # Own goal
+        is_own_goal = data.get("is_own_goal", False)
+        own_goal_for = Team.objects.filter(id=data.get("own_goal_for_id")).first()
+
+        AttemptToGoal.objects.create(
+            match=match,
+            player=player,
+            team=team,
+            outcome=data["outcome"],
+            delivery_type=data["delivery_type"],
+            assist_by_id=data.get("assist_by_id"),
+            pre_assist_by_id=data.get("pre_assist_by_id"),
+            minute=data["minute"],
+            second=data["second"],
+            is_own_goal=is_own_goal,
+            own_goal_for=own_goal_for,
+            is_opponent=data.get("is_opponent", False),
+            timestamp=data.get("timestamp"),
+        )
+
+        # Return updated outcome counts for this team
+        outcome_counts = (
+            AttemptToGoal.objects.filter(match=match, team=team)
+            .values("outcome")
+            .annotate(count=Count("outcome"))
+        )
+        outcome_dict = {row["outcome"]: row["count"] for row in outcome_counts}
+        outcome_dict["total"] = sum(outcome_dict.values())
+
+        return JsonResponse({"status": "ok", "updated_counts": outcome_dict})
+
+    except Exception as e:
+        traceback.print_exc()
+        return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+
+
+
+def attempt_to_goal_dashboard(request, match_id):
+    # Get the match
+    match = get_object_or_404(Match, id=match_id)
+
+    # Determine "our team"
+    # 1. Try GET parameter
+    our_team_id = request.GET.get("our_team_id")
+    if our_team_id:
         try:
-            data = json.loads(request.body)
-            match = get_object_or_404(Match, id=data['match_id'])
-            player = get_object_or_404(Player, id=data['player_id'])
+            our_team_id = int(our_team_id)
+        except ValueError:
+            # Invalid GET parameter, fallback to home_team
+            our_team_id = match.home_team.id
+    else:
+        # No GET parameter, fallback to home_team
+        our_team_id = match.home_team.id
 
-            lineup_entry = MatchLineup.objects.filter(match=match, player=player).first()
-            if not lineup_entry:
-                return JsonResponse({"status": "error", "message": "Player not found in match lineup"}, status=400)
+    # Call the utility with a valid team ID
+    context = get_match_full_context(match_id, our_team_id)
 
-            tag = AttemptToGoal.objects.create(
-                match=match,
-                player=player if not data.get('is_own_goal') else None,
-                team=lineup_entry.team,
-                minute=data['minute'],
-                second=data['second'],
-                outcome=data['outcome'],
-                delivery_type=data['delivery_type'],
-                assist_by_id=data.get('assist_by_id'),
-                pre_assist_by_id=data.get('pre_assist_by_id'),
-                is_own_goal=data.get('is_own_goal', False),
-                timestamp=data['timestamp']
-            )
+    return render(request, "tagging_app/attempt_to_goal_dashboard.html", context)
 
 
-            # Live outcome counts update
-            outcome_counts = AttemptToGoal.objects.filter(player=player, match=match) \
-                .values('outcome') \
-                .annotate(count=Count('outcome'))
-            outcome_dict = {item['outcome']: item['count'] for item in outcome_counts}
-            outcome_dict['total'] = sum(outcome_dict.values())
 
-            return JsonResponse({
-                "status": "ok",
-                "updated_counts": outcome_dict,
-                "player_id": player.id,
-                "player_name": player.name,
-                "event_time": f"{data['minute']:02}:{data['second']:02}"
-            })
-
-        except Exception as e:
-            traceback.print_exc()
-            return JsonResponse({"status": "error", "message": str(e)}, status=400)
-
-    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
 
 
@@ -145,28 +149,6 @@ def get_live_tagging_state(request, match_id):
         'timer': 0,  # You can later add a MatchTimer model here
         'events': data
     })
-
-
-
-
-
-
-
-
-def attempt_to_goal_dashboard(request, match_id):
-    
-    # Get full context using your utility
-    context = get_attempt_to_goal_context(match_id)
-
-    # Add opponent and our team goals to context
-    context['opponent_goals_count'] = context['opponent_goals'].count()
-    context['our_team_goals_count'] = context['our_team_attempts'].filter(outcome='On Target Goal').count()
-
-    return render(request, 'tagging_app/attempt_to_goal_dashboard.html', context)
-
-
-
-
 
 
 def export_attempt_to_goal_csv(request, match_id):
