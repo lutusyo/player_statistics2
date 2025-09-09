@@ -46,6 +46,7 @@
     border-radius: 6px;
     overflow: hidden;
     box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
   }
 
   .attempt-to-goal-dashboard thead {
@@ -105,17 +106,8 @@
   }
 </style>
 
-<!--<div class="attempt-to-goal-dashboard">
-  <h2>Top Scorers</h2>
-  <ul>
-    {% for player, goals in top_scorers %}
-      <li><strong>{{ player }}</strong>: {{ goals }} goal{{ goals|pluralize }}</li>
-    {% empty %}
-      <li>No goals recorded</li>
-    {% endfor %}
-  </ul>
-
-  <h2>Goal Attempts</h2>-->
+<div class="attempt-to-goal-dashboard">
+  <h2>Goal Attempts</h2>
   <table>
     <thead>
       <tr>
@@ -138,4 +130,61 @@
       {% endfor %}
     </tbody>
   </table>
+
+  <!-- ✅ Goals List Section -->
+  <h2>Goals</h2>
+<h2>Goals</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Minute</th>
+      <th>Scorer</th>
+      <th>Assist</th>
+      <th>Pre-Assist</th>
+      <th>Delivery Type</th>
+      <th>Own Goal</th>
+      <th>Team</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for g in goals %}
+      <tr>
+        <td data-label="Minute">
+          {{ g.minute }}{% if g.second %}:{{ g.second|stringformat:"02d" }}{% endif %}
+        </td>
+        <td data-label="Scorer">
+          {% if g.is_own_goal %}
+            🥅 Own Goal
+          {% elif g.player %}
+            {{ g.player.name }}
+          {% else %}
+            -
+          {% endif %}
+        </td>
+
+        <td data-label="Assist">
+          {% if g.assist_by %}{{ g.assist_by.name }}{% else %}-{% endif %}
+        </td>
+        <td data-label="Pre-Assist">
+          {% if g.pre_assist_by %}{{ g.pre_assist_by.name }}{% else %}-{% endif %}
+        </td>
+        <td data-label="Delivery Type">{{ g.get_delivery_type_display }}</td>
+        <td data-label="Own Goal">
+            {% if g.is_own_goal %}
+              ✅ Yes (for {{ g.own_goal_for.name }})
+            {% else %}
+              No
+            {% endif %}
+          </td>
+
+        <td data-label="Team">{{ g.team.name }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="7">No goals recorded</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
 </div>

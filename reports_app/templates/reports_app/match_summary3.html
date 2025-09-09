@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  body { font-family: Arial, sans-serif; margin: 15px; background: #f9f9f9; }
+  h1,h2 { margin-bottom:5px; }
+  .timer { background:#222;color:#eee;font-size:24px;font-weight:bold;padding:10px;width:180px;text-align:center;border-radius:5px;user-select:none;margin-bottom:15px; }
+  .btn { cursor:pointer;border:none;background-color:#007BFF;color:white;padding:7px 14px;border-radius:4px;margin-right:8px;font-size:14px;transition: background-color 0.2s ease; }
+  .btn:hover { background-color:#0056b3; }
+  .btn-secondary { background-color:#6c757d; }
+  .btn-secondary:hover { background-color:#4e555b; }
+  .lists-container { display:flex;flex-wrap:wrap;gap:20px; }
+  .list-box { background:white;border-radius:5px;padding:10px;flex:1 1 300px;max-width:350px;box-shadow:0 0 6px rgba(0,0,0,0.1); }
+  .list-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:8px; }
+  .player-list { max-height:350px;overflow-y:auto; }
+  .player-item { display:flex;align-items:center;border-bottom:1px solid #eee;padding:6px 4px; cursor:pointer; }
+  .player-item:last-child { border-bottom:none; }
+  .player-photo { width:36px;height:36px;border-radius:50%;object-fit:cover;margin-right:10px;border:1px solid #ddd; }
+  .player-info { flex-grow:1; }
+  .player-name { font-weight:600;font-size:15px; }
+  .player-jersey { font-size:13px;color:#666; }
+  .selection-highlight { background-color:#cce5ff; }
+  .hidden { display:none; }
+  .substitution-step { margin-top:20px;padding:15px;background:#e9f0ff;border-radius:5px; }
+  .time-input { width:60px;font-size:14px;padding:3px 6px;border:1px solid #aaa;border-radius:4px;margin-right:10px; }
+  .selected-player-display { display:flex;align-items:center;gap:15px;margin-bottom:10px; }
+  .selected-player-photo { width:50px;height:50px;border-radius:50%;object-fit:cover;border:1px solid #999; }
+  .error-message { color:red;margin-top:10px; }
+</style>
+</head>
+<body>
+
+
+
+<div class="lists-container">
+  <div class="list-box">
+    <div class="list-header"><strong>1) Currently On Pitch</strong></div>
+    <div class="player-list" id="list-currently_on_pitch"></div>
+  </div>
+
+  <div class="list-box">
+    <div class="list-header"><strong>2) Currently On Subs</strong></div>
+    <div class="player-list" id="list-currently_on_subs"></div>
+  </div>
+
+  <div class="list-box">
+    <div class="list-header"><strong>3) Bench (Static)</strong></div>
+    <div class="player-list" id="list-bench"></div>
+  </div>
+
+  <div class="list-box">
+    <div class="list-header"><strong>4) Already Played & Out</strong></div>
+    <div class="player-list" id="list-already_played_and_out"></div>
+  </div>
+
+  <div class="list-box">
+    <div class="list-header"><strong>5) Starting Eleven (Static)</strong></div>
+    <div class="player-list" id="list-starting_eleven"></div>
+  </div>
+
+  <div class="list-box">
+    <div class="list-header"><strong>6) Subs This Match</strong></div>
+    <div class="player-list" id="list-subs_this_match"></div>
+  </div>
+
+  <div class="list-box">
+    <div class="list-header"><strong>7) Player Exchanges (Substitutions)</strong></div>
+    <div class="player-list" id="list-subs_exchanges"></div>
+  </div>
+
+  <div class="list-box">
+    <div class="list-header"><strong>8) Subs But Didn't Play</strong></div>
+    <div class="player-list" id="list-subs_not_played"></div>
+  </div>
+</div>
+
+
+<div class="substitution-step" id="substitution-flow" style="display:none;">
+  <h3>Substitution in progress</h3>
+  <div id="step-1"><p>Select player <strong>going out</strong>:</p><div id="select-out-list" class="player-list"></div></div>
+  <div id="step-2" style="display:none;"><p>Selected <strong>out</strong> player:</p>
+    <div class="selected-player-display" id="selected-out-player"></div>
+    <label>Time Out (minute): <input type="number" id="time-out-input" class="time-input" min="0" max="120" /></label>
+    <button class="btn" id="confirm-out">Confirm Out</button>
+    <button class="btn btn-secondary" id="cancel-out">Cancel</button>
+  </div>
+  <div id="step-3" style="display:none;"><p>Select player <strong>coming in</strong>:</p><div id="select-in-list" class="player-list"></div></div>
+  <div id="step-4" style="display:none;"><p>Selected <strong>in</strong> player:</p>
+    <div class="selected-player-display" id="selected-in-player"></div>
+    <p>Time In is set to the Time Out of player going out (not editable)</p>
+    <button class="btn" id="confirm-in">Confirm In</button>
+    <button class="btn btn-secondary" id="cancel-in">Cancel</button>
+  </div>
+  <div class="error-message" id="error-msg"></div>
+</div>
+
+<button class="btn" id="start-substitution-btn">Start Substitution</button>
+
+<script>
+const matchId = {{ match.id }};
+const csrftoken = getCookie('csrftoken');
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        document.cookie.split(';').forEach(cookie => {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        });
+    }
+    return cookieValue;
+}
+
+// --- Load & render lists ---
+async function loadAllLists() {
+    try {
+        const resp = await fetch("{% url 'lineup_app:api_sub_lists' match.id %}");
+        const data = await resp.json();
+        renderList('currently_on_pitch', data.currently_on_pitch);
+        renderList('currently_on_subs', data.currently_on_subs);
+        renderList('bench', data.bench);
+        renderList('already_played_and_out', data.already_played_and_out);
+        renderList('starting_eleven', data.starting_eleven);
+        renderList('subs_this_match', data.subs_this_match);
+        renderSubsExchanges(data.subs_exchanges);
+        renderList('subs_not_played', data.subs_not_played);
+    } catch (err) { console.error("Error loading lists:", err); }
+}
+
+function renderList(listName, players) {
+    const container = document.getElementById('list-' + listName);
+    container.innerHTML = '';
+    if (!players.length) { container.innerHTML = '<em>No players</em>'; return; }
+    players.forEach(pl => {
+        const div = document.createElement('div');
+        div.className = 'player-item';
+        div.dataset.playerId = pl.player_id;
+        div.dataset.lineupId = pl.lineup_id || '';
+        div.innerHTML = `<img src="${pl.photo_url || 'https://via.placeholder.com/36'}" class="player-photo" />
+        <div class="player-info"><div class="player-name">${pl.name}</div><div class="player-jersey">#${pl.jersey_number || 'N/A'}</div></div>`;
+        container.appendChild(div);
+    });
+}
+
+function renderSubsExchanges(subs) {
+    const container = document.getElementById('list-subs_exchanges'); container.innerHTML = '';
+    if (!subs.length) { container.innerHTML = '<em>No substitutions yet</em>'; return; }
+    subs.forEach(sub => {
+        const div = document.createElement('div'); div.className='player-item';
+        div.innerHTML = `<img src="${sub.player_out_photo}" class="player-photo" /><div class="player-info"><strong>OUT:</strong> ${sub.player_out_name} (#${sub.player_out_jersey})</div>
+        <img src="${sub.player_in_photo}" class="player-photo" /><div class="player-info"><strong>IN:</strong> ${sub.player_in_name} (#${sub.player_in_jersey})</div>
+        <span style="margin-left:auto;">Min: ${sub.minute}</span>`; container.appendChild(div);
+    });
+}
+
+// --- Substitution flow ---
+let selectedOut = null, selectedIn = null;
+
+document.getElementById('start-substitution-btn').addEventListener('click', () => {
+    const flow = document.getElementById('substitution-flow');
+    flow.style.display='block'; 
+    document.getElementById('step-1').style.display='block';
+    document.getElementById('step-2').style.display='none';
+    document.getElementById('step-3').style.display='none';
+    document.getElementById('step-4').style.display='none';
+
+    const onPitch = document.getElementById('list-currently_on_pitch').cloneNode(true);
+    const list = document.getElementById('select-out-list');
+    list.innerHTML=''; 
+    onPitch.querySelectorAll('.player-item').forEach(div=>{
+        div.addEventListener('click', ()=> selectOutPlayer(div));
+    }); list.append(...onPitch.children);
+});
+
+function selectOutPlayer(div){
+    selectedOut = { playerId: div.dataset.playerId, lineupId: div.dataset.lineupId, name: div.querySelector('.player-name').textContent, photo: div.querySelector('img').src };
+    document.getElementById('step-1').style.display='none';
+    document.getElementById('step-2').style.display='block';
+    document.getElementById('selected-out-player').innerHTML=`<img src="${selectedOut.photo}" class="selected-player-photo"><div>${selectedOut.name}</div>`;
+}
+
+document.getElementById('confirm-out').addEventListener('click', ()=>{
+    const minute = parseInt(document.getElementById('time-out-input').value);
+    if(!minute || minute<0){ alert('Enter a valid minute!'); return; }
+    selectedOut.minute = minute; document.getElementById('step-2').style.display='none';
+    document.getElementById('step-3').style.display='block';
+    const inList = document.getElementById('list-currently_on_subs').cloneNode(true);
+    const selectIn = document.getElementById('select-in-list'); selectIn.innerHTML='';
+    inList.querySelectorAll('.player-item').forEach(div=>{ div.addEventListener('click', ()=> selectInPlayer(div)); });
+    selectIn.append(...inList.children);
+});
+
+function selectInPlayer(div){
+    selectedIn = { playerId: div.dataset.playerId, lineupId: div.dataset.lineupId, name: div.querySelector('.player-name').textContent, photo: div.querySelector('img').src };
+    document.getElementById('step-3').style.display='none'; document.getElementById('step-4').style.display='block';
+    document.getElementById('selected-in-player').innerHTML=`<img src="${selectedIn.photo}" class="selected-player-photo"><div>${selectedIn.name}</div>`;
+}
+
+document.getElementById('confirm-in').addEventListener('click', async ()=>{
+    if(!selectedOut || !selectedIn) return;
+    const success = await recordSubstitution(selectedOut.playerId, selectedIn.playerId, selectedOut.minute);
+    if(success){
+        document.getElementById('substitution-flow').style.display='none';
+        selectedOut=null; selectedIn=null;
+    }
+});
+
+// --- API calls ---
+async function recordSubstitution(playerOutId, playerInId, minute){
+    try{
+        const resp = await fetch("{% url 'lineup_app:api_finalize_substitution' match.id %}", {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json', 'X-CSRFToken': csrftoken },
+            body:JSON.stringify({ player_out_id:playerOutId, player_in_id:playerInId, minute:minute })
+        });
+        const data = await resp.json();
+        if(data.success){ alert("Substitution recorded successfully!"); loadAllLists(); return true; }
+        else { alert("Failed to record substitution: "+(data.error||'Unknown')); return false; }
+    }catch(err){ console.error(err); alert("Server error"); return false; }
+}
+
+// Toggle list visibility
+document.querySelectorAll('.btn-toggle').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+        const list = document.getElementById('list-'+btn.dataset.list);
+        list.classList.toggle('hidden');
+    });
+});
+
+// --- INIT ---
+document.addEventListener('DOMContentLoaded', ()=>{ loadAllLists(); });
+</script>
+</body>
+</html>

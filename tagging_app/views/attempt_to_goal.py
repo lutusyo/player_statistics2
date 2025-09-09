@@ -107,29 +107,69 @@ def save_attempt_to_goal(request):
 
 
 
+from django.db.models import Q
+
+from django.db.models import Count
+
 def attempt_to_goal_dashboard(request, match_id):
-    # Get the match
     match = get_object_or_404(Match, id=match_id)
 
-    # Determine "our team"
-    # 1. Try GET parameter
-    our_team_id = request.GET.get("our_team_id")
-    if our_team_id:
-        try:
-            our_team_id = int(our_team_id)
-        except ValueError:
-            # Invalid GET parameter, fallback to home_team
-            our_team_id = match.home_team.id
-    else:
-        # No GET parameter, fallback to home_team
+    our_team_id = request.GET.get("our_team_id") or match.home_team.id
+    try:
+        our_team_id = int(our_team_id)
+    except ValueError:
         our_team_id = match.home_team.id
 
-    # Call the utility with a valid team ID
     context = get_match_full_context(match_id, our_team_id)
+
+    # ✅ Players from the lineup
+    lineup = MatchLineup.objects.filter(match=match, team_id=our_team_id).select_related("player")
+    players = [entry.player for entry in lineup]
+
+    # ✅ Build outcomes_matrix (per player per outcome)
+    outcomes_matrix = {}
+    for player in players:
+        counts = (
+            AttemptToGoal.objects.filter(player=player, match=match)
+            .values("outcome")
+            .annotate(count=Count("outcome"))
+        )
+        outcomes_matrix[player.id] = {row["outcome"]: row["count"] for row in counts}
+
+    # ✅ Add goals
+    goals = AttemptToGoal.objects.filter(match=match).filter(
+        Q(outcome="On Target Goal") | Q(is_own_goal=True)
+    ).select_related("player", "assist_by", "pre_assist_by", "team", "own_goal_for").order_by("minute", "second")
+
+    # Update context
+    context.update({
+        "players": players,
+        "outcomes_matrix": outcomes_matrix,
+        "goals": goals,
+        "match": match,
+    })
 
     return render(request, "tagging_app/attempt_to_goal_dashboard.html", context)
 
 
+
+def goals_list(request, match_id):
+    match = get_object_or_404(Match, id=match_id)
+
+    # Goals = On Target Goal OR Own Goal
+    goals = AttemptToGoal.objects.filter(
+        match=match
+    ).filter(
+        Q(outcome="On Target Goal") | Q(is_own_goal=True)
+    ).select_related(
+        "player", "assist_by", "pre_assist_by", "team", "own_goal_for"
+    ).order_by("minute", "second")
+
+    context = {
+        "match": match,
+        "goals": goals,
+    }
+    return render(request, "tagging_app/goals_list.html", context)
 
 
 
@@ -201,3 +241,4 @@ def get_outcome_counts(request, match_id):
     counts_dict = {row['outcome']: row['count'] for row in outcome_counts}
 
     return JsonResponse(counts_dict)
+

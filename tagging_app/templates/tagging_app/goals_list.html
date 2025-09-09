@@ -1,0 +1,38 @@
+<h2>Goals - {{ match }}</h2>
+
+<table border="1" cellpadding="5">
+    <thead>
+        <tr>
+            <th>Minute</th>
+            <th>Scorer</th>
+            <th>Assist</th>
+            <th>Pre-Assist</th>
+            <th>Delivery Type</th>
+            <th>Own Goal</th>
+            <th>Team</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for g in goals %}
+        <tr>
+            <td>{{ g.minute }}{% if g.second %}:{{ g.second|stringformat:"02d" }}{% endif %}</td>
+            <td>{{ g.player.name if g.player }}</td>
+            <td>{% if g.assist_by %}{{ g.assist_by.name }}{% else %}-{% endif %}</td>
+            <td>{% if g.pre_assist_by %}{{ g.pre_assist_by.name }}{% else %}-{% endif %}</td>
+            <td>{{ g.get_delivery_type_display }}</td>
+            <td>
+                {% if g.is_own_goal %}
+                    Yes (for {{ g.own_goal_for.name }})
+                {% else %}
+                    No
+                {% endif %}
+            </td>
+            <td>{{ g.team.name }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">No goals recorded</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
