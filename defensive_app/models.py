@@ -23,7 +23,6 @@ class PlayerDefensiveStats(models.Model):
     foul_committed = models.PositiveIntegerField(default=0)
     foul_won = models.PositiveIntegerField(default=0)
 
-    corner = models.PositiveIntegerField(default=0)
     offside = models.PositiveIntegerField(default=0)
 
     yellow_card = models.PositiveIntegerField(default=0)

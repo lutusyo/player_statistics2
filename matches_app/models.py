@@ -34,6 +34,10 @@ class Match(models.Model):
     competition_type = models.CharField(max_length=50, choices=CompetitionType.choices)
     age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)
 
+        # Opponent team cards (for fouls won)
+    opponent_yellow_cards = models.PositiveIntegerField(default=0)
+    opponent_red_cards = models.PositiveIntegerField(default=0)
+
     # NEW FIELDS FOR CLOCK
     start_time = models.DateTimeField(null=True, blank=True, help_text="When the match actually started (UTC).")
     end_time = models.DateTimeField(null=True, blank=True, help_text="When the match ended (UTC).")

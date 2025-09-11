@@ -4,6 +4,8 @@ from tagging_app.views  import attempt_to_goal, goalkeeper_distribution, pass_ne
 from tagging_app import views
 from tagging_app.views import current_players
 
+from tagging_app.views.output.summary_key_statistics import summary_key_statistics_view
+
 app_name = 'tagging_app'
 
 urlpatterns = [
@@ -54,6 +56,12 @@ urlpatterns = [
     path('match/<int:match_id>/goalkeeper-distribution-dashboard/', goalkeeper_distribution.goalkeeper_distribution_dashboard, name='goalkeeper_distribution_dashboard'),
     path('match/<int:match_id>/csv/export-goalkeeper-distribution-csv/', goalkeeper_distribution.export_goalkeeper_distribution_csv, name='export_goalkeeper_distribution_csv'),
     path('match/<int:match_id>/pdf/export-goalkeeper-distribution-pdf/', goalkeeper_distribution.export_goalkeeper_distribution_pdf, name='export_goalkeeper_distribution_pdf'),
+
+
+    # All summary key statistics ( attempToGoal,Pass,Goalkeeper)
+    path("summary_key_statistics/<int:match_id>/", summary_key_statistics_view, name="summary_key_statistics"),
+
+
 ]
 
 

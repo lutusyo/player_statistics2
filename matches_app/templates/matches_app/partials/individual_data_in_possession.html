@@ -1,0 +1,34 @@
+
+
+<table border="1" cellpadding="6">
+    <tr>
+        <th>#</th>
+        <th>Player</th>
+        <th>Passes Attempted</th>
+        <th>Passes Completed</th>
+        <th>Pass %</th>
+        <th>Line Breaks Attempted</th>
+        <th>Line Breaks Completed</th>
+        <th>Line Break %</th>
+        <th>GK Dist Attempted</th>
+        <th>GK Dist Completed</th>
+        <th>Attempts at Goal</th>
+        <th>Goals</th>
+    </tr>
+    {% for s in stats %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ s.player.name }}</td>
+        <td>{{ s.passes_attempted }}</td>
+        <td>{{ s.passes_completed }}</td>
+        <td>{{ s.pass_completion }}%</td>
+        <td>{{ s.line_breaks_attempted }}</td>
+        <td>{{ s.line_breaks_completed }}</td>
+        <td>{{ s.line_break_completion }}%</td>
+        <td>{{ s.gk_dist_attempted }}</td>
+        <td>{{ s.gk_dist_completed }}</td>
+        <td>{{ s.attempts }}</td>
+        <td>{{ s.goals }}</td>
+    </tr>
+    {% endfor %}
+</table>

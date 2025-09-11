@@ -13,21 +13,24 @@
         <h2 style="color:#2C3E50; text-align: left;">Table of Contents</h2>
         <ul style="list-style-type:none; padding:0; text-align: left;">
             <li style="margin-bottom:20px;">
-                <a href="#match-summary" style="color:#2980B9; text-decoration:none; font-weight:bold;">
-                    1. Match Summary – Key Statistics
+
+                <a href="{% url 'tagging_app:summary_key_statistics' match.id %}"  style="color:#2980B9; text-decoration:none; font-weight:bold;">
+                    1. Match Summary - Key Statistics
                 </a>
                 <p style="margin:5px 0 15px 0; color:#555;">
                     An overview of key team-level stats like possession, xG, shots, and passing accuracy.
                 </p>
             </li>
+
             <li style="margin-bottom:20px;">
-                <a href="#in-possession" style="color:#2980B9; text-decoration:none; font-weight:bold;">
+                <a href="{% url 'tagging_app:attempt_to_goal_dashboard' match.id %}" style="color:#2980B9; text-decoration:none; font-weight:bold;">
                     2. IN POSSESSION
                 </a>
                 <p style="margin:5px 0 15px 0; color:#555;">
                     Team structure and patterns while in possession — including build-up play and progression.
                 </p>
             </li>
+
             <li style="margin-bottom:20px;">
                 <a href="#out-of-possession" style="color:#2980B9; text-decoration:none; font-weight:bold;">
                     3. OUT OF POSSESSION
@@ -53,7 +56,7 @@
                 </p>
             </li>
             <li style="margin-bottom:20px;">
-                <a href="#individual-in-possession" style="color:#2980B9; text-decoration:none; font-weight:bold;">
+                <a href="{% url 'matches_app:individual_data_in_possession' match.id %}"  style="color:#2980B9; text-decoration:none; font-weight:bold;"">
                     6. INDIVIDUAL DATA IN POSSESSION
                 </a>
                 <p style="margin:5px 0 15px 0; color:#555;">

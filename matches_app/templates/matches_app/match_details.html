@@ -387,10 +387,13 @@ table tbody tr:hover {
 
 <!-- External Analytics Links -->
 <div class="text-center">
-    <a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" class="btn btn-primary m-1">📊 View Pass Network</a>
-    <a href="{% url 'tagging_app:attempt_to_goal_dashboard' match.id %}" class="btn btn-primary m-1">📊 View Goal Attempts</a>
-    <a href="{% url 'tagging_app:goalkeeper_distribution_dashboard' match.id %}" class="btn btn-primary m-1">📊 View Goalkeeping Distribution</a>
-    <a href="{% url 'defensive_app:defensive_summary' match.id %}" class="btn btn-primary m-1">📊 View Other Statistics</a>
+
+    <a href="{% url 'tagging_app:summary_key_statistics' match.id %}"  class="btn btn-primary m-1">Match Summary - Key Statistics</a>
+    <a href="{% url 'matches_app:individual_data_in_possession' match.id %}"  class="btn btn-primary m-1">Individual data in possession</a>
+    <a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" class="btn btn-primary m-1"> Pass Network</a>
+    <a href="{% url 'tagging_app:attempt_to_goal_dashboard' match.id %}" class="btn btn-primary m-1"> Goal Attempts</a>
+    <a href="{% url 'tagging_app:goalkeeper_distribution_dashboard' match.id %}" class="btn btn-primary m-1"> Goalkeeping Distribution</a>
+    <a href="{% url 'defensive_app:defensive_summary' match.id %}" class="btn btn-primary m-1"> Other Statistics</a>
 </div>
 
 <!-- Scripts -->

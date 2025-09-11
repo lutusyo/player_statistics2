@@ -1,7 +1,17 @@
 from . import views
 from django.urls import path
-from matches_app.views import  career_stage, fixture_view, get_match_goals, match_detail, player_statistics, result_view, table_view, team_dashboard
+from matches_app.views import  ( 
+    career_stage, fixture_view, 
+    get_match_goals, 
+    match_detail, 
+    player_statistics, 
+    result_view, table_view, 
+    team_dashboard, 
+    individual_data_in_possession
+)
+
 from lineup_app.views import lineup_bila_uwanja, substitution, match_lineup_view_with_uwanja
+from matches_app.views import individual_data_in_possession
 
 from lineup_app.views.substitution import (
     substitution_panel,
@@ -13,8 +23,6 @@ from lineup_app.views.substitution import (
 app_name = 'matches_app'
 
 urlpatterns = [
-
-    
 
     ## API endpoints for substitution
 
@@ -41,6 +49,14 @@ urlpatterns = [
     path('match/<int:match_id>/', match_detail.match_detail, name='match_detail'),
 
     #path('match/<int:match_id>/add-goal/', views.add_goal, name='add_goal'),
+
+    path(
+    "match/<int:match_id>/individual-data-in-possession/",
+    individual_data_in_possession.individual_data_in_possession_view,
+    name="individual_data_in_possession",
+),
+
+
 ]
 
 

@@ -6,6 +6,8 @@ from reports_app.utils.stats import get_match_stats
 from tagging_app.utils.pass_network_utils import get_pass_network_context
 from matches_app.utils.match_details_utils import get_match_detail_context
 
+from tagging_app.services.summary_key_statistics import get_match_summary
+
 
 def full_report_view(request, match_id, our_team_id):
     match = get_object_or_404(Match, id=match_id)
@@ -61,3 +63,8 @@ def full_report_view(request, match_id, our_team_id):
     context.update(get_match_detail_context(match))
 
     return render(request, 'reports_app/full_report.html', context)
+
+
+
+
+
