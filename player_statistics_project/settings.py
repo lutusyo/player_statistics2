@@ -147,14 +147,13 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
 # MEDIA settings
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media_player_statistics2/'
+MEDIA_ROOT = '/home/afcportal/public_html/media_player_statistics2'
 
-
-
-#STATIC_URL = '/static_player_statistics2/'
-STATIC_URL = '/static/'
+STATIC_URL = '/static_player_statistics2/'
+#STATIC_URL = '/static/'
 STATIC_ROOT = '/home/afcportal/public_html/static_player_statistics2/'
 
 
