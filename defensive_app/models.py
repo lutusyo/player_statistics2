@@ -31,5 +31,8 @@ class PlayerDefensiveStats(models.Model):
     line_breaks_completed = models.IntegerField(default=0)
     defensive_line_breaks = models.IntegerField(default=0)
 
+    corner = models.PositiveIntegerField(default=0)
+
+
     def __str__(self):
         return f"{self.player.name} - {self.match}"

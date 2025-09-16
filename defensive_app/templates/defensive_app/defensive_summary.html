@@ -2,8 +2,33 @@
 {% load defensive_custom_filters %}
 
 {% block content %}
-<h2>Out of possession</h2>
+<h2>Out of Possession - Defensive Summary</h2>
 
+<!-- Fouls & Card Outcome Table -->
+<table border="1" cellspacing="0" cellpadding="5" style="width:100%; border-collapse: collapse; margin-bottom:20px;">
+    <thead>
+        <tr style="background-color:#007bff; color:white;">
+            <th>Player</th>
+            <th>Fouls Committed</th>
+            <th>Fouls Won</th>
+            <th>Card Outcome</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for stat in players_stats %}
+        <tr>
+            <td>{{ stat.player.name }}</td>
+            <td>{{ stat.foul_committed }}</td>
+            <td>{{ stat.foul_won }}</td>
+            <td>{{ stat.card_outcome }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No data available</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Full Event Table -->
 <table border="1" cellspacing="0" cellpadding="5" style="width:100%; border-collapse: collapse;">
     <thead>
         <tr style="background-color:#007bff; color:white;">
@@ -11,18 +36,20 @@
             {% for field, label in event_fields %}
                 <th>{{ label }}</th>
             {% endfor %}
+            <th>Card Outcome</th>
         </tr>
     </thead>
     <tbody>
-        {% for stat in stats %}
+        {% for stat in players_stats %}
             <tr>
                 <td>{{ stat.player.name }}</td>
                 {% for field, label in event_fields %}
                     <td>{{ stat|attr:field }}</td>
                 {% endfor %}
+                <td>{{ stat.card_outcome }}</td>
             </tr>
         {% empty %}
-            <tr><td colspan="{{ event_fields|length|add:'1' }}">No data available</td></tr>
+            <tr><td colspan="{{ event_fields|length|add:'2' }}">No data available</td></tr>
         {% endfor %}
     </tbody>
 </table>

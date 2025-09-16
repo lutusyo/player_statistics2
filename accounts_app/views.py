@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from teams_app.models import Team
 
 
+
 def index(request):
     team = Team.objects.filter(age_group__code='U20', team_type='OUR_TEAM').first()
 
@@ -25,3 +26,10 @@ def signup_view(request):
     else:
         form = UserCreationForm()
     return render(request, 'accounts_app/signup.html', {'form': form})
+
+
+
+@login_required
+def data_analyst_responsibilities(request):
+    return render(request, "data_analyst/responsibilities.html")
+

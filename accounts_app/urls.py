@@ -2,11 +2,15 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from accounts_app.forms import CustomLoginForm
 from . import views
+from django.urls import path
+from .views import data_analyst_responsibilities
 
 app_name = 'accounts_app'
 
 urlpatterns = [
-
+    
+    # My responsibilities
+    path("secret-data-analyst-tasks-2025/", data_analyst_responsibilities, name="data_analyst_responsibilities"),
     
     path('', views.index, name='home'),
 

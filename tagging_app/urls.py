@@ -5,10 +5,23 @@ from tagging_app import views
 from tagging_app.views import current_players
 
 from tagging_app.views.output.summary_key_statistics import summary_key_statistics_view
+from tagging_app.views.output import full_report, match_summary3, table_of_contents, post_match_summary
 
 app_name = 'tagging_app'
 
 urlpatterns = [
+
+    path("full-report/<int:match_id>/<int:our_team_id>/", full_report.full_report_view, name="full_report"),
+
+    #table of contents
+    path("table-of-contents/<int:match_id>/<int:our_team_id>/", table_of_contents.table_of_contents_view, name="report_cover"),
+
+    path('intro/post-match-summary/<int:match_id>/<int:our_team_id>/', post_match_summary.full_match_context_view, name='post_match_summary'),
+
+    # kikosi
+    path('match-summary/<int:match_id>/<int:team_id>/', match_summary3.match_summary_view, name='match_summary'),
+
+
     path('api_current_on_field_players/<int:match_id>/', current_players.api_current_on_field_players, name='api_current_on_field_players'),
     #path("current_players/<int:match_id>/", current_players.api_current_on_field_players, name="api_current_players"),
     path("match/<int:match_id>/api/outcome-counts/", attempt_to_goal.get_outcome_counts, name="get_outcome_counts"),

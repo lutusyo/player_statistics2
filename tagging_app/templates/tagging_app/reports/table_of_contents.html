@@ -12,19 +12,42 @@
     <nav>
         <h2 style="color:#2C3E50; text-align: left;">Table of Contents</h2>
         <ul style="list-style-type:none; padding:0; text-align: left;">
+
+
+            <li style="margin-bottom:20px;">
+                <a href="{% url 'tagging_app:post_match_summary' match.id match.home_team.id %}"  style="color:#2980B9; text-decoration:none; font-weight:bold;">
+                    1. Post Match Summary Report
+                </a>
+                <p style="margin:5px 0 15px 0; color:#555;">
+                    An overview of Match Details
+                </p>
+            </li>
+
+            <li style="margin-bottom:20px;">
+                <a href="{% url 'tagging_app:match_summary' match.id match.home_team.id %}"  style="color:#2980B9; text-decoration:none; font-weight:bold;">
+                    2. Match Summary - Team
+                </a>
+                <p style="margin:5px 0 15px 0; color:#555;">
+                    An overview of Team first eleven and substitution
+                </p>
+            </li>
+
             <li style="margin-bottom:20px;">
 
                 <a href="{% url 'tagging_app:summary_key_statistics' match.id %}"  style="color:#2980B9; text-decoration:none; font-weight:bold;">
-                    1. Match Summary - Key Statistics
+                    3. Match Summary - Key Statistics
                 </a>
                 <p style="margin:5px 0 15px 0; color:#555;">
                     An overview of key team-level stats like possession, xG, shots, and passing accuracy.
                 </p>
             </li>
 
+
+
+
             <li style="margin-bottom:20px;">
                 <a href="{% url 'tagging_app:attempt_to_goal_dashboard' match.id %}" style="color:#2980B9; text-decoration:none; font-weight:bold;">
-                    2. IN POSSESSION
+                    4. IN POSSESSION
                 </a>
                 <p style="margin:5px 0 15px 0; color:#555;">
                     Team structure and patterns while in possession — including build-up play and progression.
@@ -33,7 +56,7 @@
 
             <li style="margin-bottom:20px;">
                 <a href="#out-of-possession" style="color:#2980B9; text-decoration:none; font-weight:bold;">
-                    3. OUT OF POSSESSION
+                    5. OUT OF POSSESSION
                 </a>
                 <p style="margin:5px 0 15px 0; color:#555;">
                     Defensive shape, pressing actions, and strategies when the team is without the ball.
@@ -41,7 +64,7 @@
             </li>
             <li style="margin-bottom:20px;">
                 <a href="#goalkeeping" style="color:#2980B9; text-decoration:none; font-weight:bold;">
-                    4. GOALKEEPING
+                    6. GOALKEEPING
                 </a>
                 <p style="margin:5px 0 15px 0; color:#555;">
                     Analysis of goalkeeper performance — saves, distribution, and positioning.
@@ -49,7 +72,7 @@
             </li>
             <li style="margin-bottom:20px;">
                 <a href="#set-plays" style="color:#2980B9; text-decoration:none; font-weight:bold;">
-                    5. SET PLAYS
+                    7. SET PLAYS
                 </a>
                 <p style="margin:5px 0 15px 0; color:#555;">
                     Effectiveness of offensive and defensive set pieces like corners and free kicks.
@@ -57,7 +80,7 @@
             </li>
             <li style="margin-bottom:20px;">
                 <a href="{% url 'matches_app:individual_data_in_possession' match.id %}"  style="color:#2980B9; text-decoration:none; font-weight:bold;"">
-                    6. INDIVIDUAL DATA IN POSSESSION
+                    8. INDIVIDUAL DATA IN POSSESSION
                 </a>
                 <p style="margin:5px 0 15px 0; color:#555;">
                     Player-level metrics in possession — passing, dribbles, and chances created.
@@ -65,7 +88,7 @@
             </li>
             <li style="margin-bottom:20px;">
                 <a href="#individual-out-of-possession" style="color:#2980B9; text-decoration:none; font-weight:bold;">
-                    7. INDIVIDUAL DATA OUT OF POSSESSION
+                    9. INDIVIDUAL DATA OUT OF POSSESSION
                 </a>
                 <p style="margin:5px 0 15px 0; color:#555;">
                     Defensive contributions per player — tackles, interceptions, and recoveries.
@@ -73,7 +96,7 @@
             </li>
             <li style="margin-bottom:20px;">
                 <a href="#individual-physical" style="color:#2980B9; text-decoration:none; font-weight:bold;">
-                    8. INDIVIDUAL DATA PHYSICAL
+                    10. INDIVIDUAL DATA PHYSICAL
                 </a>
                 <p style="margin:5px 0 15px 0; color:#555;">
                     Physical outputs like total distance, sprints, and high-intensity efforts.

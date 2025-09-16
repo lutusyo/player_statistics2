@@ -126,6 +126,17 @@
                         </section>
                     </div>
                 </div>
+
+                <div>
+                        {% if user.is_authenticated and user.is_superuser %}
+                            <p>
+                                <a href="{% url 'accounts_app:data_analyst_responsibilities' %}" target="_blank">
+                                    d-dp
+                                </a>
+                            </p>
+                        {% endif %}
+                </div>
+
             </footer>
         </div>
     </div>
