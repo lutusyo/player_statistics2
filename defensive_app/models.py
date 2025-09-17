@@ -34,5 +34,21 @@ class PlayerDefensiveStats(models.Model):
     corner = models.PositiveIntegerField(default=0)
 
 
+
+    @property
+    def card_outcome(self):
+        if self.red_card > 0:
+            return "Red"
+        elif self.yellow_card >= 2:
+            return "Second Yellow → Red"
+        elif self.yellow_card == 1:
+            return "Yellow"
+        return "None"
+
+
+
+
     def __str__(self):
         return f"{self.player.name} - {self.match}"
+    
+

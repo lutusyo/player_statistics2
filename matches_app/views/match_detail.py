@@ -16,6 +16,7 @@ def match_detail(request, match_id):
     # Base context
     context = {
         'match': match,
+        'our_team_id': our_team_id,
     }
 
     # Get match details context (lineups, h2h, goals, etc.)

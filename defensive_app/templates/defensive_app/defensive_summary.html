@@ -2,55 +2,139 @@
 {% load defensive_custom_filters %}
 
 {% block content %}
-<h2>Out of Possession - Defensive Summary</h2>
+<h2 style="text-align:center;">Discipline Summary & Defensive Actions</h2>
 
-<!-- Fouls & Card Outcome Table -->
-<table border="1" cellspacing="0" cellpadding="5" style="width:100%; border-collapse: collapse; margin-bottom:20px;">
-    <thead>
-        <tr style="background-color:#007bff; color:white;">
-            <th>Player</th>
-            <th>Fouls Committed</th>
-            <th>Fouls Won</th>
-            <th>Card Outcome</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for stat in players_stats %}
-        <tr>
-            <td>{{ stat.player.name }}</td>
-            <td>{{ stat.foul_committed }}</td>
-            <td>{{ stat.foul_won }}</td>
-            <td>{{ stat.card_outcome }}</td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="4">No data available</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<!-- Full Event Table -->
-<table border="1" cellspacing="0" cellpadding="5" style="width:100%; border-collapse: collapse;">
-    <thead>
-        <tr style="background-color:#007bff; color:white;">
-            <th>Player</th>
-            {% for field, label in event_fields %}
-                <th>{{ label }}</th>
-            {% endfor %}
-            <th>Card Outcome</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for stat in players_stats %}
-            <tr>
-                <td>{{ stat.player.name }}</td>
-                {% for field, label in event_fields %}
-                    <td>{{ stat|attr:field }}</td>
-                {% endfor %}
-                <td>{{ stat.card_outcome }}</td>
+<!-- 1️⃣ Fouls & Card Outcome Table -->
+<div style="display:flex; justify-content:center; margin-bottom:30px;">
+    <table style="width:60%; border-collapse: collapse; font-size:14px; text-align:center;">
+        <thead>
+            <tr style="background-color:#007bff; color:white;">
+                <th style="padding:6px;">Player</th>
+                <th style="padding:6px;">Fouls Committed</th>
+                <th style="padding:6px;">Fouls Won</th>
+                <th style="padding:6px;">Card Outcome</th>
             </tr>
-        {% empty %}
-            <tr><td colspan="{{ event_fields|length|add:'2' }}">No data available</td></tr>
-        {% endfor %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% for stat in players_stats %}
+                {% if stat.foul_committed or stat.foul_won or stat.yellow_card or stat.red_card %}
+                <tr style="border-bottom:1px solid #ddd;">
+                    <td>{{ stat.player.name }}</td>
+                    <td>{{ stat.foul_committed }}</td>
+                    <td>{{ stat.foul_won }}</td>
+                    <td>
+                        {% if stat.red_card > 0 %}
+                            <span style="display:inline-block; width:14px; height:20px; background:red; border:1px solid #333;"></span>
+                        {% elif stat.yellow_card > 0 %}
+                            <span style="display:inline-block; width:14px; height:20px; background:yellow; border:1px solid #333;"></span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endif %}
+            {% empty %}
+                <tr><td colspan="4">No data available</td></tr>
+            {% endfor %}
+
+            <!-- Totals row -->
+            <tr style="font-weight:bold; background:#f2f2f2;">
+                <td>Total</td>
+                <td>{{ players_stats|sum_attr:"foul_committed" }}</td>
+                <td>{{ players_stats|sum_attr:"foul_won" }}</td>
+                <td>
+                    🟨 {{ players_stats|sum_attr:"yellow_card" }} |
+                    🔴 {{ players_stats|sum_attr:"red_card" }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- 2️⃣ Full Event Tables (stacked vertically) -->
+<div style="display:block; margin-top:20px; text-align:center;">
+    
+    <!-- First Table -->
+    <table style="width:70%; margin:auto; border-collapse: collapse; font-size:13px; text-align:center; margin-bottom:25px;">
+        <thead>
+            <tr style="background-color:#007bff; color:white;">
+                <th>Player</th>
+                <th>Aerial Duel Won</th>
+                <th>Aerial Duel Lost</th>
+                <th>Tackle Won</th>
+                <th>Tackle Lost</th>
+                <th>Physical Duel Won</th>
+                <th>Physical Duel Lost</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in players_stats %}
+                <tr style="border-bottom:1px solid #eee;">
+                    <td>{{ stat.player.name }}</td>
+                    <td>{{ stat.aerial_duel_won }}</td>
+                    <td>{{ stat.aerial_duel_lost }}</td>
+                    <td>{{ stat.tackle_won }}</td>
+                    <td>{{ stat.tackle_lost }}</td>
+                    <td>{{ stat.physical_duel_won }}</td>
+                    <td>{{ stat.physical_duel_lost }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="7">No data available</td></tr>
+            {% endfor %}
+
+            <!-- Totals -->
+            <tr style="font-weight:bold; background:#f9f9f9;">
+                <td>Total</td>
+                <td>{{ players_stats|sum_attr:"aerial_duel_won" }}</td>
+                <td>{{ players_stats|sum_attr:"aerial_duel_lost" }}</td>
+                <td>{{ players_stats|sum_attr:"tackle_won" }}</td>
+                <td>{{ players_stats|sum_attr:"tackle_lost" }}</td>
+                <td>{{ players_stats|sum_attr:"physical_duel_won" }}</td>
+                <td>{{ players_stats|sum_attr:"physical_duel_lost" }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Second Table -->
+    <table style="width:70%; margin:auto; border-collapse: collapse; font-size:13px; text-align:center;">
+        <thead>
+            <tr style="background-color:#007bff; color:white;">
+                <th>Player</th>
+                <th>1v1 Duel Won (Att)</th>
+                <th>1v1 Duel Lost (Att)</th>
+                <th>1v1 Duel Won (Def)</th>
+                <th>1v1 Duel Lost (Def)</th>
+                <th>Corner</th>
+                <th>Offside</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in players_stats %}
+                <tr style="border-bottom:1px solid #eee;">
+                    <td>{{ stat.player.name }}</td>
+                    <td>{{ stat.duel_1v1_won_att }}</td>
+                    <td>{{ stat.duel_1v1_lost_att }}</td>
+                    <td>{{ stat.duel_1v1_won_def }}</td>
+                    <td>{{ stat.duel_1v1_lost_def }}</td>
+                    <td>{{ stat.corner }}</td>
+                    <td>{{ stat.offside }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="7">No data available</td></tr>
+            {% endfor %}
+
+            <!-- Totals -->
+            <tr style="font-weight:bold; background:#f9f9f9;">
+                <td>Total</td>
+                <td>{{ players_stats|sum_attr:"duel_1v1_won_att" }}</td>
+                <td>{{ players_stats|sum_attr:"duel_1v1_lost_att" }}</td>
+                <td>{{ players_stats|sum_attr:"duel_1v1_won_def" }}</td>
+                <td>{{ players_stats|sum_attr:"duel_1v1_lost_def" }}</td>
+                <td>{{ players_stats|sum_attr:"corner" }}</td>
+                <td>{{ players_stats|sum_attr:"offside" }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
 {% endblock %}

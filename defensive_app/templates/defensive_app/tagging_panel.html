@@ -131,9 +131,12 @@ document.querySelectorAll('.card-btn').forEach(btn => {
 
 function saveEvent(playerId, event, card) {
     let time = new Date().toISOString();
-    fetch("{% url 'defensive_app:record_event' match.id %}", {
+    fetch(`/defensive/{{ match.id }}/record/`, {   // ✅ Corrected URL
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+        headers: { 
+            'Content-Type': 'application/json', 
+            'X-CSRFToken': '{{ csrf_token }}' 
+        },
         body: JSON.stringify({ player_id: playerId, event: event, card: card, time: time })
     })
     .then(res => res.json())
