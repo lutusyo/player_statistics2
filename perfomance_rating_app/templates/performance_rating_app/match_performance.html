@@ -1,57 +1,312 @@
-<!-- performance_rating_app/templates/performance_rating_app/match_performance.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Player Performance - {{ match }}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta charset="utf-8">
+    <title>Match Performance — {{ match }}</title>
+
+    <!-- Font Awesome for stars -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            margin: 20px;
+            color: #222;
+            background: #f8fafc;
+        }
+
+        h1 { margin-bottom: 10px; }
+        .sub { color: #666; margin-bottom: 18px; }
+
+        .ratings-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.07);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .ratings-table thead th {
+            background: linear-gradient(180deg,#0d6efd, #0b5ed7);
+            color: white;
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 13px;
+
+            /* 👇 make sticky */
+            position: sticky;
+            top: 0;
+            z-index: 2; /* stays above rows */
+        }
+
+
+        .ratings-table tbody td {
+            padding: 10px;
+            border-bottom: 1px solid #eef2f6;
+            vertical-align: middle;
+        }
+
+        .player-name {
+            display:flex;
+            gap:12px;
+            align-items:center;
+        }
+        .player-thumb {
+            width:44px;height:44px;border-radius:8px;object-fit:cover;border:1px solid #eee;
+        }
+        .player-name .name { font-weight:700; font-size:14px; }
+
+        /* star styles */
+        .stars { display:inline-block; vertical-align: middle; }
+        .star { margin-right:4px; font-size:16px; }
+        .star.empty { color: #e9ecef; } /* visible empty star; change to #fff if you want pure white */
+        .star.green { color: #28a745; }
+        .star.teal { color: #17a2b8; }
+        .star.yellow { color: #f1c40f; }
+        .star.orange { color: #ff8c00; }
+        .star.red { color: #dc3545; }
+
+        /* hover row highlight */
+        .ratings-table tbody tr:hover { background: #f3f8ff; cursor: pointer; }
+
+
+
+        .layout { 
+            display: grid; 
+            grid-template-columns: 1fr 360px; 
+            gap: 20px; 
+            align-items: start; 
+        }
+
+        /* Make radar preview sticky on desktop */
+        .preview-card {
+            position: sticky;
+            top: 20px; /* stays visible while scrolling */
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+            min-height: 400px;
+        }
+
+        /* Chart sizing */
+        #radarPreview {
+            display: block;
+            width: 100% !important;
+            height: 360px !important;
+            margin-top: 10px;
+        }
+
+        /* Responsive for mobile */
+        @media (max-width: 980px) {
+            .layout { 
+                grid-template-columns: 1fr; 
+            }
+            .preview-card { 
+                order: -1; 
+                position: relative; /* no sticky on mobile */
+                top: auto;
+                margin-bottom: 20px;
+            }
+        }
+
+    </style>
 </head>
 <body>
-    <h1>Performance Ratings for {{ match }}</h1>
-    
-    <h2>Player Ratings</h2>
-    <div>
-        {% for rating in ratings %}
+    <h1>Player Performance — {{ match }}</h1>
+    <div class="sub">Click a row to preview detailed radar for that player</div>
+
+    <div class="layout">
         <div>
-            <h3>{{ rating.player.name }}</h3>
-            <p><strong>Attacking:</strong> <i class="fas fa-star" style="color:gold;"></i> {{ rating.attacking }} / 5</p>
-            <p><strong>Creativity:</strong> <i class="fas fa-star" style="color:gold;"></i> {{ rating.creativity }} / 5</p>
-            <p><strong>Defending:</strong> <i class="fas fa-star" style="color:gold;"></i> {{ rating.defending }} / 5</p>
-            <p><strong>Tactical:</strong> <i class="fas fa-star" style="color:gold;"></i> {{ rating.tactical }} / 5</p>
-            <p><strong>Technical:</strong> <i class="fas fa-star" style="color:gold;"></i> {{ rating.technical }} / 5</p>
+
+
+
+            <div style="max-height: 600px; overflow-y: auto;">
+                <table class="ratings-table">
+                    <!-- thead & tbody -->
+                </table>
+            </div>
+
+
+            <div style="max-height: 600px; overflow-y: auto;">
+                <table class="ratings-table">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Attacking</th>
+                            <th>Creativity</th>
+                            <th>Defending</th>
+                            <th>Tactical</th>
+                            <th>Technical</th>
+                            <th>Discipline</th>
+                            <th>Avg</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in ratings %}
+                        <tr class="player-row" data-radar="{{ r.radar_dataset|safe }}" data-player-name="{{ r.player.name }}">
+                            <td>
+                                <div class="player-name">
+                                    {% if r.player.photo %}
+                                        <img src="{{ r.player.photo.url }}" class="player-thumb" alt="{{ r.player.name }}">
+                                    {% endif %}
+                                    <div>
+                                        <div class="name">{{ r.player.name }}</div>
+                                        <div style="font-size:12px;color:#6b7280;">{{ r.player.position }}</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="stars">
+                                    {% for s in r.attacking_stars %}
+                                        {% if s.filled %}
+                                            <i class="fas fa-star star {{ s.color }}"></i>
+                                        {% else %}
+                                            <i class="far fa-star star empty"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="stars">
+                                    {% for s in r.creativity_stars %}
+                                        {% if s.filled %}
+                                            <i class="fas fa-star star {{ s.color }}"></i>
+                                        {% else %}
+                                            <i class="far fa-star star empty"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="stars">
+                                    {% for s in r.defending_stars %}
+                                        {% if s.filled %}
+                                            <i class="fas fa-star star {{ s.color }}"></i>
+                                        {% else %}
+                                            <i class="far fa-star star empty"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="stars">
+                                    {% for s in r.tactical_stars %}
+                                        {% if s.filled %}
+                                            <i class="fas fa-star star {{ s.color }}"></i>
+                                        {% else %}
+                                            <i class="far fa-star star empty"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="stars">
+                                    {% for s in r.technical_stars %}
+                                        {% if s.filled %}
+                                            <i class="fas fa-star star {{ s.color }}"></i>
+                                        {% else %}
+                                            <i class="far fa-star star empty"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="stars">
+                                    {% for s in r.discipline_stars %}
+                                        {% if s.filled %}
+                                            <i class="fas fa-star star {{ s.color }}"></i>
+                                        {% else %}
+                                            <i class="far fa-star star empty"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                            </td>
+
+                            <td><span class="avg-badge">{{ r.average }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-        {% endfor %}
+        
+
+        <aside class="preview-card">
+            <div class="preview-title">Player radar preview</div>
+            <canvas id="radarPreview"></canvas>
+            <div style="margin-top:12px; color:#6b7280; font-size:14px;">
+                Attacking — Creativity — Defending — Tactical — Technical — Discipline
+            </div>
+        </aside>
+
+
     </div>
 
-    <h2>Radar Chart</h2>
-    <canvas id="radarChart" width="400" height="400"></canvas>
     <script>
-        var ctx = document.getElementById('radarChart').getContext('2d');
-        var chart = new Chart(ctx, {
+        // parse data-radar attribute into array numbers
+        function parseRadarData(str) {
+            // incoming looks like: [1,2,3,4,5,5] (from Python list)
+            try {
+                return JSON.parse(str.replace(/'/g, '"'));
+            } catch (e) {
+                // fallback: try simple split
+                return str.replace(/[\[\]\s]/g,'').split(',').map(n => Number(n||0));
+            }
+        }
+
+        let ctx = document.getElementById('radarPreview').getContext('2d');
+        let radarChart = new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: ['Attacking', 'Creativity', 'Defending', 'Tactical', 'Technical'],
+                labels: ['Attacking','Creativity','Defending','Tactical','Technical','Discipline'],
                 datasets: [{
-                    label: '{{ rating.player.name }}',
-                    data: [
-                        {{ rating.attacking }},
-                        {{ rating.creativity }},
-                        {{ rating.defending }},
-                        {{ rating.tactical }},
-                        {{ rating.technical }}
-                    ],
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    pointBackgroundColor: 'rgba(255, 99, 132, 1)',
+                    label: 'Preview',
+                    data: [0,0,0,0,0,0],
+                    fill: true,
+                    backgroundColor: 'rgba(13,110,253,0.12)',
+                    borderColor: 'rgba(13,110,253,1)',
+                    pointBackgroundColor: 'rgba(13,110,253,1)',
                 }]
             },
             options: {
-                scale: {
-                    ticks: { beginAtZero: true, max: 5 }
-                }
+                scales: {
+                    r: {
+                        suggestedMin: 0,
+                        suggestedMax: 5,
+                        ticks: { stepSize: 1 }
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false
             }
         });
+
+        // update radar when row clicked
+        document.querySelectorAll('.player-row').forEach(row => {
+            row.addEventListener('click', () => {
+                const raw = row.getAttribute('data-radar');
+                const data = parseRadarData(raw);
+                radarChart.data.datasets[0].data = data;
+                radarChart.data.datasets[0].label = row.getAttribute('data-player-name') || 'Player';
+                radarChart.update();
+            });
+        });
+
+        // init with first player if exists
+        const firstRow = document.querySelector('.player-row');
+        if (firstRow) firstRow.click();
     </script>
 </body>
 </html>

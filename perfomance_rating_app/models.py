@@ -13,6 +13,7 @@ class PerformanceRating(models.Model):
     defending = models.IntegerField(null=True, blank=True)
     tactical = models.IntegerField(null=True, blank=True)
     technical = models.IntegerField(null=True, blank=True)
+    discipline = models.PositiveSmallIntegerField(default=5) 
 
     is_computed = models.BooleanField(default=False)
     is_manual = models.BooleanField(default=False)  # Added for manual override option

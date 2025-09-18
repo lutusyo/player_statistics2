@@ -2,12 +2,13 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from collections import defaultdict
-from django.db.models import Q
+
 from matches_app.models import Match
 from players_app.models import Player
 from tagging_app.models import AttemptToGoal
 from defensive_app.models import PlayerDefensiveStats
-from lineup_app.models import MatchLineup
+from lineup_app.models import MatchLineup, Substitution
+
 
 @login_required
 def player_detail(request, player_id):
@@ -22,19 +23,54 @@ def player_detail(request, player_id):
     selected_season = request.GET.get('season', 'all')
     selected_competition = request.GET.get('competition', 'all')
 
-    # Build filters for related matches
-    match_filters = Q()
-    if selected_season != 'all':
-        match_filters &= Q(match__season=selected_season)
-    if selected_competition != 'all':
-        match_filters &= Q(match__competition_type=selected_competition)
+    # Helper to apply season/competition filters to QuerySets that are related to Match via `match`
+    def apply_match_filters(qs):
+        if selected_season != 'all':
+            qs = qs.filter(match__season=selected_season)
+        if selected_competition != 'all':
+            qs = qs.filter(match__competition_type=selected_competition)
+        return qs
 
-    # Get related match IDs from tagging and defensive apps for existing stats coverage
-    atg_match_ids = AttemptToGoal.objects.filter(player=player).filter(match_filters).values_list('match_id', flat=True)
-    def_match_ids = PlayerDefensiveStats.objects.filter(player=player).filter(match_filters).values_list('match_id', flat=True)
-    all_match_ids = set(atg_match_ids).union(set(def_match_ids))
+    # --- QuerySets with safe conditional filtering ---
+    lineup_qs = MatchLineup.objects.filter(player=player).select_related('match')
+    lineup_qs = apply_match_filters(lineup_qs)
 
-    # Initialize stats dict per competition
+    # Goals (only count attempts that are actual goals)
+    goals_qs = AttemptToGoal.objects.filter(
+        player=player,
+        outcome='On Target Goal',  # matches OutcomeChoices.ON_TARGET_GOAL
+        is_own_goal=False
+    ).select_related('match')
+    goals_qs = apply_match_filters(goals_qs)
+
+    # Assists: only count assists that led to a goal (i.e. the assisted AttemptToGoal has outcome = goal)
+    assists_qs = AttemptToGoal.objects.filter(
+        assist_by=player,
+        outcome='On Target Goal',
+        is_own_goal=False
+    ).select_related('match')
+    assists_qs = apply_match_filters(assists_qs)
+
+    defensive_qs = PlayerDefensiveStats.objects.filter(player=player).select_related('match')
+    defensive_qs = apply_match_filters(defensive_qs)
+
+    # Substitutions (use Substitution model to count sub-in / sub-out)
+    subs_in_qs = Substitution.objects.filter(player_in__player=player).select_related('match', 'player_in__match')
+    subs_out_qs = Substitution.objects.filter(player_out__player=player).select_related('match', 'player_out__match')
+    subs_in_qs = apply_match_filters(subs_in_qs)
+    subs_out_qs = apply_match_filters(subs_out_qs)
+
+    # Sets of match ids where the player appears in each source
+    lineup_match_ids = set(lineup_qs.values_list('match_id', flat=True))
+    goals_match_ids = set(goals_qs.values_list('match_id', flat=True))
+    assists_match_ids = set(assists_qs.values_list('match_id', flat=True))
+    defensive_match_ids = set(defensive_qs.values_list('match_id', flat=True))
+    subs_in_match_ids = set(subs_in_qs.values_list('match_id', flat=True))
+    subs_out_match_ids = set(subs_out_qs.values_list('match_id', flat=True))
+
+    all_match_ids = lineup_match_ids | goals_match_ids | defensive_match_ids | assists_match_ids | subs_in_match_ids | subs_out_match_ids
+
+    # initialize dict per competition
     stats_dict = defaultdict(lambda: {
         'appearances': 0,
         'minutes': 0,
@@ -49,73 +85,91 @@ def player_detail(request, player_id):
         'red_cards': 0
     })
 
-    # --- Add Lineup data (minutes, starts, sub ins/outs, appearances) ---
-    lineup_qs = MatchLineup.objects.filter(player=player).filter(
-        match__season=selected_season if selected_season != 'all' else None,
-        match__competition_type=selected_competition if selected_competition != 'all' else None,
-    )
+    # preload matches
+    matches = Match.objects.filter(id__in=all_match_ids).select_related()
 
-    # If filters are 'all', remove None filters:
-    if selected_season == 'all':
-        lineup_qs = lineup_qs.exclude(match__season__isnull=True)
-    if selected_competition == 'all':
-        lineup_qs = lineup_qs.exclude(match__competition_type__isnull=True)
+    # build a quick map of lineups by match for faster lookup
+    lineups_by_match = {}
+    for lu in lineup_qs:
+        lineups_by_match.setdefault(lu.match_id, []).append(lu)
 
-    # Process each lineup record
-    for lineup in lineup_qs.select_related('match'):
-        comp = lineup.match.competition_type
+    # Count substitution events per competition (use unique substitution events)
+    subs_in_by_match = {}
+    for s in subs_in_qs:
+        subs_in_by_match.setdefault(s.match_id, 0)
+        subs_in_by_match[s.match_id] += 1
+
+    subs_out_by_match = {}
+    for s in subs_out_qs:
+        subs_out_by_match.setdefault(s.match_id, 0)
+        subs_out_by_match[s.match_id] += 1
+
+    # Now iterate matches and populate stats per competition
+    for match in matches:
+        comp = match.competition_type or 'Unknown'
         stats = stats_dict[comp]
-        stats['appearances'] += 1
-        stats['minutes'] += lineup.minutes_played or 0
-        if lineup.is_starting:
-            stats['starts'] += 1
-        elif lineup.time_in is not None and lineup.time_in > 0:
-            stats['sub_in'] += 1
-        if lineup.time_out is not None:
-            stats['sub_out'] += 1
 
-    # --- Add matches from AttemptToGoal and DefensiveStats for appearances & minutes fallback ---
-    lineup_match_ids = set(lineup_qs.values_list('match_id', flat=True))
-    extra_match_ids = all_match_ids - lineup_match_ids
+        # match elapsed minutes fallback
+        try:
+            final_minute = match.elapsed_minutes() if callable(getattr(match, 'elapsed_minutes', None)) else 90
+        except Exception:
+            final_minute = 90
 
-    if extra_match_ids:
-        matches = Match.objects.filter(id__in=extra_match_ids)
-        for match in matches:
-            comp = match.competition_type
-            stats_dict[comp]['appearances'] += 1
-            stats_dict[comp]['minutes'] += match.elapsed_minutes() or 90
+        # Minutes & starts from lineup (prefer accurate lineup calc)
+        mp_for_match = 0
+        starts_for_match = 0
+        if match.id in lineups_by_match:
+            for lu in lineups_by_match[match.id]:
+                # calculate minutes using match final minute where possible
+                mp = lu.calculate_minutes_played(final_minute=final_minute)
+                # fallback to stored minutes_played if save wasn't called earlier
+                if not mp and getattr(lu, 'minutes_played', 0):
+                    mp = lu.minutes_played
+                mp_for_match += (mp or 0)
+                if lu.is_starting:
+                    starts_for_match += 1
 
-    # --- Add goals ---
-    goals_qs = AttemptToGoal.objects.filter(
-        player=player,
-        outcome='On Target Goal',
-        is_own_goal=False
-    ).filter(match_filters)
+        # Determine if this match counts as an appearance
+        had_attempt_or_def = (match.id in goals_match_ids) or (match.id in defensive_match_ids) or (match.id in assists_match_ids)
+        had_sub_event = (match.id in subs_in_by_match) or (match.id in subs_out_by_match)
+        played_minutes_flag = mp_for_match > 0
 
+        if played_minutes_flag or had_attempt_or_def or had_sub_event:
+            stats['appearances'] += 1
+
+            # minutes: prefer calculated minutes, else fallback to match elapsed minutes
+            if played_minutes_flag:
+                stats['minutes'] += mp_for_match
+            else:
+                stats['minutes'] += (final_minute or 90)
+
+            # starts from lineup
+            stats['starts'] += starts_for_match
+
+            # sub in/out from Substitution records (more reliable than heuristic on time_in/time_out)
+            stats['sub_in'] += subs_in_by_match.get(match.id, 0)
+            stats['sub_out'] += subs_out_by_match.get(match.id, 0)
+
+    # --- goals (already filtered to real goals) ---
     for g in goals_qs:
-        comp = g.match.competition_type
+        comp = g.match.competition_type or 'Unknown'
         stats_dict[comp]['goals'] += 1
 
-    # --- Add assists ---
-    assists_qs = AttemptToGoal.objects.filter(
-        assist_by=player,
-        is_own_goal=False
-    ).filter(match_filters)
-
+    # --- assists (only those that led to goals) ---
     for a in assists_qs:
-        comp = a.match.competition_type
+        comp = a.match.competition_type or 'Unknown'
         stats_dict[comp]['assists'] += 1
 
-    # --- Add defensive stats ---
-    defensive_qs = PlayerDefensiveStats.objects.filter(player=player).filter(match_filters)
+    # --- defensive aggregates ---
     for d in defensive_qs:
-        comp = d.match.competition_type
-        stats_dict[comp]['tackles_won'] += d.tackle_won or 0
-        stats_dict[comp]['tackles_lost'] += d.tackle_lost or 0
-        stats_dict[comp]['yellow_cards'] += d.yellow_card or 0
-        stats_dict[comp]['red_cards'] += d.red_card or 0
+        comp = d.match.competition_type or 'Unknown'
+        s = stats_dict[comp]
+        s['tackles_won'] += getattr(d, 'tackle_won', 0) or 0
+        s['tackles_lost'] += getattr(d, 'tackle_lost', 0) or 0
+        s['yellow_cards'] += getattr(d, 'yellow_card', 0) or 0
+        s['red_cards'] += getattr(d, 'red_card', 0) or 0
 
-    # Prepare data for template
+    # Build player_stats list and totals (same layout your template expects)
     player_stats = []
     totals = dict.fromkeys([
         'appearances', 'minutes', 'starts', 'sub_in', 'sub_out',
@@ -123,15 +177,16 @@ def player_detail(request, player_id):
         'yellow_cards', 'red_cards'
     ], 0)
 
-    # If a specific competition is selected, show only that one and sum totals accordingly
     if selected_competition != 'all':
-        if selected_competition in stats_dict:
-            stats = stats_dict[selected_competition]
-            player_stats.append({'competition': selected_competition, **stats})
+        # show only that competition (if any stats exist)
+        comp = selected_competition
+        if comp in stats_dict:
+            stats = stats_dict[comp]
+            player_stats.append({'competition': comp, **stats})
             for key in totals:
                 totals[key] += stats[key]
     else:
-        # Show all competitions
+        # show all competitions
         for comp, stats in stats_dict.items():
             player_stats.append({'competition': comp, **stats})
             for key in totals:

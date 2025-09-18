@@ -1,0 +1,13 @@
+{% extends 'tagging_app/output/full_report.html' %}
+
+{% block report_content %}
+<div style="min-height: 100vh; width: 100%; display: flex; flex-direction: column; align-items: center; background-color: black; font-family: Arial, sans-serif; color: white; position: relative;">
+
+    <!-- Company Name and Logo at Top Center -->
+    <div style="position: absolute; top: 60px; left: 50%; transform: translateX(-50%); text-align: center;">
+        <strong style="font-size: 22px; font-style: italic;">{{ company }}</strong><br>
+        <img src="{% static 'goalkeeping_app/azamfc_logo.png' %}" style="height: 90px; margin-top: 10px;">
+    </div>
+
+</div>
+{% endblock %}
