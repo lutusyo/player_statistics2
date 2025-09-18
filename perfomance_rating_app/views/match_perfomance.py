@@ -45,7 +45,7 @@ def match_performance(request, match_id):
         if not rating or not rating.is_computed:
             rating = compute_player_rating(player, match)
 
-        # build star lists for each metric (server-side)
+        # build star lists for each metric
         attacking_stars = _make_star_list(getattr(rating, 'attacking', 0))
         creativity_stars = _make_star_list(getattr(rating, 'creativity', 0))
         defending_stars = _make_star_list(getattr(rating, 'defending', 0))
@@ -75,7 +75,6 @@ def match_performance(request, match_id):
             'technical_stars': technical_stars,
             'discipline_stars': discipline_stars,
             'average': avg,
-            # helpful for JS radar preview
             'radar_dataset': [
                 getattr(rating, 'attacking', 0),
                 getattr(rating, 'creativity', 0),
@@ -86,7 +85,11 @@ def match_performance(request, match_id):
             ]
         })
 
+    # Sort players by average descending
+    ratings_for_template.sort(key=lambda x: x['average'], reverse=True)
+
     return render(request, 'performance_rating_app/match_performance.html', {
         'match': match,
         'ratings': ratings_for_template,
     })
+
