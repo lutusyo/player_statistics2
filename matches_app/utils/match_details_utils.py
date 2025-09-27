@@ -119,7 +119,6 @@ def get_match_detail_context(match):
     total_passes = pass_context['total_passes']
     ball_lost = pass_context['ball_lost']
 
-
     # Prepare player stats list
     all_players = MatchLineup.objects.filter(match=match).select_related("player", "team")
     player_stats = []
@@ -166,8 +165,6 @@ def get_match_detail_context(match):
 
     home_pass_stats = calculate_team_passing(home_player_ids)
     away_pass_stats = calculate_team_passing(away_player_ids)
-
-
 
 
     return {

@@ -17,6 +17,33 @@ class OutcomeChoices(models.TextChoices):
     PLAYER_ERROR = 'Player Error', 'Player Error'
     OWN_GOAL = 'Own Goal', 'Own Goal'
 
+class LocationChoices(models.TextChoices):
+    # Outside the penalty box
+    OUTSIDE_BOX_LEFT = "Outside box left", "Outside box left"
+    OUTSIDE_BOX_CENTER = "Outside box center", "Outside box center"
+    OUTSIDE_BOX_RIGHT = "Outside box right", "Outside box right"
+
+    # Inside the penalty box( excluding six-yard box and penalty spot)
+    INSIDE_BOX_LEFT = "Inside box left", "Inside box left"
+    INSIDE_BOX_CENTER = "Inside box center", "Inside box center"
+    INSIDE_BOX_RIGHT = "Inside box right", "Inside box right"
+
+    # Six-yard box(goal area)
+    SIX_YARD_LEFT = "Six-yard box left", "Six-yard box left"
+    SIX_YARD_CENTER = "Six-yard box center", "Six-yard box center"
+    SIX_YARD_RIGHT = "Six-yard box right", "Six-yard box right"
+
+    #Specific Locations
+    PENALTY_SPOT = "Penalty spot", "Penalty spot"
+    LONG_RANGE = "Long Range", "Long Range"
+    OTHER = "Other", "Other"
+
+class BodyPartChoices(models.TextChoices):
+    RIGHT_FOOT = 'Right Foot', 'Right Foot'
+    LEFT_FOOT = 'Left Foot', 'Left Foot'
+    HEADER = 'Header', 'Header'
+    OTHER = 'Other', 'Other'
+
 
     # ATTEMPT TO GOAL TAGGING
 class AttemptToGoal(models.Model):
@@ -29,6 +56,10 @@ class AttemptToGoal(models.Model):
     second = models.PositiveIntegerField(default=0)
     delivery_type = models.CharField(max_length=20, choices=DeliveryTypeChoices.choices)
     outcome = models.CharField(max_length=30, choices=OutcomeChoices.choices)
+
+    body_part = models.CharField(max_length=20, choices=BodyPartChoices.choices, default=BodyPartChoices.RIGHT_FOOT)
+    location_tag = models.CharField(max_length=30, choices=LocationChoices.choices, default=LocationChoices.LONG_RANGE, null=False, blank=False)
+
     x = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     y = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     assist_by = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='assists')

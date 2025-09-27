@@ -10,9 +10,11 @@ from lineup_app.models import MatchLineup
 from matches_app.models import Match
 from players_app.models import Player
 from teams_app.models import Team
-from tagging_app.models import AttemptToGoal, DeliveryTypeChoices, OutcomeChoices
+from tagging_app.models import AttemptToGoal, DeliveryTypeChoices, OutcomeChoices, BodyPartChoices, LocationChoices
 from tagging_app.utils.attempt_to_goal_utils import get_match_full_context
 
+from django.db.models import Q
+from django.db.models import Count
 
 
 def enter_attempt_to_goal(request, match_id):
@@ -49,6 +51,8 @@ def enter_attempt_to_goal(request, match_id):
         "players": players,
         "delivery_types": DeliveryTypeChoices.choices,
         "outcomes": OutcomeChoices.choices,
+        "body_parts": BodyPartChoices.choices,
+        "locations": LocationChoices.choices,
         "outcome_counts": outcome_counts,
         "total_outcome_counts": total_outcome_dict,
         "our_team": our_team,
@@ -79,7 +83,11 @@ def save_attempt_to_goal(request):
             team=team,
             outcome=data["outcome"],
             delivery_type=data["delivery_type"],
+            body_part = data.get("body_part"),
+
+            location_tag = data.get("location_tag"),
             assist_by_id=data.get("assist_by_id"),
+            
             pre_assist_by_id=data.get("pre_assist_by_id"),
             minute=data["minute"],
             second=data["second"],
@@ -104,12 +112,6 @@ def save_attempt_to_goal(request):
         traceback.print_exc()
         return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
-
-
-
-from django.db.models import Q
-
-from django.db.models import Count
 
 def attempt_to_goal_dashboard(request, match_id):
     match = get_object_or_404(Match, id=match_id)

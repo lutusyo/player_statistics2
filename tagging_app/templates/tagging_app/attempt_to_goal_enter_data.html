@@ -36,6 +36,7 @@
 
 
 <div id="attempt-to-goal" class="tag-panel responsive-panel">
+
   <!-- Outcome Panel -->
   <div id="outcome-panel" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
     {% for value, label in outcomes %}
@@ -50,6 +51,23 @@
 
   <!-- On-field Players -->
   <div id="our-players" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px;"></div>
+
+
+  <div id="bodypart-panel" style="display: none; grid-template-columns: repeat(4,1fr); gap: 10px;">
+    {% for value, label in body_parts %}
+      <button class="location-btn" data-body-part="{{ value }}">{{ label }}</button>
+    {% endfor %}
+  </div>
+
+  <div id="location-panel" style="display: none; grid-template-columns: repeat(3,1fr); gap: 10px;">
+    {% for value, label in locations %}
+      <button class="location-btn" data-location="{{ value }}">{{ label }}</button>
+    {% endfor %}
+  </div>
+
+  
+
+
 
   <!-- Delivery Options -->
   <div id="delivery-panel" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
@@ -68,7 +86,7 @@
 let timer = 0;
 let interval = null;
 let isPaused = false;
-let selectedPlayer = null, selectedOutcome = null, selectedDeliveryType = null, selectedAssistPlayer = null;
+let selectedPlayer = null, selectedOutcome = null, selectedBodyPart = null, selectedLocation = null, selectedDeliveryType = null, selectedAssistPlayer = null;
 const matchId = {{ match.id }};
 
 function formatTime(sec) {
@@ -92,11 +110,40 @@ function selectPlayer(btn, playerId) {
   selectedPlayer = playerId;
   document.getElementById('outcome-panel').style.display = 'none';
   document.getElementById('our-players').style.display = 'none';
-  document.getElementById('delivery-panel').style.display = 'grid';
+
+  document.getElementById('bodypart-panel').style.display = 'grid';
   clearSelected('.player-btn');
   clearSelected('.delivery-btn');
   btn.classList.add('selected');
 }
+
+
+document.getElementById('bodypart-panel').addEventListener('click', e => {
+  const btn = e.target.closest('.location-btn');
+  if (!btn) return;
+  selectedBodyPart = btn.dataset.bodyPart;
+
+  // Hide bodypart, show location next
+  document.getElementById('bodypart-panel').style.display = 'none';
+  document.getElementById('location-panel').style.display = 'grid';
+});
+
+
+
+document.getElementById('location-panel').addEventListener('click', e => {
+  const btn = e.target.closest('.location-btn');
+  if (!btn) return;
+  selectedLocation = btn.dataset.location;
+
+  // Hide location, show delivery
+  document.getElementById('location-panel').style.display = 'none';
+  document.getElementById('delivery-panel').style.display = 'grid';
+});
+
+
+
+
+
 
 function makePlayerButton(p) {
   const btn = document.createElement('button');
@@ -139,7 +186,7 @@ function refreshAssistPlayers() {
       skipBtn.onclick = () => {
         selectedAssistPlayer = null;
         document.getElementById('assist-panel').style.display = 'none';
-        saveAttempt(selectedOutcome, selectedPlayer, selectedDeliveryType, selectedAssistPlayer);
+        saveAttempt(selectedOutcome, selectedPlayer, selectedBodyPart, selectedLocation, selectedDeliveryType, selectedAssistPlayer);
       };
       container.appendChild(skipBtn);
     });
@@ -168,8 +215,8 @@ function refreshOutcomeCounts() {
     });
 }
 
-function saveAttempt(outcome, playerId, deliveryType, assistPlayerId = null) {
-  if (!outcome || !playerId || !deliveryType) {
+function saveAttempt(outcome, playerId, bodyPart, locationTag, deliveryType, assistPlayerId = null) {
+  if (!outcome || !playerId || !bodyPart || !locationTag || !deliveryType) {
     console.error('Missing data, cannot save attempt');
     return;
   }
@@ -178,6 +225,8 @@ function saveAttempt(outcome, playerId, deliveryType, assistPlayerId = null) {
     player_id: playerId,
     team_id: {{ our_team.id }},
     outcome,
+    body_part: selectedBodyPart,
+    location_tag: selectedLocation,
     delivery_type: deliveryType,
     assist_by_id: assistPlayerId, 
     minute: Math.floor(timer / 60),
@@ -256,7 +305,7 @@ document.getElementById('assist-panel').addEventListener('click', e => {
   if (!btn) return;
   selectedAssistPlayer = btn.dataset.playerId;
   if (selectedPlayer && selectedOutcome && selectedDeliveryType) {
-    saveAttempt(selectedOutcome, selectedPlayer, selectedDeliveryType, selectedAssistPlayer);
+    saveAttempt(selectedOutcome, selectedPlayer, selectedBodyPart, selectedLocation, selectedDeliveryType, selectedAssistPlayer);
   }
 });
 </script>
