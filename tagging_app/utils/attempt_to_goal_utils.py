@@ -4,6 +4,7 @@ from matches_app.models import Match
 from teams_app.models import Team
 from players_app.models import Player
 from collections import defaultdict
+from django.db.models import Count 
 
 
 def get_match_full_context(match_id, our_team_id):
@@ -39,6 +40,11 @@ def get_match_full_context(match_id, our_team_id):
             "big_chance_missed": qs.filter(outcome="Player Error").count(),
             "corners": qs.filter(delivery_type="Corner").count(),
             "crosses": qs.filter(delivery_type="Cross").count(),
+
+            "by_location": dict(qs.values("location_tag").annotate(c=Count("id")).values_list("location_tag", "c")),
+            "by_body_part": dict(qs.values("body_part").annotate(c=Count("id")).values_list("body_part", "c")),
+
+
             "times": list(qs.values_list("minute", "second")),
         }
 

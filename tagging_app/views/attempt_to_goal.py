@@ -138,15 +138,60 @@ def attempt_to_goal_dashboard(request, match_id):
         )
         outcomes_matrix[player.id] = {row["outcome"]: row["count"] for row in counts}
 
-    # ✅ Add goals
-    goals = AttemptToGoal.objects.filter(match=match).filter(
-        Q(outcome="On Target Goal") | Q(is_own_goal=True)
-    ).select_related("player", "assist_by", "pre_assist_by", "team", "own_goal_for").order_by("minute", "second")
+           
+        # ✅ Separate attempts
+        our_attempts = (
+            AttemptToGoal.objects.filter(match=match, team_id=our_team_id)
+            .select_related("player", "team")
+            .order_by("minute", "second")
+        )
+        opponent_attempts = (
+            AttemptToGoal.objects.filter(match=match).exclude(team_id=our_team_id)
+            .select_related("player", "team")
+            .order_by("minute", "second")
+        )
+
+        # ✅ Add goals
+        goals = AttemptToGoal.objects.filter(match=match).filter(
+            Q(outcome="On Target Goal") | Q(is_own_goal=True)
+        ).select_related(
+            "player", "assist_by", "pre_assist_by", "team", "own_goal_for"
+        ).order_by("minute", "second")
+
+            # Compute summary totals for our team
+
+
+        our_summary = {
+            "goals": our_attempts.filter(Q(outcome="On Target Goal") | Q(is_own_goal=True)).count(),
+            "on_target": our_attempts.filter(outcome="On Target").count(),
+            "on_target_save": our_attempts.filter(outcome="On Target Save").count(),
+            "off_target": our_attempts.filter(outcome="Off Target").count(),
+            "blocked": our_attempts.filter(outcome="Blocked").count(),
+            "incomplete": our_attempts.filter(outcome="Incomplete").count(),
+        }
+
+        opponent_summary = {
+            "goals": opponent_attempts.filter(Q(outcome="On Target Goal") | Q(is_own_goal=True)).count(),
+            "on_target": opponent_attempts.filter(outcome="On Target").count(),
+            "on_target_save": opponent_attempts.filter(outcome="On Target Save").count(),
+            "off_target": opponent_attempts.filter(outcome="Off Target").count(),
+            "blocked": opponent_attempts.filter(outcome="Blocked").count(),
+            "incomplete": opponent_attempts.filter(outcome="Incomplete").count(),
+        }
+
+
+
 
     # Update context
     context.update({
         "players": players,
         "outcomes_matrix": outcomes_matrix,
+        "our_attempts": our_attempts,
+        "opponent_attempts": opponent_attempts,
+
+        "our_summary": our_summary,
+        "opponent_summary": opponent_summary,
+        
         "goals": goals,
         "match": match,
     })
@@ -197,17 +242,20 @@ def export_attempt_to_goal_csv(request, match_id):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="attempt_to_goal_{match_id}.csv"'
     writer = csv.writer(response)
-    writer.writerow(['Player', 'Body Part', 'Delivery Type', 'Zone X', 'Zone Y'])
+    writer.writerow(['Player', 'Body Part', 'Delivery Type', 'Location', 'Zone X', 'Zone Y'])
 
     attempts = AttemptToGoal.objects.filter(match_id=match_id)
     for a in attempts:
         writer.writerow([
             a.player.name if a.player else 'N/A',
-            a.delivery_type,
+            a.get_body_part_display(),
+            a.get_delivery_type_display(),
+            a.get_location_tag_display(),
             a.x,
             a.y
         ])
     return response
+
 
 
 def export_attempt_to_goal_pdf(request, match_id):
@@ -218,7 +266,8 @@ def export_attempt_to_goal_pdf(request, match_id):
     attempts = AttemptToGoal.objects.filter(match_id=match_id)
     y = 750
     for a in attempts:
-        c.drawString(100, y, f"{a.player.name} | Zone: {a.x}, {a.y}")
+        line = f"{a.player.name if a.player else 'N/A'} | {a.get_body_part_display()} | {a.get_location_tag_display()} | Zone: {a.x}, {a.y}"
+        c.drawString(100, y, line)
         y -= 15
         if y < 50:
             c.showPage()
