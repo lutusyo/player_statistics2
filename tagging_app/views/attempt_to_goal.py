@@ -113,6 +113,7 @@ def save_attempt_to_goal(request):
         return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
 
+
 def attempt_to_goal_dashboard(request, match_id):
     match = get_object_or_404(Match, id=match_id)
 
@@ -138,65 +139,73 @@ def attempt_to_goal_dashboard(request, match_id):
         )
         outcomes_matrix[player.id] = {row["outcome"]: row["count"] for row in counts}
 
-           
-        # ✅ Separate attempts
-        our_attempts = (
-            AttemptToGoal.objects.filter(match=match, team_id=our_team_id)
-            .select_related("player", "team")
-            .order_by("minute", "second")
-        )
-        opponent_attempts = (
-            AttemptToGoal.objects.filter(match=match).exclude(team_id=our_team_id)
-            .select_related("player", "team")
-            .order_by("minute", "second")
-        )
+    # ✅ Separate attempts (move outside the loop)
+    our_attempts = (
+        AttemptToGoal.objects.filter(match=match, team_id=our_team_id)
+        .select_related("player", "team")
+        .order_by("minute", "second")
+    )
+    opponent_attempts = (
+        AttemptToGoal.objects.filter(match=match).exclude(team_id=our_team_id)
+        .select_related("player", "team")
+        .order_by("minute", "second")
+    )
 
-        # ✅ Add goals
-        goals = AttemptToGoal.objects.filter(match=match).filter(
-            Q(outcome="On Target Goal") | Q(is_own_goal=True)
-        ).select_related(
-            "player", "assist_by", "pre_assist_by", "team", "own_goal_for"
-        ).order_by("minute", "second")
-
-            # Compute summary totals for our team
+    # ✅ Add goals (move outside loop)
+    goals = AttemptToGoal.objects.filter(match=match).filter(
+        Q(outcome="On Target Goal") | Q(is_own_goal=True)
+    ).select_related(
+        "player", "assist_by", "pre_assist_by", "team", "own_goal_for"
+    ).order_by("minute", "second")
 
 
-        our_summary = {
-            "goals": our_attempts.filter(Q(outcome="On Target Goal") | Q(is_own_goal=True)).count(),
-            "on_target": our_attempts.filter(outcome="On Target").count(),
-            "on_target_save": our_attempts.filter(outcome="On Target Save").count(),
-            "off_target": our_attempts.filter(outcome="Off Target").count(),
-            "blocked": our_attempts.filter(outcome="Blocked").count(),
-            "incomplete": our_attempts.filter(outcome="Incomplete").count(),
-        }
+    our_team_attempts = AttemptToGoal.objects.filter(match_id=match_id, is_opponent=False)
 
-        opponent_summary = {
-            "goals": opponent_attempts.filter(Q(outcome="On Target Goal") | Q(is_own_goal=True)).count(),
-            "on_target": opponent_attempts.filter(outcome="On Target").count(),
-            "on_target_save": opponent_attempts.filter(outcome="On Target Save").count(),
-            "off_target": opponent_attempts.filter(outcome="Off Target").count(),
-            "blocked": opponent_attempts.filter(outcome="Blocked").count(),
-            "incomplete": opponent_attempts.filter(outcome="Incomplete").count(),
-        }
+    # Get totals for each delivery type
+    total_delivery_types = (
+        our_team_attempts.values('delivery_type')
+        .annotate(total=Count('id'))
+        .order_by('delivery_type')
+    )
 
-
+    # ✅ Compute summaries
+    our_summary = {
+        "goals": our_attempts.filter(Q(outcome="On Target Goal") | Q(is_own_goal=True)).count(),
+        "on_target_saved": our_attempts.filter(outcome="On Target Saved").count(),
+        "off_target": our_attempts.filter(outcome="Off Target").count(),
+        "blocked": our_attempts.filter(outcome="Blocked").count(),
+        "incomplete": our_attempts.filter(outcome="Player Error").count(),
+    }
 
 
-    # Update context
+    our_summary["on_target_total"] = our_summary["goals"] + our_summary["on_target_saved"]
+
+    opponent_summary = {
+        "goals": opponent_attempts.filter(Q(outcome="On Target Goal") | Q(is_own_goal=True)).count(),
+        "on_target": opponent_attempts.filter(outcome="On Target").count(),
+        "on_target_save": opponent_attempts.filter(outcome="On Target Save").count(),
+        "off_target": opponent_attempts.filter(outcome="Off Target").count(),
+        "blocked": opponent_attempts.filter(outcome="Blocked").count(),
+        "incomplete": opponent_attempts.filter(outcome="Incomplete").count(),
+    }
+
+    #opponent_summary["on_target_total"] = opponent_summary["goals"] + opponent_summary["on_target_save"]
+
+    # ✅ Update context
     context.update({
         "players": players,
         "outcomes_matrix": outcomes_matrix,
         "our_attempts": our_attempts,
         "opponent_attempts": opponent_attempts,
-
         "our_summary": our_summary,
         "opponent_summary": opponent_summary,
-        
         "goals": goals,
         "match": match,
+        'total_delivery_types': total_delivery_types,
     })
 
     return render(request, "tagging_app/attempt_to_goal_dashboard.html", context)
+
 
 
 

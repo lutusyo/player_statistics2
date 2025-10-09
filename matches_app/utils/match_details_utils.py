@@ -6,10 +6,6 @@ from tagging_app.utils.attempt_to_goal_utils import get_match_full_context
 from tagging_app.utils.attempt_to_goal_utils_opp import get_opponent_goals_for_match
 
 
-
-
-
-
 def get_match_detail_context(match):
     # Get all goals: normal goals + own goals
     goals_qs = AttemptToGoal.objects.filter(

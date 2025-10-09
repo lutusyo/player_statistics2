@@ -7,9 +7,18 @@ from tagging_app.views import current_players
 from tagging_app.views.output.summary_key_statistics import summary_key_statistics_view
 from tagging_app.views.output import full_report, match_summary3, table_of_contents, post_match_summary
 
+from tagging_app.views2 import delivery_type
+
+
 app_name = 'tagging_app'
 
 urlpatterns = [
+
+
+
+    path('match/<int:match_id>/delivery-summary/', delivery_type.delivery_summary_view, name='delivery_summary'),
+
+
 
     path("full-report/<int:match_id>/<int:our_team_id>/", full_report.full_report_view, name="full_report"),
 

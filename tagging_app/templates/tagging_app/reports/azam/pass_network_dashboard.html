@@ -1,0 +1,177 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pass Network Dashboard - {{ match }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa; /* light background */
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 0 auto 30px auto; /* center tables */
+            width: 80%;
+            max-width: 900px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px 15px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+
+        .chart-container {
+            width: 80%;
+            max-width: 600px;
+            margin: 0 auto 40px auto; /* center chart */
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        ul {
+            list-style: none;
+            text-align: center;
+            padding: 0;
+        }
+
+        ul li {
+            margin: 10px 0;
+        }
+
+        ul li a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        ul li a:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Pass Matrix -->
+    <h2>Pass Matrix</h2>
+    <table>
+        <tr>
+            <th>From\To</th>
+            {% for p in players %}
+                <th>{{ player_names|get_item:p.id|slice:":10" }}</th>
+            {% endfor %}
+        </tr>
+        {% for row_player in players %}
+        <tr>
+            <th>{{ player_names|get_item:row_player.id|slice:":10" }}</th>
+            {% for col_player in players %}
+                {% if row_player.id == col_player.id %}
+                    <td>—</td>
+                {% else %}
+                    <td>{{ matrix|get_item:row_player.id|get_item:col_player.id|default:"0" }}</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Totals -->
+    <h2>Player Passing Totals</h2>
+    <table>
+        <tr><th>Player</th><th>Total Passes</th><th>Ball Lost</th></tr>
+        {% for p in players %}
+        <tr>
+            <td>{{ player_names|get_item:p.id }}</td>
+            <td>{{ total_passes|get_item:p.id|default:"0" }}</td>
+            <td>{{ ball_lost|get_item:p.id|default:"0" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Top 5 Combinations -->
+    <h2>Top 5 Pass Combinations</h2>
+    <table>
+        <tr><th>From</th><th>To</th><th>Count</th></tr>
+        {% for f, t, c in top_combinations %}
+            <tr>
+                <td>{{ f }}</td>
+                <td>{{ t }}</td>
+                <td>{{ c }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Bar Chart -->
+    <h2>Pass Distribution Chart</h2>
+    <div class="chart-container">
+        <canvas id="passChart"></canvas>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('passChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {{ chart_data.names|safe }},
+                datasets: [{
+                    label: 'Total Passes',
+                    data: {{ chart_data.values|safe }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { 
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                    x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+
+    <!-- Download Links 
+    <h2>Downloads</h2>
+    <ul>
+        <li><a href="{% url 'tagging_app:export_pass_network_pdf' match.id %}" target="_blank">Download PDF</a></li>
+        <li><a href="{% url 'tagging_app:export_pass_network_csv' match.id %}" target="_blank">Download CSV</a></li>
+        <li><a href="{% url 'tagging_app:export_pass_network_excel' match.id %}" target="_blank">Download Excel</a></li>
+    </ul> -->
+
+</body>
+</html>

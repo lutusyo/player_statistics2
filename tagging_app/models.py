@@ -8,6 +8,7 @@ class DeliveryTypeChoices(models.TextChoices):
     CROSS = 'Cross', 'Cross'
     LOOSE_BALL = 'Loose Ball', 'Loose Ball'
     CORNER = 'Corner', 'Corner'
+    
 
 class OutcomeChoices(models.TextChoices):
     OFF_TARGET = 'Off Target', 'Off Target'

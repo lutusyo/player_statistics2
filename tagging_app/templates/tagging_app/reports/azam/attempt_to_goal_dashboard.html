@@ -1,7 +1,6 @@
 {% load static %}
 {% load custom_filters %}
 
-
 {% block title %}Attempts at Goal{% endblock %}
 
 <style>
@@ -143,9 +142,6 @@
   </tbody>
 </table>
 
-
-
-
   <!-- Our Team Attempts -->
   <h2>Our Team Attempts</h2>
   <table>
@@ -174,28 +170,6 @@
       {% endfor %}
     </tbody>
   </table>
-
-
-
-<div class="delivery-summary" style="padding:20px; font-family:Arial;">
-  <h3 style="margin-top:30px;">Effective Delivery</h3>
-  <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 50%;">
-    <thead>
-      <tr style="background:#f0f0f0;">
-        <th>Delivery Type</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for item in total_delivery_types %}
-        <tr>
-          <td>{{ item.delivery_type }}</td>
-          <td style="text-align:center;">{{ item.total }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
 
 <div class="summary-pitch-container" style="flex-direction: column; gap: 30px;">
 
