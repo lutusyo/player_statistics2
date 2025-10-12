@@ -109,33 +109,62 @@ def save_pass_network(request):
         data = json.loads(request.body)
         try:
             match = Match.objects.get(id=data['match_id'])
-            from_player = Player.objects.get(id=data['from_player_id'])
-            to_player = Player.objects.get(id=data.get('to_player_id')) if data.get('to_player_id') else None
-            from_team = Team.objects.get(id=data['from_team_id'])
-            to_team = Team.objects.get(id=data['to_team_id'])
 
+            from_player = None
+            if data.get('from_player_id'):
+                from_player = Player.objects.get(id=data['from_player_id'])
+
+            to_player = None
+            if data.get('to_player_id'):
+                to_player = Player.objects.get(id=data['to_player_id'])
+
+            from_team = Team.objects.get(id=data['from_team_id']) if data.get('from_team_id') else None
+            to_team = Team.objects.get(id=data['to_team_id']) if data.get('to_team_id') else None
+
+            ball_out_by = None
+            if data.get('is_ball_out') and data.get('ball_out_by'):
+                try:
+                    ball_out_by = Player.objects.get(id=data['ball_out_by'])
+                except Player.DoesNotExist:
+                    ball_out_by = None
+
+            throw_in_team = None
+            if data.get('is_ball_out') and data.get('throw_in_team'):
+                throw_in_team = Team.objects.get(id=data['throw_in_team'])
+
+            throw_in_player = None
+            if data.get('throw_in_player'):
+                try:
+                    throw_in_player = Player.objects.get(id=data['throw_in_player'])
+                except Player.DoesNotExist:
+                    throw_in_player = None
+
+            # Save event
             PassEvent.objects.create(
                 match=match,
                 from_player=from_player,
                 to_player=to_player,
                 from_team=from_team,
                 to_team=to_team,
-                minute=data['minute'],
-                second=data['second'],
-                x_start=data.get('x_start'),
-                y_start=data.get('y_start'),
-                x_end=data.get('x_end'),
-                y_end=data.get('y_end'),
-                is_successful=data['is_successful'],
+                minute=data.get('minute', 0),
+                second=data.get('second', 0),
+                is_successful=data.get('is_successful', True),
                 is_possession_regained=data.get('is_possession_regained', False),
+                is_ball_out=data.get('is_ball_out', False),
+                ball_out_by=ball_out_by,
+                throw_in_team=throw_in_team,
+                throw_in_player=throw_in_player
             )
 
-            count = PassEvent.objects.filter(match=match, from_player=from_player).count()
+            count = PassEvent.objects.filter(match=match, from_player=from_player).count() if from_player else 0
             return JsonResponse({'status': 'success', 'count': count})
+
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
 
     return JsonResponse({'status': 'invalid request'})
+
+
 
 
 

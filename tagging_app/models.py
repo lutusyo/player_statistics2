@@ -83,7 +83,7 @@ class AttemptToGoal(models.Model):
     # PASSING NETWORK
 class PassEvent(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    from_player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='passes_made')
+    from_player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='passes_made', null=True, blank=True)
     to_player = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='passes_received')
 
     from_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='passes_from')
@@ -99,6 +99,12 @@ class PassEvent(models.Model):
 
     is_successful = models.BooleanField(default=True)
     is_possession_regained = models.BooleanField(default=False)
+
+    # BALL OUT OF PLAY
+    is_ball_out = models.BooleanField(default=False)
+    ball_out_by = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='player_who_kick_the_ball_out')
+    throw_in_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
+    throw_in_player = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='player_who_make_a_throw_in')
 
     timestamp = models.DateTimeField(auto_now_add=True)
 

@@ -6,16 +6,14 @@
 <title>Passing Network Tagging</title>
 
 <style>
-/* --- Player grid: fixed 3 columns --- */
 #our-players {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);  /* always 3 columns */
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   justify-items: center;
   padding: 5px;
 }
 
-/* --- Player buttons --- */
 .player-btn {
   width: 70px;
   height: 70px;
@@ -31,7 +29,6 @@
   justify-content: center;
 }
 
-/* Player name overlay */
 .player-btn span {
   background: rgba(0,0,0,0.5);
   width: 100%;
@@ -44,7 +41,6 @@
   line-height: 1;
 }
 
-/* Pass count badge */
 .player-btn .pass-count {
   position: absolute;
   top: -5px;
@@ -57,7 +53,6 @@
   border: 1px solid white;
 }
 
-/* --- Opponent button --- */
 .opponent-btn {
   min-width: 120px;
   min-height: 50px;
@@ -66,7 +61,6 @@
   position: relative;
 }
 
-/* Opponent pass count */
 .opponent-btn .pass-count {
   position: absolute;
   top: 5px;
@@ -78,35 +72,29 @@
   border-radius: 12px;
 }
 
-/* --- Responsive adjustments --- */
 @media (max-width: 480px) {
   #our-players {
-    grid-template-columns: repeat(2, 1fr); /* 2 columns on small screens */
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
-
   .player-btn {
     width: 60px;
     height: 60px;
     font-size: 9px;
   }
-
   .player-btn span {
     font-size: 8px;
   }
-
   .player-btn .pass-count {
     font-size: 7px;
     padding: 1px 3px;
   }
-
   .opponent-btn {
     min-width: 100px;
     min-height: 45px;
     font-size: 10px;
     padding-right: 20px;
   }
-
   .opponent-btn .pass-count {
     font-size: 8px;
     padding: 1px 3px;
@@ -115,21 +103,18 @@
 </style>
 
 <div id="pass-network">
+  <div id="our-players"><p>Loading players...</p></div>
 
-  <!-- Players will be dynamically loaded -->
-  <div id="our-players" >
-    <p>Loading players...</p>
+  <div style="margin: 12px 0; text-align: center;">
+    <button class="opponent-btn" id="opponent-btn" data-team-id="{{ opponent_team.id }}">
+      {{ opponent_team.name }}
+      <span class="pass-count" id="opponent-pass-count">0</span>
+    </button>
   </div>
 
-  <!-- Opponent button -->
-  <div style="margin: 12px 0; text-align: center;">
-    <button class="opponent-btn" id="opponent-btn" data-team-id="{{ opponent_team.id }}"
-            style="position: relative; padding-right: 30px; font-size: 12px; min-width: 140px; min-height: 50px; border-radius: 8px;">
-      {{ opponent_team.name }} 
-      <span class="pass-count" id="opponent-pass-count" 
-            style="position: absolute; top: 5px; right: 8px; background: #0073e6; color: white; border-radius: 12px; padding: 2px 8px; font-size: 12px;">
-        0
-      </span>
+  <div style="text-align: center; margin-top: 10px;">
+    <button id="ball-out-btn" class="btn btn-warning" style="font-size: 12;">
+      Ball out of Play
     </button>
   </div>
 
@@ -139,23 +124,25 @@
 <a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>
 
 <script>
-/* Your existing PassNetwork JS code remains unchanged */
-
 window.PassNetwork = {
     matchId: {{ match.id }},
     lastPlayerId: null,
     lastTeamId: null,
+    lastOpponentTeamId: null,
     minute: 0,
     second: 0,
     passCounts: JSON.parse(localStorage.getItem('passCounts') || '{}'),
+    throwInMode: false,
+    currentThrowIn: null,
 
     init: function () {
         this.restoreCounts();
         this.bindOpponentEvent();
+        this.bindBallOutEvent();
         this.updateTimer();
         setInterval(this.updateTimer.bind(this), 1000);
-        loadPlayers(); // first load
-        setInterval(loadPlayers, 10000); // refresh every 10s
+        loadPlayers();
+        setInterval(loadPlayers, 10000);
     },
 
     updateTimer: function () {
@@ -183,18 +170,31 @@ window.PassNetwork = {
 
     bindPlayerEvents: function () {
         document.querySelectorAll('#pass-network .player-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.onclick = () => {
                 const playerId = btn.dataset.playerId;
                 const teamId = btn.dataset.teamId;
 
+                // HANDLE THROW-IN MODE
+                if (this.throwInMode && this.currentThrowIn) {
+                    const { teamId: throwInTeamId, ballOutById, ballOutTeamId } = this.currentThrowIn;
+                    this.recordBallOut(ballOutById, ballOutTeamId, throwInTeamId, playerId);
+                    this.throwInMode = false;
+                    this.currentThrowIn = null;
+                    document.getElementById('our-players').style.border = 'none';
+                    this.resetAfterBallOut();
+                    return;
+                }
+
+                // NORMAL PASS
                 if (this.lastPlayerId) {
                     this.recordPass(this.lastPlayerId, playerId, this.lastTeamId, teamId);
                 }
 
                 this.lastPlayerId = playerId;
                 this.lastTeamId = teamId;
+                this.lastOpponentTeamId = null;
                 this.highlightButton(playerId);
-            });
+            };
         });
     },
 
@@ -204,19 +204,60 @@ window.PassNetwork = {
             const opponentTeamId = opponentBtn.dataset.teamId;
             if (this.lastPlayerId && this.lastTeamId) {
                 this.recordPass(this.lastPlayerId, null, this.lastTeamId, opponentTeamId, false, false);
-                this.lastPlayerId = null;
-                this.lastTeamId = null;
-                this.highlightButton(null);
+            }
+            this.lastOpponentTeamId = opponentTeamId;
+            this.lastPlayerId = null;
+            this.lastTeamId = null;
+            this.highlightButton(null);
 
-                // Opponent count
-                if (!this.opponentPassCount) this.opponentPassCount = 0;
-                this.opponentPassCount++;
-                document.getElementById('opponent-pass-count').textContent = this.opponentPassCount;
+            if (!this.opponentPassCount) this.opponentPassCount = 0;
+            this.opponentPassCount++;
+            document.getElementById('opponent-pass-count').textContent = this.opponentPassCount;
 
-                opponentBtn.classList.add('active');
-                setTimeout(() => opponentBtn.classList.remove('active'), 500);
+            opponentBtn.classList.add('active');
+            setTimeout(() => opponentBtn.classList.remove('active'), 500);
+        });
+    },
+
+    bindBallOutEvent: function () {
+        const btn = document.getElementById('ball-out-btn');
+        btn.addEventListener('click', () => {
+            const opponentTeamId = {{ opponent_team.id }};
+            const ourTeamId = {{ our_team.id }};
+            let ballOutById = null;
+            let ballOutTeamId = null;
+
+            if (this.lastPlayerId && this.lastTeamId) {
+                ballOutById = this.lastPlayerId;
+                ballOutTeamId = this.lastTeamId;
+            } else if (this.lastOpponentTeamId) {
+                ballOutTeamId = this.lastOpponentTeamId;
+            } else {
+                alert("Select a player or opponent first before marking Ball Out!");
+                return;
+            }
+
+            const isOurTeam = ballOutTeamId == ourTeamId;
+            const throwInTeamId = isOurTeam ? opponentTeamId : ourTeamId;
+
+            if (isOurTeam) {
+                alert("Ball out by our team — opponent will take the throw-in.");
+                this.recordBallOut(ballOutById, ballOutTeamId, throwInTeamId, null);
+                this.resetAfterBallOut();
+            } else {
+                this.throwInMode = true;
+                this.currentThrowIn = { teamId: throwInTeamId, ballOutById, ballOutTeamId };
+                document.getElementById('our-players').style.border = '2px dashed red';
+                alert("Select the player who will take the throw-in by clicking their picture.");
             }
         });
+    },
+
+    resetAfterBallOut: function() {
+        this.lastPlayerId = null;
+        this.lastTeamId = null;
+        this.lastOpponentTeamId = null;
+        this.highlightButton(null);
     },
 
     recordPass: function (fromPlayerId, toPlayerId, fromTeamId, toTeamId, isSuccessful = true, isPossessionRegained = false) {
@@ -234,25 +275,50 @@ window.PassNetwork = {
                 to_team_id: toTeamId,
                 minute: this.minute,
                 second: this.second,
-                x_start: null,
-                y_start: null,
-                x_end: null,
-                y_end: null,
                 is_successful: isSuccessful,
                 is_possession_regained: isPossessionRegained
             })
-        }).then(response => response.json()).then(data => {
+        })
+        .then(r => r.json())
+        .then(data => {
             if (data.status === 'success') {
-                document.getElementById('last-pass').textContent = `From ${fromPlayerId} → To ${toPlayerId || 'Opponent Intercept'}`;
+                document.getElementById('last-pass').textContent =
+                  `From ${fromPlayerId} → To ${toPlayerId || 'Opponent Intercept'}`;
                 this.updatePassCount(fromPlayerId, data.count);
-                this.highlightButton(toPlayerId);
-            } else {
-                alert("Failed to save: " + data.message);
-            }
-        }).catch(error => {
-            console.error("Fetch error:", error);
-            alert("Failed to save due to network error.");
-        });
+            } else alert("Failed to save: " + data.message);
+        })
+        .catch(err => console.error(err));
+    },
+
+    recordBallOut: function (ballOutById, ballOutTeamId, throwInTeamId, throwInPlayerId) {
+        fetch("{% url 'tagging_app:save_pass_network' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': this.getCookie('csrftoken'),
+            },
+            body: JSON.stringify({
+                match_id: this.matchId,
+                from_player_id: ballOutById,
+                from_team_id: ballOutTeamId,
+                to_team_id: throwInTeamId,
+                minute: this.minute,
+                second: this.second,
+                is_successful: false,
+                is_ball_out: true,
+                ball_out_by: ballOutById,
+                throw_in_team: throwInTeamId,
+                throw_in_player: throwInPlayerId
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById('last-pass').textContent =
+                  `Ball Out by ${ballOutTeamId == {{ our_team.id }} ? 'Our Team' : 'Opponent'}, Throw-in → Team ${throwInTeamId}`;
+            } else alert("Error saving ball-out: " + data.message);
+        })
+        .catch(err => console.error(err));
     },
 
     updatePassCount: function (playerId, newCount) {
@@ -288,7 +354,6 @@ window.PassNetwork = {
     }
 };
 
-// Load players dynamically
 function loadPlayers() {
   const matchId = window.PassNetwork.matchId;
   fetch(`/tagging/api_current_on_field_players/${matchId}/`)
@@ -296,29 +361,27 @@ function loadPlayers() {
     .then(data => {
       const container = document.getElementById("our-players");
       container.innerHTML = "";
+      if (!data.players || !data.players.length) {
+        container.innerHTML = "<p style='color:red;'>No players currently on the field</p>";
+        return;
+      }
       data.players.forEach(p => {
         container.innerHTML += `
-          <button class="player-btn"
-                  id="player-${p.id}"
-                  data-player-id="${p.id}"
-                  data-team-id="${p.team_id || ''}"
+          <button class="player-btn" id="player-${p.id}"
+                  data-player-id="${p.id}" data-team-id="${p.team_id || ''}"
                   style="background-image:url('${p.photo_url || '/static/default_player.png'}');">
-            <span style="background:rgba(0,0,0,0.5);width:100%;text-align:center;
-                         border-bottom-left-radius:50%;border-bottom-right-radius:50%;
-                         padding:1px 2px;">${p.name}</span>
-            <span class="pass-count"
-                  style="position:absolute;top:-5px;right:-5px;background:#0073e6;color:white;
-                         font-size:8px;padding:1px 4px;border-radius:10px;border:1px solid white;">0</span>
+            <span>${p.name}</span>
+            <span class="pass-count">0</span>
           </button>`;
       });
-      window.PassNetwork.bindPlayerEvents(); // re-bind clicks
-      window.PassNetwork.restoreCounts();    // restore pass counts
+      window.PassNetwork.bindPlayerEvents();
+      window.PassNetwork.restoreCounts();
     });
 }
 
-// Init
 document.addEventListener('DOMContentLoaded', () => {
     window.PassNetwork.init();
 });
 </script>
+
 {% endblock %}
