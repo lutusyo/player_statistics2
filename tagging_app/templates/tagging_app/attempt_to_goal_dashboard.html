@@ -1,5 +1,6 @@
 {% load static %}
-{% load custom_filters %}
+{% load tagging_custom_filters %}
+
 
 
 <!--{% block title %}Attempts at Goal{% endblock %}-->
@@ -105,6 +106,41 @@
 
 <div class="attempts-dashboard">
 
+
+
+
+<div class="summary-pitch-container" style="flex-direction: column; gap: 30px;">
+
+  <!-- OUR TEAM SUMMARY + PITCH SIDE BY SIDE -->
+  <div style="display:flex; gap:10px; align-items:flex-start;">
+    <!-- Table -->
+    <table class="summary-table" style="width:50%;">
+      <thead>
+        <tr><th>Key</th><th>Outcome</th><th>Shots</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="color:red;">●</td><td>Goals</td><td>{{ our_summary.goals|default:0 }}</td></tr>
+        
+        <tr><td style="color:cyan;">●</td><td>On Target</td><td>{{ our_summary.on_target_total|default:0 }}</td></tr>
+        
+        <tr><td style="color:orange;">●</td><td>Off Target</td><td>{{ our_summary.off_target|default:0 }}</td></tr>
+        <tr><td style="color:gold;">●</td><td>Blocked</td><td>{{ our_summary.blocked|default:0 }}</td></tr>
+        <tr><td style="color:black;">●</td><td>Incomplete</td><td>{{ our_summary.incomplete|default:0 }}</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Pitch -->
+    <div class="pitch" style="width:50%;">
+      <img src="{% static 'images/pitch-2.jpg' %}" alt="Pitch" class="pitch-bg">
+      {% for attempt in our_attempts %}
+        <div class="shot {{ attempt.outcome|slugify }}" style="top:{{ attempt.y_percent }}%; left:{{ attempt.x_percent }}%;">
+          {{ attempt.player.squad_number }}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+
       <!-- âœ… Goals List Section -->
 <h2>Goals</h2>
 <table>
@@ -163,8 +199,133 @@
 
 
 
+
+<h3>Shots On Target</h3>
+<table border="1">
+  <tr><th>Player</th><th>Minute</th><th>Outcome</th><th>Body Part</th></tr>
+  {% for shot in our_shots_on_target %}
+  <tr>
+    <td>{{ shot.player.name }}</td>
+    <td>{{ shot.minute }}'</td>
+    <td>{{ shot.outcome }}</td>
+    <td>{{ shot.body_part }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="4">No data available</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Shots Off Target</h3>
+<table border="1">
+  <tr><th>Player</th><th>Minute</th><th>Outcome</th></tr>
+  {% for shot in our_shots_off_target %}
+  <tr>
+    <td>{{ shot.player.name }}</td>
+    <td>{{ shot.minute }}'</td>
+    <td>{{ shot.outcome }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="3">No data available</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Blocked Shots</h3>
+<table border="1">
+  <tr><th>Player</th><th>Minute</th><th>Outcome</th></tr>
+  {% for shot in our_blocked_shots %}
+  <tr>
+    <td>{{ shot.player.name }}</td>
+    <td>{{ shot.minute }}'</td>
+    <td>{{ shot.outcome }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="3">No data available</td></tr>
+  {% endfor %}
+</table>
+
+
+<div class="delivery-summary" style="padding:20px; font-family:Arial;">
+  <h3 style="margin-top:30px;">Effective Delivery</h3>
+  <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 50%;">
+    <thead>
+      <tr style="background:#f0f0f0;">
+        <th>Delivery Type</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in total_delivery_types %}
+        <tr>
+          <td>{{ item.delivery_type }}</td>
+          <td style="text-align:center;">{{ item.total }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+<h3>Corners</h3>
+<table border="1">
+  <tr><th>Assist By</th><th>Minute</th><th>Outcome</th></tr>
+  {% for corner in our_corners %}
+  <tr>
+    <td>{{ corner.assist_by.name }}</td>
+    <td>{{ corner.minute }}'</td>
+    <td>{{ corner.outcome }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="3">No corners recorded</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Crosses</h3>
+<table border="1">
+  <tr><th>Assist By</th><th>Minute</th><th>Outcome</th></tr>
+  {% for shot in our_crosses %}
+  <tr>
+    <td>{{ shot.assist_by.name }}</td>
+    <td>{{ shot.minute }}'</td>
+    <td>{{ shot.outcome }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="3">No crosses recorded</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Loose Balls</h3>
+<table border="1">
+  <tr><th>Player</th><th>Minute</th></tr>
+  {% for shot in our_effective_loose_ball %}
+  <tr>
+    <td>{{ shot.player.name }}</td>
+    <td>{{ shot.minute }}'</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="2">No loose balls recorded</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Effective Delivery Passes</h3>
+<table border="1">
+  <tr><th>Assist By</th><th>Minute</th><th>Outcome</th></tr>
+  {% for shot in our_effective_pass %}
+  <tr>
+    <td>{{ shot.assist_by.name }}</td>
+    <td>{{ shot.minute }}'</td>
+    <td>{{ shot.outcome }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="3">No effective passes recorded</td></tr>
+  {% endfor %}
+</table>
+
+
+
+
+
   <!-- Our Team Attempts -->
-  <h2>Our Team Attempts</h2>
+  <h2>Azam Fc Goal Attempts</h2>
   <table>
     <thead>
       <tr>
@@ -194,56 +355,24 @@
 
 
 
-<div class="delivery-summary" style="padding:20px; font-family:Arial;">
-  <h3 style="margin-top:30px;">Effective Delivery</h3>
-  <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 50%;">
-    <thead>
-      <tr style="background:#f0f0f0;">
-        <th>Delivery Type</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for item in total_delivery_types %}
-        <tr>
-          <td>{{ item.delivery_type }}</td>
-          <td style="text-align:center;">{{ item.total }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
 
-<div class="summary-pitch-container" style="flex-direction: column; gap: 30px;">
 
-  <!-- OUR TEAM SUMMARY + PITCH SIDE BY SIDE -->
-  <div style="display:flex; gap:10px; align-items:flex-start;">
-    <!-- Table -->
-    <table class="summary-table" style="width:50%;">
-      <thead>
-        <tr><th>Key</th><th>Outcome</th><th>Shots</th></tr>
-      </thead>
-      <tbody>
-        <tr><td style="color:red;">●</td><td>Goals</td><td>{{ our_summary.goals|default:0 }}</td></tr>
-        
-        <tr><td style="color:cyan;">●</td><td>On Target</td><td>{{ our_summary.on_target_total|default:0 }}</td></tr>
-        
-        <tr><td style="color:orange;">●</td><td>Off Target</td><td>{{ our_summary.off_target|default:0 }}</td></tr>
-        <tr><td style="color:gold;">●</td><td>Blocked</td><td>{{ our_summary.blocked|default:0 }}</td></tr>
-        <tr><td style="color:black;">●</td><td>Incomplete</td><td>{{ our_summary.incomplete|default:0 }}</td></tr>
-      </tbody>
-    </table>
 
-    <!-- Pitch -->
-    <div class="pitch" style="width:50%;">
-      <img src="{% static 'images/pitch-2.jpg' %}" alt="Pitch" class="pitch-bg">
-      {% for attempt in our_attempts %}
-        <div class="shot {{ attempt.outcome|slugify }}" style="top:{{ attempt.y_percent }}%; left:{{ attempt.x_percent }}%;">
-          {{ attempt.player.squad_number }}
-        </div>
-      {% endfor %}
-    </div>
-  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

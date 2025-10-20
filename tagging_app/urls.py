@@ -6,30 +6,24 @@ from tagging_app.views import current_players
 
 from tagging_app.views.output.summary_key_statistics import summary_key_statistics_view
 from tagging_app.views.output import full_report, match_summary3, table_of_contents, post_match_summary
-
-from tagging_app.views2 import delivery_type
-
+from tagging_app.views2 import delivery_type, pdf_download, attempt_summary
 
 app_name = 'tagging_app'
 
 urlpatterns = [
 
-
-
     path('match/<int:match_id>/delivery-summary/', delivery_type.delivery_summary_view, name='delivery_summary'),
+    path('attempt-summary/<int:match_id>/', attempt_summary.attempt_summary_view, name='attempt_summary'),
 
-
-
-    path("full-report/<int:match_id>/<int:our_team_id>/", full_report.full_report_view, name="full_report"),
+    path("full-report/<int:match_id>/<int:our_team_id>/", full_report.full_report_view, name="full_report"),  #Full Report
+    path('full-report/<int:match_id>/<int:our_team_id>/download/', pdf_download.download_full_report, name='download_full_report'), #Full Report PDF Download 
 
     #table of contents
     path("table-of-contents/<int:match_id>/<int:our_team_id>/", table_of_contents.table_of_contents_view, name="report_cover"),
 
     path('intro/post-match-summary/<int:match_id>/<int:our_team_id>/', post_match_summary.full_match_context_view, name='post_match_summary'),
-
     # kikosi
     path('match-summary/<int:match_id>/<int:team_id>/', match_summary3.match_summary_view, name='match_summary'),
-
 
     path('api_current_on_field_players/<int:match_id>/', current_players.api_current_on_field_players, name='api_current_on_field_players'),
     #path("current_players/<int:match_id>/", current_players.api_current_on_field_players, name="api_current_players"),
@@ -41,7 +35,6 @@ urlpatterns = [
     # (1)entering data (2)saving data (3)dashboard to view data (4) export  csv file (5) export pdf file
 
     # tagging_app/urls.py
-
 
     # Attempt to Goal enter data: our team
     path('match/<int:match_id>/attempt_to_goal/', attempt_to_goal.enter_attempt_to_goal, name='enter_attempt_to_goal'),

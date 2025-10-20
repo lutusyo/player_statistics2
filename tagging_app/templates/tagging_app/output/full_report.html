@@ -1,64 +1,101 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Full Report</title>
+
+    <!-- Basic fallback CSS (safe inline styles) -->
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #222;
+        }
+        h1, h2, h3 {
+            color: #000;
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
         .page-break {
             page-break-before: always;
         }
+
+
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #ddd; padding: 6px; font-size: 10px; }
+  .player-photo { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+  .page-break { page-break-before: always; }
+
+
+
+
     </style>
 </head>
 <body>
-    {% block report_content %}
-
+{% block report_content %}
     <div>{% include "tagging_app/reports/table_of_contents.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="post-match-summary"> {% include "tagging_app/reports/intro_pages/post_match_summary.html" %}</div>
+    <div>{% include "tagging_app/reports/intro_pages/post_match_summary.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="match-summary">{% include "tagging_app/reports/match_summary3.html" %}</div>
+    <div>{% include "tagging_app/reports/match_summary3.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="match-summary-stats">{% include "tagging_app/output/summary_key_statistics.html" %}</div>
+    <div>{% include "tagging_app/output/summary_key_statistics.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="in-possession">{% include "tagging_app/reports/intro_pages/in_possession.html" %}</div>
+    <div>{% include "tagging_app/reports/intro_pages/in_possession.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="pass-network-dashboard">{% include "tagging_app/pass_network_dashboard.html" %}</div>
+    <div>{% include "tagging_app/pass_network_dashboard.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="attempt-to-goal-dashboard">{% include "tagging_app/attempt_to_goal_dashboard.html" %}</div>
+    <div>{% include "tagging_app/attempt_to_goal_dashboard.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="out-of-possession">{% include "reports_app/intro_pages/out_of_possession.html" %}</div>
+    <div>{% include "reports_app/intro_pages/out_of_possession.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="goalkeeping">{% include "reports_app/intro_pages/goalkeeping.html" %}</div>
+    <div>{% include "reports_app/intro_pages/goalkeeping.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="set-plays">{% include "reports_app/intro_pages/set_plays.html" %}</div>
+    <div>{% include "reports_app/intro_pages/set_plays.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="individual-in-possession">{% include "reports_app/intro_pages/individual_in_possession.html" %}</div>
+    <div>{% include "reports_app/intro_pages/individual_in_possession.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="match-summary-stats">{% include "matches_app/partials/stats.html" %}</div>
+    <div>{% include "matches_app/partials/stats.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="individual-out-of-possession">{% include "reports_app/intro_pages/individual_out_of_possession.html" %}</div>
+    <div>{% include "reports_app/intro_pages/individual_out_of_possession.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="individual-physical">{% include "reports_app/intro_pages/individual_physical.html" %}</div>
+    <div>{% include "reports_app/intro_pages/individual_physical.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="gps-match-detail">{% include "gps_app/gps_match_detail.html" %}</div>
+    <div>{% include "gps_app/gps_match_detail.html" %}</div>
     <div class="page-break"></div>
 
-    <div class="outro">{% include "tagging_app/reports/intro_pages/outro.html" %}</div>
+    <div>{% include "tagging_app/reports/intro_pages/outro.html" %}</div>
 
-    {% endblock %}
+
+{% endblock %}
 </body>
 </html>

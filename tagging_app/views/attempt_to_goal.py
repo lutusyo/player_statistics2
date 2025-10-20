@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
 from django.http import JsonResponse, HttpResponse, FileResponse
-from django.db.models import Count
+from django.db.models import Count, Q
 import traceback, json, csv, io
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -12,9 +12,6 @@ from players_app.models import Player
 from teams_app.models import Team
 from tagging_app.models import AttemptToGoal, DeliveryTypeChoices, OutcomeChoices, BodyPartChoices, LocationChoices
 from tagging_app.utils.attempt_to_goal_utils import get_match_full_context
-
-from django.db.models import Q
-from django.db.models import Count
 
 
 def enter_attempt_to_goal(request, match_id):
@@ -113,10 +110,9 @@ def save_attempt_to_goal(request):
         return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
 
-
 def attempt_to_goal_dashboard(request, match_id):
     match = get_object_or_404(Match, id=match_id)
-
+    
     our_team_id = request.GET.get("our_team_id") or match.home_team.id
     try:
         our_team_id = int(our_team_id)
@@ -191,6 +187,36 @@ def attempt_to_goal_dashboard(request, match_id):
 
     #opponent_summary["on_target_total"] = opponent_summary["goals"] + opponent_summary["on_target_save"]
 
+
+
+##############################################################################################################################
+    our_attempts = AttemptToGoal.objects.filter(match=match, is_opponent=False)   # our team attempts
+    
+    # Filter by categories
+
+
+    our_shots_on_target = our_attempts.filter(outcome__in=[OutcomeChoices.ON_TARGET_GOAL, OutcomeChoices.ON_TARGET_SAVED])
+    our_shots_off_target = our_attempts.filter(outcome=OutcomeChoices.OFF_TARGET)
+    our_blocked_shots = our_attempts.filter(outcome=OutcomeChoices.BLOCKED)
+    our_player_errors = our_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR)
+
+    our_corners = our_attempts.filter(delivery_type=DeliveryTypeChoices.CORNER)
+    our_crosses = our_attempts.filter(delivery_type=DeliveryTypeChoices.CROSS)
+    our_effective_loose_ball = our_attempts.filter(delivery_type=DeliveryTypeChoices.LOOSE_BALL)
+    our_effective_pass = our_attempts.filter(delivery_type=DeliveryTypeChoices.PASS)
+
+        
+   # opponent_attempts = AttemptToGoal.objects.filter(match=match, is_opponent=True)     # opponents team attempts
+    # Filter by categories
+    #opponent_shots_on_target = opponent_attempts.filter(outcome__in=[OutcomeChoices.ON_TARGET_GOAL, OutcomeChoices.ON_TARGET_SAVED])
+    #opponent_shots_off_target = opponent_attempts.filter(outcome=OutcomeChoices.OFF_TARGET)
+    #opponent_blocked_shots = opponent_attempts.filter(outcome=OutcomeChoices.BLOCKED)
+    #opponent_player_errors = opponent_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR)
+
+    #opponent_corners = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.CORNER)
+    #opponent_crosses = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.CROSS)
+
+
     # ✅ Update context
     context.update({
         "players": players,
@@ -202,6 +228,18 @@ def attempt_to_goal_dashboard(request, match_id):
         "goals": goals,
         "match": match,
         'total_delivery_types': total_delivery_types,
+
+
+        "match": match,
+        "our_shots_on_target": our_shots_on_target,
+        "our_shots_off_target": our_shots_off_target,
+        "our_blocked_shots": our_blocked_shots,
+        "our_player_errors": our_player_errors,
+
+        "our_corners": our_corners,
+        "our_crosses": our_crosses,
+        "our_effective_loose_ball": our_effective_loose_ball,
+        "our_effective_pass": our_effective_pass,
     })
 
     return render(request, "tagging_app/attempt_to_goal_dashboard.html", context)
@@ -302,3 +340,10 @@ def get_outcome_counts(request, match_id):
 
     return JsonResponse(counts_dict)
 
+
+
+
+
+
+
+    

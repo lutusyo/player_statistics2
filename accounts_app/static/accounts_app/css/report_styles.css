@@ -1,0 +1,31 @@
+/* accounts_app/static/css/report_styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #222;
+    margin: 20px;
+}
+
+h1, h2, h3 {
+    color: #003366;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+table, th, td {
+    border: 1px solid #555;
+}
+
+th, td {
+    padding: 6px;
+    text-align: left;
+}
+
+.page-break {
+    page-break-before: always;
+}

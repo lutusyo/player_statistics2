@@ -1,26 +1,34 @@
 {% extends 'base.html' %}
-{% load custom_filters %}
+{% load tagging_custom_filters %}
+
+
+
+
 {% block content %}
-<div class="delivery-summary" style="padding:20px; font-family:Arial;">
-  
+
+    <div class="delivery-summary" style="padding:20px; font-family:Arial;">
+      
+
+      <h3 style="margin-top:30px;">Total Delivery Types (All Players)</h3>
+      <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 50%;">
+        <thead>
+          <tr style="background:#f0f0f0;">
+            <th>Delivery Type</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in total_delivery_types %}
+            <tr>
+              <td>{{ item.delivery_type }}</td>
+              <td style="text-align:center;">{{ item.total }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      
+    </div>
 
 
-  <h3 style="margin-top:30px;">Total Delivery Types (All Players)</h3>
-  <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 50%;">
-    <thead>
-      <tr style="background:#f0f0f0;">
-        <th>Delivery Type</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for item in total_delivery_types %}
-        <tr>
-          <td>{{ item.delivery_type }}</td>
-          <td style="text-align:center;">{{ item.total }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
 {% endblock %}

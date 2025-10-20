@@ -1,0 +1,104 @@
+{% load tagging_custom_filters %}
+
+{% block content %}
+<h2>Match Attempt Summary — {{ match }}</h2>
+
+<h3>Shots On Target</h3>
+<table border="1">
+  <tr><th>Player</th><th>Minute</th><th>Outcome</th><th>Body Part</th></tr>
+  {% for shot in our_shots_on_target %}
+  <tr>
+    <td>{{ shot.player.name }}</td>
+    <td>{{ shot.minute }}'</td>
+    <td>{{ shot.outcome }}</td>
+    <td>{{ shot.body_part }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="4">No data available</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Shots Off Target</h3>
+<table border="1">
+  <tr><th>Player</th><th>Minute</th><th>Outcome</th></tr>
+  {% for shot in our_shots_off_target %}
+  <tr>
+    <td>{{ shot.player.name }}</td>
+    <td>{{ shot.minute }}'</td>
+    <td>{{ shot.outcome }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="3">No data available</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Blocked Shots</h3>
+<table border="1">
+  <tr><th>Player</th><th>Minute</th><th>Outcome</th></tr>
+  {% for shot in our_blocked_shots %}
+  <tr>
+    <td>{{ shot.player.name }}</td>
+    <td>{{ shot.minute }}'</td>
+    <td>{{ shot.outcome }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="3">No data available</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Corners</h3>
+<table border="1">
+  <tr><th>Assist By</th><th>Minute</th><th>Outcome</th></tr>
+  {% for corner in our_corners %}
+  <tr>
+    <td>{{ corner.assist_by.name }}</td>
+    <td>{{ corner.minute }}'</td>
+    <td>{{ corner.outcome }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="3">No corners recorded</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Crosses</h3>
+<table border="1">
+  <tr><th>Assist By</th><th>Minute</th><th>Outcome</th></tr>
+  {% for shot in our_crosses %}
+  <tr>
+    <td>{{ shot.assist_by.name }}</td>
+    <td>{{ shot.minute }}'</td>
+    <td>{{ shot.outcome }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="3">No crosses recorded</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Loose Balls</h3>
+<table border="1">
+  <tr><th>Player</th><th>Minute</th></tr>
+  {% for shot in our_effective_loose_ball %}
+  <tr>
+    <td>{{ shot.player.name }}</td>
+    <td>{{ shot.minute }}'</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="2">No loose balls recorded</td></tr>
+  {% endfor %}
+</table>
+
+<h3>Effective Delivery Passes</h3>
+<table border="1">
+  <tr><th>Assist By</th><th>Minute</th><th>Outcome</th></tr>
+  {% for shot in our_effective_pass %}
+  <tr>
+    <td>{{ shot.assist_by.name }}</td>
+    <td>{{ shot.minute }}'</td>
+    <td>{{ shot.outcome }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="3">No effective passes recorded</td></tr>
+  {% endfor %}
+</table>
+
+{% endblock %}

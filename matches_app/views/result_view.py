@@ -35,6 +35,7 @@ def results_view(request, team):
 
         match.our_team_id = our_team.id
 
+    
         # Use the updated detail context
         detail_context = get_match_detail_context(match)
         match.our_team_goals = detail_context["home_team_goals"] if our_team == match.home_team else detail_context["away_team_goals"]
@@ -45,6 +46,7 @@ def results_view(request, team):
         "team_selected": team,
         "past_matches": past_matches,
         "active_tab": "results",
+        
     }
     return render(request, "matches_app/match_results.html", context)
 

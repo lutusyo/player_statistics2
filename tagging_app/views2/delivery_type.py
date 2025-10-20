@@ -1,32 +1,17 @@
 # Import aggregation and query utilities from Django ORM
 from django.db.models import Count, Q
-
 # Import the render shortcut to render templates
-from django.shortcuts import render
-
-# Import the AttemptToGoal model and the DeliveryTypeChoices enumeration
-from tagging_app.models import AttemptToGoal, DeliveryTypeChoices
-
-# Import aggregation and query utilities from Django ORM
-from django.db.models import Count
-from django.shortcuts import render
-
-# Import the AttemptToGoal model and the DeliveryTypeChoices enumeration
-from tagging_app.models import AttemptToGoal, DeliveryTypeChoices
+from django.shortcuts import render, get_object_or_404
+from tagging_app.models import AttemptToGoal, DeliveryTypeChoices, OutcomeChoices
+from matches_app.models import Match
 
 
 def delivery_summary_view(request, match_id):
-    """
-    View function that summarizes delivery statistics
-    (like crosses, passes, etc.) for a given match.
-    """
 
-    # Get only our team's attempts
     attempts = AttemptToGoal.objects.filter(match_id=match_id, is_opponent=False)
 
     # Group by player and delivery type
-    delivery_summary = (
-        attempts.values('assist_by__name', 'delivery_type')
+    delivery_summary = (attempts.values('assist_by__name', 'delivery_type')
         .annotate(total=Count('id'))
         .order_by('assist_by__name')
     )
@@ -56,3 +41,10 @@ def delivery_summary_view(request, match_id):
     }
 
     return render(request, 'tagging_app/output/delivery_types.html', context)
+
+
+
+
+
+
+

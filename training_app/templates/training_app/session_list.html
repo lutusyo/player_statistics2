@@ -15,7 +15,7 @@
                 {% endfor %}
                 <ul>
                     {% for attendance in session.attendances.all %}
-                        <li>{{ attendance.player.name }} - {{ "✔" if attendance.attended else "✘" }}</li>
+                        <li>{{ attendance.player.name }} - {% if attendance.attended %} ✔ {% else %} ✘ {% endif %}</li>
                     {% endfor %}
                 </ul>
             </li>

@@ -52,24 +52,21 @@
   <!-- On-field Players -->
   <div id="our-players" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px;"></div>
 
-
+  <!-- body part -->
   <div id="bodypart-panel" style="display: none; grid-template-columns: repeat(4,1fr); gap: 10px;">
     {% for value, label in body_parts %}
       <button class="location-btn" data-body-part="{{ value }}">{{ label }}</button>
     {% endfor %}
   </div>
 
+  <!-- location -->
   <div id="location-panel" style="display: none; grid-template-columns: repeat(3,1fr); gap: 10px;">
     {% for value, label in locations %}
       <button class="location-btn" data-location="{{ value }}">{{ label }}</button>
     {% endfor %}
   </div>
 
-  
-
-
-
-  <!-- Delivery Options -->
+  <!-- Delivery type -->
   <div id="delivery-panel" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
     {% for value, label in delivery_types %}
       <button class="delivery-btn" data-delivery-type="{{ value }}">{{ label }}</button>
@@ -78,7 +75,13 @@
 
   <!-- Assist Selection -->
   <div id="assist-panel" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;"></div>
+
+  <!-- Pre-Assist Selection -->
+  <div id="preassist-panel" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;"></div>
+
 </div>
+
+
 
 <a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>
 
@@ -86,7 +89,7 @@
 let timer = 0;
 let interval = null;
 let isPaused = false;
-let selectedPlayer = null, selectedOutcome = null, selectedBodyPart = null, selectedLocation = null, selectedDeliveryType = null, selectedAssistPlayer = null;
+let selectedPlayer = null, selectedOutcome = null, selectedBodyPart = null, selectedLocation = null, selectedDeliveryType = null, selectedAssistPlayer = null, selectedPreAssistPlayer = null;
 const matchId = {{ match.id }};
 
 function formatTime(sec) {
@@ -112,10 +115,18 @@ function selectPlayer(btn, playerId) {
   document.getElementById('our-players').style.display = 'none';
 
   document.getElementById('bodypart-panel').style.display = 'grid';
+  document.getElementById('location-panel').style.display = 'none';
+  document.getElementById('delivery-panel').style.display = 'none';
+  document.getElementById('assist-panel').style.display = 'none';
+  document.getElementById('preassist-panel').style.display = 'none';
+
   clearSelected('.player-btn');
   clearSelected('.delivery-btn');
   btn.classList.add('selected');
 }
+
+
+
 
 
 document.getElementById('bodypart-panel').addEventListener('click', e => {
@@ -123,9 +134,12 @@ document.getElementById('bodypart-panel').addEventListener('click', e => {
   if (!btn) return;
   selectedBodyPart = btn.dataset.bodyPart;
 
-  // Hide bodypart, show location next
+  // Move to location selection
   document.getElementById('bodypart-panel').style.display = 'none';
   document.getElementById('location-panel').style.display = 'grid';
+  document.getElementById('delivery-panel').style.display = 'none';
+  document.getElementById('assist-panel').style.display = 'none';
+  document.getElementById('preassist-panel').style.display = 'none';
 });
 
 
@@ -139,9 +153,6 @@ document.getElementById('location-panel').addEventListener('click', e => {
   document.getElementById('location-panel').style.display = 'none';
   document.getElementById('delivery-panel').style.display = 'grid';
 });
-
-
-
 
 
 
@@ -192,6 +203,44 @@ function refreshAssistPlayers() {
     });
 }
 
+
+function refreshPreAssistPlayers() {
+  fetch(`/tagging/api_current_on_field_players/${matchId}/`)
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById('preassist-panel');
+      container.innerHTML = '';
+      data.players
+        .filter(p => p.id != selectedPlayer && p.id != selectedAssistPlayer)
+        .forEach(p => {
+          const btn = makePlayerButton(p);
+          btn.classList.add('preassist-btn');
+          container.appendChild(btn);
+        });
+
+      const skipBtn = document.createElement('button');
+      skipBtn.className = 'outcome-btn';
+      skipBtn.textContent = 'No Pre-Assist';
+      skipBtn.onclick = () => {
+        selectedPreAssistPlayer = null;
+        document.getElementById('preassist-panel').style.display = 'none';
+        saveAttempt(
+          selectedOutcome,
+          selectedPlayer,
+          selectedBodyPart,
+          selectedLocation,
+          selectedDeliveryType,
+          selectedAssistPlayer,
+          selectedPreAssistPlayer
+        );
+      };
+      container.appendChild(skipBtn);
+    });
+}
+
+
+
+
 function updateEventLog() {
   fetch(`/tagging/live_state/${matchId}/`)
     .then(res => res.json())
@@ -215,11 +264,13 @@ function refreshOutcomeCounts() {
     });
 }
 
-function saveAttempt(outcome, playerId, bodyPart, locationTag, deliveryType, assistPlayerId = null) {
+function saveAttempt(outcome, playerId, bodyPart, locationTag, deliveryType, assistPlayerId = null, preAssistPlayerId = null) {
   if (!outcome || !playerId || !bodyPart || !locationTag || !deliveryType) {
     console.error('Missing data, cannot save attempt');
     return;
   }
+
+
   const payload = {
     match_id: matchId,
     player_id: playerId,
@@ -228,7 +279,8 @@ function saveAttempt(outcome, playerId, bodyPart, locationTag, deliveryType, ass
     body_part: selectedBodyPart,
     location_tag: selectedLocation,
     delivery_type: deliveryType,
-    assist_by_id: assistPlayerId, 
+    assist_by_id: assistPlayerId,
+    pre_assist_by_id: preAssistPlayerId,
     minute: Math.floor(timer / 60),
     second: timer % 60,
     timestamp: new Date().toISOString(),
@@ -247,11 +299,14 @@ function saveAttempt(outcome, playerId, bodyPart, locationTag, deliveryType, ass
       updateEventLog();
       refreshOnFieldPlayers();
       refreshOutcomeCounts();
-      selectedPlayer = selectedOutcome = selectedDeliveryType = selectedAssistPlayer = null;
+      selectedPlayer = selectedOutcome = selectedDeliveryType = selectedAssistPlayer = selectedBodyPart = selectedLocation = selectedPreAssistPlayer = null;
       document.getElementById('outcome-panel').style.display = 'grid';
       document.getElementById('our-players').style.display = 'none';
+      document.getElementById('bodypart-panel').style.display = 'none';
+      document.getElementById('location-panel').style.display = 'none';
       document.getElementById('delivery-panel').style.display = 'none';
       document.getElementById('assist-panel').style.display = 'none';
+      document.getElementById('preassist-panel').style.display = 'none';
     } else {
       alert(json.message);
     }
@@ -305,8 +360,31 @@ document.getElementById('assist-panel').addEventListener('click', e => {
   if (!btn) return;
   selectedAssistPlayer = btn.dataset.playerId;
   if (selectedPlayer && selectedOutcome && selectedDeliveryType) {
-    saveAttempt(selectedOutcome, selectedPlayer, selectedBodyPart, selectedLocation, selectedDeliveryType, selectedAssistPlayer);
+    // Hide assist panel, show pre-assist panel
+    document.getElementById('assist-panel').style.display = 'none';
+    document.getElementById('preassist-panel').style.display = 'grid';
+    refreshPreAssistPlayers();
   }
 });
+
+
+document.getElementById('preassist-panel').addEventListener('click', e => {
+  const btn = e.target.closest('.preassist-btn');
+  if (!btn) return;
+  selectedPreAssistPlayer = btn.dataset.playerId;
+  if (selectedPlayer && selectedOutcome && selectedDeliveryType) {
+    saveAttempt(
+      selectedOutcome,
+      selectedPlayer,
+      selectedBodyPart,
+      selectedLocation,
+      selectedDeliveryType,
+      selectedAssistPlayer,
+      selectedPreAssistPlayer
+    );
+  }
+});
+
+
 </script>
 {% endblock %}
