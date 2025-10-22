@@ -147,42 +147,31 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# STATIC FILES
+STATIC_URL = '/static_player_statistics2/'
+STATIC_ROOT = '/home/afcportal/public_html/static_player_statistics2'
 
-#Detect environment
-ENVIRONMENT = os.getenv('DJANGO_ENV', 'development')  # default to 'development'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'accounts_app', 'static'),
+    os.path.join(BASE_DIR, 'actions_app', 'static'),
+    #os.path.join(BASE_DIR, 'announcement_app', 'static'),
+    #os.path.join(BASE_DIR, 'defensive_app', 'static'),
+    os.path.join(BASE_DIR, 'goalkeeping_app', 'static'),
+    os.path.join(BASE_DIR, 'gps_app', 'static'),
+    #os.path.join(BASE_DIR, 'lineup_app', 'static'),
+    os.path.join(BASE_DIR, 'matches_app', 'static'),
+    #os.path.join(BASE_DIR, 'perfomance_app', 'static'),
+    os.path.join(BASE_DIR, 'players_app', 'static'),
+    os.path.join(BASE_DIR, 'reports_app', 'static'),
+    os.path.join(BASE_DIR, 'tagging_app', 'static'),
+    os.path.join(BASE_DIR, 'teams_app', 'static'),
+    #os.path.join(BASE_DIR, 'training_app', 'static'),
+    os.path.join(BASE_DIR, 'static'),  # optional: for global/static files
+]
 
-
-if ENVIRONMENT == 'production':
-    STATIC_URL = '/static_player_statistics2/'
-    STATIC_ROOT = '/home/afcportal/public_html/static_player_statistics2'
-    
-    MEDIA_URL = '/media_player_statistics2/'
-    MEDIA_ROOT = '/home/afcportal/public_html/media_player_statistics2'
-    
-    # In production, STATICFILES_DIRS is not needed
-    STATICFILES_DIRS = []
-
-else:
-    STATIC_URL = '/static/'
-    MEDIA_URL = '/media/'
-
-    STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')  # ONLY for collectstatic, not in STATICFILES_DIRS
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'accounts_app', 'static'),
-        os.path.join(BASE_DIR, 'players_app', 'static'),
-        os.path.join(BASE_DIR, 'matches_app', 'static'),
-        os.path.join(BASE_DIR, 'actions_app', 'static'),
-        os.path.join(BASE_DIR, 'gps_app', 'static'),
-        os.path.join(BASE_DIR, 'teams_app', 'static'),
-        os.path.join(BASE_DIR, 'goalkeeping_app', 'static'),
-        os.path.join(BASE_DIR, 'reports_app', 'static'),
-        os.path.join(BASE_DIR, 'tagging_app', 'static'),
-        os.path.join(BASE_DIR, 'static'),  # optional global
-    ]
-
-
+# MEDIA FILES
+MEDIA_URL = '/media_player_statistics2/'
+MEDIA_ROOT = '/home/afcportal/public_html/media_player_statistics2'
 
 
 LOGIN_REDIRECT_URL = 'home'  # redirect after login

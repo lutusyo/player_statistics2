@@ -1,17 +1,26 @@
-from django.shortcuts import render, get_object_or_404
+from io import BytesIO
+from django.shortcuts import get_object_or_404, render
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
-from django.http import JsonResponse, HttpResponse, FileResponse
 from django.db.models import Count, Q
-import traceback, json, csv, io
+
 from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-from lineup_app.models import MatchLineup
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+
 from matches_app.models import Match
 from players_app.models import Player
 from teams_app.models import Team
+from lineup_app.models import MatchLineup
 from tagging_app.models import AttemptToGoal, DeliveryTypeChoices, OutcomeChoices, BodyPartChoices, LocationChoices
 from tagging_app.utils.attempt_to_goal_utils import get_match_full_context
+import json
+import traceback
+
+
+
 
 
 def enter_attempt_to_goal(request, match_id):
@@ -305,24 +314,121 @@ def export_attempt_to_goal_csv(request, match_id):
 
 
 
-def export_attempt_to_goal_pdf(request, match_id):
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
-    c.drawString(100, 800, f"Attempt to Goal Report for Match {match_id}")
 
-    attempts = AttemptToGoal.objects.filter(match_id=match_id)
-    y = 750
-    for a in attempts:
-        line = f"{a.player.name if a.player else 'N/A'} | {a.get_body_part_display()} | {a.get_location_tag_display()} | Zone: {a.x}, {a.y}"
-        c.drawString(100, y, line)
-        y -= 15
-        if y < 50:
-            c.showPage()
-            y = 800
 
-    c.save()
+def link_callback(uri, rel):
+    """
+    Convert URIs to absolute system paths for xhtml2pdf.
+    Handles both STATIC and MEDIA files safely.
+    """
+    result = finders.find(uri)
+    if result:
+        if isinstance(result, (list, tuple)):
+            result = result[0]
+        return os.path.realpath(result)
+
+    sUrl = settings.STATIC_URL
+    mUrl = settings.MEDIA_URL
+    mRoot = settings.MEDIA_ROOT
+
+    if uri.startswith(mUrl):
+        path = os.path.join(mRoot, uri.replace(mUrl, ""))
+    elif uri.startswith(sUrl):
+        for static_dir in settings.STATICFILES_DIRS:
+            candidate = os.path.join(static_dir, uri.replace(sUrl, ""))
+            if os.path.isfile(candidate):
+                return os.path.realpath(candidate)
+        if settings.STATIC_ROOT:
+            candidate = os.path.join(settings.STATIC_ROOT, uri.replace(sUrl, ""))
+            if os.path.isfile(candidate):
+                return os.path.realpath(candidate)
+        raise FileNotFoundError(f"Static file not found: {uri}")
+    else:
+        return uri
+
+    if not os.path.isfile(path):
+        raise FileNotFoundError(f"Cannot find file: {uri}")
+
+    return os.path.realpath(path)
+
+
+
+
+def download_attempt_to_goal_pdf(request, match_id):
+    match = get_object_or_404(Match, id=match_id)
+    our_attempts = AttemptToGoal.objects.filter(match=match, is_opponent=False)
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4,
+                            rightMargin=20, leftMargin=20,
+                            topMargin=20, bottomMargin=20)
+
+    styles = getSampleStyleSheet()
+    styleH = styles['Heading2']
+
+    elements = []
+
+    # Title
+    elements.append(Paragraph(f"{match.home_team.name} - Attempts to Goal Dashboard", styleH))
+    elements.append(Spacer(1, 12))
+
+    # Summary Table
+    summary_data = [["Outcome", "Shots"]]
+    summary_data += [
+        ["Goals", our_attempts.filter(outcome='GOAL').count()],
+        ["On Target", our_attempts.filter(outcome='ON_TARGET_GOAL').count()],
+        ["Off Target", our_attempts.filter(outcome='OFF_TARGET').count()],
+        ["Blocked", our_attempts.filter(outcome='BLOCKED').count()],
+        ["Incomplete/Errors", our_attempts.filter(outcome='PLAYER_ERROR').count()],
+    ]
+
+    table = Table(summary_data, hAlign='LEFT', colWidths=[150, 80])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.black),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0,0), (-1,0), 6),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('FONTSIZE', (0,0), (-1,-1), 10),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+    ]))
+    elements.append(table)
+    elements.append(Spacer(1, 20))
+
+    # Detailed Attempts Table
+    elements.append(Paragraph("Detailed Goal Attempts", styleH))
+    elements.append(Spacer(1, 12))
+
+    attempt_data = [["Time", "Player", "Outcome", "Body Part", "Delivery Type", "Location"]]
+    for attempt in our_attempts:
+        attempt_data.append([
+            f"{attempt.minute}:{str(attempt.second).zfill(2)}",
+            attempt.player.name,
+            attempt.outcome,
+            attempt.get_body_part_display(),
+            attempt.get_delivery_type_display(),
+            attempt.get_location_tag_display(),
+        ])
+
+    attempts_table = Table(attempt_data, hAlign='LEFT', colWidths=[50, 100, 80, 80, 80, 80])
+    attempts_table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.lightgrey),
+        ('GRID', (0,0), (-1,-1), 0.25, colors.grey),
+        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+    ]))
+    elements.append(attempts_table)
+
+    doc.build(elements)
+
     buffer.seek(0)
-    return FileResponse(buffer, as_attachment=True, filename='attempt_to_goal.pdf')
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="attempt_to_goal_{match_id}.pdf"'
+    return response
+
+
+
 
 
 

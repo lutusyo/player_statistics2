@@ -15,6 +15,20 @@ urlpatterns = [
     path('match/<int:match_id>/delivery-summary/', delivery_type.delivery_summary_view, name='delivery_summary'),
     path('attempt-summary/<int:match_id>/', attempt_summary.attempt_summary_view, name='attempt_summary'),
 
+
+
+
+
+
+    path('match/<int:match_id>/attempt-to-goal/download/', attempt_to_goal.download_attempt_to_goal_pdf, name='download_attempt_to_goal_pdf'),
+
+
+
+
+
+
+
+
     path("full-report/<int:match_id>/<int:our_team_id>/", full_report.full_report_view, name="full_report"),  #Full Report
     path('full-report/<int:match_id>/<int:our_team_id>/download/', pdf_download.download_full_report, name='download_full_report'), #Full Report PDF Download 
 
@@ -50,7 +64,6 @@ urlpatterns = [
 
     path('match/<int:match_id>/attempt-to-goal-dashboard/', attempt_to_goal.attempt_to_goal_dashboard, name='attempt_to_goal_dashboard'),
     path('match/<int:match_id>/csv/export-attempt-to-goal-csv/',attempt_to_goal.export_attempt_to_goal_csv, name='export_attempt_to_goal_csv'),
-    path('match/<int:match_id>/pdf/export-attempt-to-goal-pdf/',attempt_to_goal.export_attempt_to_goal_pdf, name='export_attempt_to_goal_pdf'),
     # acros multiple device
     path('match/<int:match_id>/live_state/', attempt_to_goal.get_live_tagging_state, name='get_live_tagging_state'),
     # update substitute api
