@@ -8,6 +8,11 @@ class PlayerAttendanceInline(admin.TabularInline):
 @admin.register(TrainingSession)
 class TrainingSessionAdmin(admin.ModelAdmin):
     list_display = ['date', 'duration_minutes', 'training_types']
+    list_filter = ('date', 'duration_minutes')
     inlines = [PlayerAttendanceInline]
 
 admin.site.register(PlayerAttendance)
+
+
+
+    

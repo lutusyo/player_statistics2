@@ -1,64 +1,153 @@
+# lineup_app/models.py
 from django.db import models
 from players_app.models import Player
 from matches_app.models import Match
 from teams_app.models import Team
 
 
-class PositionChoices(models.TextChoices):
-    GK = 'GK', 'Goalkeeper'
-    RB = 'RB', 'Right Back'
-    RCB = 'RCB', 'Right Center Back'
-    LCB = 'LCB', 'Left Center Back'
-    LB = 'LB', 'Left Back'
-    RM = 'RM', 'Right Midfielder'
-    CM = 'CM', 'Central Midfielder'
-    LM = 'LM', 'Left Midfielder'
-    RW = 'RW', 'Right Winger'
-    LW = 'LW', 'Left Winger'
-    ST = 'ST', 'Striker'
-    # Optional SUB if you want to keep it
-    SUB = 'SUB', 'Substitute'
 
-
-    # Map position codes to pitch coordinates (% from top, % from left)
+# Map position codes to pitch coordinates (% from top, % from left)
 POSITION_COORDS = {
-    "GK":  {"top": 5,  "left": 45},
-    "RB":  {"top": 25, "left": 80},
-    "RCB": {"top": 25, "left": 60},
-    "LCB": {"top": 25, "left": 40},
-    "LB":  {"top": 25, "left": 20},
-    "RM":  {"top": 50, "left": 75},
-    "CM":  {"top": 50, "left": 55},
-    "LM":  {"top": 50, "left": 35},
-    "RW":  {"top": 75, "left": 70},
-    "LW":  {"top": 75, "left": 30},
-    "ST":  {"top": 75, "left": 50},
+    "4-4-2": {
+        "GK": {"top": 5, "left": 45},
+        "LB": {"top": 25, "left": 20},
+        "LCB": {"top": 25, "left": 40},
+        "RCB": {"top": 25, "left": 60},
+        "RB": {"top": 25, "left": 80},
+        "LM": {"top": 50, "left": 35},
+        "LCM": {"top": 50, "left": 45},
+        "RCM": {"top": 50, "left": 55},
+        "RM": {"top": 50, "left": 65},
+        "ST1": {"top": 75, "left": 40},
+        "ST2": {"top": 75, "left": 60},
+    },
+    "4-3-3": {
+        "GK": {"top": 5, "left": 45},
+        "LB": {"top": 25, "left": 20},
+        "LCB": {"top": 25, "left": 40},
+        "RCB": {"top": 25, "left": 60},
+        "RB": {"top": 25, "left": 80},
+        "LCM": {"top": 50, "left": 35},
+        "CM": {"top": 50, "left": 50},
+        "RCM": {"top": 50, "left": 65},
+        "LW": {"top": 70, "left": 25},
+        "ST": {"top": 75, "left": 50},
+        "RW": {"top": 70, "left": 75},
+    },
+    "3-5-2": {
+        "GK": {"top": 5, "left": 45},
+        "LCB": {"top": 25, "left": 35},
+        "CB": {"top": 25, "left": 50},
+        "RCB": {"top": 25, "left": 65},
+        "LM": {"top": 45, "left": 20},
+        "LCM": {"top": 45, "left": 40},
+        "CM": {"top": 50, "left": 50},
+        "RCM": {"top": 45, "left": 60},
+        "RM": {"top": 45, "left": 80},
+        "ST1": {"top": 70, "left": 40},
+        "ST2": {"top": 70, "left": 60},
+    },
+    "3-4-3": {
+        "GK": {"top": 5, "left": 45},
+        "LCB": {"top": 25, "left": 30},
+        "CB": {"top": 25, "left": 50},
+        "RCB": {"top": 25, "left": 70},
+        "LM": {"top": 45, "left": 35},
+        "LCM": {"top": 45, "left": 45},
+        "RCM": {"top": 45, "left": 55},
+        "RM": {"top": 45, "left": 65},
+        "LW": {"top": 70, "left": 25},
+        "ST": {"top": 70, "left": 50},
+        "RW": {"top": 70, "left": 75},
+    },
+    "4-5-1": {
+        "GK": {"top": 5, "left": 45},
+        "LB": {"top": 25, "left": 20},
+        "LCB": {"top": 25, "left": 40},
+        "RCB": {"top": 25, "left": 60},
+        "RB": {"top": 25, "left": 80},
+        "LM": {"top": 45, "left": 25},
+        "LCM": {"top": 45, "left": 40},
+        "CM": {"top": 50, "left": 50},
+        "RCM": {"top": 45, "left": 60},
+        "RM": {"top": 45, "left": 75},
+        "ST": {"top": 70, "left": 50},
+    },
+
+    
+    #"4-2-3-1":{
+     #   "GK": {"top": 5, "left": 45},
+      #  "LB": {"top": 25, "left": 20},
+      #  "LCB": {"top": 25, "left": 40},
+       # "RCB": {"top": 25, "left": 60},
+       # "RB": {"top": 25, "left": 80},
+      #  "LM": {"top": 45, "left": 25},
+      #  "LCM": {"top": 45, "left": 40},
+      #  "CM": {"top": 50, "left": 50},
+      #  "RCM": {"top": 45, "left": 60},
+       # "RM": {"top": 45, "left": 75},
+       # "ST": {"top": 70, "left": 50},
+   # },
 }
 
 
+class Formation(models.TextChoices):
+    F442 = "4-4-2", "4-4-2"
+    F433 = "4-3-3", "4-3-3"
+    F352 = "3-5-2", "3-5-2"
+    F343 = "3-4-3", "3-4-3"
+    F451 = "4-5-1", "4-5-1"
+    #F4231 = "4-2-3-1", "4-2-3-1"
+
+
+
+class PositionChoices(models.TextChoices):
+    GK = 'GK', 'Goalkeeper'
+    LB = 'LB', 'Left Back'
+    LCB = 'LCB', 'Left Center Back'
+    RCB = 'RCB', 'Right Center Back'
+    RB = 'RB', 'Right Back'
+    LM = 'LM', 'Left Midfielder'
+    LCM = 'LCM', 'Left Central Midfielder'
+    RCM = 'RCM', 'Right Central Midfielder'
+    RM = 'RM', 'Right Midfielder'
+    ST1 = 'ST1', 'Striker 1'
+    ST2 = 'ST2', 'Striker 2'
+    LW = 'LW', 'Left Winger'
+    RW = 'RW', 'Right Winger'
+    ST = 'ST', 'Striker'
+    CM = 'CM', 'Central Midfielder'
+    CB = 'CB', 'Center Back'
+    SUB = 'SUB', 'Substitute'
+
+
+
+
+
+
 class MatchLineup(models.Model):
-    match = models.ForeignKey(Match, on_delete=models.CASCADE, null=True, blank=True, help_text='Match this player is registered for')
-    player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True, blank=True, help_text='Player registered for this match')
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True, blank=True, help_text='Team this player belongs to (optional if you derive from Player)')
-    is_starting = models.BooleanField(default=False, help_text='True if this player is in the starting eleven')
-
+    formation = models.CharField(max_length=10, choices=Formation.choices, blank=True, null=True)
+    match = models.ForeignKey(Match, on_delete=models.CASCADE, null=True, blank=True)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True)
+    is_starting = models.BooleanField(default=False)
     position = models.CharField(max_length=5, choices=PositionChoices.choices, default=PositionChoices.SUB, blank=True, null=True)
-    pod_number = models.CharField(max_length=20, null=True, blank=True, default='Demo', help_text="GPS Pod number assigned to the player in this match")
-    time_in = models.PositiveSmallIntegerField(null=True, blank=True, help_text='Minute the player entered the match (e.g. 0 for starting XI or 1). Null = not yet played.')
-    time_out = models.PositiveSmallIntegerField(null=True, blank=True, help_text='Minute the player went out of the match. Null = still on pitch or not used.')
-
-    minutes_played = models.PositiveSmallIntegerField(default=0, help_text='Total minutes this player played in the match; calculated after substitutions or when the match ends.')
-
-    order = models.PositiveSmallIntegerField(null=True, blank=True, help_text='Optional ordering key to control display order on UI.')
+    pod_number = models.CharField(max_length=20, null=True, blank=True)
+    time_in = models.PositiveSmallIntegerField(null=True, blank=True)
+    time_out = models.PositiveSmallIntegerField(null=True, blank=True)
+    minutes_played = models.PositiveSmallIntegerField(default=0)
+    order = models.PositiveSmallIntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = (('match', 'player', 'pod_number'),)
+        constraints = [
+            models.UniqueConstraint(fields=['match', 'team', 'player'], name='unique_lineup_per_team'),
+        ]
         ordering = ['order', 'player__name']
 
     def __str__(self):
-        return f"{self.match} — {self.player} (start={self.is_starting}) - {self.pod_number}"
+        return f"{self.match} - {self.team} - {self.player}"
 
     def calculate_minutes_played(self, final_minute=None):
         if self.time_in is None:

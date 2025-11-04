@@ -387,15 +387,11 @@ table tbody tr:hover {
 
 <!-- External Analytics Links -->
 <div class="text-center">
-    <a href="{% url 'performance_rating_app:match_performance' match.id %}" class="btn btn-primary">
-    Player Performance Ratings
-    </a>
 
-    <a href="{% url 'tagging_app:match_summary' match.id match.home_team.id %}" class="btn btn-primary m-1">2. Lineup</a>
+    <a href="{% url 'lineup_app:both_teams_lineup' match.id  %}" class="btn btn-primary m-1">2. Lineup</a>
     <a href="{% url 'tagging_app:summary_key_statistics' match.id %}"  class="btn btn-primary m-1">3. Match Summary - Key Statistics</a>
     <a href="{% url 'matches_app:individual_data_in_possession' match.id %}"  class="btn btn-primary m-1">Individual data in possession</a>
     <a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" class="btn btn-primary m-1"> Pass Network</a>
-    <a href="{% url 'tagging_app:attempt_to_goal_dashboard' match.id %}" class="btn btn-primary m-1"> Goal Attempts</a>
     <a href="{% url 'tagging_app:goalkeeper_distribution_dashboard' match.id %}" class="btn btn-primary m-1"> Goalkeeping Distribution</a>
     <a href="{% url 'defensive_app:defensive_summary' match.id %}" class="btn btn-primary m-1"> Other Statistics</a>
 

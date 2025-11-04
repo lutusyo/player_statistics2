@@ -80,15 +80,25 @@ def api_get_lists(request, match_id):
     ]
 
     data = {
-        "currently_on_pitch": team_a["on_field"] + team_b["on_field"],
-        "currently_on_subs": team_a["on_bench"] + team_b["on_bench"],
-        "bench": team_a["not_selected"] + team_b["not_selected"],
-        "already_played_and_out": team_a["subbed_out"] + team_b["subbed_out"],
-        "starting_eleven": starting_eleven,
-        "subs_this_match": [],  # Add logic if you want to track
-        "subs_exchanges": [],
-        "subs_not_played": [],  # Add logic if you want to track
+        "home": {
+            "currently_on_pitch": team_a["on_field"],
+            "currently_on_subs": team_a["on_bench"],
+            "bench": team_a["not_selected"],
+            "already_played_and_out": team_a["subbed_out"],
+            "starting_eleven": [p for p in team_a["on_field"] if p["is_starting"]],
+        },
+        "away": {
+            "currently_on_pitch": team_b["on_field"],
+            "currently_on_subs": team_b["on_bench"],
+            "bench": team_b["not_selected"],
+            "already_played_and_out": team_b["subbed_out"],
+            "starting_eleven": [p for p in team_b["on_field"] if p["is_starting"]],
+        },
+        "subs_exchanges": [],  # Keep as-is
+        "subs_this_match": [],
+        "subs_not_played": [],
     }
+
 
     # Fill subs_exchanges
     substitutions = Substitution.objects.filter(match=match).select_related(

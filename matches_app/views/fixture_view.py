@@ -13,7 +13,8 @@ from tagging_app.utils.attempt_to_goal_utils import get_match_full_context
 @login_required
 def fixtures_view(request, team):
     age_group = AgeGroup.objects.get(code=team)
-    our_teams = Team.objects.filter(age_group=age_group, team_type='OUR_TEAM')
+    our_teams = Team.objects.filter(age_group=age_group)
+    #our_teams = Team.objects.filter(age_group=age_group, team_type="OUR_TEAM")
 
     upcoming_matches = Match.objects.filter(
         Q(home_team__in=our_teams) | Q(away_team__in=our_teams),

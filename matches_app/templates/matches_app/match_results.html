@@ -12,33 +12,53 @@
 
     <hr>
     <h2 style="text-align: center; margin-top: 40px;">Past Matches</h2>
+    
+
 
     {% if past_matches %}
         {% for match in past_matches %}
 
             <!-- Admin Action Buttons -->
+
+
             <div class="admin-actions">
-                {% if user.is_authenticated and user.username == 'Azam2' %}
-                    {% if match.has_lineup %}
+            {% if user.is_authenticated and user.username == 'Azam2' %}
+                {% if match.home_lineup_exists and match.away_lineup_exists %}
+                    <li>
+                        <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}">Goal Tagging</a> |
+                        <a href="{% url 'tagging_app:pass_network_enter_data' match.id %}">Pass Tagging</a> |
+                        <!--<a href="{% url 'tagging_app:enter_goalkeeper_distribution' match.id %}">Goalkeeper Distribution</a>--> |
+                        <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive Stats</a> |
+                        <a href="{% url 'reports_app:match_report' match.id  %}">FULL REPORT</a>
+                    </li>
+                {% else %}
+                    <li>
+                        {% if not match.home_lineup_exists %}
+                            <a href="{% url 'lineup_app:create_lineup' match.id match.home_team.id %}">CREATE LINEUP (Home)</a>
+                            <a href="{% url 'reports_app:match_report' match.id  %}">FULL REPORT</a>
+                        {% endif %}
+                        {% if not match.away_lineup_exists %}
+                            <a href="{% url 'lineup_app:create_lineup' match.id match.away_team.id %}">CREATE LINEUP (Away)</a>
+                            <a href="{% url 'reports_app:match_report' match.id  %}">FULL REPORT</a>
+
+
+
                         <li>
                             <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}">Goal Tagging</a> |
                             <a href="{% url 'tagging_app:pass_network_enter_data' match.id %}">Pass Tagging</a> |
-                            <a href="{% url 'tagging_app:enter_goalkeeper_distribution' match.id %}">Goalkeeper Distribution</a> |
+                            <!--<a href="{% url 'tagging_app:enter_goalkeeper_distribution' match.id %}">Goalkeeper Distribution</a>--> |
                             <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive Stats</a> |
-                            <a href="{% url 'tagging_app:enter_attempt_to_goal_opp' match.id %}" class="btn btn-primary">Opponent Goal Tagging</a>
+                            <a href="{% url 'reports_app:match_report' match.id  %}">FULL REPORT</a>
+                        </li>
 
-                            <a href="{% url 'tagging_app:download_full_report' match.id match.our_team_id %}"
-                               style="background-color: #007bff; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none;">
-                                📄 Download Full Report (PDF)
-                            </a>
-                        </li>
-                    {% else %}
-                        <li>
-                            <a href="{% url 'lineup_app:create_lineup' match.id %}">CREATE LINEUP</a>
-                        </li>
-                    {% endif %}
+                        
+
+                        {% endif %}
+                    </li>
                 {% endif %}
+            {% endif %}
             </div>
+
 
             <!-- Match Card -->
             <a href="{% url 'matches_app:match_detail' match_id=match.id %}" style="text-decoration: none; color: inherit;">

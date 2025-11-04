@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+
+
+
+
+
+
+
+<div class="sticky-nav-wrapper">
+  <div class="container">
+    <div class="sticky-nav">
+      <div class="row g-2 justify-content-center">
+        <div class="col-auto">
+          <a href="{% url 'reports_app:mesocycle_reports' %}"  class="btn btn-outline-primary">Mesocycle</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:fitness_reports' %}"  class="btn btn-outline-success">Fitness Plan</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:iap_reports' %}"  class="btn btn-outline-warning">IDPs</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:performance_reports' %}" class="btn btn-outline-info">Performance</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:scouting_reports' %}" class="btn btn-outline-dark">Scouting</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:medical_reports' %}" class="btn btn-outline-danger">Medical</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:transition_reports' %}" class="btn btn-outline-secondary">Transition</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="container mt-4">
+  <h2 class="mb-3">Match Results</h2>
+
+  <form method="get" class="row g-3 mb-3">
+    <div class="col-md-3">{{ form.team.label_tag }} {{ form.team }}</div>
+    <div class="col-md-2">{{ form.period.label_tag }} {{ form.period }}</div>
+    <div class="col-md-2">{{ form.start_date.label_tag }} {{ form.start_date }}</div>
+    <div class="col-md-2">{{ form.end_date.label_tag }} {{ form.end_date }}</div>
+    <div class="col-md-1"><button type="submit" class="btn btn-primary">Filter</button></div>
+  </form>
+
+  <div class="mb-3">
+    <a href="{% url 'reports_app:export_result_excel' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-success btn-sm">Export Excel</a>
+    <a href="{% url 'reports_app:export_result_pdf' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-danger btn-sm">Export PDF</a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-sm table-bordered">
+      <thead class="table-light">
+        <tr>
+          <th>Date</th><th>Venue</th><th>Competition</th>
+          <th>Home</th><th>Score</th><th>Away</th><th>Our Team</th><th>Result</th><th>Goals/Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td>{{ r.date }}</td>
+          <td>{{ r.venue }}</td>
+          <td>{{ r.competition }}</td>
+          <td>{{ r.home_team.name }}</td>
+          <td>{{ r.home_score }} - {{ r.away_score }}</td>
+          <td>{{ r.away_team.name }}</td>
+          <td>{% if r.our_team %}{{ r.our_team.name }}{% else %}-{% endif %}</td>
+          <td>{{ r.result }}</td>
+          <td>
+            {% if r.goal_scorers %}{{ r.goal_scorers|linebreaksbr }}{% else %}{{ r.notes }}{% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="text-center text-muted">No match results found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Player Statistics Report ({{ filter_type|title }})</h3>
+
+  <div class="mb-3">
+    <a href="?filter=all" class="btn btn-secondary btn-sm">All</a>
+    <a href="?filter=month" class="btn btn-secondary btn-sm">This Month</a>
+    <a href="?filter=week" class="btn btn-secondary btn-sm">This Week</a>
+    <a href="{% url 'reports_app:statistics_export_excel' %}?filter={{ filter_type }}" class="btn btn-success btn-sm">Download Excel</a>
+    <a href="{% url 'reports_app:statistics_export_pdf' %}?filter={{ filter_type }}" class="btn btn-danger btn-sm">Download PDF</a>
+  </div>
+
+  <table class="table table-striped table-bordered text-center">
+    <thead class="table-dark">
+      <tr>
+        <th>Name</th>
+        <th>Position</th>
+        <th>Training (min)</th>
+        <th>Game (min)</th>
+        <th>Apps</th>
+        <th>Starts</th>
+        <th>Sub In</th>
+        <th>Sub Out</th>
+        <th>Goals</th>
+        <th>Assists</th>
+        <th>Note</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in report %}
+      <tr>
+        <td>{{ r.player.name }}</td>
+        <td>{{ r.position }}</td>
+        <td>{{ r.training_minutes }}</td>
+        <td>{{ r.game_minutes }}</td>
+        <td>{{ r.appearances }}</td>
+        <td>{{ r.starts }}</td>
+        <td>{{ r.sub_in }}</td>
+        <td>{{ r.sub_out }}</td>
+        <td>{{ r.goals }}</td>
+        <td>{{ r.assists }}</td>
+        <td>{{ r.note }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="11">No data available</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

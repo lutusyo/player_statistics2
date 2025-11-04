@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+/* === Sticky navbar below base.html navbar === */
+.sticky-nav-wrapper {
+    position: fixed;
+    top: 170px; /* Adjust to fit your base navbar height */
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    background-color: #fff;
+    padding: 10px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Highlight active nav button */
+.sticky-nav .btn.active {
+    font-weight: bold;
+    border-width: 2px;
+}
+
+/* Push main content down */
+#content-section {
+    margin-top: 130px; /* base navbar + sticky navbar height */
+}
+</style>
+
+<div class="sticky-nav-wrapper">
+  <div class="container">
+    <div class="sticky-nav">
+      <div class="row g-2 justify-content-center">
+        <div class="col-auto">
+          <a href="{% url 'reports_app:mesocycle_reports' %}"  class="btn btn-outline-primary">Mesocycle</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:fitness_reports' %}"  class="btn btn-outline-success">Fitness Plan</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:iap_reports' %}"  class="btn btn-outline-warning">IDPs</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:performance_reports' %}" class="btn btn-outline-info">Performance</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:scouting_reports' %}" class="btn btn-outline-dark">Scouting</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:medical_reports' %}" class="btn btn-outline-danger">Medical</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:transition_reports' %}" class="btn btn-outline-secondary">Transition</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

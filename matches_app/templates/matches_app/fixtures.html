@@ -27,12 +27,21 @@
                             <!-- Tagging Links -->
                             <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}" class="btn btn-primary">Goal Tagging</a>
                             <a href="{% url 'tagging_app:pass_network_enter_data' match.id %}">Pass Tagging</a>
-                            <a href="{% url 'tagging_app:enter_goalkeeper_distribution' match.id %}" class="btn btn-secondary">Goalkeeper Distribution</a>
+                            <!--<a href="{% url 'tagging_app:enter_goalkeeper_distribution' match.id %}" class="btn btn-secondary">Goalkeeper Distribution</a>-->
                             <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}" class="btn btn-info">Defensive</a>
-                            <a href="{% url 'tagging_app:enter_attempt_to_goal_opp' match.id %}" class="btn btn-primary">Opp Goal Attempt Tagging</a>
                         {% else %}
+                        
                             <!-- Create Lineup Only -->
-                            <a href="{% url 'lineup_app:create_lineup' match.id %}" class="btn btn-warning">Create Lineup</a>
+
+                            <li>
+                                {% if not match.home_lineup_exists %}
+                                    <a href="{% url 'lineup_app:create_lineup' match.id match.home_team.id %}" class="btn btn-primary"> Line Up (Home)</a>
+                                {% endif %}
+                                {% if not match.away_lineup_exists %}
+                                    <a href="{% url 'lineup_app:create_lineup' match.id match.away_team.id %}" class="btn btn-secondary"> Line Up (Away)</a>
+                                {% endif %}
+                            </li>
+
                         {% endif %}
                     </div>
                 {% endif %}

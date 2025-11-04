@@ -22,6 +22,7 @@ class CompetitionType(models.TextChoices):
 
 class VenueChoices(models.TextChoices):
     CHAMAZI_COMPLEX = 'AZAM COMPLEX', 'AZAM COMPLEX'
+    NDC_STADIUM = 'NDC STADIUM', 'NDC STADIUM'
 
 
 class Match(models.Model):

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+/* Fixed navbar below base.html navbar */
+.sticky-nav-wrapper {
+    position: fixed;
+    top: 170px; /* Adjust this to match the height of your base.html navbar */
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    background-color: #fff;
+    padding: 10px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Active button highlight */
+.sticky-nav .btn.active {
+    font-weight: bold;
+    border-width: 2px;
+}
+
+/* Push page content below sticky nav */
+#content-section {
+    margin-top: 120px; /* Adjust this: base navbar height + reports navbar height */
+}
+</style>
+
+<!-- Reports Navbar -->
+<div class="sticky-nav-wrapper">
+  <div class="container">
+    <div class="sticky-nav">
+      <div class="row g-2 justify-content-center">
+        <div class="col-auto">
+          <a href="#" class="btn btn-outline-primary" id="mesocycle-btn"> Mesocycle</a>
+        </div>
+        <div class="col-auto">
+          <a href="#" class="btn btn-outline-success" id="fitness-btn">Fitness Plan</a>
+        </div>
+        <div class="col-auto">
+          <a href="#" class="btn btn-outline-warning" id="iap-btn">IDPs</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:results_list' %}?team_id={{ team.id }}" class="btn btn-outline-info" id="results-btn"> Results</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:statistics_list' team.id %}" class="btn btn-outline-secondary" id="statistics-btn">Statistics</a>
+        </div>
+        <div class="col-auto">
+          <a href="#" class="btn btn-outline-danger" id="medical-btn">Medical</a>
+        </div>
+        <div class="col-auto">
+          <a href="#" class="btn btn-outline-dark" id="transition-btn">Transition</a>
+        </div>
+        <div class="col-auto">
+          <a href="#" class="btn btn-outline-primary" id="scouting-btn">Scouting</a>
+        </div>
+        <div>
+              <a class="btn btn-success" href="#">Download All in Excel</a> | 
+              <a class="btn btn-danger" href="#">Download All in PDF</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Page content -->
+<div class="container" id="content-section">
+
+
+ 
+
+
+</div>
+
+<script>
+  // Highlight active button
+  const buttons = document.querySelectorAll('.sticky-nav .btn');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      buttons.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+{% endblock %}

@@ -3,244 +3,205 @@
 
 {% block content %}
 <style>
-    .player-card {
-        border: 1px solid #ccc;
-        padding: 8px;
-        margin-bottom: 8px;
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
+.player-card {
+    border: 1px solid #ccc;
+    padding: 8px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.player-card.selected { background-color: #4CAF50; color: white; }
+.player-card img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; margin-right: 12px; }
+#players-list { display: flex; flex-direction: column; max-height: 500px; overflow-y: auto; }
+.player-card p { margin: 0; font-size: 14px; font-weight: 500; }
 
-    .player-card.selected {
-        background-color: #4CAF50;
-        color: white;
-    }
+.step-container { max-width: 1200px; margin: auto; display: flex; gap: 20px; }
+.buttons { margin-top: 20px; display: flex; justify-content: flex-end; }
 
-    .player-card img {
-        width: 50px;
-        height: 50px;
-        object-fit: cover;
-        border-radius: 50%;
-        margin-right: 12px;
-    }
-
-    #players-list {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .player-card p {
-        margin: 0;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .step-container {
-        max-width: 600px;
-        margin: auto;
-    }
-
-    .buttons {
-        margin-top: 20px;
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .spinner {
-        display: none;
-        margin-left: 10px;
-    }
+#pitch {
+    width: 600px;
+    height: 800px;
+    background: green;
+    border: 2px solid white;
+    border-radius: 10px;
+    position: relative;
+}
+.pitch-player {
+    width: 50px; height: 50px;
+    position: absolute;
+    cursor: grab;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background-size: cover;
+    background-position: center;
+    text-align: center;
+    font-size: 12px;
+    color: white;
+    font-weight: bold;
+}
 </style>
 
 
+<div style="margin-bottom: 10px;">
+    <a href="{% url 'lineup_app:create_lineup' match.id match.home_team.id %}" class="btn btn-primary">Home Team Lineup</a>
+    <a href="{% url 'lineup_app:create_lineup' match.id match.away_team.id %}" class="btn btn-secondary">Away Team Lineup</a>
+</div>
 
-<div class="step-container">
+<div>
+    <select id="formation-select">
+        <option value="">-- Select Formation --</option>
+        {% for key, value in formations.items %}
+        <option value="{{ key }}">{{ value }}</option>
+        {% endfor %}
+    </select>
+</div>
 
-    <!-- STEP 1: SELECT PLAYERS -->
-    <div id="step1">
-        <h2>Select Players</h2>
-        <p>Select exactly 11 starters, then optionally select substitutes.</p>
+<div id="lineup-container" class="step-container hidden">
+    <!-- PLAYER LIST -->
+    <div id="player-list-panel">
         <div id="players-list">
             {% for player in players %}
-            <div class="player-card" data-id="{{ player.id }}">
+            <div class="player-card" data-id="{{ player.id }}" data-name="{{ player.name }}" data-photo="{{ player.photo.url }}">
                 <img src="{{ player.photo.url }}" alt="{{ player.name }}">
                 <p>{{ player.name }}</p>
             </div>
             {% endfor %}
         </div>
-        
-        
-        
         <div>
             <small>Selected starters: <span id="starters-count">0</span>/11</small>
         </div>
         <div>
             <small>Selected substitutes: <span id="bench-count">0</span></small>
         </div>
+    </div>
+
+    <!-- PITCH -->
+    <div id="pitch-panel">
+        <div id="pitch"></div>
         <div class="buttons">
-            <span></span>
-            <button id="next-btn" disabled>Next →</button>
+            <button id="save-btn">Save Lineup</button>
+            <span class="spinner" id="loading-spinner">⏳ Saving...</span>
         </div>
     </div>
-
-    <!-- STEP 2: ASSIGN POSITIONS & GPS PODS -->
-    <div id="step2" class="hidden">
-        <h2>Assign Positions & GPS Pods</h2>
-        <form id="lineup-form">
-            <div id="assignments"></div>
-            <div class="buttons">
-                <button type="button" id="back-btn">← Back</button>
-                <button type="submit" id="save-btn">Save Lineup</button>
-                <span class="spinner" id="loading-spinner">⏳ Saving...</span>
-            </div>
-        </form>
-    </div>
-
 </div>
 
 <script>
-    let starters = [];
-    let bench = [];
+const FORMATION_POSITION_COORDS = {{ formation_coords_json|safe }};
+let selectedFormation = null;
+let starters = [];
+let bench = [];
 
-    document.querySelectorAll('.player-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const id = card.dataset.id;
-
-            // Remove if already selected (in starters or bench)
-            if (starters.includes(id)) {
-                starters = starters.filter(pid => pid !== id);
-                card.classList.remove('selected');
-                updateCounts();
-                updateNextBtn();
-                return;
-            }
-            if (bench.includes(id)) {
-                bench = bench.filter(pid => pid !== id);
-                card.classList.remove('selected');
-                updateCounts();
-                updateNextBtn();
-                return;
-            }
-
-            // Add new selection: fill starters first (max 11), then bench
-            if (starters.length < 11) {
-                starters.push(id);
-                card.classList.add('selected');
-            } else {
-                bench.push(id);
-                card.classList.add('selected');
-            }
-            updateCounts();
-            updateNextBtn();
-        });
-    });
-
-    function updateCounts() {
-        document.getElementById('starters-count').innerText = starters.length;
-        document.getElementById('bench-count').innerText = bench.length;
+const formationSelect = document.getElementById('formation-select');
+formationSelect.addEventListener('change', () => {
+    selectedFormation = formationSelect.value;
+    if(selectedFormation) {
+        document.getElementById('lineup-container').classList.remove('hidden');
+        setupPitch();
+    } else {
+        document.getElementById('lineup-container').classList.add('hidden');
     }
+});
 
-    function updateNextBtn() {
-        document.getElementById('next-btn').disabled = starters.length !== 11;
-    }
-
-    // NEXT → Step 2
-    document.getElementById('next-btn').addEventListener('click', () => {
-        const assignmentsDiv = document.getElementById('assignments');
-        assignmentsDiv.innerHTML = "";
-
-        // Positions & GPS pods for starters (positions required)
-        starters.forEach(id => {
-            const playerCard = document.querySelector(`.player-card[data-id="${id}"]`);
-            const name = playerCard.querySelector('p').innerText;
-
-            assignmentsDiv.innerHTML += `
-                <div style="display:flex;align-items:center;margin-bottom:10px;">
-                    <span style="width:150px;">${name}</span>
-                    <select name="position_${id}" required>
-                        <option value="">Select Position</option>
-                        <option value="GK">GK</option>
-                        <option value="RB">RB</option>
-                        <option value="RCB">RCB</option>
-                        <option value="LCB">LCB</option>
-                        <option value="LB">LB</option>
-                        <option value="RM">RM</option>
-                        <option value="CM">CM</option>
-                        <option value="LM">LM</option>
-                        <option value="RW">RW</option>
-                        <option value="LW">LW</option>
-                        <option value="ST">ST</option>
-                    </select>
-
-                    <input type="text" name="gps_${id}" placeholder="GPS Pod #" style="margin-left:10px;width:100px;">
-                </div>
-            `;
-        });
-
-        // Bench players — no position, optional GPS pod only
-        if (bench.length) {
-            assignmentsDiv.innerHTML += `<h3>Bench Players (no position required)</h3>`;
-            bench.forEach(id => {
-                const playerCard = document.querySelector(`.player-card[data-id="${id}"]`);
-                const name = playerCard.querySelector('p').innerText;
-                assignmentsDiv.innerHTML += `
-                    <div style="display:flex;align-items:center;margin-bottom:10px;">
-                        <span style="width:150px;">${name}</span>
-                        <input type="text" name="gps_${id}" placeholder="GPS Pod #" style="margin-left:10px;width:100px;">
-                    </div>
-                `;
-            });
+// --- PLAYER SELECTION ---
+document.querySelectorAll('.player-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const id = card.dataset.id;
+        if(starters.includes(id)) {
+            starters = starters.filter(pid=>pid!==id);
+            card.classList.remove('selected');
+        } else if(bench.includes(id)) {
+            bench = bench.filter(pid=>pid!==id);
+            card.classList.remove('selected');
+        } else if(starters.length < 11) {
+            starters.push(id);
+            card.classList.add('selected');
+        } else {
+            bench.push(id);
+            card.classList.add('selected');
         }
-
-        document.getElementById('step1').classList.add('hidden');
-        document.getElementById('step2').classList.remove('hidden');
+        updateCounts();
+        setupPitch();
     });
+});
 
-    // ← BACK
-    document.getElementById('back-btn').addEventListener('click', () => {
-        document.getElementById('step2').classList.add('hidden');
-        document.getElementById('step1').classList.remove('hidden');
+function updateCounts() {
+    document.getElementById('starters-count').innerText = starters.length;
+    document.getElementById('bench-count').innerText = bench.length;
+}
+
+// --- SETUP PITCH ---
+function setupPitch() {
+    const pitch = document.getElementById('pitch');
+    pitch.innerHTML = "";
+    if(!selectedFormation) return;
+    const formationMapping = FORMATION_POSITION_COORDS[selectedFormation];
+    if(!formationMapping) return;
+
+    starters.forEach((id, idx) => {
+        const card = document.querySelector(`.player-card[data-id="${id}"]`);
+        if(!card) return;
+        const name = card.dataset.name;
+        const photo = card.dataset.photo;
+        const posKey = Object.keys(formationMapping)[idx] || "Pos";
+        const posCoords = formationMapping[posKey];
+
+        const div = document.createElement('div');
+        div.classList.add('pitch-player');
+        div.dataset.playerId = id;
+        div.style.top = (posCoords?.top || 0) + "%";
+        div.style.left = (posCoords?.left || 0) + "%";
+        div.style.backgroundImage = `url(${photo})`;
+        div.title = name;
+        div.innerText = posKey;
+        div.draggable = true;
+        div.addEventListener('dragstart', dragStart);
+        div.addEventListener('dragend', dragEnd);
+        pitch.appendChild(div);
     });
+}
 
-    // SAVE LINEUP FORM
-    document.getElementById('lineup-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        document.getElementById('loading-spinner').style.display = 'inline';
+// --- DRAG & DROP ---
+let draggedPlayer = null;
+function dragStart(e){ draggedPlayer = e.target; }
+function dragEnd(e){
+    const rect = e.target.parentElement.getBoundingClientRect();
+    const x = ((e.pageX - rect.left) / rect.width) * 100;
+    const y = ((e.pageY - rect.top) / rect.height) * 100;
+    e.target.style.left = x + "%";
+    e.target.style.top = y + "%";
+}
 
-        const formData = new FormData();
-        formData.append('match_id', '{{ match.id }}');
+// --- SAVE LINEUP ---
+document.getElementById('save-btn').addEventListener('click',(e)=>{
+    e.preventDefault();
+    document.getElementById('loading-spinner').style.display='inline';
 
-        // Append starters
-        starters.forEach(id => {
-            formData.append('starters[]', id);
-            formData.append(`position_${id}`, e.target[`position_${id}`]?.value || '');
-            formData.append(`gps_${id}`, e.target[`gps_${id}`]?.value || '');
-        });
+    const formData = new FormData();
+    formData.append('match_id','{{ match.id }}');
+    formData.append('formation', selectedFormation);
+    starters.forEach(id=> formData.append('starters[]', id));
+    bench.forEach(id=> formData.append('bench[]', id));
 
-        // Append bench
-        bench.forEach(id => {
-            formData.append('bench[]', id);
-            formData.append(`gps_${id}`, e.target[`gps_${id}`]?.value || '');
-        });
-
-        fetch("{% url 'lineup_app:create_lineup' match.id %}", {
-            method: "POST",
-            body: formData,
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-        })
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById('loading-spinner').style.display = 'none';
-            alert("Lineup saved successfully!");
+    fetch("{% url 'lineup_app:create_lineup' match.id team.id %}", {
+        method: "POST",
+        body: formData,
+        headers:{'X-CSRFToken':'{{ csrf_token }}'}
+    }).then(res=>res.json())
+    .then(data=>{
+        document.getElementById('loading-spinner').style.display='none';
+        if(data.success){ 
+            alert("Lineup saved!"); 
             window.location.href = "{% url 'lineup_app:substitution_panel' match.id %}";
-        })
-        .catch(err => {
-            document.getElementById('loading-spinner').style.display = 'none';
-            alert("Error saving lineup");
-        });
+        } else { 
+            alert("Error: "+(data.error||"Unknown error")); 
+        }
+    }).catch(err=>{
+        document.getElementById('loading-spinner').style.display='none';
+        alert("Error saving lineup");
     });
+});
 </script>
 {% endblock %}

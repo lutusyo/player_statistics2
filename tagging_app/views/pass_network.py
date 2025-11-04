@@ -167,13 +167,12 @@ def save_pass_network(request):
 
 
 
-
-
 def pass_network_dashboard(request, match_id):
     match = get_object_or_404(Match, id=match_id)  # ✅ Add this line
     context = get_pass_network_context(match)      # ✅ Use the Match object, not match_id
     context['match'] = match                       # ✅ Add match to context explicitly
-    return render(request, 'tagging_app/pass_network_dashboard.html', context)
+    return render(request, "reports_app/match_report.html", context)
+    #return render(request, 'tagging_app/attempt_to_goal_dashboard.html', context)
 
 
 

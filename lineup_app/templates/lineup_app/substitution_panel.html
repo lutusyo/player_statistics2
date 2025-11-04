@@ -4,8 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Substitution Panel - {{ match }}</title>
+
 <style>
-  body { font-family: Arial, sans-serif; margin: 15px; background: #f9f9f9; }
+  body { font-family: Arial, sans-serif; margin: 10px; background: #f9f9f9; }
   h1,h2 { margin-bottom:5px; }
   .timer { background:#222;color:#eee;font-size:24px;font-weight:bold;padding:10px;width:180px;text-align:center;border-radius:5px;user-select:none;margin-bottom:15px; }
   .btn { cursor:pointer;border:none;background-color:#007BFF;color:white;padding:7px 14px;border-radius:4px;margin-right:8px;font-size:14px;transition: background-color 0.2s ease; }
@@ -31,10 +32,12 @@
   .error-message { color:red;margin-top:10px; }
 </style>
 </head>
-<body>
 
-<h1>Substitution Panel</h1>
-<h2>{{ match.home_team.name }} vs {{ match.away_team.name }} — {{ match.date }}</h2>
+
+
+<body>
+<a href="{% url 'lineup_app:create_lineup' match.id match.away_team.id %}">BACK</a>
+<h1>Substitution Panel</h1> <h2>{{ match.home_team.name }} vs {{ match.away_team.name }} — {{ match.date }}</h2>
 
 <div class="timer" id="match-timer">00:00</div>
 <div>
@@ -45,62 +48,27 @@
 
 <hr />
 
-<div class="lists-container">
+<h3>{{ match.home_team.name }} (Home)</h3>
+<div class="lists-container" id="home-lists">
   <div class="list-box">
-    <div class="list-header">
-      <strong>1) Currently On Pitch</strong>
-      <button class="btn btn-secondary btn-toggle" data-list="currently_on_pitch">Show</button>
-    </div>
-    <div class="player-list hidden" id="list-currently_on_pitch"></div>
+    <div class="list-header"><strong>Currently On Pitch</strong></div>
+    <div class="player-list" id="home-currently_on_pitch"></div>
   </div>
   <div class="list-box">
-    <div class="list-header">
-      <strong>2) Currently On Subs</strong>
-      <button class="btn btn-secondary btn-toggle" data-list="currently_on_subs">Show</button>
-    </div>
-    <div class="player-list hidden" id="list-currently_on_subs"></div>
+    <div class="list-header"><strong>Bench / Subs</strong></div>
+    <div class="player-list" id="home-bench"></div>
+  </div>
+</div>
+
+<h3>{{ match.away_team.name }} (Away)</h3>
+<div class="lists-container" id="away-lists">
+  <div class="list-box">
+    <div class="list-header"><strong>Currently On Pitch</strong></div>
+    <div class="player-list" id="away-currently_on_pitch"></div>
   </div>
   <div class="list-box">
-    <div class="list-header">
-      <strong>3) Bench (Static)</strong>
-      <button class="btn btn-secondary btn-toggle" data-list="bench">Show</button>
-    </div>
-    <div class="player-list hidden" id="list-bench"></div>
-  </div>
-  <div class="list-box">
-    <div class="list-header">
-      <strong>4) Already Played & Out</strong>
-      <button class="btn btn-secondary btn-toggle" data-list="already_played_and_out">Show</button>
-    </div>
-    <div class="player-list hidden" id="list-already_played_and_out"></div>
-  </div>
-  <div class="list-box">
-    <div class="list-header">
-      <strong>5) Starting Eleven (Static)</strong>
-      <button class="btn btn-secondary btn-toggle" data-list="starting_eleven">Show</button>
-    </div>
-    <div class="player-list hidden" id="list-starting_eleven"></div>
-  </div>
-  <div class="list-box">
-    <div class="list-header">
-      <strong>6) Subs This Match</strong>
-      <button class="btn btn-secondary btn-toggle" data-list="subs_this_match">Show</button>
-    </div>
-    <div class="player-list hidden" id="list-subs_this_match"></div>
-  </div>
-  <div class="list-box">
-    <div class="list-header">
-      <strong>7) Player Exchanges (Substitutions)</strong>
-      <button class="btn btn-secondary btn-toggle" data-list="subs_exchanges">Show</button>
-    </div>
-    <div class="player-list hidden" id="list-subs_exchanges"></div>
-  </div>
-  <div class="list-box">
-    <div class="list-header">
-      <strong>8) Subs But Didn't Play</strong>
-      <button class="btn btn-secondary btn-toggle" data-list="subs_not_played">Show</button>
-    </div>
-    <div class="player-list hidden" id="list-subs_not_played"></div>
+    <div class="list-header"><strong>Bench / Subs</strong></div>
+    <div class="player-list" id="away-bench"></div>
   </div>
 </div>
 
@@ -145,64 +113,89 @@ async function loadAllLists() {
     try {
         const resp = await fetch("{% url 'lineup_app:api_sub_lists' match.id %}");
         const data = await resp.json();
-        renderList('currently_on_pitch', data.currently_on_pitch);
-        renderList('currently_on_subs', data.currently_on_subs);
-        renderList('bench', data.bench);
-        renderList('already_played_and_out', data.already_played_and_out);
-        renderList('starting_eleven', data.starting_eleven);
-        renderList('subs_this_match', data.subs_this_match);
+
+        // Home team
+        renderList('home-currently_on_pitch', data.home.currently_on_pitch);
+        renderList('home-bench', data.home.currently_on_subs.concat(data.home.bench));
+
+        // Away team
+        renderList('away-currently_on_pitch', data.away.currently_on_pitch);
+        renderList('away-bench', data.away.currently_on_subs.concat(data.away.bench));
+
+        // Existing substitution exchanges
         renderSubsExchanges(data.subs_exchanges);
-        renderList('subs_not_played', data.subs_not_played);
     } catch (err) { console.error("Error loading lists:", err); }
 }
 
-function renderList(listName, players) {
-    const container = document.getElementById('list-' + listName);
+function renderList(listId, players) {
+    const container = document.getElementById(listId);
     container.innerHTML = '';
-    if (!players.length) { container.innerHTML = '<em>No players</em>'; return; }
+    if (!players || players.length === 0) { 
+        container.innerHTML = '<em>No players</em>'; 
+        return; 
+    }
     players.forEach(pl => {
         const div = document.createElement('div');
         div.className = 'player-item';
         div.dataset.playerId = pl.player_id;
         div.dataset.lineupId = pl.lineup_id || '';
-        div.innerHTML = `<img src="${pl.photo_url || 'https://via.placeholder.com/36'}" class="player-photo" />
-        <div class="player-info"><div class="player-name">${pl.name}</div><div class="player-jersey">#${pl.jersey_number || 'N/A'}</div></div>`;
+        div.innerHTML = `
+            <img src="${pl.photo_url || 'https://via.placeholder.com/36'}" class="player-photo" />
+            <div class="player-info">
+                <div class="player-name">${pl.name}</div>
+                <div class="player-jersey">#${pl.jersey_number || 'N/A'}</div>
+            </div>
+        `;
         container.appendChild(div);
     });
 }
 
 function renderSubsExchanges(subs) {
-    const container = document.getElementById('list-subs_exchanges'); container.innerHTML = '';
+    const container = document.getElementById('list-subs_exchanges');
+    if(!container) return;
+    container.innerHTML = '';
     if (!subs.length) { container.innerHTML = '<em>No substitutions yet</em>'; return; }
     subs.forEach(sub => {
-        const div = document.createElement('div'); div.className='player-item';
-        div.innerHTML = `<img src="${sub.player_out_photo}" class="player-photo" /><div class="player-info"><strong>OUT:</strong> ${sub.player_out_name} (#${sub.player_out_jersey})</div>
-        <img src="${sub.player_in_photo}" class="player-photo" /><div class="player-info"><strong>IN:</strong> ${sub.player_in_name} (#${sub.player_in_jersey})</div>
-        <span style="margin-left:auto;">Min: ${sub.minute}</span>`; container.appendChild(div);
+        const div = document.createElement('div');
+        div.className='player-item';
+        div.innerHTML = `
+            <img src="${sub.player_out.photo_url}" class="player-photo" />
+            <div class="player-info"><strong>OUT:</strong> ${sub.player_out.name}</div>
+            <img src="${sub.player_in.photo_url}" class="player-photo" />
+            <div class="player-info"><strong>IN:</strong> ${sub.player_in.name}</div>
+            <span style="margin-left:auto;">Min: ${sub.minute}</span>
+        `;
+        container.appendChild(div);
     });
 }
 
 // --- Substitution flow ---
 let selectedOut = null, selectedIn = null;
 
-document.getElementById('start-substitution-btn').addEventListener('click', () => {
-    const flow = document.getElementById('substitution-flow');
-    flow.style.display='block'; 
-    document.getElementById('step-1').style.display='block';
-    document.getElementById('step-2').style.display='none';
-    document.getElementById('step-3').style.display='none';
-    document.getElementById('step-4').style.display='none';
+document.getElementById('start-substitution-btn').addEventListener('click', async () => {
+    document.getElementById('substitution-flow').style.display = 'block';
+    document.getElementById('step-1').style.display = 'block';
+    document.getElementById('step-2').style.display = 'none';
+    document.getElementById('step-3').style.display = 'none';
+    document.getElementById('step-4').style.display = 'none';
 
-    const onPitch = document.getElementById('list-currently_on_pitch').cloneNode(true);
-    const list = document.getElementById('select-out-list');
-    list.innerHTML=''; 
-    onPitch.querySelectorAll('.player-item').forEach(div=>{
-        div.addEventListener('click', ()=> selectOutPlayer(div));
-    }); list.append(...onPitch.children);
+    // Default: Home team out list (can later toggle)
+    const onPitch = document.getElementById('home-currently_on_pitch').cloneNode(true);
+    const selectOutList = document.getElementById('select-out-list');
+    selectOutList.innerHTML = '';
+    onPitch.querySelectorAll('.player-item').forEach(div => {
+        div.addEventListener('click', () => selectOutPlayer(div));
+    });
+    selectOutList.append(...onPitch.children);
 });
 
 function selectOutPlayer(div){
-    selectedOut = { playerId: div.dataset.playerId, lineupId: div.dataset.lineupId, name: div.querySelector('.player-name').textContent, photo: div.querySelector('img').src };
+    selectedOut = { 
+        playerId: div.dataset.playerId, 
+        lineupId: div.dataset.lineupId, 
+        name: div.querySelector('.player-name').textContent, 
+        photo: div.querySelector('img').src 
+    };
     document.getElementById('step-1').style.display='none';
     document.getElementById('step-2').style.display='block';
     document.getElementById('selected-out-player').innerHTML=`<img src="${selectedOut.photo}" class="selected-player-photo"><div>${selectedOut.name}</div>`;
@@ -211,17 +204,28 @@ function selectOutPlayer(div){
 document.getElementById('confirm-out').addEventListener('click', ()=>{
     const minute = parseInt(document.getElementById('time-out-input').value);
     if(!minute || minute<0){ alert('Enter a valid minute!'); return; }
-    selectedOut.minute = minute; document.getElementById('step-2').style.display='none';
+    selectedOut.minute = minute;
+    document.getElementById('step-2').style.display='none';
     document.getElementById('step-3').style.display='block';
-    const inList = document.getElementById('list-currently_on_subs').cloneNode(true);
-    const selectIn = document.getElementById('select-in-list'); selectIn.innerHTML='';
-    inList.querySelectorAll('.player-item').forEach(div=>{ div.addEventListener('click', ()=> selectInPlayer(div)); });
-    selectIn.append(...inList.children);
+
+    // In list: home bench by default
+    const bench = document.getElementById('home-bench').cloneNode(true);
+    const selectInList = document.getElementById('select-in-list'); selectInList.innerHTML='';
+    bench.querySelectorAll('.player-item').forEach(div => {
+        div.addEventListener('click', ()=> selectInPlayer(div));
+    });
+    selectInList.append(...bench.children);
 });
 
 function selectInPlayer(div){
-    selectedIn = { playerId: div.dataset.playerId, lineupId: div.dataset.lineupId, name: div.querySelector('.player-name').textContent, photo: div.querySelector('img').src };
-    document.getElementById('step-3').style.display='none'; document.getElementById('step-4').style.display='block';
+    selectedIn = { 
+        playerId: div.dataset.playerId, 
+        lineupId: div.dataset.lineupId, 
+        name: div.querySelector('.player-name').textContent, 
+        photo: div.querySelector('img').src 
+    };
+    document.getElementById('step-3').style.display='none'; 
+    document.getElementById('step-4').style.display='block';
     document.getElementById('selected-in-player').innerHTML=`<img src="${selectedIn.photo}" class="selected-player-photo"><div>${selectedIn.name}</div>`;
 }
 
@@ -234,7 +238,6 @@ document.getElementById('confirm-in').addEventListener('click', async ()=>{
     }
 });
 
-// --- API calls ---
 async function recordSubstitution(playerOutId, playerInId, minute){
     try{
         const resp = await fetch("{% url 'lineup_app:api_finalize_substitution' match.id %}", {
@@ -243,18 +246,14 @@ async function recordSubstitution(playerOutId, playerInId, minute){
             body:JSON.stringify({ player_out_id:playerOutId, player_in_id:playerInId, minute:minute })
         });
         const data = await resp.json();
-        if(data.success){ alert("Substitution recorded successfully!"); loadAllLists(); return true; }
+        if(data.success){ 
+            alert("Substitution recorded successfully!"); 
+            loadAllLists(); 
+            return true; 
+        }
         else { alert("Failed to record substitution: "+(data.error||'Unknown')); return false; }
     }catch(err){ console.error(err); alert("Server error"); return false; }
 }
-
-// Toggle list visibility
-document.querySelectorAll('.btn-toggle').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-        const list = document.getElementById('list-'+btn.dataset.list);
-        list.classList.toggle('hidden');
-    });
-});
 
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', ()=>{ loadAllLists(); });

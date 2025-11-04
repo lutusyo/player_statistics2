@@ -133,7 +133,11 @@
   {% include 'gps_app/gps_position_detail.html' %}
   {% else %}
     <p class="alert alert-warning">No GPS data available for this match.</p>
-    <p><a href="{% url 'gps_app:gps_dashboard' %}" class="btn btn-primary">Upload CSV file</a></p>
+      {% if team %}
+        <p><a href="{% url 'gps_app:gps_data' match.id %}" class="btn btn-primary">Upload CSV file</a></p>
+      {% else %}
+        <p class="alert alert-info">Team not available.</p>
+      {% endif %}
   {% endif %}
 
 </div>

@@ -5,8 +5,8 @@ from collections import defaultdict
 
 from matches_app.models import Match
 from players_app.models import Player
-from tagging_app.models import AttemptToGoal
 from defensive_app.models import PlayerDefensiveStats
+from tagging_app.models import AttemptToGoal, PassEvent, GoalkeeperDistributionEvent
 from lineup_app.models import MatchLineup, Substitution
 
 
@@ -53,6 +53,24 @@ def player_detail(request, player_id):
 
     defensive_qs = PlayerDefensiveStats.objects.filter(player=player).select_related('match')
     defensive_qs = apply_match_filters(defensive_qs)
+
+
+        # --- INDIVIDUAL DATA ---
+
+    # 1️⃣ Attempt to Goal (shots)
+    attempts_qs = AttemptToGoal.objects.filter(player=player).select_related('match')
+    attempts_qs = apply_match_filters(attempts_qs)
+
+    # 2️⃣ Passes
+    passes_qs = PassEvent.objects.filter(from_player=player).select_related('match')
+    passes_qs = apply_match_filters(passes_qs)
+
+    # 3️⃣ Goalkeeper Distributions
+    gk_dist_qs = GoalkeeperDistributionEvent.objects.filter(goalkeeper=player).select_related('match')
+    gk_dist_qs = apply_match_filters(gk_dist_qs)
+
+
+
 
     # Substitutions (use Substitution model to count sub-in / sub-out)
     subs_in_qs = Substitution.objects.filter(player_in__player=player).select_related('match', 'player_in__match')
@@ -137,18 +155,20 @@ def player_detail(request, player_id):
         if played_minutes_flag or had_attempt_or_def or had_sub_event:
             stats['appearances'] += 1
 
-            # minutes: prefer calculated minutes, else fallback to match elapsed minutes
             if played_minutes_flag:
+                # use actual lineup minutes
                 stats['minutes'] += mp_for_match
+            elif had_sub_event:
+                # estimate 10 minutes if substituted (no lineup info)
+                stats['minutes'] += 10
             else:
-                stats['minutes'] += (final_minute or 90)
+                # no lineup or substitution info → 0 minutes
+                stats['minutes'] += 0
 
-            # starts from lineup
             stats['starts'] += starts_for_match
-
-            # sub in/out from Substitution records (more reliable than heuristic on time_in/time_out)
             stats['sub_in'] += subs_in_by_match.get(match.id, 0)
             stats['sub_out'] += subs_out_by_match.get(match.id, 0)
+
 
     # --- goals (already filtered to real goals) ---
     for g in goals_qs:
@@ -198,6 +218,26 @@ def player_detail(request, player_id):
 
     tab = request.GET.get('tab', 'profile')
 
+
+
+
+
+    # build a list of matches the player actually played
+    matches_played = []
+
+    for match in matches:
+        # Try to get the player's lineup for this match
+        lineup = MatchLineup.objects.filter(match=match, player=player).first()
+        if lineup or match.id in goals_match_ids or match.id in assists_match_ids or match.id in defensive_match_ids:
+            matches_played.append({
+                'match': match,
+                'minutes_played': lineup.minutes_played if lineup else 0,
+            })
+
+
+
+
+
     return render(request, 'players_app/player_detail.html', {
         'player': player,
         'related_players': related_players,
@@ -205,7 +245,14 @@ def player_detail(request, player_id):
         'competitions': competitions,
         'selected_season': selected_season,
         'selected_competition': selected_competition,
+        'matches_played': matches_played, 
         'player_stats': player_stats,
         'totals': totals,
         'tab': tab,
-    })
+
+
+            # NEW CONTEXT DATA
+        'attempts_qs': attempts_qs,
+        'passes_qs': passes_qs,
+        'gk_dist_qs': gk_dist_qs,
+        })

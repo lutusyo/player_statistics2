@@ -1,61 +1,56 @@
 from django.shortcuts import render, get_object_or_404
-from lineup_app.models import MatchLineup, PositionChoices
-from matches_app.models import Match
-from django.http import JsonResponse
-from django.db import transaction
-from players_app.models import Player
-
-from django.shortcuts import render, get_object_or_404
-from lineup_app.models import MatchLineup, PositionChoices
+from lineup_app.models import MatchLineup, POSITION_COORDS
 from matches_app.models import Match
 
-# Map position codes to pitch coordinates (% from top, % from left)
-POSITION_COORDS = {
-    "GK":  {"top": 5,  "left": 45},
-    "RB":  {"top": 25, "left": 80},
-    "RCB": {"top": 25, "left": 60},
-    "LCB": {"top": 25, "left": 40},
-    "LB":  {"top": 25, "left": 20},
-    "RM":  {"top": 50, "left": 75},
-    "CM":  {"top": 50, "left": 55},
-    "LM":  {"top": 50, "left": 35},
-    "RW":  {"top": 75, "left": 70},
-    "LW":  {"top": 75, "left": 30},
-    "ST":  {"top": 75, "left": 50},
-}
 
 def pitch_lineup_view(request, match_id):
     match = get_object_or_404(Match, id=match_id)
 
-    # Get starters
-    home_starters = MatchLineup.objects.filter(match=match, team=match.home_team, is_starting=True).select_related('player')
-    away_starters = MatchLineup.objects.filter(match=match, team=match.away_team, is_starting=True).select_related('player')
+    # --- Get home and away lineups ---
+    home_qs = MatchLineup.objects.filter(match=match, team=match.home_team, is_starting=True).select_related('player')
+    away_qs = MatchLineup.objects.filter(match=match, team=match.away_team, is_starting=True).select_related('player')
 
-    def lineup_with_coords(qs, mirror=False):
+    # --- Determine formation for each team ---
+    home_formation = home_qs.first().formation if home_qs.exists() else None
+    away_formation = away_qs.first().formation if away_qs.exists() else None
+
+    home_coords = POSITION_COORDS.get(home_formation, {})
+    away_coords = POSITION_COORDS.get(away_formation, {})
+
+    def lineup_with_coords(qs, coords_dict, mirror=False):
+        """Attach pitch coordinates based on formation & mirror if away."""
         players = []
         for ml in qs:
-            coords = POSITION_COORDS.get(ml.position, {"top": 50, "left": 50})
+            coords = coords_dict.get(ml.position, {"top": 50, "left": 50})
             top = coords["top"]
+            left = coords["left"]
+
+            # Mirror vertically for away team
             if mirror:
                 top = 100 - top
+
             players.append({
                 "id": ml.player.id,
                 "name": ml.player.name,
                 "number": getattr(ml.player, "jersey_number", ""),
-                "position_x": coords["left"],
+                "position_x": left,
                 "position_y": top,
+                "photo": ml.player.photo.url if ml.player.photo else None,
+                "position": ml.position,
             })
         return players
 
-    home_lineup = lineup_with_coords(home_starters)
-    away_lineup = lineup_with_coords(away_starters, mirror=True)
+    home_lineup = lineup_with_coords(home_qs, home_coords)
+    away_lineup = lineup_with_coords(away_qs, away_coords, mirror=True)
 
-    lineup = home_lineup + away_lineup
-
-    return render(request, "lineup_app/pitch_lineup.html", {
+    context = {
         "match": match,
-        "lineup": lineup,
+        "home_team": match.home_team,
+        "away_team": match.away_team,
+        "home_formation": home_formation,
+        "away_formation": away_formation,
         "home_lineup": home_lineup,
         "away_lineup": away_lineup,
-    })
+    }
 
+    return render(request, "lineup_app/pitch_lineup.html", context)

@@ -23,6 +23,7 @@ class Player(models.Model):
     name = models.CharField(max_length=50)
     second_name = models.CharField(max_length=50, default='Second_name')
     surname = models.CharField(max_length=50, default='surname')
+    jina_maarufu = models.CharField(max_length=50, default='nickname', null=True, blank=True)
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='players')
     birthdate = models.DateField(null=True, blank=True)
     place_of_birth = models.CharField(max_length=100, default="Tanzania")
@@ -32,9 +33,11 @@ class Player(models.Model):
         max_length=50,
         choices=[
             ('Forward', 'Forward'),
+            ('Winger', 'Winger'),
             ('Midfielder', 'Midfielder'),
             ('Defender', 'Defender'),
             ('Goalkeeper', 'Goalkeeper'),
+            
         ]
     )
 
@@ -58,7 +61,7 @@ class Player(models.Model):
     is_active = models.BooleanField(default=True)
     
     def __str__(self):
-        return f"{self.name} - {self.age_group}"
+        return f"{self.name} - {self.age_group} - {self.team}"
 
 # Career stage for each player
 class PlayerCareerStage(models.Model):

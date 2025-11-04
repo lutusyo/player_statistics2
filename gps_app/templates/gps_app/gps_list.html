@@ -2,27 +2,29 @@
 {% load static %}
 
 {% block content %}
-<h1>Matches with GPS Data</h1>
-<ul>
-{% for match in matches %}
-  <li>
-    {% if match.gps_count > 0 %}
-      <!-- GPS data exists: link to view GPS data -->
+<div class="container mt-4">
+  <h2 class="mb-3">{{ team.age_group.code }} — Matches with GPS Data</h2>
 
-      <a href="{% url 'gps_app:gps_data' match.id %}">
-        {{ match.date }} - {{ match.home_team.name }} vs {{ match.away_team.name }} ({{ match.gps_count }} records)
-      </a>
-
-    {% else %}
-      <!-- No GPS data: link to upload GPS CSV for this match -->
-      {{ match.home_team.name }} vs {{ match.away_team.name }} - 
-      <a href="{% url 'gps_app:gps_upload' %}?match_id={{ match.id }}">Upload GPS Data</a>
-    {% endif %}
-  </li>
-  
-{% empty %}
-  <li>No matches found.</li>
-{% endfor %}
-</ul>
-
+  <ul class="list-group">
+  {% for match in matches %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      {% if match.gps_count > 0 %}
+        <!-- GPS data exists: link to view GPS data -->
+        <a href="{% url 'gps_app:gps_data' match.id %}">
+          {{ match.date }} — {{ match.home_team.name }} vs {{ match.away_team.name }}
+        </a>
+        <span class="badge bg-success">{{ match.gps_count }} records</span>
+      {% else %}
+        <!-- No GPS data: link to upload GPS CSV for this match -->
+        <span>{{ match.home_team.name }} vs {{ match.away_team.name }}</span>
+        <a href="{% url 'gps_app:gps_upload' %}?match_id={{ match.id }}" class="btn btn-sm btn-outline-primary">
+          Upload GPS Data
+        </a>
+      {% endif %}
+    </li>
+  {% empty %}
+    <li class="list-group-item">No matches with GPS data found for {{ team.age_group.code }}.</li>
+  {% endfor %}
+  </ul>
+</div>
 {% endblock %}

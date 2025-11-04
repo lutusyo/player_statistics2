@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+
+
+  <!-- 🔽 Team Filter -->
+  <form method="get" class="mb-3 d-flex" style="gap:10px;">
+    <select name="team_id" class="form-select" style="width:auto;" onchange="this.form.submit()">
+      <option value="">All Teams</option>
+      {% for t in teams %}
+        <option value="{{ t.id }}" {% if team_id|stringformat:"s" == t.id|stringformat:"s" %}selected{% endif %}>
+          {{ t.name }} {{ t.age_group.name }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <!-- Keep the same period filter in the URL when changing team -->
+    {% if request.GET.period %}
+      <input type="hidden" name="period" value="{{ request.GET.period }}">
+    {% endif %}
+  </form>
+
+  <div class="mb-3">
+    <a class="btn btn-outline-primary" href="{% url 'reports_app:results_list' %}?period=all{% if team_id %}&team_id={{ team_id }}{% endif %}">All matches</a>
+    <a class="btn btn-outline-primary" href="{% url 'reports_app:results_list' %}?period=week{% if team_id %}&team_id={{ team_id }}{% endif %}">Last 7 days</a>
+    <a class="btn btn-outline-primary" href="{% url 'reports_app:results_list' %}?period=month{% if team_id %}&team_id={{ team_id }}{% endif %}">This month</a>
+
+    <a class="btn btn-success" href="{% url 'reports_app:results_export_excel' %}?{{ request.GET.urlencode }}">Download Excel</a>
+    <a class="btn btn-danger" href="{% url 'reports_app:results_export_pdf' %}?{{ request.GET.urlencode }}">Download PDF</a>
+  </div>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Opponent</th>
+        <th>Venue</th>
+        <th>Competition</th>
+        <th>Result</th>
+        <th>Goal Scorers</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r.date }}</td>
+        <td>{{ r.opponent }}</td>
+        <td>{{ r.venue }}</td>
+        <td>{{ r.competition_type }}</td>
+        <td>{{ r.result }}</td>
+        <td>
+          {% if r.scorers %}
+            <ul class="list-unstyled mb-0">
+              {% for s in r.scorers %}
+                <li>{{ s.player }} {% if s.note %} <small>({{ s.note }})</small> {% endif %}
+                  <small class="text-muted">[{{ s.minute }}'] - {{ s.team }}</small>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            -
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6">No matches found for this filter.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

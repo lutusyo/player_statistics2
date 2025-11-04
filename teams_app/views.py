@@ -11,8 +11,11 @@ def team_squad_view(request, pk):
     if not team:
         return render(request, '404.html', status=404)
 
-    # Get players whose age_group matches the team age group
-    players = Player.objects.filter(age_group=team.age_group)
+    # ✅ Get only players in our_team and matching this team's age group
+    players = Player.objects.filter(
+        team__team_type='OUR_TEAM',
+        age_group=team.age_group
+    ).select_related('team')
 
     # Group players by position
     from collections import defaultdict
@@ -20,7 +23,7 @@ def team_squad_view(request, pk):
     for player in players:
         grouped_players[player.position].append(player)
 
-    position_order = ['Goalkeeper', 'Defender', 'Midfielder', 'Forward']
+    position_order = ['Goalkeeper', 'Defender', 'Midfielder', 'Winger', 'Forward']
 
     return render(request, 'teams_app/squad.html', {
         'team_selected': team,
@@ -29,6 +32,7 @@ def team_squad_view(request, pk):
         'active_tab': 'squad',
         'team': team,
     })
+
 
 
 @login_required

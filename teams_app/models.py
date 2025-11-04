@@ -1,5 +1,6 @@
 # teams_app/models.py
 from django.db import models
+from datetime import date
 
 
 class AgeGroup(models.Model):
@@ -56,3 +57,34 @@ class StaffMember(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.get_role_display()} ({self.age_group})"
+    
+
+
+
+ 
+
+class TeamSeasonMembership(models.Model):
+    SEASON_CHOICES = [
+        ("2022/2023", "2022/2023"),
+        ("2023/2024", "2023/2024"),
+        ("2024/2025", "2024/2025"),
+        ("2025/2026", "2025/2026"),
+        ("2026/2027", "2026/2027"),
+    ]
+
+    player = models.ForeignKey("players_app.Player", on_delete=models.CASCADE, related_name="team_memberships")
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="season_memberships")
+    season = models.CharField(max_length=20, choices=SEASON_CHOICES)
+    
+    # Optional extra details
+    jersey_number = models.PositiveIntegerField(default=0)
+    position = models.CharField(max_length=50, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('player', 'team', 'season')
+        ordering = ['season']
+
+    def __str__(self):
+        return f"{self.player.name} - {self.team.name} ({self.season})"
+

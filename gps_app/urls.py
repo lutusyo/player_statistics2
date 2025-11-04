@@ -5,7 +5,7 @@ app_name = 'gps_app'
 
 urlpatterns = [
     path('upload/', upload_gps_data.upload_gps_data, name='gps_upload'),
-    path('dashboard/', gps_match_list.gps_matches_list, name='gps_dashboard'),
+    path('<int:team_id>/matches_gps_list/', gps_match_list.gps_matches_list, name='gps_dashboard'),
     path('match/<int:match_id>/gps_data/', gps_match_detail.gps_match_detail, name='gps_data'),
 
      # ... gps data according to position

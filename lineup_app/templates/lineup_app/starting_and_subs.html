@@ -1,29 +1,49 @@
 {% load static %}
-<link rel="stylesheet" href="{% static 'matches_app/css/lineup.css' %}">
+<style>
+.pitch {
+  position: relative;
+  width: 700px;
+  height: 1000px;
+  background: url("{% static 'matches_app/images/pitch.png' %}") center/cover no-repeat;
+  border-radius: 10px;
+  margin: auto;
+}
 
-<div class="lineup-wrapper">
-  
-  <div class="pitch">
-    {% for stat in player_stats %}
-      {% if stat.is_starting %}
-        <div class="player player-{{ stat.position }}">
-          <img src="{{ stat.player.photo.url }}" alt="{{ stat.player.name }}">
-          <div class="player-name">{{ stat.player.name|upper }}</div>
-        </div>
-      {% endif %}
-    {% endfor %}
-  </div>
+.player {
+  position: absolute;
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
 
-  <div class="subs-panel">
-    <h3>SUBS:</h3>
-    <ul>
-      {% for stat in player_stats %}
-        {% if not stat.is_starting %}
-          <li>{{ stat.player.jersey_number }} {{ stat.player.name }}</li>
-        {% endif %}
-      {% endfor %}
-    </ul>
-  </div>
+.player img {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.player-name {
+  color: white;
+  font-size: 12px;
+  margin-top: 4px;
+  text-shadow: 0 0 3px black;
+}
+</style>
+
+<div class="pitch">
+  <!-- HOME TEAM -->
+  {% for p in home_lineup %}
+    <div class="player" style="top:{{ p.position_y }}%; left:{{ p.position_x }}%;">
+      <img src="{{ p.photo }}" alt="{{ p.name }}">
+      <div class="player-name">{{ p.number }} {{ p.name|upper }}</div>
+    </div>
+  {% endfor %}
+
+  <!-- AWAY TEAM -->
+  {% for p in away_lineup %}
+    <div class="player" style="top:{{ p.position_y }}%; left:{{ p.position_x }}%;">
+      <img src="{{ p.photo }}" alt="{{ p.name }}">
+      <div class="player-name" style="color: yellow;">{{ p.number }} {{ p.name|upper }}</div>
+    </div>
+  {% endfor %}
 </div>
-
-            

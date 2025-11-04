@@ -35,7 +35,20 @@
 </style>
 
 
+<form method="get">
+  <select name="team_id" onchange="this.form.submit()">
+    <option value="{{ match.home_team.id }}" {% if active_team.id == match.home_team.id %}selected{% endif %}>
+      {{ match.home_team.name }}
+    </option>
+    <option value="{{ match.away_team.id }}" {% if active_team.id == match.away_team.id %}selected{% endif %}>
+      {{ match.away_team.name }}
+    </option>
+  </select>
+</form>
+
+
 <div id="attempt-to-goal" class="tag-panel responsive-panel">
+
 
   <!-- Outcome Panel -->
   <div id="outcome-panel" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
@@ -274,7 +287,7 @@ function saveAttempt(outcome, playerId, bodyPart, locationTag, deliveryType, ass
   const payload = {
     match_id: matchId,
     player_id: playerId,
-    team_id: {{ our_team.id }},
+    team_id: {{ active_team.id }},
     outcome,
     body_part: selectedBodyPart,
     location_tag: selectedLocation,
@@ -285,7 +298,8 @@ function saveAttempt(outcome, playerId, bodyPart, locationTag, deliveryType, ass
     second: timer % 60,
     timestamp: new Date().toISOString(),
     is_own_goal: selectedOutcome === "Own Goal",
-    own_goal_for_id: {{ opponent_team.id|default:'null' }},
+    own_goal_for_id: {{ opponent_team.id|default:"null" }}
+
   };
 
   fetch("{% url 'tagging_app:save_attempt_to_goal' %}", {
