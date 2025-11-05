@@ -53,6 +53,7 @@ def team_reports_dashboard(request, team_id):
     context = {
         'team': team,
         'form': form,
+        'team_id': team.id,
         **section_data,
     }
 

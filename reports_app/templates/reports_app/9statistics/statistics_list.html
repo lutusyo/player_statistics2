@@ -1,5 +1,56 @@
 {% extends "base.html" %}
 {% block content %}
+
+
+
+
+
+
+
+<div class="sticky-nav-wrapper">
+  <div class="container">
+    <div class="sticky-nav">
+      <div class="row g-2 justify-content-center">
+        <div class="col-auto">
+          <a href="{% url 'reports_app:mesocycle_reports' team_id=team.id %}" class="btn btn-outline-primary">Mesocycle</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:fitness_reports' team_id=team.id %}" class="btn btn-outline-success">Fitness Plan</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:iap_reports' team_id=team.id %}" class="btn btn-outline-warning">IDPs</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:performance_reports' team_id=team.id %}" class="btn btn-outline-info">Performance</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:scouting_reports' team_id=team.id %}" class="btn btn-outline-dark">Scouting</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:medical_reports' team_id=team.id %}" class="btn btn-outline-danger">Medical</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:transition_reports' team_id=team.id %}" class="btn btn-outline-secondary">Transition</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:result_reports' team_id=team.id %}" class="btn btn-outline-secondary">Results</a>
+        </div>
+        <div class="col-auto">
+          <a href="{% url 'reports_app:statistics_list' team_id=team.id %}" class="btn btn-outline-secondary">Statistics</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
 <div class="container mt-4">
   <h3>Player Statistics Report ({{ filter_type|title }})</h3>
 

@@ -7,23 +7,35 @@ from reports_app.models import Mesocycle
 from reports_app.forms import ReportFilterForm
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from django.shortcuts import render, get_object_or_404
+from teams_app.models import Team
 
 
-def mesocycle_reports(request):
+# ---- View for displaying mesocycle reports ----
+def mesocycle_reports(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
     form = ReportFilterForm(request.GET or None)
-    queryset = Mesocycle.objects.all().select_related('team')
+    queryset = Mesocycle.objects.filter(team_id=team_id).select_related('team')
 
     if form.is_valid():
         team = form.cleaned_data.get('team')
         if team:
             queryset = queryset.filter(team=team)
 
-    return render(request, 'reports_app/4mesocycle/mesocycle_reports.html', {'form': form, 'records': queryset})
+    return render(request, 'reports_app/4mesocycle/mesocycle_reports.html', {
+        'form': form,
+        'team': team,
+        'records': queryset,
+        'team_id': team_id,
+    })
 
 
-def export_mesocycle_excel(request):
-    queryset = Mesocycle.objects.all().select_related('team')
-    df = pd.DataFrame(list(queryset.values('title', 'team__name', 'start_date', 'end_date', 'uploaded_at')))
+# ---- Export to Excel ----
+def export_mesocycle_excel(request, team_id):
+    queryset = Mesocycle.objects.filter(team_id=team_id).select_related('team')
+    df = pd.DataFrame(list(queryset.values(
+        'title', 'team__name', 'start_date', 'end_date', 'uploaded_at'
+    )))
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Mesocycles')
@@ -33,8 +45,9 @@ def export_mesocycle_excel(request):
     return response
 
 
-def export_mesocycle_pdf(request):
-    queryset = Mesocycle.objects.all().select_related('team')
+# ---- Export to PDF ----
+def export_mesocycle_pdf(request, team_id):
+    queryset = Mesocycle.objects.filter(team_id=team_id).select_related('team')
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=A4)
     y = 780

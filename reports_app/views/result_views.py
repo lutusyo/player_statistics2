@@ -1,28 +1,40 @@
 import io
 import pandas as pd
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from reports_app.models import Result
 from reports_app.forms import ReportFilterForm
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from teams_app.models import Team
 
-
-def result_reports(request):
+# ---- Display result reports ----
+def result_reports(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
     form = ReportFilterForm(request.GET or None)
-    queryset = Result.objects.all().select_related('home_team', 'away_team', 'our_team')
+    queryset = Result.objects.filter(our_team_id=team_id).select_related('home_team', 'away_team', 'our_team')
 
     if form.is_valid():
         team = form.cleaned_data.get('team')
         if team:
             queryset = queryset.filter(our_team=team)
 
-    return render(request, 'reports_app/8results/result_reports.html', {'form': form, 'records': queryset})
+    return render(request, 'reports_app/8results/result_reports.html', {
+        'form': form,
+        'team': team,
+        'records': queryset,
+        'team_id': team_id,
+    })
 
 
-def export_result_excel(request):
-    queryset = Result.objects.all().select_related('home_team', 'away_team', 'our_team')
-    df = pd.DataFrame(list(queryset.values('date', 'venue', 'competition', 'home_team__name', 'home_score', 'away_score', 'away_team__name', 'result', 'goal_scorers', 'our_team__name', 'notes')))
+# ---- Export to Excel ----
+def export_result_excel(request, team_id):
+    queryset = Result.objects.filter(our_team_id=team_id).select_related('home_team', 'away_team', 'our_team')
+    df = pd.DataFrame(list(queryset.values(
+        'date', 'venue', 'competition', 'home_team__name', 'home_score',
+        'away_score', 'away_team__name', 'result', 'goal_scorers',
+        'our_team__name', 'notes'
+    )))
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Results')
@@ -32,8 +44,9 @@ def export_result_excel(request):
     return response
 
 
-def export_result_pdf(request):
-    queryset = Result.objects.all().select_related('home_team', 'away_team')
+# ---- Export to PDF ----
+def export_result_pdf(request, team_id):
+    queryset = Result.objects.filter(our_team_id=team_id).select_related('home_team', 'away_team', 'our_team')
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=A4)
     y = 780

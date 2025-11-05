@@ -1,16 +1,19 @@
 import io
 import pandas as pd
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.utils import timezone
 from reports_app.models import Medical
 from reports_app.forms import ReportFilterForm
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from teams_app.models import Team
 
-def medical_reports(request):
+
+def medical_reports(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
     form = ReportFilterForm(request.GET or None)
-    queryset = Medical.objects.all().select_related('name', 'squad')
+    queryset = Medical.objects.filter(squad_id=team_id).select_related('name', 'squad')
 
     # Filtering logic
     if form.is_valid():
@@ -32,12 +35,19 @@ def medical_reports(request):
             elif period == 'This Year':
                 queryset = queryset.filter(date__year=now.year)
 
-    context = {'form': form, 'records': queryset}
+    context = {
+        'form': form,
+        'records': queryset,
+        'team': team,
+        'team_id': team_id,  # 👈 include for navigation links
+    }
+
     return render(request, 'reports_app/1medical/medical_reports.html', context)
 
+
 # ---- Export to Excel ----
-def export_medical_excel(request):
-    queryset = Medical.objects.all().select_related('name', 'squad')
+def export_medical_excel(request, team_id):
+    queryset = Medical.objects.filter(squad_id=team_id).select_related('name', 'squad')
     df = pd.DataFrame(list(queryset.values(
         'name__name', 'squad__name', 'injury_or_illness', 'status', 'comments', 'date'
     )))
@@ -45,13 +55,17 @@ def export_medical_excel(request):
     with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Medical Reports')
     buffer.seek(0)
-    response = HttpResponse(buffer, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="medical_reports.xlsx"'
+    response = HttpResponse(
+        buffer,
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="medical_reports_team_{team_id}.xlsx"'
     return response
 
+
 # ---- Export to PDF ----
-def export_medical_pdf(request):
-    queryset = Medical.objects.all().select_related('name', 'squad')
+def export_medical_pdf(request, team_id):
+    queryset = Medical.objects.filter(squad_id=team_id).select_related('name', 'squad')
 
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=A4)
@@ -59,7 +73,7 @@ def export_medical_pdf(request):
     y = height - 50
 
     p.setFont("Helvetica-Bold", 14)
-    p.drawString(200, y, "Medical Report Summary")
+    p.drawString(180, y, f"Medical Report Summary - Team {team_id}")
     y -= 40
 
     p.setFont("Helvetica", 10)
@@ -68,11 +82,14 @@ def export_medical_pdf(request):
             p.showPage()
             y = height - 50
             p.setFont("Helvetica", 10)
-        p.drawString(50, y, f"{record.name.name} | {record.squad.name} | {record.injury_or_illness} | {record.status} | {record.date}")
+        p.drawString(
+            50, y,
+            f"{record.name.name} | {record.squad.name} | {record.injury_or_illness} | {record.status} | {record.date}"
+        )
         y -= 20
 
     p.save()
     buffer.seek(0)
     response = HttpResponse(buffer, content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="medical_reports.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="medical_reports_team_{team_id}.pdf"'
     return response

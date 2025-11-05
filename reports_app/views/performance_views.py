@@ -1,17 +1,20 @@
 import io
 import pandas as pd
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
 from django.utils import timezone
 from reports_app.models import Performance
 from reports_app.forms import ReportFilterForm
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from teams_app.models import Team
 
 
-def performance_reports(request):
+# ---- Display performance reports ----
+def performance_reports(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
     form = ReportFilterForm(request.GET or None)
-    queryset = Performance.objects.all().select_related('squad')
+    queryset = Performance.objects.filter(squad_id=team_id).select_related('squad')
 
     if form.is_valid():
         team = form.cleaned_data.get('team')
@@ -32,11 +35,17 @@ def performance_reports(request):
             elif period == 'This Year':
                 queryset = queryset.filter(date__year=now.year)
 
-    return render(request, 'reports_app/3performance/performance_reports.html', {'form': form, 'records': queryset})
+    return render(request, 'reports_app/3performance/performance_reports.html', {
+        'form': form,
+        'records': queryset,
+        'team': team,
+        'team_id': team_id,
+    })
 
 
-def export_performance_excel(request):
-    queryset = Performance.objects.all().select_related('squad')
+# ---- Export performance to Excel ----
+def export_performance_excel(request, team_id):
+    queryset = Performance.objects.filter(squad_id=team_id).select_related('squad')
     df = pd.DataFrame(list(queryset.values('date', 'squad__name', 'activity', 'comments')))
     buffer = io.BytesIO()
     with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
@@ -47,8 +56,9 @@ def export_performance_excel(request):
     return response
 
 
-def export_performance_pdf(request):
-    queryset = Performance.objects.all().select_related('squad')
+# ---- Export performance to PDF ----
+def export_performance_pdf(request, team_id):
+    queryset = Performance.objects.filter(squad_id=team_id).select_related('squad')
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=A4)
     width, height = A4
