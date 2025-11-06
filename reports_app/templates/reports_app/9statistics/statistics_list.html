@@ -55,9 +55,10 @@
   <h3>Player Statistics Report ({{ filter_type|title }})</h3>
 
   <div class="mb-3">
-    <a href="?filter=all" class="btn btn-secondary btn-sm">All</a>
+    <!--<a href="?filter=all" class="btn btn-secondary btn-sm">All</a>
     <a href="?filter=month" class="btn btn-secondary btn-sm">This Month</a>
-    <a href="?filter=week" class="btn btn-secondary btn-sm">This Week</a>
+    <a href="?filter=week" class="btn btn-secondary btn-sm">This Week</a>-->
+
     <a href="{% url 'reports_app:statistics_export_excel' %}?filter={{ filter_type }}" class="btn btn-success btn-sm">Download Excel</a>
     <a href="{% url 'reports_app:statistics_export_pdf' %}?filter={{ filter_type }}" class="btn btn-danger btn-sm">Download PDF</a>
   </div>

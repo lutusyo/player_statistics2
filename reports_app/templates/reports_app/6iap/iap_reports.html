@@ -54,13 +54,13 @@
 <div class="container mt-4">
   <h2 class="mb-3">Individual Action Plans (IAP)</h2>
 
-  <form method="get" class="row g-3 mb-3">
+  <!--<form method="get" class="row g-3 mb-3">
     <div class="col-md-3">{{ form.team.label_tag }} {{ form.team }}</div>
     <div class="col-md-2">{{ form.period.label_tag }} {{ form.period }}</div>
     <div class="col-md-2">{{ form.start_date.label_tag }} {{ form.start_date }}</div>
     <div class="col-md-2">{{ form.end_date.label_tag }} {{ form.end_date }}</div>
     <div class="col-md-1"><button type="submit" class="btn btn-primary">Filter</button></div>
-  </form>
+  </form>-->
 
   <div class="mb-3">
     <a href="{% url 'reports_app:export_iap_excel' team_id=team.id %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-success btn-sm">Export Excel</a>

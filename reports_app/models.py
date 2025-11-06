@@ -23,6 +23,8 @@ class Medical(models.Model):
     comments = models.CharField(max_length=150, blank=True)
     status = models.CharField(max_length=50)
 
+    
+
     def __str__(self):
         return f"{self.name} - {self.status}"
 
