@@ -5,7 +5,7 @@ from reports_app.views import (
     fitness_views, iap_views, transition_views, result_views, statistics_view, report_exports, report_filters, team_reports_view
 )
 from reports_app.views.match_report_views import ( 
-    goalkeeping_view, set_plays_views, in_possession_views, post_match_summary_views
+    goalkeeping_view, set_plays_views, in_possession_views, post_match_summary_views, full_match_report_views
     )
 
 app_name = 'reports_app'
@@ -87,6 +87,8 @@ urlpatterns = [
     ## 7_seplays
     path('match/<int:match_id>/<int:team_id>/setplays/', set_plays_views.setplays_dashboard, name='setplays_dashboard'),
 
+    ## full report
+    path('match/<int:match_id>/<int:our_team_id>/full-report/',full_match_report_views.full_match_report_view,name='full_match_report'),
 
 
 ]

@@ -8,7 +8,7 @@ from tagging_app.utils.pass_network_utils import get_pass_network_context
 from matches_app.utils.match_details_utils import get_match_detail_context
 
 
-def full_match_context_view(request, match_id, our_team_id):
+def full_match_context_view(request, match_id, our_team_id, return_context=False):
     """
     Returns a full context for a match, including:
     - Team stats (attempts, passes, goalkeeper)
@@ -65,5 +65,8 @@ def full_match_context_view(request, match_id, our_team_id):
         **pass_network_context,
         **match_detail_context,
     }
+
+    if return_context:
+        return context
 
     return render(request, 'reports_app/match_report_templates/1_post_match_summary/post_match_summary.html', context)

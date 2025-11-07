@@ -57,7 +57,7 @@ from tagging_app.utils.pass_network_utils import get_pass_network_context  # ✅
 
     
 
-def attempt_to_goal_dashboard(request, match_id):
+def attempt_to_goal_dashboard(request, match_id, return_context=False):
     match = get_object_or_404(Match, id=match_id)
     
     our_team_id = request.GET.get("our_team_id") or match.home_team.id
@@ -189,6 +189,9 @@ def attempt_to_goal_dashboard(request, match_id):
         "home_team": match.home_team,
         "away_team": match.away_team,
     })
+
+    if return_context:
+        return context
 
     return render(request, "reports_app/match_report_templates/4_in_possession/attempt_to_goal.html", context)
 

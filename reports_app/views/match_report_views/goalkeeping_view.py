@@ -5,7 +5,7 @@ from teams_app.models import Team
 from players_app.models import Player
 from tagging_app.models import AttemptToGoal, PassEvent, OutcomeChoices
 
-def goalkeeping_view(request, match_id, our_team_id):
+def goalkeeping_view(request, match_id, our_team_id, return_context=False):
     match = get_object_or_404(Match, id=match_id)
     our_team = get_object_or_404(Team, id=our_team_id)
 
@@ -81,5 +81,9 @@ def goalkeeping_view(request, match_id, our_team_id):
         "our_goalkeeper_successful_long_passes": our_goalkeeper_successful_long_passes,
         "our_goalkeeper_long_passes_ratio": our_goalkeeper_long_passes_ratio,
     }
+
+    if return_context:
+        return context
+
 
     return render(request, 'reports_app/match_report_templates/6_goalkeeping/goalkeeping.html', context)

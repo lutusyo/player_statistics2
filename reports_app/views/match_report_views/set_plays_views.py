@@ -5,7 +5,7 @@ from tagging_app.models import AttemptToGoal, DeliveryTypeChoices, OutcomeChoice
 from teams_app.models import Team
 from lineup_app.models import MatchLineup
 
-def setplays_dashboard(request, match_id, team_id):
+def setplays_dashboard(request, match_id, team_id, return_context=False):
     """
     View to analyze and display all set plays (corners, free kicks, penalties)
     for a given match and team.
@@ -67,5 +67,8 @@ def setplays_dashboard(request, match_id, team_id):
         "home_team": match.home_team,
         "away_team": match.away_team,
     }
+
+    if return_context:
+        return context
 
     return render(request, "reports_app/match_report_templates/7_set_plays/set_plays.html", context)
