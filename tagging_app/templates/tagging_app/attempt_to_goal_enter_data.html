@@ -29,9 +29,11 @@
     margin-top: auto;
   }
 
-  .player-btn.selected {
-    border-color: #007bff;
-  }
+  .player-btn.selected { border-color: #007bff; }
+
+  /* differentiate teams */
+  #our-players .player-btn { border-color: #28a745; }
+  #opponent-players .player-btn { border-color: #b30000; }
 </style>
 
 
@@ -49,7 +51,6 @@
 
 <div id="attempt-to-goal" class="tag-panel responsive-panel">
 
-
   <!-- Outcome Panel -->
   <div id="outcome-panel" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;">
     {% for value, label in outcomes %}
@@ -64,6 +65,7 @@
 
   <!-- On-field Players -->
   <div id="our-players" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px;"></div>
+  <div id="opponent-players" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px;"></div>
 
   <!-- body part -->
   <div id="bodypart-panel" style="display: none; grid-template-columns: repeat(4,1fr); gap: 10px;">
@@ -93,8 +95,6 @@
   <div id="preassist-panel" style="display: none; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px;"></div>
 
 </div>
-
-
 
 <a href="{% url 'lineup_app:substitution_panel' match.id %}">SUB</a>
 
@@ -126,48 +126,32 @@ function selectPlayer(btn, playerId) {
   selectedPlayer = playerId;
   document.getElementById('outcome-panel').style.display = 'none';
   document.getElementById('our-players').style.display = 'none';
-
+  document.getElementById('opponent-players').style.display = 'none';
   document.getElementById('bodypart-panel').style.display = 'grid';
   document.getElementById('location-panel').style.display = 'none';
   document.getElementById('delivery-panel').style.display = 'none';
   document.getElementById('assist-panel').style.display = 'none';
   document.getElementById('preassist-panel').style.display = 'none';
-
   clearSelected('.player-btn');
   clearSelected('.delivery-btn');
   btn.classList.add('selected');
 }
 
-
-
-
-
 document.getElementById('bodypart-panel').addEventListener('click', e => {
   const btn = e.target.closest('.location-btn');
   if (!btn) return;
   selectedBodyPart = btn.dataset.bodyPart;
-
-  // Move to location selection
   document.getElementById('bodypart-panel').style.display = 'none';
   document.getElementById('location-panel').style.display = 'grid';
-  document.getElementById('delivery-panel').style.display = 'none';
-  document.getElementById('assist-panel').style.display = 'none';
-  document.getElementById('preassist-panel').style.display = 'none';
 });
-
-
 
 document.getElementById('location-panel').addEventListener('click', e => {
   const btn = e.target.closest('.location-btn');
   if (!btn) return;
   selectedLocation = btn.dataset.location;
-
-  // Hide location, show delivery
   document.getElementById('location-panel').style.display = 'none';
   document.getElementById('delivery-panel').style.display = 'grid';
 });
-
-
 
 function makePlayerButton(p) {
   const btn = document.createElement('button');
@@ -185,6 +169,17 @@ function refreshOnFieldPlayers() {
     .then(res => res.json())
     .then(data => {
       const container = document.getElementById('our-players');
+      container.innerHTML = '';
+      data.players.forEach(p => container.appendChild(makePlayerButton(p)));
+    });
+}
+
+/* ✅ NEW FUNCTION for opponent team */
+function refreshOpponentPlayers() {
+  fetch(`/tagging/api_current_on_field_opponent_players/${matchId}/`)
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById('opponent-players');
       container.innerHTML = '';
       data.players.forEach(p => container.appendChild(makePlayerButton(p)));
     });
@@ -216,7 +211,6 @@ function refreshAssistPlayers() {
     });
 }
 
-
 function refreshPreAssistPlayers() {
   fetch(`/tagging/api_current_on_field_players/${matchId}/`)
     .then(res => res.json())
@@ -237,32 +231,23 @@ function refreshPreAssistPlayers() {
       skipBtn.onclick = () => {
         selectedPreAssistPlayer = null;
         document.getElementById('preassist-panel').style.display = 'none';
-        saveAttempt(
-          selectedOutcome,
-          selectedPlayer,
-          selectedBodyPart,
-          selectedLocation,
-          selectedDeliveryType,
-          selectedAssistPlayer,
-          selectedPreAssistPlayer
-        );
+        saveAttempt(selectedOutcome, selectedPlayer, selectedBodyPart, selectedLocation, selectedDeliveryType, selectedAssistPlayer, selectedPreAssistPlayer);
       };
       container.appendChild(skipBtn);
     });
 }
-
-
-
 
 function updateEventLog() {
   fetch(`/tagging/live_state/${matchId}/`)
     .then(res => res.json())
     .then(data => {
       const log = document.getElementById('event-log');
-      log.innerHTML = '';
-      data.events.forEach(ev => {
-        log.innerHTML += `<div><b>${ev.player_name}</b> - ${ev.outcome} - ${ev.delivery_type} at ${String(ev.minute).padStart(2,'0')}:${String(ev.second).padStart(2,'0')}</div>`;
-      });
+      if (log) {
+        log.innerHTML = '';
+        data.events.forEach(ev => {
+          log.innerHTML += `<div><b>${ev.player_name}</b> - ${ev.outcome} - ${ev.delivery_type} at ${String(ev.minute).padStart(2,'0')}:${String(ev.second).padStart(2,'0')}</div>`;
+        });
+      }
     });
 }
 
@@ -282,8 +267,6 @@ function saveAttempt(outcome, playerId, bodyPart, locationTag, deliveryType, ass
     console.error('Missing data, cannot save attempt');
     return;
   }
-
-
   const payload = {
     match_id: matchId,
     player_id: playerId,
@@ -299,9 +282,7 @@ function saveAttempt(outcome, playerId, bodyPart, locationTag, deliveryType, ass
     timestamp: new Date().toISOString(),
     is_own_goal: selectedOutcome === "Own Goal",
     own_goal_for_id: {{ opponent_team.id|default:"null" }}
-
   };
-
   fetch("{% url 'tagging_app:save_attempt_to_goal' %}", {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
@@ -312,10 +293,12 @@ function saveAttempt(outcome, playerId, bodyPart, locationTag, deliveryType, ass
     if (json.status === 'ok') {
       updateEventLog();
       refreshOnFieldPlayers();
+      refreshOpponentPlayers();
       refreshOutcomeCounts();
       selectedPlayer = selectedOutcome = selectedDeliveryType = selectedAssistPlayer = selectedBodyPart = selectedLocation = selectedPreAssistPlayer = null;
       document.getElementById('outcome-panel').style.display = 'grid';
       document.getElementById('our-players').style.display = 'none';
+      document.getElementById('opponent-players').style.display = 'none';
       document.getElementById('bodypart-panel').style.display = 'none';
       document.getElementById('location-panel').style.display = 'none';
       document.getElementById('delivery-panel').style.display = 'none';
@@ -327,12 +310,12 @@ function saveAttempt(outcome, playerId, bodyPart, locationTag, deliveryType, ass
   });
 }
 
-
 window.onload = () => {
   timer = parseInt(sessionStorage.getItem('tagging-timer')) || 0;
   updateTimerDisplay();
   startTimer();
   refreshOnFieldPlayers();
+  refreshOpponentPlayers();  // ✅ Load opponent too
   updateEventLog();
   refreshOutcomeCounts();
 };
@@ -343,6 +326,7 @@ document.getElementById('outcome-panel').addEventListener('click', e => {
   selectedOutcome = btn.dataset.outcome;
   document.getElementById('outcome-panel').style.display = 'none';
   document.getElementById('our-players').style.display = 'grid';
+  document.getElementById('opponent-players').style.display = 'grid'; // ✅ show both teams
   document.getElementById('delivery-panel').style.display = 'none';
   clearSelected('.outcome-btn');
   clearSelected('.player-btn');
@@ -351,6 +335,11 @@ document.getElementById('outcome-panel').addEventListener('click', e => {
 });
 
 document.getElementById('our-players').addEventListener('click', e => {
+  const btn = e.target.closest('.player-btn');
+  if (btn) selectPlayer(btn, btn.dataset.playerId);
+});
+
+document.getElementById('opponent-players').addEventListener('click', e => {
   const btn = e.target.closest('.player-btn');
   if (btn) selectPlayer(btn, btn.dataset.playerId);
 });
@@ -373,32 +362,24 @@ document.getElementById('assist-panel').addEventListener('click', e => {
   const btn = e.target.closest('.assist-btn');
   if (!btn) return;
   selectedAssistPlayer = btn.dataset.playerId;
-  if (selectedPlayer && selectedOutcome && selectedDeliveryType) {
-    // Hide assist panel, show pre-assist panel
-    document.getElementById('assist-panel').style.display = 'none';
-    document.getElementById('preassist-panel').style.display = 'grid';
-    refreshPreAssistPlayers();
-  }
+  document.getElementById('assist-panel').style.display = 'none';
+  document.getElementById('preassist-panel').style.display = 'grid';
+  refreshPreAssistPlayers();
 });
-
 
 document.getElementById('preassist-panel').addEventListener('click', e => {
   const btn = e.target.closest('.preassist-btn');
   if (!btn) return;
   selectedPreAssistPlayer = btn.dataset.playerId;
-  if (selectedPlayer && selectedOutcome && selectedDeliveryType) {
-    saveAttempt(
-      selectedOutcome,
-      selectedPlayer,
-      selectedBodyPart,
-      selectedLocation,
-      selectedDeliveryType,
-      selectedAssistPlayer,
-      selectedPreAssistPlayer
-    );
-  }
+  saveAttempt(
+    selectedOutcome,
+    selectedPlayer,
+    selectedBodyPart,
+    selectedLocation,
+    selectedDeliveryType,
+    selectedAssistPlayer,
+    selectedPreAssistPlayer
+  );
 });
-
-
 </script>
 {% endblock %}

@@ -35,7 +35,7 @@ def performance_reports(request, team_id):
             elif period == 'This Year':
                 queryset = queryset.filter(date__year=now.year)
 
-    return render(request, 'reports_app/3performance/performance_reports.html', {
+    return render(request, 'reports_app/daily_report_templates/3performance/performance_reports.html', {
         'form': form,
         'records': queryset,
         'team': team,

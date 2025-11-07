@@ -26,7 +26,7 @@ def iap_reports(request, team_id):
         'team_id': team_id,  # 👈 so you can reuse in template links
     }
 
-    return render(request, 'reports_app/6iap/iap_reports.html', context)
+    return render(request, 'reports_app/daily_report_templates/6iap/iap_reports.html', context)
 
 
 def export_iap_excel(request, team_id):

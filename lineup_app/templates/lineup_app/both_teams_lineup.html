@@ -12,12 +12,17 @@ body {
   margin: 0;
   padding: 20px;
 }
-h1 { text-align: center; color: #222; margin-bottom: 30px; }
+h1 {
+  text-align: center;
+  color: #222;
+  margin-bottom: 30px;
+}
 
 .lineup-container {
   display: flex;
   justify-content: space-between;
   gap: 30px;
+  flex-wrap: wrap;
 }
 
 .pitch {
@@ -88,6 +93,18 @@ h1 { text-align: center; color: #222; margin-bottom: 30px; }
   object-fit: cover;
   background: #ccc;
 }
+
+/* Responsive layout */
+@media (max-width: 1000px) {
+  .lineup-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  .pitch {
+    width: 90%;
+    height: 500px;
+  }
+}
 </style>
 </head>
 
@@ -97,11 +114,14 @@ h1 { text-align: center; color: #222; margin-bottom: 30px; }
   <div class="lineup-container">
     <!-- OUR TEAM -->
     <div>
-      <div class="team-title" style="color:#007f3d;">Our Team ({{ our_team_formation }})</div>
+      <div class="team-title" style="color:#007f3d;">
+        Our Team ({{ our_team_formation }})
+      </div>
+
       <div class="pitch">
         {% for p in our_team_lineup %}
           <div class="player" style="top: {{ p.top }}%; left: {{ p.left }}%;">
-            <img src="{{ p.photo|default:'{% static "images/default_player.png" %}' }}" alt="{{ p.name }}">
+            <img src="{% if p.photo %}{{ p.photo }}{% else %}{% static 'images/default_player.png' %}{% endif %}" alt="{{ p.name }}">
             <div class="player-info">
               {{ p.name }}<br>#{{ p.number }} - {{ p.position }}
             </div>
@@ -114,7 +134,7 @@ h1 { text-align: center; color: #222; margin-bottom: 30px; }
         <div class="subs-list">
           {% for s in our_subs %}
             <div class="sub-card">
-              <img src="{{ s.photo|default:'{% static "images/default_player.png" %}' }}" alt="{{ s.name }}">
+              <img src="{% if s.photo %}{{ s.photo }}{% else %}{% static 'images/default_player.png' %}{% endif %}" alt="{{ s.name }}">
               <div>{{ s.name }}</div>
               <small>#{{ s.number }}</small>
             </div>
@@ -127,11 +147,14 @@ h1 { text-align: center; color: #222; margin-bottom: 30px; }
 
     <!-- OPPONENT TEAM -->
     <div>
-      <div class="team-title" style="color:#b30000;">Opponent ({{ opponent_formation }})</div>
+      <div class="team-title" style="color:#b30000;">
+        Opponent ({{ opponent_formation }})
+      </div>
+
       <div class="pitch" style="background: linear-gradient(180deg, #333, #555);">
         {% for p in opponent_team_lineup %}
           <div class="player" style="top: {{ p.top }}%; left: {{ p.left }}%;">
-            <img src="{{ p.photo|default:'{% static "images/default_player.png" %}' }}" alt="{{ p.name }}">
+            <img src="{% if p.photo %}{{ p.photo }}{% else %}{% static 'images/default_player.png' %}{% endif %}" alt="{{ p.name }}">
             <div class="player-info">
               {{ p.name }}<br>#{{ p.number }} - {{ p.position }}
             </div>
@@ -144,7 +167,7 @@ h1 { text-align: center; color: #222; margin-bottom: 30px; }
         <div class="subs-list">
           {% for s in opponent_subs %}
             <div class="sub-card">
-              <img src="{{ s.photo|default:'{% static "images/default_player.png" %}' }}" alt="{{ s.name }}">
+              <img src="{% if s.photo %}{{ s.photo }}{% else %}{% static 'images/default_player.png' %}{% endif %}" alt="{{ s.name }}">
               <div>{{ s.name }}</div>
               <small>#{{ s.number }}</small>
             </div>

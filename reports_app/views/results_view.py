@@ -163,13 +163,9 @@ def results_list_view(request):
         'team_id': team_id,
         'query_params': request.GET.urlencode(),
     }
-    return render(request, 'reports_app/7results/results_list.html', context)
-
-
-
+    return render(request, 'reports_app/daily_report_templates/7results/results_list.html', context)
 
 # ----------------- EXPORTS -----------------
-
 
 def results_export_excel(request):
     """Export match results to Excel."""

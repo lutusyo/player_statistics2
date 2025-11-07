@@ -19,7 +19,7 @@ def result_reports(request, team_id):
         if team:
             queryset = queryset.filter(our_team=team)
 
-    return render(request, 'reports_app/8results/result_reports.html', {
+    return render(request, 'reports_app/daily_report_templates/8results/result_reports.html', {
         'form': form,
         'team': team,
         'records': queryset,

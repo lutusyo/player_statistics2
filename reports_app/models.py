@@ -50,8 +50,28 @@ class Scouting(models.Model):
     agreement = models.CharField(max_length=20, choices=AgreementChoices.choices)
     comments = models.TextField(blank=True)
 
+    # ✅ New fields
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    former_club = models.CharField(max_length=100, default='Unknown')
+    school_name = models.CharField(max_length=150, blank=True, null=True)
+    education_level = models.CharField(max_length=100, blank=True, null=True)
+    parent_or_coach_phone = models.CharField(max_length=20, blank=True, null=True)
+    guardian_name = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text="Name of guardian (if parent or coach)"
+    )
+    scouting_location = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text="Place where the player was scouted"
+    )
+
     def __str__(self):
         return f"{self.name} - {self.agreement}"
+
 
 
 class Performance(models.Model):

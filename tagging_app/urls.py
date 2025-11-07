@@ -34,6 +34,9 @@ urlpatterns = [
 
 
     # Attempt to Goal enter data: our team
+    # Attempt to Goal Dashboard
+    path('match/<int:match_id>/attempt-to-goal-dashboard/', attempt_to_goal.attempt_to_goal_dashboard, name='attempt_to_goal_dashboard'),
+
     path('match/<int:match_id>/attempt_to_goal/', attempt_to_goal.enter_attempt_to_goal, name='enter_attempt_to_goal'),
     path('match/save-attempt-to-goal/', attempt_to_goal.save_attempt_to_goal, name='save_attempt_to_goal'),
     path('match/<int:match_id>/csv/export-attempt-to-goal-csv/',attempt_to_goal.export_attempt_to_goal_csv, name='export_attempt_to_goal_csv'),

@@ -19,7 +19,7 @@ def transition_reports(request, team_id):
         if team:
             queryset = queryset.filter(squad=team)
 
-    return render(request, 'reports_app/7transition/transition_reports.html', 
+    return render(request, 'reports_app/daily_report_templates/7transition/transition_reports.html', 
                   {'form': form, 'records': queryset, 'team': team, 'team_id': team_id})
 
 

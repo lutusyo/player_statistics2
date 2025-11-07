@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <div class="card mb-4 p-4 shadow-sm">
+        <h5 class="text-primary">Match: {{ match }}</h5>
+        {% if goalkeeper %}
+        <p><strong>Goalkeeper:</strong> {{ goalkeeper.name }}</p>
+        {% else %}
+        <p class="text-danger"><strong>No goalkeeper found in this team.</strong></p>
+        {% endif %}
+    </div>
+
+    <div class="row g-3">
+        <!-- Defensive Summary -->
+        <div class="col-md-6">
+            <div class="card p-3 shadow-sm">
+                <h5 class="text-primary mb-3"> Defensive Summary</h5>
+                <ul class="list-unstyled">
+                    <li>• Total Attempts Faced: <strong>{{ total_attempts_faced }}</strong></li>
+                    <li>• On Target Faced: <strong>{{ goalkeeper_on_target_faced }}</strong></li>
+                    <li>• Saves Made: <strong>{{ goalkeeper_saves_made }}</strong></li>
+                    <li>• Goals Conceded: <strong>{{ our_goalkeeper_goals_conceded }}</strong></li>
+                    <li>• Save Percentage: <strong>{{ our_goalkeeper_save_percentage }}%</strong></li>
+                    <li>• Clean Sheet: <strong>{{ clean_sheet|yesno:"Yes,No" }}</strong></li>
+                </ul>
+                <canvas id="saveChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Distribution Summary -->
+        <div class="col-md-6">
+            <div class="card p-3 shadow-sm">
+                <h5 class="text-success mb-3"> Distribution Summary</h5>
+                <ul class="list-unstyled">
+                    <li>• Total Passes: <strong>{{ total_passes }}</strong></li>
+                    <li>• Successful Passes: <strong>{{ successful_passes }}</strong></li>
+                    <li>• Pass Accuracy: <strong>{{ our_goalkeeper_pass_accuracy }}%</strong></li>
+                    <li>• Total Involvements: <strong>{{ our_goalkeeper_total_involvements }}</strong></li>
+                    <li>• Long Passes: <strong>{{ our_goalkeeper_long_passes }}</strong></li>
+                    <li>• Long Pass Ratio: <strong>{{ our_goalkeeper_long_passes_ratio }}%</strong></li>
+                </ul>
+                <canvas id="longPassChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctxSave = document.getElementById('saveChart').getContext('2d');
+new Chart(ctxSave, {
+    type: 'pie',
+    data: {
+        labels: ['Saves Made', 'Goals Conceded'],
+        datasets: [{
+            data: [{{ goalkeeper_saves_made }}, {{ our_goalkeeper_goals_conceded }}],
+            backgroundColor: ['#28a745', '#dc3545'],
+        }]
+    },
+    options: {
+        plugins: {
+            title: {
+                display: true,
+                text: 'Save vs Goals Conceded',
+                font: { size: 14 }
+            }
+        }
+    }
+});
+
+const ctxPass = document.getElementById('longPassChart').getContext('2d');
+new Chart(ctxPass, {
+    type: 'bar',
+    data: {
+        labels: ['Long Passes Attempted', 'Successful Long Passes'],
+        datasets: [{
+            label: 'Long Pass Performance',
+            data: [{{ our_goalkeeper_long_passes }}, {{ our_goalkeeper_successful_long_passes }}],
+            backgroundColor: ['#17a2b8', '#28a745']
+        }]
+    },
+    options: {
+        plugins: {
+            title: {
+                display: true,
+                text: 'Long Pass Distribution',
+                font: { size: 14 }
+            }
+        },
+        scales: { y: { beginAtZero: true } }
+    }
+});
+</script>
+{% endblock %}

@@ -6,10 +6,13 @@ from django.utils.html import format_html
 from django.contrib import messages
 from django.forms import modelformset_factory
 
-from lineup_app.models import Match, MatchLineup, Substitution
+from lineup_app.models import MatchLineup, Substitution
+from matches_app.models import Match
 from matches_app.admin import MatchAdmin
 from lineup_app.forms import MatchLineupForm
 from players_app.models import Player
+
+
 
 ### Bulk Lineup Form ###
 class MatchLineupBulkForm(forms.ModelForm):
@@ -49,3 +52,5 @@ class MatchLineupAdmin(admin.ModelAdmin):
 # Register Models
 admin.site.register(MatchLineup, MatchLineupAdmin)
 admin.site.register(Substitution)
+
+

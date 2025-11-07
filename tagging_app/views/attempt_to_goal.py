@@ -176,24 +176,6 @@ def save_attempt_to_goal(request):
         return JsonResponse({"status": "error", "message": str(e)}, status=400)
     
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def attempt_to_goal_dashboard(request, match_id):
     match = get_object_or_404(Match, id=match_id)
     
@@ -277,7 +259,6 @@ def attempt_to_goal_dashboard(request, match_id):
     our_attempts = AttemptToGoal.objects.filter(match=match, is_opponent=False)   # our team attempts
     
     # Filter by categories
-
 
     our_shots_on_target = our_attempts.filter(outcome__in=[OutcomeChoices.ON_TARGET_GOAL, OutcomeChoices.ON_TARGET_SAVED])
     our_shots_off_target = our_attempts.filter(outcome=OutcomeChoices.OFF_TARGET)

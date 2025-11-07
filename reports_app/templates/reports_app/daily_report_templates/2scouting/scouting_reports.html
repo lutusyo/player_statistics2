@@ -60,10 +60,6 @@
 
 
 
-
-
-
-
 <div class="container mt-4">
   <h2 class="mb-3">Scouting Reports</h2>
 
@@ -80,26 +76,49 @@
     <a href="{% url 'reports_app:export_scouting_pdf' team.id %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-danger btn-sm">Export PDF</a>
   </div>
 
-  <div class="table-responsive">
-    <table class="table table-sm table-bordered">
-      <thead class="table-light">
-        <tr><th>Name</th><th>Position</th><th>DOB</th><th>Squad</th><th>Agreement</th><th>Date</th></tr>
-      </thead>
-      <tbody>
-        {% for r in records %}
-        <tr>
-          <td>{{ r.name }}</td>
-          <td>{{ r.pos }}</td>
-          <td>{{ r.dob }}</td>
-          <td>{{ r.squad.name }}</td>
-          <td>{{ r.agreement }}</td>
-          <td>{{ r.date }}</td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="6" class="text-center text-muted">No scouting records found.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+<div class="table-responsive">
+  <table class="table table-sm table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Name</th>
+        <th>Position</th>
+        <th>DOB</th>
+        <th>Squad</th>
+        <th>Agreement</th>
+        <th>Phone</th>
+        <th>Former Club</th>
+        <th>School</th>
+        <th>Level</th>
+        <th>Guardian</th>
+        <th>Guardian Contact</th>
+        <th>Scouting Location</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in records %}
+      <tr>
+        <td>{{ r.name }}</td>
+        <td>{{ r.pos }}</td>
+        <td>{{ r.dob }}</td>
+        <td>{{ r.squad.name }}</td>
+        <td>{{ r.agreement }}</td>
+        <td>{{ r.phone_number }}</td>
+        <td>{{ r.former_club }}</td>
+        <td>{{ r.school_name }}</td>
+        <td>{{ r.education_level }}</td>
+        <td>{{ r.guardian_name }}</td>
+        <td>{{ r.parent_or_coach_phone }}</td>
+        <td>{{ r.scouting_location }}</td>
+        <td>{{ r.date }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="13" class="text-center text-muted">No scouting records found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
+
 {% endblock %}

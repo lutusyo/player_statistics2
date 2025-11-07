@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center mb-4 fw-bold">⚽ Set Plays Report</h2>
+  <h5 class="text-muted text-center mb-5">{{ match }} — {{ team.name }}</h5>
+
+  <!-- Summary Cards -->
+  <div class="row text-center mb-4">
+    <div class="col-md-3 mb-3">
+      <div class="card shadow-sm border-primary">
+        <div class="card-body">
+          <h6 class="text-primary">Total Set Plays</h6>
+          <h3>{{ summary.total_setplays }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card shadow-sm border-info">
+        <div class="card-body">
+          <h6 class="text-info">Corners</h6>
+          <h3>{{ summary.total_corners }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card shadow-sm border-success">
+        <div class="card-body">
+          <h6 class="text-success">Free Kicks</h6>
+          <h3>{{ summary.total_free_kicks }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card shadow-sm border-danger">
+        <div class="card-body">
+          <h6 class="text-danger">Penalties</h6>
+          <h3>{{ summary.total_penalties }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart Section -->
+  <div class="card p-4 shadow-sm mb-5">
+    <h5 class="text-center mb-4 fw-bold">📊 Set Play Overview</h5>
+    <canvas id="setPlayChart" height="100"></canvas>
+  </div>
+
+  <!-- Detailed Breakdown -->
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card shadow-sm p-3 mb-3">
+        <h5 class="text-primary mb-3">Corners ({{ corners.count }})</h5>
+        <ul class="list-unstyled">
+          {% for c in corners %}
+            <li>⚽ {{ c.player }} — <em>{{ c.outcome }}</em> ({{ c.minute }}’)</li>
+          {% empty %}
+            <li class="text-muted">No corners recorded.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm p-3 mb-3">
+        <h5 class="text-success mb-3">Free Kicks ({{ free_kicks.count }})</h5>
+        <ul class="list-unstyled">
+          {% for f in free_kicks %}
+            <li>🎯 {{ f.player }} — <em>{{ f.outcome }}</em> ({{ f.minute }}’)</li>
+          {% empty %}
+            <li class="text-muted">No free kicks recorded.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm p-3 mb-3">
+        <h5 class="text-danger mb-3">Penalties ({{ penalties.count }})</h5>
+        <ul class="list-unstyled">
+          {% for p in penalties %}
+            <li>🔥 {{ p.player }} — <em>{{ p.outcome }}</em> ({{ p.minute }}’)</li>
+          {% empty %}
+            <li class="text-muted">No penalties recorded.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Player Summary -->
+  <div class="card shadow-sm mt-4 p-3">
+    <h5 class="fw-bold mb-3">👤 Player Contribution Summary</h5>
+    <table class="table table-striped table-sm">
+      <thead class="table-dark">
+        <tr>
+          <th>Player</th>
+          <th>Type</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in player_summary %}
+        <tr>
+          <td>{{ item.player__name }}</td>
+          <td>{{ item.delivery_type }}</td>
+          <td>{{ item.total }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="3" class="text-muted text-center">No data available</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('setPlayChart').getContext('2d');
+  const setPlayChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Corners', 'Free Kicks', 'Penalties', 'Goals (Set Plays)'],
+      datasets: [{
+        label: 'Number of Events',
+        data: [
+          {{ summary.total_corners }},
+          {{ summary.total_free_kicks }},
+          {{ summary.total_penalties }},
+          {{ summary.goals_from_setplays }}
+        ],
+        backgroundColor: ['#0d6efd', '#198754', '#dc3545', '#ffc107'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        title: {
+          display: true,
+          text: 'Set Plays Breakdown ({{ team.name }})',
+          font: { size: 16 }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

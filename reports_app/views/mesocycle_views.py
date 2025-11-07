@@ -22,7 +22,7 @@ def mesocycle_reports(request, team_id):
         if team:
             queryset = queryset.filter(team=team)
 
-    return render(request, 'reports_app/4mesocycle/mesocycle_reports.html', {
+    return render(request, 'reports_app/daily_report_templates/4mesocycle/mesocycle_reports.html', {
         'form': form,
         'team': team,
         'records': queryset,

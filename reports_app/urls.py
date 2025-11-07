@@ -4,6 +4,9 @@ from reports_app.views import (
     medical_views, scouting_views, performance_views, mesocycle_views,
     fitness_views, iap_views, transition_views, result_views, statistics_view, report_exports, report_filters, team_reports_view
 )
+from reports_app.views.match_report_views import ( 
+    goalkeeping_view, set_plays_views, in_possession_views, post_match_summary_views
+    )
 
 app_name = 'reports_app'
 
@@ -66,6 +69,24 @@ urlpatterns = [
 
     path('team-reports/<int:team_id>/dashboard/', report_filters.reports_dashboard, name='reports_dashboard'),
     path('team-reports/<int:team_id>/', team_reports_view.team_reports_view, name='team_reports'),
+
+
+
+    # MATCH REPORT
+
+    ## 1-Post-match-summary
+    path('match/<int:match_id>/<int:our_team_id>/post-match-summary/', post_match_summary_views.full_match_context_view, name='post_match_summary'),
+
+    ##
+     path('match/<int:match_id>/attempt-to-goal-dashboard/', in_possession_views.attempt_to_goal_dashboard, name='attempt_to_goal_dashboard'),
+
+    ## Goalkeeping
+    path("match/<int:match_id>/<int:our_team_id>/goalkeeping/", goalkeeping_view.goalkeeping_view, name="goalkeeping_report"),
+
+
+    ## 7_seplays
+    path('match/<int:match_id>/<int:team_id>/setplays/', set_plays_views.setplays_dashboard, name='setplays_dashboard'),
+
 
 
 ]

@@ -84,7 +84,7 @@ def statistics_list_view(request, team_id):
                "team": team
                }
 
-    return render(request, "reports_app/9statistics/statistics_list.html", context)
+    return render(request, "reports_app/daily_report_templates/9statistics/statistics_list.html", context)
 
 
 # ✅ 2. Export to Excel

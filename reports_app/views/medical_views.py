@@ -42,7 +42,7 @@ def medical_reports(request, team_id):
         'team_id': team_id,  # 👈 include for navigation links
     }
 
-    return render(request, 'reports_app/1medical/medical_reports.html', context)
+    return render(request, 'reports_app/daily_report_templates/1medical/medical_reports.html', context)
 
 
 # ---- Export to Excel ----
