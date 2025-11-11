@@ -1,18 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>Full Match Report: {{ match }}</h1>
 
-<!-- Post-match summary -->
-{% include "reports_app/match_report_templates/1_post_match_summary/post_match_summary.html" %}
+    <a href="{% url 'reports_app:download_full_report_pdf' match.id our_team_id %}" class="btn btn-primary" style="margin: 20px;">
+        📄 Download Full Report (PDF)
+    </a>
 
-<!-- Attempt to Goal Dashboard -->
-{% include "reports_app/match_report_templates/4_in_possession/attempt_to_goal.html" %}
+    <!-- Post-match summary -->
+    {% include "reports_app/match_report_templates/1_post_match_summary/post_match_summary.html" %}
 
-<!-- Goalkeeping -->
-{% include "reports_app/match_report_templates/6_goalkeeping/goalkeeping.html" %}
+    <!--4_in_possession-->
+    {% include "reports_app/match_report_templates/4_in_possession/intro.html" %}
+    {% include "reports_app/match_report_templates/4_in_possession/attempt_to_goal.html" %}
+    {% include "reports_app/match_report_templates/4_in_possession/pass_network.html" %}
 
-<!-- Set Plays -->
-{% include "reports_app/match_report_templates/7_set_plays/set_plays.html" %}
+    <!-- Goalkeeping -->
+    {% include "reports_app/match_report_templates/6_goalkeeping/goalkeeping_intro.html" %}
+    {% include "reports_app/match_report_templates/6_goalkeeping/goalkeeping.html" %}
+
+    <!-- Set Plays -->
+    {% include "reports_app/match_report_templates/7_set_plays/set_plays_intro.html" %}
+    {% include "reports_app/match_report_templates/7_set_plays/set_plays.html" %}
+
+    <!--outro page-->
+    {% include "reports_app/match_report_templates/11_outro_page/outro.html" %}
+
 
 {% endblock %}

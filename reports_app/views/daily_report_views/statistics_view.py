@@ -19,7 +19,7 @@ from teams_app.models import Team
 
 
 # ✅ Helper to build the report data
-def get_statistics_report(filter_type="all"):
+def get_statistics_report(filter_type="all", team=None):
     today = now().date()
 
     if filter_type == "week":
@@ -37,7 +37,9 @@ def get_statistics_report(filter_type="all"):
         training_filter &= Q(session__date__gte=start_date)
 
     report = []
-    players = Player.objects.filter(is_active=True)
+
+    # ✅ Only players from this team
+    players = Player.objects.filter(is_active=True, team=team)
 
     for player in players:
         lineups = MatchLineup.objects.filter(player=player).filter(match_filter)
@@ -70,28 +72,31 @@ def get_statistics_report(filter_type="all"):
     return report
 
 
+
 # ✅ 1. Normal view
 @login_required
+@login_required
 def statistics_list_view(request, team_id):
-
     team = get_object_or_404(Team, id=team_id)
-
     filter_type = request.GET.get("filter", "all")
-    report = get_statistics_report(filter_type)
+    report = get_statistics_report(filter_type, team=team)
 
-    context = {"report": report,
-               "filter_type": filter_type,
-               "team": team
-               }
-
+    context = {
+        "report": report,
+        "filter_type": filter_type,
+        "team": team,
+    }
     return render(request, "reports_app/daily_report_templates/9statistics/statistics_list.html", context)
+
 
 
 # ✅ 2. Export to Excel
 @login_required
-def statistics_export_excel(request):
+def statistics_export_excel(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
     filter_type = request.GET.get("filter", "all")
-    report = get_statistics_report(filter_type)
+    report = get_statistics_report(filter_type, team=team)
+
 
     df = pd.DataFrame([
         {
@@ -124,9 +129,10 @@ def statistics_export_excel(request):
 
 # ✅ 3. Export to PDF
 @login_required
-def statistics_export_pdf(request):
+def statistics_export_pdf(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
     filter_type = request.GET.get("filter", "all")
-    report = get_statistics_report(filter_type)
+    report = get_statistics_report(filter_type, team=team)
 
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4)

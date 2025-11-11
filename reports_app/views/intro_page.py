@@ -54,7 +54,7 @@ def out_of_possession_view(request, match_id):
     return render(request, 'reports_app/intro_pages/out_of_possession.html', context)
 
 
-def goalkeeping_view(request, match_id):
+def goalkeeping_intro_view(request, match_id, return_context=False):
     match = get_object_or_404(Match, id=match_id)
     context = {
         'match': match,
@@ -63,7 +63,10 @@ def goalkeeping_view(request, match_id):
         'away_team': match.away_team,
         'company': 'Azam Fc Analyst',
     }
-    return render(request, 'reports_app/intro_pages/goalkeeping.html', context)
+
+    if return_context:
+        return context
+    return render(request, 'reports_app/match_report_templates/6_goalkeeping/goalkeeping_intro.html', context)
 
 
 def set_plays_view(request, match_id):

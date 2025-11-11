@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>GPS Dashboard for Match: {{ match.home_team.name }} vs {{ match.away_team.name }} ({{ match.date }})</h1>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-auto">
+            <label for="periodSelect" class="form-label">Select Period:</label>
+            <select id="periodSelect" class="form-select">
+                {% for period in periods %}
+                    <option value="{{ period }}">{{ period }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-auto">
+            <label for="positionSelect" class="form-label">Select Position:</label>
+            <select id="positionSelect" class="form-select">
+                <option value="All">All</option>
+                {% for pos in positions %}
+                    <option value="{{ pos }}">{{ pos }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- GPS Data Table -->
+    <div class="table-responsive mb-5">
+        <table class="table table-striped table-bordered" id="gpsTable">
+            <thead class="table-dark">
+                <tr>
+                    <th>Player</th>
+                    <th>Position</th>
+                    <th>Distance (m)</th>
+                    <th>Accel/Decel Efforts</th>
+                    <th>Sprint Efforts</th>
+                    <th>High Speed Efforts</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Filled dynamically via JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Distance Chart -->
+    <h3 class="mt-4 text-center">Distance per Player</h3>
+    <div class="chart-container mb-5">
+        <canvas id="distanceChart"></canvas>
+    </div>
+
+    <!-- Separate Radar Charts (Stacked) -->
+    <div class="chart-container mb-5">
+        <h4 class="text-center">Accel/Decel Efforts</h4>
+        <canvas id="accelDecelChart" height="300"></canvas>
+    </div>
+
+    <div class="chart-container mb-5">
+        <h4 class="text-center">Sprint Efforts</h4>
+        <canvas id="sprintChart" height="300"></canvas>
+    </div>
+
+    <div class="chart-container mb-5">
+        <h4 class="text-center">High Speed Efforts</h4>
+        <canvas id="highSpeedChart" height="300"></canvas>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const matchId = {{ match.id }};
+const periodSelect = document.getElementById('periodSelect');
+const positionSelect = document.getElementById('positionSelect');
+
+const distanceCtx = document.getElementById('distanceChart').getContext('2d');
+const accelDecelCtx = document.getElementById('accelDecelChart').getContext('2d');
+const sprintCtx = document.getElementById('sprintChart').getContext('2d');
+const highSpeedCtx = document.getElementById('highSpeedChart').getContext('2d');
+
+// Chart container style (responsive)
+document.querySelectorAll('.chart-container').forEach(div => {
+    div.style.width = '100%';
+    div.style.maxWidth = '800px';
+    div.style.height = '400px';
+    div.style.margin = '0 auto';
+});
+
+let distanceChart = new Chart(distanceCtx, {
+    type: 'bar',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Distance (m)',
+            data: [],
+            backgroundColor: 'rgba(54,162,235,0.6)',
+            borderColor: 'rgba(54,162,235,1)',
+            borderWidth: 1
+        }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+});
+
+let accelDecelChart = new Chart(accelDecelCtx, {
+    type: 'radar',
+    data: { labels: [], datasets: [{
+        label: 'Accel/Decel Efforts',
+        data: [],
+        backgroundColor: 'rgba(255,99,132,0.2)',
+        borderColor: 'rgba(255,99,132,0.8)',
+        pointBackgroundColor: 'rgba(255,99,132,1)',
+        fill: true
+    }] },
+    options: { responsive: true, maintainAspectRatio: false, scales: { r: { beginAtZero: true } } }
+});
+
+let sprintChart = new Chart(sprintCtx, {
+    type: 'radar',
+    data: { labels: [], datasets: [{
+        label: 'Sprint Efforts',
+        data: [],
+        backgroundColor: 'rgba(54,162,235,0.2)',
+        borderColor: 'rgba(54,162,235,0.8)',
+        pointBackgroundColor: 'rgba(54,162,235,1)',
+        fill: true
+    }] },
+    options: { responsive: true, maintainAspectRatio: false, scales: { r: { beginAtZero: true } } }
+});
+
+let highSpeedChart = new Chart(highSpeedCtx, {
+    type: 'radar',
+    data: { labels: [], datasets: [{
+        label: 'High Speed Efforts',
+        data: [],
+        backgroundColor: 'rgba(75,192,192,0.2)',
+        borderColor: 'rgba(75,192,192,0.8)',
+        pointBackgroundColor: 'rgba(75,192,192,1)',
+        fill: true
+    }] },
+    options: { responsive: true, maintainAspectRatio: false, scales: { r: { beginAtZero: true } } }
+});
+
+function fetchGPSData() {
+    const period = periodSelect.value;
+    const position = positionSelect.value;
+
+    fetch(`/gps_app/match/${matchId}/dashboard/data/?period=${period}`)
+        .then(response => response.json())
+        .then(data => {
+            // Filter by position
+            let filteredIndexes = [];
+            if (position === 'All') {
+                filteredIndexes = data.players.map((_, i) => i);
+            } else {
+                filteredIndexes = data.positions
+                    .map((pos, i) => pos === position ? i : -1)
+                    .filter(i => i !== -1);
+            }
+
+            // Update table
+            const tbody = document.querySelector('#gpsTable tbody');
+            tbody.innerHTML = '';
+            filteredIndexes.forEach(i => {
+                const row = `<tr>
+                    <td>${data.players[i]}</td>
+                    <td>${data.positions[i]}</td>
+                    <td>${data.distances[i]}</td>
+                    <td>${data.accel_decel[i]}</td>
+                    <td>${data.sprint_efforts[i]}</td>
+                    <td>${data.high_speed[i]}</td>
+                </tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+
+            // Filtered data
+            const labels = filteredIndexes.map(i => data.players[i]);
+            const distances = filteredIndexes.map(i => data.distances[i]);
+            const accelDecel = filteredIndexes.map(i => data.accel_decel[i]);
+            const sprintEfforts = filteredIndexes.map(i => data.sprint_efforts[i]);
+            const highSpeed = filteredIndexes.map(i => data.high_speed[i]);
+
+            // Update charts
+            distanceChart.data.labels = labels;
+            distanceChart.data.datasets[0].data = distances;
+            distanceChart.update();
+
+            accelDecelChart.data.labels = labels;
+            accelDecelChart.data.datasets[0].data = accelDecel;
+            accelDecelChart.update();
+
+            sprintChart.data.labels = labels;
+            sprintChart.data.datasets[0].data = sprintEfforts;
+            sprintChart.update();
+
+            highSpeedChart.data.labels = labels;
+            highSpeedChart.data.datasets[0].data = highSpeed;
+            highSpeedChart.update();
+        });
+}
+
+// Initial load
+fetchGPSData();
+
+// Update when filters change
+periodSelect.addEventListener('change', fetchGPSData);
+positionSelect.addEventListener('change', fetchGPSData);
+</script>
+{% endblock %}

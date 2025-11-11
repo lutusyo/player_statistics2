@@ -7,6 +7,13 @@ import json
 from lineup_app.models import Match, MatchLineup, Substitution
 from players_app.models import Player
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from lineup_app.models import Match, MatchLineup, Substitution
+
+from django.db import transaction
+
+
 
 # Helper to serialize MatchLineup row for JSON
 def _serialize_lineup(lineup):
@@ -25,10 +32,6 @@ def _serialize_lineup(lineup):
     }
 
 
-@require_http_methods(["GET"])
-def substitution_panel(request, match_id):
-    match = get_object_or_404(Match, id=match_id)
-    return render(request, "lineup_app/substitution_panel.html", {"match": match})
 
 
 @require_http_methods(["GET"])
@@ -189,4 +192,107 @@ def api_finalize_match(request, match_id):
         lineup.time_out = current_minute or 90  # default to 90 if not provided
         lineup.save()
     return JsonResponse({"success": True})
+
+def substitution_panel(request, match_id):
+    match = get_object_or_404(Match, id=match_id)
+
+    # Current on pitch
+    home_on_pitch = MatchLineup.objects.filter(
+        match=match, team=match.home_team, time_in__isnull=False, time_out__isnull=True
+    )
+    away_on_pitch = MatchLineup.objects.filter(
+        match=match, team=match.away_team, time_in__isnull=False, time_out__isnull=True
+    )
+
+    # Bench players
+    home_lineup_ids = MatchLineup.objects.filter(match=match, team=match.home_team).values_list("player_id", flat=True)
+    away_lineup_ids = MatchLineup.objects.filter(match=match, team=match.away_team).values_list("player_id", flat=True)
+
+    def get_bench(team, lineup_ids):
+        bench_lineup = MatchLineup.objects.filter(match=match, team=team, is_starting=False)
+        not_selected = Player.objects.filter(team=team).exclude(id__in=lineup_ids)
+
+        bench = []
+        for l in bench_lineup:
+            bench.append({
+                "id": l.id,
+                "name": l.player.name,
+                "position": l.position,
+                "is_lineup": True,
+            })
+        for p in not_selected:
+            bench.append({
+                "id": p.id,
+                "name": p.name,
+                "position": "SUB",
+                "is_lineup": False,
+            })
+        return bench
+
+    home_bench = get_bench(match.home_team, home_lineup_ids)
+    away_bench = get_bench(match.away_team, away_lineup_ids)
+
+    substitutions = Substitution.objects.filter(match=match).select_related(
+        "player_out", "player_in"
+    )
+
+    if request.method == "POST":
+        player_out_id = request.POST.get("player_out")
+        player_in_id = request.POST.get("player_in")
+        minute = request.POST.get("minute")
+
+        if not (player_out_id and player_in_id and minute):
+            messages.error(request, "Please select players and enter minute.")
+        else:
+            with transaction.atomic():
+                player_out = get_object_or_404(MatchLineup, id=player_out_id)
+
+                # If player_in is a Player (not yet in lineup), create a lineup entry
+                if MatchLineup.objects.filter(match=match, player_id=player_in_id).exists():
+                    # The player is already in lineup for this match
+                    player_in = MatchLineup.objects.get(match=match, player_id=player_in_id)
+                else:
+                    player_obj = get_object_or_404(Player, id=player_in_id)
+                    player_in = MatchLineup.objects.create(
+                        match=match,
+                        team=player_obj.team,
+                        player=player_obj,
+                        is_starting=False,
+                        time_in=None,
+                        time_out=None,
+                    )
+
+
+                player_out.time_out = minute
+                player_in.time_in = minute
+                player_out.save()
+                player_in.save()
+
+                Substitution.objects.create(
+                    match=match,
+                    player_out=player_out,
+                    player_in=player_in,
+                    minute=minute,
+                )
+
+            messages.success(
+                request,
+                f"Substitution recorded: {player_out.player.name} → {player_in.player.name}",
+            )
+            return redirect("lineup_app:substitution_panel", match_id=match.id)
+
+    # ✅ Ensure we always return an HttpResponse
+    return render(
+        request,
+        "lineup_app/substitution_panel.html",
+        {
+            "match": match,
+            "home_currently_on_pitch": home_on_pitch,
+            "home_bench": home_bench,
+            "away_currently_on_pitch": away_on_pitch,
+            "away_bench": away_bench,
+            "substitutions": substitutions,
+        },
+    )
+
 

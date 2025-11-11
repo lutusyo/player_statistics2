@@ -38,7 +38,7 @@ def scouting_reports(request, team_id):
             elif period == 'This Year':
                 queryset = queryset.filter(date__year=now.year)
 
-    return render(request, 'reports_app/2scouting/scouting_reports.html', {
+    return render(request, 'reports_app/daily_report_templates/2scouting/scouting_reports.html', {
         'form': form,
         'team': team,
         'records': queryset,

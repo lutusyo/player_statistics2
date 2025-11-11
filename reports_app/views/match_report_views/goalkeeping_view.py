@@ -87,3 +87,5 @@ def goalkeeping_view(request, match_id, our_team_id, return_context=False):
 
 
     return render(request, 'reports_app/match_report_templates/6_goalkeeping/goalkeeping.html', context)
+
+

@@ -10,10 +10,10 @@ from matches_app.views import  (
     individual_data_in_possession
 )
 
-from lineup_app.views import lineup_bila_uwanja, substitution, match_lineup_view_with_uwanja
+from lineup_app.views import lineup_bila_uwanja, match_lineup_view_with_uwanja, substitution_panel
 from matches_app.views import individual_data_in_possession
 
-from lineup_app.views.substitution import (
+from lineup_app.views.substitution_panel import (
     substitution_panel,
     api_get_lists,
     api_finalize_substitution,

@@ -1,10 +1,7 @@
-
 {% load static %}
 
-{% block content %}
 <div class="container mt-5">
-  <h2 class="text-center mb-4 fw-bold">⚽ Set Plays Report</h2>
-  <h5 class="text-muted text-center mb-5">{{ match }} — {{ team.name }}</h5>
+
 
   <!-- Summary Cards -->
   <div class="row text-center mb-4">
@@ -42,10 +39,10 @@
     </div>
   </div>
 
-  <!-- Chart Section -->
+  <!-- Chart Section (Server-side Matplotlib) -->
   <div class="card p-4 shadow-sm mb-5">
     <h5 class="text-center mb-4 fw-bold">📊 Set Play Overview</h5>
-    <canvas id="setPlayChart" height="100"></canvas>
+    <img src="data:image/png;base64,{{ chart }}" class="img-fluid" alt="Set Play Chart">
   </div>
 
   <!-- Detailed Breakdown -->
@@ -117,44 +114,3 @@
     </table>
   </div>
 </div>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-  const ctx = document.getElementById('setPlayChart').getContext('2d');
-  const setPlayChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['Corners', 'Free Kicks', 'Penalties', 'Goals (Set Plays)'],
-      datasets: [{
-        label: 'Number of Events',
-        data: [
-          {{ summary.total_corners }},
-          {{ summary.total_free_kicks }},
-          {{ summary.total_penalties }},
-          {{ summary.goals_from_setplays }}
-        ],
-        backgroundColor: ['#0d6efd', '#198754', '#dc3545', '#ffc107'],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { stepSize: 1 }
-        }
-      },
-      plugins: {
-        legend: { display: false },
-        title: {
-          display: true,
-          text: 'Set Plays Breakdown ({{ team.name }})',
-          font: { size: 16 }
-        }
-      }
-    }
-  });
-</script>
-{% endblock %}

@@ -4,6 +4,17 @@ from lineup_app.models import MatchLineup, POSITION_COORDS, Substitution
 from players_app.models import Player
 from teams_app.models import Team
 
+
+POSITION_ALIAS = {
+    "ST": ["ST1", "ST2", "ST"],
+    "CM": ["LCM", "RCM", "CM"],
+    "CB": ["LCB", "RCB", "CB"],
+    "LM": ["LM", "LCM", "LW"],
+    "RM": ["RM", "RCM", "RW"],
+}
+
+
+
 def both_teams_lineup_view(request, match_id):
     match = get_object_or_404(Match, id=match_id)
     lineups = MatchLineup.objects.filter(match=match).select_related("player", "team")
@@ -52,22 +63,26 @@ def both_teams_lineup_view(request, match_id):
         or "4-4-2"
     )
 
-    def get_coords(formation, position):
+    def get_coords(formation, position, used_positions):
         formation_map = POSITION_COORDS.get(formation, {})
-        if position in formation_map:
+        
+        # Try exact match first
+        if position in formation_map and position not in used_positions:
+            used_positions.add(position)
             return formation_map[position]
-
-        fallback_map = {
-            "ST": ["ST1", "ST2"],
-            "CM": ["LCM", "RCM", "CM"],
-            "CB": ["LCB", "RCB", "CB"],
-            "RM": ["RW", "RCM"],
-            "LM": ["LW", "LCM"],
-        }
-        for alias in fallback_map.get(position, []):
-            if alias in formation_map:
+        
+        # Try aliases
+        for alias in POSITION_ALIAS.get(position, []):
+            if alias in formation_map and alias not in used_positions:
+                used_positions.add(alias)
                 return formation_map[alias]
+        
+        # fallback
         return {"top": 50, "left": 50}
+
+
+    used_our_positions = set()
+    used_opponent_positions = set()
 
     for l in lineups:
         player_info = {
@@ -80,11 +95,11 @@ def both_teams_lineup_view(request, match_id):
 
         if l.is_starting:
             if l.team.team_type == "OUR_TEAM":
-                coords = get_coords(our_team_formation, l.position)
+                coords = get_coords(our_team_formation, l.position, used_our_positions)
                 player_info.update(coords)
                 our_team_lineup.append(player_info)
             else:
-                coords = get_coords(opponent_formation, l.position)
+                coords = get_coords(opponent_formation, l.position, used_opponent_positions)
                 player_info.update(coords)
                 opponent_team_lineup.append(player_info)
         else:
@@ -92,6 +107,7 @@ def both_teams_lineup_view(request, match_id):
                 our_subs.append(player_info)
             else:
                 opponent_subs.append(player_info)
+
 
     substitutions = Substitution.objects.filter(match=match).select_related("player_out__player", "player_in__player")
 

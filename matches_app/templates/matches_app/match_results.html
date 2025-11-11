@@ -22,45 +22,38 @@
 
 
             <div class="admin-actions">
-            {% if user.is_authenticated and user.username == 'Azam2' %}
-
-
-
-                {% if match.home_lineup_exists and match.away_lineup_exists %}
-                    <li>
-                        <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}">Goal Tagging</a> |
-                        <a href="{% url 'tagging_app:pass_network_enter_data' match.id %}">Pass Tagging</a> ||
-                        <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive Stats</a> |
-                        <a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}">FULL REPORT</a>
-
-                    </li>
-                {% else %}
-                    <li>
-                        {% if not match.home_lineup_exists %}
-                            <a href="{% url 'lineup_app:create_lineup' match.id match.home_team.id %}">CREATE LINEUP (Home)</a>
-                            <a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}">FULL REPORT</a>
-
-                        {% endif %}
-                        {% if not match.away_lineup_exists %}
-                            <a href="{% url 'lineup_app:create_lineup' match.id match.away_team.id %}">CREATE LINEUP (Away)</a>
-                            <a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}">FULL REPORT</a>
-
-
+                {% if user.is_authenticated and user.username == 'Azam2' %}
+                    {% if match.home_lineup_exists and match.away_lineup_exists %}
                         <li>
                             <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}">Goal Tagging</a> |
                             <a href="{% url 'tagging_app:pass_network_enter_data' match.id %}">Pass Tagging</a> |
                             <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive Stats</a> |
-                            <a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}">FULL REPORT</a>
-
-
+                            <a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}">FULL REPORT</a> |
+                            {% if match.has_gps_data %}
+                                <a href="{% url 'gps_app:gps_dashboard' match.id %}">View GPS Dashboard</a>
+                            {% else %}
+                                <a href="{% url 'gps_app:gps_upload' match.id %}">Upload GPS Data</a>
+                            {% endif %}
                         </li>
-
-                        
-                        {% endif %}
-                    </li>
+                    {% else %}
+                        <li>
+                            {% if not match.home_lineup_exists %}
+                                <a href="{% url 'lineup_app:create_lineup' match.id match.home_team.id %}">CREATE LINEUP (Home)</a> |
+                            {% endif %}
+                            {% if not match.away_lineup_exists %}
+                                <a href="{% url 'lineup_app:create_lineup' match.id match.away_team.id %}">CREATE LINEUP (Away)</a> |
+                            {% endif %}
+                            {% if match.has_gps_data %}
+                                <a href="{% url 'gps_app:gps_dashboard' match.id %}">View GPS Dashboard</a>
+                            {% else %}
+                                <a href="{% url 'gps_app:gps_upload' match.id %}">Upload GPS Data</a>
+                            {% endif %}
+                        </li>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
             </div>
+
+
 
 
             <!-- Match Card -->

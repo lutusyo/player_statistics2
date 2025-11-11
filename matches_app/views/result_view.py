@@ -5,6 +5,7 @@ from datetime import date
 
 from teams_app.models import Team, AgeGroup
 from lineup_app.models import MatchLineup
+from gps_app.models import GPSRecord
 from matches_app.models import Match
 from matches_app.views.get_match_goals import get_match_goals
 from tagging_app.utils.attempt_to_goal_utils import get_match_full_context
@@ -28,6 +29,7 @@ def results_view(request, team):
 
     for match in past_matches:
         match.has_lineup = MatchLineup.objects.filter(match=match).exists()
+        match.has_gps_data = GPSRecord.objects.filter(match=match).exists()
 
         if match.home_team in our_teams:
             our_team = match.home_team

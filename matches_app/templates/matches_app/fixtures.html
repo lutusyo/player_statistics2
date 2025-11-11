@@ -24,6 +24,9 @@
                 {% if user.is_authenticated and user.username == 'Azam2' %}
                     <div class="fixture-actions" style="margin-bottom:10px; text-align:center;">
                         {% if match.has_lineup %}
+
+                            <a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}">FULL REPORT</a>
+
                             <!-- Tagging Links -->
                             <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}" class="btn btn-primary">Goal Tagging</a>
                             <a href="{% url 'tagging_app:pass_network_enter_data' match.id %}">Pass Tagging</a>
@@ -32,6 +35,8 @@
                         {% else %}
                         
                             <!-- Create Lineup Only -->
+
+                            <a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}">FULL REPORT</a>
 
                             <li>
                                 {% if not match.home_lineup_exists %}

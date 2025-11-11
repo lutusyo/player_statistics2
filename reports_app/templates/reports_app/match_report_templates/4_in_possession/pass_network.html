@@ -1,0 +1,243 @@
+{% load static %}
+{% load tagging_custom_filters %}
+{% load custom_filters %}
+
+
+
+  <title>Attempts at Goal Dashboard</title>
+
+  <style>
+  /* Global Styles */
+  body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+  }
+
+  h1, h2, h3 {
+      margin-top: 30px;
+      margin-bottom: 15px;
+      color: #007bff;
+      text-align: center;
+  }
+
+  /* Tables */
+  table {
+      width: 80%;
+      max-width: 1000px;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  th, td {
+      padding: 10px 15px;
+      border: 1px solid #ccc;
+      text-align: center;
+  }
+
+  th {
+      background-color: #007bff;
+      color: #fff;
+      font-weight: bold;
+  }
+
+  tr:nth-child(even) {
+      background-color: #f2f2f2;
+  }
+
+  tr:nth-child(odd) {
+      background-color: #ffffff;
+  }
+
+  /* Buttons */
+  .btn-download {
+      display: inline-block;
+      margin: 20px auto;
+      padding: 10px 25px;
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.3s;
+  }
+
+  .btn-download:hover {
+      background-color: #0056b3;
+  }
+
+  /* Dashboard Layout */
+  .summary-pitch-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 30px;
+  }
+
+  .summary-table {
+      width: 45%;
+      border-collapse: collapse;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+  }
+
+  .summary-table th, .summary-table td {
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: center;
+  }
+
+  .pitch {
+      position: relative;
+      width: 50%;
+      height: 400px;
+      background: #eee;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .pitch-bg {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+  }
+
+  .shot {
+      position: absolute;
+      font-size: 16px;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px #000;
+  }
+
+  .shot.goal { color: red; }
+  .shot.on-target { color: cyan; }
+  .shot.off-target { color: orange; }
+  .shot.blocked { color: gold; }
+  .shot.incomplete { color: black; }
+
+  /* Chart container */
+  .chart-container {
+      width: 80%;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  /* Lists */
+  ul {
+      list-style: none;
+      padding: 0;
+      text-align: center;
+  }
+
+  ul li {
+      margin: 8px 0;
+  }
+
+  ul li a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+  }
+
+  ul li a:hover {
+      color: #0056b3;
+  }
+
+  
+</style>
+
+
+<div class="container mt-4">
+
+    <!-- Pass Matrix -->
+    <h2>Pass Matrix</h2>
+    <table>
+        <tr>
+            <th>From\To</th>
+            {% for p in players %}
+                <th>{{ player_names|get_item:p.id|slice:":10" }}</th>
+            {% endfor %}
+        </tr>
+        {% for row_player in players %}
+        <tr>
+            <th>{{ player_names|get_item:row_player.id|slice:":10" }}</th>
+            {% for col_player in players %}
+                {% if row_player.id == col_player.id %}
+                    <td>—</td>
+                {% else %}
+                    <td>{{ matrix|get_item:row_player.id|get_item:col_player.id|default:"0" }}</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Totals -->
+    <h2>Player Passing Totals</h2>
+    <table>
+        <tr><th>Player</th><th>Total Passes</th><th>Ball Lost</th></tr>
+        {% for p in players %}
+        <tr>
+            <td>{{ player_names|get_item:p.id }}</td>
+            <td>{{ total_passes|get_item:p.id|default:"0" }}</td>
+            <td>{{ ball_lost|get_item:p.id|default:"0" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Top 5 Combinations -->
+    <h2>Top 5 Pass Combinations</h2>
+    <table>
+        <tr><th>From</th><th>To</th><th>Count</th></tr>
+        {% for f, t, c in top_combinations %}
+            <tr>
+                <td>{{ f }}</td>
+                <td>{{ t }}</td>
+                <td>{{ c }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <!-- Bar Chart -->
+    <h2>Pass Distribution Chart</h2>
+    <div class="chart-container">
+        <canvas id="passChart"></canvas>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('passChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {{ chart_data.names|safe }},
+                datasets: [{
+                    label: 'Total Passes',
+                    data: {{ chart_data.values|safe }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { 
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                    x: { ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+  

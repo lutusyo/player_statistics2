@@ -18,11 +18,14 @@ class CompetitionType(models.TextChoices):
     LOCAL_FRIENDLY = 'Local Friendly', 'Local Friendly'
     INTERNATIONAL_FRIENDLY = 'International Friendly', 'International Friendly'
     NBC_YOUTH_LEAGUE = 'NBC Youth League', 'NBC Youth League'
+    NBC_PREMIER_LEAGUE = 'NBC Premier League', 'NBC Premier League'
+    CAF_CONFEDERATION_CUP = 'CAF Confederation Cup', 'CAF Confederation Cup'
 
 
 class VenueChoices(models.TextChoices):
     CHAMAZI_COMPLEX = 'AZAM COMPLEX', 'AZAM COMPLEX'
     NDC_STADIUM = 'NDC STADIUM', 'NDC STADIUM'
+    MAJALIWA = 'MAJALIWA', 'MAJALIWA'
 
 
 class Match(models.Model):

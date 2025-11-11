@@ -100,7 +100,6 @@ class Formation(models.TextChoices):
     #F4231 = "4-2-3-1", "4-2-3-1"
 
 
-
 class PositionChoices(models.TextChoices):
     GK = 'GK', 'Goalkeeper'
     LB = 'LB', 'Left Back'
@@ -119,10 +118,6 @@ class PositionChoices(models.TextChoices):
     CM = 'CM', 'Central Midfielder'
     CB = 'CB', 'Center Back'
     SUB = 'SUB', 'Substitute'
-
-
-
-
 
 
 class MatchLineup(models.Model):
@@ -153,16 +148,25 @@ class MatchLineup(models.Model):
         if self.time_in is None:
             return 0
 
+        try:
+            time_in = int(self.time_in)
+        except (ValueError, TypeError):
+            return 0  # invalid data
+
         # Decide exit time
         if self.time_out is not None:
-            end_minute = self.time_out
+            try:
+                end_minute = int(self.time_out)
+            except (ValueError, TypeError):
+                end_minute = final_minute
         elif final_minute is not None:
             end_minute = final_minute
         else:
             return 0
 
-        mp = end_minute - self.time_in
+        mp = end_minute - time_in
         return mp if mp > 0 else 0
+
 
     def save(self, *args, **kwargs):
         """

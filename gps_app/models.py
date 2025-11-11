@@ -1,16 +1,22 @@
 from django.db import models
 from players_app.models import Player
 from matches_app.models import Match
-from lineup_app.models import MatchLineup, Substitution, PositionChoices
-
+from lineup_app.models import MatchLineup
 
 class GPSRecord(models.Model):
+    PERIOD_CHOICES = [
+        ("Session", "Session"),
+        ("First Half", "First Half"),
+        ("Second Half", "Second Half"),
+    ]
+
     match = models.ForeignKey(Match, related_name='gps_records', on_delete=models.CASCADE)
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     lineup = models.ForeignKey(MatchLineup, null=True, blank=True, on_delete=models.SET_NULL)
 
+    # CSV fields
     player_name = models.CharField(max_length=255, blank=True, null=True)
-    period_name = models.CharField(max_length=100, blank=True, null=True)
+    period_name = models.CharField(max_length=100, choices=PERIOD_CHOICES, blank=True, null=True)
     period_number = models.IntegerField(blank=True, null=True)
     max_acceleration = models.FloatField(blank=True, null=True)
     max_deceleration = models.FloatField(blank=True, null=True)
@@ -18,7 +24,7 @@ class GPSRecord(models.Model):
     deceleration_efforts = models.IntegerField(blank=True, null=True)
     accel_decel_efforts = models.IntegerField(blank=True, null=True)
     accel_decel_efforts_per_minute = models.FloatField(blank=True, null=True)
-    duration = models.CharField(max_length=50, blank=True, null=True)
+    duration = models.FloatField(blank=True, null=True)
     distance = models.FloatField(blank=True, null=True)
     player_load = models.FloatField(blank=True, null=True)
     max_velocity = models.FloatField(blank=True, null=True)
@@ -32,6 +38,12 @@ class GPSRecord(models.Model):
     avg_hr_percent_max = models.FloatField(blank=True, null=True)
     hr_exertion = models.FloatField(blank=True, null=True)
     red_zone = models.FloatField(blank=True, null=True)
+    heart_rate_band_1_duration = models.FloatField(blank=True, null=True)
+    heart_rate_band_2_duration = models.FloatField(blank=True, null=True)
+    heart_rate_band_3_duration = models.FloatField(blank=True, null=True)
+    heart_rate_band_4_duration = models.FloatField(blank=True, null=True)
+    heart_rate_band_5_duration = models.FloatField(blank=True, null=True)
+    heart_rate_band_6_duration = models.FloatField(blank=True, null=True)
     energy = models.FloatField(blank=True, null=True)
     high_metabolic_load_distance = models.FloatField(blank=True, null=True)
     standing_distance = models.FloatField(blank=True, null=True)
@@ -52,6 +64,67 @@ class GPSRecord(models.Model):
     athlete_participation_tags = models.TextField(blank=True, null=True)
     period_tags = models.TextField(blank=True, null=True)
 
+    def __str__(self):
+        return f"{self.match} | {self.player_name or self.player} | {self.period_name}"
+
+
+
+class CTRReport(models.Model):
+    PERIOD_CHOICES = [
+        ("Session", "Session"),
+        ("First Half", "First Half"),
+        ("Second Half", "Second Half"),
+    ]
+
+    player_name = models.CharField(max_length=100)
+    period_name = models.CharField(max_length=50, choices=PERIOD_CHOICES)
+    period_number = models.IntegerField(null=True, blank=True)
+    max_acceleration = models.FloatField(null=True, blank=True)
+    max_deceleration = models.FloatField(null=True, blank=True)
+    acceleration_efforts = models.IntegerField(null=True, blank=True)
+    deceleration_efforts = models.IntegerField(null=True, blank=True)
+    accel_decel_efforts = models.IntegerField(null=True, blank=True)
+    accel_decel_efforts_per_minute = models.FloatField(null=True, blank=True)
+    duration = models.FloatField(null=True, blank=True)
+    distance = models.FloatField(null=True, blank=True)
+    player_load = models.FloatField(null=True, blank=True)
+    max_velocity = models.FloatField(null=True, blank=True)
+    max_velocity_percent = models.FloatField(null=True, blank=True)
+    meterage_per_minute = models.FloatField(null=True, blank=True)
+    player_load_per_minute = models.FloatField(null=True, blank=True)
+    work_rest_ratio = models.FloatField(null=True, blank=True)
+    max_heart_rate = models.IntegerField(null=True, blank=True)
+    avg_heart_rate = models.IntegerField(null=True, blank=True)
+    max_hr_percent = models.FloatField(null=True, blank=True)
+    avg_hr_percent = models.FloatField(null=True, blank=True)
+    hr_exertion = models.FloatField(null=True, blank=True)
+    red_zone = models.FloatField(null=True, blank=True)
+    heart_rate_band_1_duration = models.FloatField(null=True, blank=True)
+    heart_rate_band_2_duration = models.FloatField(null=True, blank=True)
+    heart_rate_band_3_duration = models.FloatField(null=True, blank=True)
+    heart_rate_band_4_duration = models.FloatField(null=True, blank=True)
+    heart_rate_band_5_duration = models.FloatField(null=True, blank=True)
+    heart_rate_band_6_duration = models.FloatField(null=True, blank=True)
+    energy = models.FloatField(null=True, blank=True)
+    high_metabolic_load_distance = models.FloatField(null=True, blank=True)
+    standing_distance = models.FloatField(null=True, blank=True)
+    walking_distance = models.FloatField(null=True, blank=True)
+    jogging_distance = models.FloatField(null=True, blank=True)
+    running_distance = models.FloatField(null=True, blank=True)
+    hi_distance = models.FloatField(null=True, blank=True)
+    sprint_distance = models.FloatField(null=True, blank=True)
+    sprint_efforts = models.IntegerField(null=True, blank=True)
+    sprint_dist_per_min = models.FloatField(null=True, blank=True)
+    high_speed_distance = models.FloatField(null=True, blank=True)
+    high_speed_efforts = models.IntegerField(null=True, blank=True)
+    high_speed_distance_per_minute = models.FloatField(null=True, blank=True)
+    impacts = models.IntegerField(null=True, blank=True)
+    athlete_tags = models.TextField(blank=True, null=True)
+    activity_tags = models.TextField(blank=True, null=True)
+    game_tags = models.TextField(blank=True, null=True)
+    athlete_participation_tags = models.TextField(blank=True, null=True)
+    period_tags = models.TextField(blank=True, null=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.match} | {self.player} | {self.match.date}"
+        return f"{self.player_name} - {self.period_name}"

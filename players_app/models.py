@@ -18,6 +18,43 @@ COMPETITION_CHOICES = [
     ('NBC Youth League', 'NBC Youth League'),
 ]
 
+# Medical test Choices
+MEDICAL_TEST_CHOICES = [
+    ('DONE', 'DONE'),
+    ('NOT DONE', 'NOT DONE'),
+]
+
+
+# position choices
+
+
+# Specific position choices
+SPECIFIC_POSITION_CHOICES = [
+    # Goalkeepers
+    ('GK', 'Goalkeeper'),
+
+    # Defenders
+    ('CB', 'Centre Back'),
+    ('LB', 'Left Back'),
+    ('RB', 'Right Back'),
+    ('LWB', 'Left Wing Back'),
+    ('RWB', 'Right Wing Back'),
+
+    # Midfielders
+    ('CDM', 'Defensive Midfielder'),
+    ('CM', 'Central Midfielder'),
+    ('CAM', 'Attacking Midfielder'),
+    ('LM', 'Left Midfielder'),
+    ('RM', 'Right Midfielder'),
+
+    # Forwards / Wingers
+    ('LW', 'Left Winger'),
+    ('RW', 'Right Winger'),
+    ('CF', 'Centre Forward'),
+    ('ST', 'Striker'),
+]
+
+
 # Player model
 class Player(models.Model):
     name = models.CharField(max_length=50)
@@ -28,6 +65,10 @@ class Player(models.Model):
     birthdate = models.DateField(null=True, blank=True)
     place_of_birth = models.CharField(max_length=100, default="Tanzania")
     nationality = models.CharField(max_length=50, default="Tanzania")
+
+    passport_number = models.CharField(max_length=20, null=True, blank=True)
+    medical_test = models.CharField(max_length=10, choices=MEDICAL_TEST_CHOICES, default='NOT DONE')
+    joined_azamfc_year = models.PositiveIntegerField(null=True, blank=True)
     
     position = models.CharField(
         max_length=50,
@@ -40,6 +81,7 @@ class Player(models.Model):
             
         ]
     )
+    specific_position = models.CharField(max_length=10, choices=SPECIFIC_POSITION_CHOICES, null=True, blank=True,help_text="e.g., CB, RW, LW, CM, etc.")
 
     height = models.DecimalField(max_digits=5, decimal_places=0, default=170)
     weight = models.DecimalField(max_digits=5, decimal_places=0, default=65)

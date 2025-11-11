@@ -1,12 +1,20 @@
 # reports_app/urls.py
 from django.urls import path
-from reports_app.views import (
-    medical_views, scouting_views, performance_views, mesocycle_views,
-    fitness_views, iap_views, transition_views, result_views, statistics_view, report_exports, report_filters, team_reports_view
+from reports_app.views.daily_report_views import (
+    report_filters
 )
+from reports_app.views.daily_report_views import fitness_views, iap_views, medical_views, mesocycle_views, performance_views, report_exports, result_views, scouting_views, statistics_view, team_reports_view, transition_views
 from reports_app.views.match_report_views import ( 
-    goalkeeping_view, set_plays_views, in_possession_views, post_match_summary_views, full_match_report_views
+    goalkeeping_view, 
+    set_plays_views, 
+    in_possession_views, 
+    post_match_summary_views, 
+    full_match_report_views,
+    summary_key_statistics_views,
+    goalkeeping_intro_view,
     )
+
+from reports_app.views.match_report_views.full_match_report_views import full_match_report_view, download_full_report_pdf
 
 app_name = 'reports_app'
 
@@ -29,7 +37,8 @@ urlpatterns = [
     # Mesocycle
     path('mesocycle/<int:team_id>/', mesocycle_views.mesocycle_reports, name='mesocycle_reports'),
     path('mesocycle/<int:team_id>/export/excel/', mesocycle_views.export_mesocycle_excel, name='export_mesocycle_excel'),
-    path('mesocycle/<int:team_id>/export/pdf/', mesocycle_views.export_mesocycle_pdf, name='export_mesocycle_pdf'),
+    path('mesocycle/<int:team_id>/export/pdf/', mesocycle_views.export_uploaded_mesocycle_pdf, name='export_mesocycle_pdf'),
+    path('team/<int:team_id>/export-all-pdfs/', mesocycle_views.export_all_mesocycle_pdfs, name='export_all_mesocycle_pdfs'),
 
     # Fitness
     path('fitness/<int:team_id>/', fitness_views.fitness_reports, name='fitness_reports'),
@@ -52,9 +61,12 @@ urlpatterns = [
     path('results/<int:team_id>/export/pdf/', result_views.export_result_pdf, name='export_result_pdf'),
 
     # Statistics
-    path("statistics/<int:team_id>/", statistics_view.statistics_list_view, name="statistics_list"),
-    path("statistics/export/excel/", statistics_view.statistics_export_excel, name="statistics_export_excel"),
-    path("statistics/export/pdf/", statistics_view.statistics_export_pdf, name="statistics_export_pdf"),
+    path('team/<int:team_id>/statistics/', statistics_view.statistics_list_view, name='statistics_list'),
+    path('team/<int:team_id>/statistics/export/excel/', statistics_view.statistics_export_excel, name='statistics_export_excel'),
+    path('team/<int:team_id>/statistics/export/pdf/', statistics_view.statistics_export_pdf, name='statistics_export_pdf'),
+
+    
+
 
     # Dashboards
     path('team-reports/<int:team_id>/dashboard/', report_filters.reports_dashboard, name='reports_dashboard'),
@@ -71,17 +83,20 @@ urlpatterns = [
     path('team-reports/<int:team_id>/', team_reports_view.team_reports_view, name='team_reports'),
 
 
-
     # MATCH REPORT
 
     ## 1-Post-match-summary
     path('match/<int:match_id>/<int:our_team_id>/post-match-summary/', post_match_summary_views.full_match_context_view, name='post_match_summary'),
 
-    ##
+    ## 3-Match_summary_key_statistics
+    path("summary_key_statistics/<int:match_id>/", summary_key_statistics_views.summary_key_statistics_view, name="summary_key_statistics"),
+
+    ## inpossession
      path('match/<int:match_id>/attempt-to-goal-dashboard/', in_possession_views.attempt_to_goal_dashboard, name='attempt_to_goal_dashboard'),
 
     ## Goalkeeping
     path("match/<int:match_id>/<int:our_team_id>/goalkeeping/", goalkeeping_view.goalkeeping_view, name="goalkeeping_report"),
+    path('match/<int:match_id>/goalkeeping-intro/', goalkeeping_intro_view.goalkeeping_intro_view, name='goalkeeping_intro'),
 
 
     ## 7_seplays
@@ -89,6 +104,8 @@ urlpatterns = [
 
     ## full report
     path('match/<int:match_id>/<int:our_team_id>/full-report/',full_match_report_views.full_match_report_view,name='full_match_report'),
+    path('match/<int:match_id>/<int:our_team_id>/download-pdf/', download_full_report_pdf, name='download_full_report_pdf'),
+
 
 
 ]
