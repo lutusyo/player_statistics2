@@ -1,52 +1,68 @@
-<!doctype html>
+{% load static %}
+<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>Match Results Report</title>
-  <style>
-    body { font-family: DejaVu Sans, Arial, Helvetica, sans-serif; font-size: 12px; }
-    h2 { text-align: center; margin-bottom: 8px }
-    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    th, td { border: 1px solid #444; padding: 6px; text-align: left; vertical-align: top; }
-    th { background: #f0f0f0; }
-    .small { font-size: 10px; color: #333; }
-  </style>
+    <meta charset="utf-8">
+    <title>{{ team.name }} Results Report</title>
 </head>
 <body>
-  <h2>Match Results Report</h2>
-  <p class="small">Period: {{ period }} {% if start and end %} ({{ start }} — {{ end }}) {% endif %}</p>
+    <div class="team-header">
+        {% if team.logo %}
+            <img src="{{ team.logo.url }}" class="team-logo" alt="Logo">
+        {% endif %}
+        <h1>{{ team.name }}</h1>
+        {% if team.age_group %}
+            <h3>{{ team.age_group.name }}</h3>
+        {% endif %}
+        <p>Generated on: {{ generated_on|date:"Y-m-d H:i" }}</p>
+    </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Opponent</th>
-        <th>Venue</th>
-        <th>Competition</th>
-        <th>Result</th>
-        <th>Goal Scorers</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for r in rows %}
-      <tr>
-        <td>{{ r.date }}</td>
-        <td>{{ r.opponent }}</td>
-        <td>{{ r.venue }}</td>
-        <td>{{ r.competition_type }}</td>
-        <td>{{ r.result }}</td>
-        <td>
-          {% if r.scorers %}
-            {% for s in r.scorers %}
-              {{ s.player }}{% if s.note %} ({{ s.note }}){% endif %} [{{ s.minute }}'] - {{ s.team }}{% if not forloop.last %}; {% endif %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Venue</th>
+                <th>Competition</th>
+                <th>Opponent</th>
+                <th>Score</th>
+                <th>Result</th>
+                <th>Goal Scorers</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in results %}
+            <tr>
+                <td>{{ r.date }}</td>
+                <td>{{ r.venue }}</td>
+                <td>{{ r.competition_type }}</td>
+                {% if r.our_team == r.home_team %}
+                    <td>{{ r.away_team.name }}</td>
+                {% else %}
+                    <td>{{ r.home_team.name }}</td>
+                {% endif %}
+                <td>{{ r.home_score }} - {{ r.away_score }}</td>
+                <td>{{ r.get_result_display }}</td>
+                <td>{{ r.goal_scorers|default:"-" }}</td>
+                <td>{{ r.notes|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" style="text-align:center;">No results found</td></tr>
             {% endfor %}
-          {% else %}
-            -
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+        </tbody>
+    </table>
+
+    <h3>Technical Staff</h3>
+    <table class="staff-table">
+        {% for s in staff_members %}
+            <tr>
+                <td><strong>{{ s.get_role_display }}:</strong></td>
+                <td>{{ s.name }}</td>
+                <td>{{ s.phone|default:"-" }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="3">No staff members found for this age group.</td></tr>
+        {% endfor %}
+    </table>
 </body>
 </html>

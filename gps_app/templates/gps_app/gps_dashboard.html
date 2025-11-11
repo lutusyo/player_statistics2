@@ -38,6 +38,7 @@
                     <th>Accel/Decel Efforts</th>
                     <th>Sprint Efforts</th>
                     <th>High Speed Efforts</th>
+                    <th>Walking Distance</th>
                 </tr>
             </thead>
             <tbody>
@@ -67,6 +68,11 @@
         <h4 class="text-center">High Speed Efforts</h4>
         <canvas id="highSpeedChart" height="300"></canvas>
     </div>
+
+    <div class="chart-container mb-5">
+        <h4 class="text-center">Walking Distance</h4>
+        <canvas id="WalkingDistanceChart" height="300"></canvas>
+    </div>
 </div>
 
 <!-- Chart.js -->
@@ -81,6 +87,7 @@ const distanceCtx = document.getElementById('distanceChart').getContext('2d');
 const accelDecelCtx = document.getElementById('accelDecelChart').getContext('2d');
 const sprintCtx = document.getElementById('sprintChart').getContext('2d');
 const highSpeedCtx = document.getElementById('highSpeedChart').getContext('2d');
+const WalkingDistanceCtx = document.getElementById('WalkingDistanceChart').getContext('2d');
 
 // Chart container style (responsive)
 document.querySelectorAll('.chart-container').forEach(div => {
@@ -172,6 +179,7 @@ function fetchGPSData() {
                     <td>${data.accel_decel[i]}</td>
                     <td>${data.sprint_efforts[i]}</td>
                     <td>${data.high_speed[i]}</td>
+                    <td>${data.walking_distance[i]}</td>
                 </tr>`;
                 tbody.insertAdjacentHTML('beforeend', row);
             });
@@ -182,6 +190,7 @@ function fetchGPSData() {
             const accelDecel = filteredIndexes.map(i => data.accel_decel[i]);
             const sprintEfforts = filteredIndexes.map(i => data.sprint_efforts[i]);
             const highSpeed = filteredIndexes.map(i => data.high_speed[i]);
+            const walking_distance = filteredIndexes.map(i => data.walking_distance[i]);
 
             // Update charts
             distanceChart.data.labels = labels;

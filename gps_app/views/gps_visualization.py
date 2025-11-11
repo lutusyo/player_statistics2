@@ -19,6 +19,7 @@ def gps_dashboard_data(request, match_id):
     accel_decel = [r.accel_decel_efforts or 0 for r in gps_records]
     sprint_efforts = [r.sprint_efforts or 0 for r in gps_records]
     high_speed = [r.high_speed_efforts or 0 for r in gps_records]
+    walking_distance = [r.walking_distance or 0 for r in gps_records]
 
     data = {
         "players": players,
@@ -27,6 +28,7 @@ def gps_dashboard_data(request, match_id):
         "accel_decel": accel_decel,
         "sprint_efforts": sprint_efforts,
         "high_speed": high_speed,
+        "walking_distance": walking_distance,
     }
     return JsonResponse(data)
 
