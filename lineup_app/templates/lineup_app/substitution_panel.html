@@ -34,15 +34,29 @@
         <label><strong>Player In:</strong></label><br>
         <select name="player_in" required>
             <option value="">-- Select Player In --</option>
-            {% for p in home_bench %}
-                {% if p.is_lineup %}
-                    <option value="{{ p.id }}">{{ p.name }} ({{ p.position }})</option>
-                {% else %}
-                    <option value="{{ p.id }}">{{ p.name }} (SUB)</option>
-                {% endif %}
-            {% endfor %}
+
+            <optgroup label="{{ match.home_team.name }} Bench">
+                {% for p in home_bench %}
+                    {% if p.is_lineup %}
+                        <option value="{{ p.id }}">{{ p.name }} ({{ p.position }})</option>
+                    {% else %}
+                        <option value="{{ p.id }}">{{ p.name }} (SUB)</option>
+                    {% endif %}
+                {% endfor %}
+            </optgroup>
+
+            <optgroup label="{{ match.away_team.name }} Bench">
+                {% for p in away_bench %}
+                    {% if p.is_lineup %}
+                        <option value="{{ p.id }}">{{ p.name }} ({{ p.position }})</option>
+                    {% else %}
+                        <option value="{{ p.id }}">{{ p.name }} (SUB)</option>
+                    {% endif %}
+                {% endfor %}
+            </optgroup>
         </select>
     </div>
+
 
     <div class="section">
         <label><strong>Minute of substitution:</strong></label><br>

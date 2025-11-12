@@ -9,6 +9,10 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from teams_app.models import Team
 
+# ---- Export to PDF ----
+import datetime
+from django.template.loader import render_to_string
+from weasyprint import HTML, CSS
 
 def medical_reports(request, team_id):
     team = get_object_or_404(Team, id=team_id)
@@ -63,33 +67,74 @@ def export_medical_excel(request, team_id):
     return response
 
 
-# ---- Export to PDF ----
+
+
 def export_medical_pdf(request, team_id):
+
+    team = get_object_or_404(Team, id=team_id)
     queryset = Medical.objects.filter(squad_id=team_id).select_related('name', 'squad')
 
-    buffer = io.BytesIO()
-    p = canvas.Canvas(buffer, pagesize=A4)
-    width, height = A4
-    y = height - 50
+    context = {
+        'team': team,                            # Team info (name, category, logo)
+        'records': queryset,                     # All medical records for that team
+        'generated_on': timezone.now(),          # Current timestamp for the footer
+        'title': "Medical Report Summary",       # PDF report title
+    }
 
-    p.setFont("Helvetica-Bold", 14)
-    p.drawString(180, y, f"Medical Report Summary - Team {team_id}")
-    y -= 40
+    # 🔹 Render the HTML template into a string using the provided context
+    # This creates the HTML that will be converted into a PDF
+    html_string = render_to_string('reports_app/daily_report_templates/1medical/medical_report_pdf.html', context)
 
-    p.setFont("Helvetica", 10)
-    for record in queryset:
-        if y < 100:
-            p.showPage()
-            y = height - 50
-            p.setFont("Helvetica", 10)
-        p.drawString(
-            50, y,
-            f"{record.name.name} | {record.squad.name} | {record.injury_or_illness} | {record.status} | {record.date}"
-        )
-        y -= 20
+    # 🔹 Create an in-memory file buffer to temporarily store the generated PDF
+    pdf_file = io.BytesIO()
 
-    p.save()
-    buffer.seek(0)
-    response = HttpResponse(buffer, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="medical_reports_team_{team_id}.pdf"'
+    # 🔹 Generate the PDF with WeasyPrint
+    # `HTML()` takes the rendered HTML string and a base URL for resolving image paths (like logos)
+    # `.write_pdf()` converts the HTML into a PDF and applies the given CSS styling
+    HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(pdf_file, stylesheets=[
+        CSS(string="""
+            /* ========== PAGE & FONT SETTINGS ========== */
+            @page { size: A4; margin: 1.5cm; }
+            body { font-family: 'Helvetica', sans-serif; font-size: 11px; color: #222; }
+
+            /* ========== TITLES ========== */
+            h1 { text-align: center; font-size: 18px; margin-bottom: 10px; }
+            h2 { text-align: center; font-size: 14px; color: #555; margin-top: -10px; }
+
+            /* ========== TABLE STYLE ========== */
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #999; padding: 6px; text-align: left; }
+            th { background-color: #f0f0f0; font-weight: bold; }
+            tr:nth-child(even) { background-color: #f9f9f9; }
+
+            /* ========== FOOTER STYLE ========== */
+            footer {
+                position: fixed; bottom: 0; left: 0; right: 0;
+                text-align: center; font-size: 9px; color: #555;
+            }
+
+            /* ========== HEADER LAYOUT ========== */
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+            .logo { height: 70px; }
+            .info { text-align: right; font-size: 12px; }
+        """)
+    ])
+
+    # 🔹 Move the pointer to the start of the buffer before returning it
+    pdf_file.seek(0)
+
+    # 🔹 Create an HTTP response with the PDF content type
+    response = HttpResponse(pdf_file, content_type='application/pdf')
+
+    # 🔹 Set filename and force browser to download the file
+    response['Content-Disposition'] = f'attachment; filename="medical_report_{team.name}.pdf"'
+
+    # 🔹 Return the generated PDF as the HTTP response
     return response
+
+

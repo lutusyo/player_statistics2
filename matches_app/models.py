@@ -23,9 +23,11 @@ class CompetitionType(models.TextChoices):
 
 
 class VenueChoices(models.TextChoices):
-    CHAMAZI_COMPLEX = 'AZAM COMPLEX', 'AZAM COMPLEX'
+    AZAM_COMPLEX = 'AZAM COMPLEX', 'AZAM COMPLEX'
     NDC_STADIUM = 'NDC STADIUM', 'NDC STADIUM'
     MAJALIWA = 'MAJALIWA', 'MAJALIWA'
+    MKWAKWANI_STADIUM = 'MKWAKWANI STADIUM', 'MKWAKWANI STADIUM'
+
 
 
 class Match(models.Model):
@@ -33,7 +35,7 @@ class Match(models.Model):
     away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_matches')
     date = models.DateField()
     time = models.TimeField(null=True, blank=True)
-    venue = models.CharField(max_length=50, choices=VenueChoices.choices, default=VenueChoices.CHAMAZI_COMPLEX)
+    venue = models.CharField(max_length=50, choices=VenueChoices.choices, default=VenueChoices.AZAM_COMPLEX)
     season = models.CharField(max_length=20, choices=SeasonChoices.choices)
     competition_type = models.CharField(max_length=50, choices=CompetitionType.choices)
     age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)
