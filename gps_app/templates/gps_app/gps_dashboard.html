@@ -39,11 +39,13 @@
                     <th>Sprint Efforts</th>
                     <th>High Speed Efforts</th>
                     <th>Walking Distance</th>
+                    <th>Jogging Distance</th>
+                    <th>Running Distance</th>
+                    <th>High Speed Distance</th>
+                    <th>Sprint Distance</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Filled dynamically via JS -->
-            </tbody>
+            <tbody></tbody>
         </table>
     </div>
 
@@ -53,7 +55,7 @@
         <canvas id="distanceChart"></canvas>
     </div>
 
-    <!-- Separate Radar Charts (Stacked) -->
+    <!-- Radar Charts -->
     <div class="chart-container mb-5">
         <h4 class="text-center">Accel/Decel Efforts</h4>
         <canvas id="accelDecelChart" height="300"></canvas>
@@ -71,7 +73,28 @@
 
     <div class="chart-container mb-5">
         <h4 class="text-center">Walking Distance</h4>
-        <canvas id="WalkingDistanceChart" height="300"></canvas>
+        <canvas id="walkingChart" height="300"></canvas>
+    </div>
+
+    <!-- New radar charts -->
+    <div class="chart-container mb-5">
+        <h4 class="text-center">Jogging Distance</h4>
+        <canvas id="joggingChart" height="300"></canvas>
+    </div>
+
+    <div class="chart-container mb-5">
+        <h4 class="text-center">Running Distance</h4>
+        <canvas id="runningChart" height="300"></canvas>
+    </div>
+
+    <div class="chart-container mb-5">
+        <h4 class="text-center">High Speed Distance</h4>
+        <canvas id="hsDistanceChart" height="300"></canvas>
+    </div>
+
+    <div class="chart-container mb-5">
+        <h4 class="text-center">Sprint Distance</h4>
+        <canvas id="sprintDistanceChart" height="300"></canvas>
     </div>
 </div>
 
@@ -83,13 +106,18 @@ const matchId = {{ match.id }};
 const periodSelect = document.getElementById('periodSelect');
 const positionSelect = document.getElementById('positionSelect');
 
+// Chart contexts
 const distanceCtx = document.getElementById('distanceChart').getContext('2d');
 const accelDecelCtx = document.getElementById('accelDecelChart').getContext('2d');
 const sprintCtx = document.getElementById('sprintChart').getContext('2d');
 const highSpeedCtx = document.getElementById('highSpeedChart').getContext('2d');
-const WalkingDistanceCtx = document.getElementById('WalkingDistanceChart').getContext('2d');
+const walkingCtx = document.getElementById('walkingChart').getContext('2d');
+const joggingCtx = document.getElementById('joggingChart').getContext('2d');
+const runningCtx = document.getElementById('runningChart').getContext('2d');
+const hsDistanceCtx = document.getElementById('hsDistanceChart').getContext('2d');
+const sprintDistanceCtx = document.getElementById('sprintDistanceChart').getContext('2d');
 
-// Chart container style (responsive)
+// Chart style
 document.querySelectorAll('.chart-container').forEach(div => {
     div.style.width = '100%';
     div.style.maxWidth = '800px';
@@ -97,82 +125,47 @@ document.querySelectorAll('.chart-container').forEach(div => {
     div.style.margin = '0 auto';
 });
 
+// Bar chart
 let distanceChart = new Chart(distanceCtx, {
     type: 'bar',
-    data: {
-        labels: [],
-        datasets: [{
-            label: 'Distance (m)',
-            data: [],
-            backgroundColor: 'rgba(54,162,235,0.6)',
-            borderColor: 'rgba(54,162,235,1)',
-            borderWidth: 1
-        }]
-    },
+    data: { labels: [], datasets: [{ label: 'Distance (m)', data: [], backgroundColor: 'rgba(54,162,235,0.6)', borderColor: 'rgba(54,162,235,1)', borderWidth: 1 }] },
     options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
 });
 
-let accelDecelChart = new Chart(accelDecelCtx, {
-    type: 'radar',
-    data: { labels: [], datasets: [{
-        label: 'Accel/Decel Efforts',
-        data: [],
-        backgroundColor: 'rgba(255,99,132,0.2)',
-        borderColor: 'rgba(255,99,132,0.8)',
-        pointBackgroundColor: 'rgba(255,99,132,1)',
-        fill: true
-    }] },
-    options: { responsive: true, maintainAspectRatio: false, scales: { r: { beginAtZero: true } } }
-});
+// Radar chart factory
+function createRadar(ctx, label, color) {
+    return new Chart(ctx, {
+        type: 'radar',
+        data: { labels: [], datasets: [{ label, data: [], backgroundColor: `${color}33`, borderColor: color, pointBackgroundColor: color, fill: true }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { r: { beginAtZero: true } } }
+    });
+}
 
-let sprintChart = new Chart(sprintCtx, {
-    type: 'radar',
-    data: { labels: [], datasets: [{
-        label: 'Sprint Efforts',
-        data: [],
-        backgroundColor: 'rgba(54,162,235,0.2)',
-        borderColor: 'rgba(54,162,235,0.8)',
-        pointBackgroundColor: 'rgba(54,162,235,1)',
-        fill: true
-    }] },
-    options: { responsive: true, maintainAspectRatio: false, scales: { r: { beginAtZero: true } } }
-});
-
-let highSpeedChart = new Chart(highSpeedCtx, {
-    type: 'radar',
-    data: { labels: [], datasets: [{
-        label: 'High Speed Efforts',
-        data: [],
-        backgroundColor: 'rgba(75,192,192,0.2)',
-        borderColor: 'rgba(75,192,192,0.8)',
-        pointBackgroundColor: 'rgba(75,192,192,1)',
-        fill: true
-    }] },
-    options: { responsive: true, maintainAspectRatio: false, scales: { r: { beginAtZero: true } } }
-});
+let accelDecelChart = createRadar(accelDecelCtx, 'Accel/Decel Efforts', 'rgba(255,99,132,1)');
+let sprintChart = createRadar(sprintCtx, 'Sprint Efforts', 'rgba(54,162,235,1)');
+let highSpeedChart = createRadar(highSpeedCtx, 'High Speed Efforts', 'rgba(75,192,192,1)');
+let walkingChart = createRadar(walkingCtx, 'Walking Distance', 'rgba(153,102,255,1)');
+let joggingChart = createRadar(joggingCtx, 'Jogging Distance', 'rgba(255,159,64,1)');
+let runningChart = createRadar(runningCtx, 'Running Distance', 'rgba(255,205,86,1)');
+let hsDistanceChart = createRadar(hsDistanceCtx, 'High Speed Distance', 'rgba(54,162,235,1)');
+let sprintDistanceChart = createRadar(sprintDistanceCtx, 'Sprint Distance', 'rgba(255,99,132,1)');
 
 function fetchGPSData() {
     const period = periodSelect.value;
     const position = positionSelect.value;
 
     fetch(`/gps_app/match/${matchId}/dashboard/data/?period=${period}`)
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
-            // Filter by position
             let filteredIndexes = [];
-            if (position === 'All') {
-                filteredIndexes = data.players.map((_, i) => i);
-            } else {
-                filteredIndexes = data.positions
-                    .map((pos, i) => pos === position ? i : -1)
-                    .filter(i => i !== -1);
-            }
+            if (position === 'All') filteredIndexes = data.players.map((_, i) => i);
+            else filteredIndexes = data.positions.map((p, i) => p === position ? i : -1).filter(i => i !== -1);
 
-            // Update table
             const tbody = document.querySelector('#gpsTable tbody');
             tbody.innerHTML = '';
             filteredIndexes.forEach(i => {
-                const row = `<tr>
+                const row = `
+                <tr>
                     <td>${data.players[i]}</td>
                     <td>${data.positions[i]}</td>
                     <td>${data.distances[i]}</td>
@@ -180,41 +173,33 @@ function fetchGPSData() {
                     <td>${data.sprint_efforts[i]}</td>
                     <td>${data.high_speed[i]}</td>
                     <td>${data.walking_distance[i]}</td>
+                    <td>${data.jogging_distance[i]}</td>
+                    <td>${data.running_distance[i]}</td>
+                    <td>${data.high_speed_distance[i]}</td>
+                    <td>${data.sprint_distance[i]}</td>
                 </tr>`;
                 tbody.insertAdjacentHTML('beforeend', row);
             });
 
-            // Filtered data
             const labels = filteredIndexes.map(i => data.players[i]);
-            const distances = filteredIndexes.map(i => data.distances[i]);
-            const accelDecel = filteredIndexes.map(i => data.accel_decel[i]);
-            const sprintEfforts = filteredIndexes.map(i => data.sprint_efforts[i]);
-            const highSpeed = filteredIndexes.map(i => data.high_speed[i]);
-            const walking_distance = filteredIndexes.map(i => data.walking_distance[i]);
+            const updateRadar = (chart, values) => { chart.data.labels = labels; chart.data.datasets[0].data = values; chart.update(); }
 
-            // Update charts
             distanceChart.data.labels = labels;
-            distanceChart.data.datasets[0].data = distances;
+            distanceChart.data.datasets[0].data = filteredIndexes.map(i => data.distances[i]);
             distanceChart.update();
 
-            accelDecelChart.data.labels = labels;
-            accelDecelChart.data.datasets[0].data = accelDecel;
-            accelDecelChart.update();
-
-            sprintChart.data.labels = labels;
-            sprintChart.data.datasets[0].data = sprintEfforts;
-            sprintChart.update();
-
-            highSpeedChart.data.labels = labels;
-            highSpeedChart.data.datasets[0].data = highSpeed;
-            highSpeedChart.update();
+            updateRadar(accelDecelChart, filteredIndexes.map(i => data.accel_decel[i]));
+            updateRadar(sprintChart, filteredIndexes.map(i => data.sprint_efforts[i]));
+            updateRadar(highSpeedChart, filteredIndexes.map(i => data.high_speed[i]));
+            updateRadar(walkingChart, filteredIndexes.map(i => data.walking_distance[i]));
+            updateRadar(joggingChart, filteredIndexes.map(i => data.jogging_distance[i]));
+            updateRadar(runningChart, filteredIndexes.map(i => data.running_distance[i]));
+            updateRadar(hsDistanceChart, filteredIndexes.map(i => data.high_speed_distance[i]));
+            updateRadar(sprintDistanceChart, filteredIndexes.map(i => data.sprint_distance[i]));
         });
 }
 
-// Initial load
 fetchGPSData();
-
-// Update when filters change
 periodSelect.addEventListener('change', fetchGPSData);
 positionSelect.addEventListener('change', fetchGPSData);
 </script>
