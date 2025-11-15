@@ -22,12 +22,20 @@ class CompetitionType(models.TextChoices):
     CAF_CONFEDERATION_CUP = 'CAF Confederation Cup', 'CAF Confederation Cup'
 
 
-class VenueChoices(models.TextChoices):
-    AZAM_COMPLEX = 'AZAM COMPLEX', 'AZAM COMPLEX'
-    NDC_STADIUM = 'NDC STADIUM', 'NDC STADIUM'
-    MAJALIWA = 'MAJALIWA', 'MAJALIWA'
-    MKWAKWANI_STADIUM = 'MKWAKWANI STADIUM', 'MKWAKWANI STADIUM'
 
+
+class Region(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+    
+class Venue(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    region = models.ForeignKey (Region, on_delete=models.CASCADE, related_name='venues')
+
+    def __str__(self):
+        return f"{self.name} ({self.region.name})"
 
 
 class Match(models.Model):
@@ -35,7 +43,7 @@ class Match(models.Model):
     away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_matches')
     date = models.DateField()
     time = models.TimeField(null=True, blank=True)
-    venue = models.CharField(max_length=50, choices=VenueChoices.choices, default=VenueChoices.AZAM_COMPLEX)
+    venue = models.ForeignKey(Venue, on_delete=models.SET_NULL, null=True, blank=True)
     season = models.CharField(max_length=20, choices=SeasonChoices.choices)
     competition_type = models.CharField(max_length=50, choices=CompetitionType.choices)
     age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)

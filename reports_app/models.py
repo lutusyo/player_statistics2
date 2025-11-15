@@ -1,7 +1,7 @@
 from django.db import models
 from teams_app.models import Team
 from players_app.models import Player
-from matches_app.models import VenueChoices, CompetitionType, SeasonChoices
+from matches_app.models import Venue, CompetitionType, SeasonChoices
 from django.utils import timezone
 
 # Common choices
@@ -135,7 +135,7 @@ class FitnessPlan(models.Model):
 
 class Result(models.Model):
     date = models.DateField()
-    venue = models.CharField(max_length=50, choices=VenueChoices.choices, default=VenueChoices.AZAM_COMPLEX)
+    venue = models.ForeignKey(Venue, on_delete=models.SET_NULL, null=True, blank=True)
     competition_type = models.CharField(max_length=50, choices=CompetitionType.choices, default=CompetitionType.LOCAL_FRIENDLY)
     season = models.CharField(max_length=20, choices=SeasonChoices.choices, default=SeasonChoices.SEASON_2025_2026)
 
