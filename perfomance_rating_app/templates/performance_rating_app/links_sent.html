@@ -1,0 +1,17 @@
+<h2>Rating links sent for {{ match }}</h2>
+
+<p>Sent to:</p>
+<ul>
+  {% for s in sent %}
+    <li>{{ s.name }} ({{ s.email }})</li>
+  {% endfor %}
+</ul>
+
+{% if failed %}
+<p>Failed to send to:</p>
+<ul>
+  {% for f in failed %}
+    <li>{{ f.name }} ({{ f.email }})</li>
+  {% endfor %}
+</ul>
+{% endif %}

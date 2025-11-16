@@ -37,13 +37,10 @@
             text-align: left;
             font-weight: 700;
             font-size: 13px;
-
-            /* 👇 make sticky */
             position: sticky;
             top: 0;
-            z-index: 2; /* stays above rows */
+            z-index: 2;
         }
-
 
         .ratings-table tbody td {
             padding: 10px;
@@ -64,17 +61,14 @@
         /* star styles */
         .stars { display:inline-block; vertical-align: middle; }
         .star { margin-right:4px; font-size:16px; }
-        .star.empty { color: #e9ecef; } /* visible empty star; change to #fff if you want pure white */
+        .star.empty { color: #e9ecef; }
         .star.green { color: #28a745; }
         .star.teal { color: #17a2b8; }
         .star.yellow { color: #f1c40f; }
         .star.orange { color: #ff8c00; }
         .star.red { color: #dc3545; }
 
-        /* hover row highlight */
         .ratings-table tbody tr:hover { background: #f3f8ff; cursor: pointer; }
-
-
 
         .layout { 
             display: grid; 
@@ -83,10 +77,9 @@
             align-items: start; 
         }
 
-        /* Make radar preview sticky on desktop */
         .preview-card {
             position: sticky;
-            top: 20px; /* stays visible while scrolling */
+            top: 20px;
             background: white;
             border-radius: 8px;
             padding: 20px;
@@ -94,7 +87,6 @@
             min-height: 400px;
         }
 
-        /* Chart sizing */
         #radarPreview {
             display: block;
             width: 100% !important;
@@ -102,36 +94,32 @@
             margin-top: 10px;
         }
 
-        /* Responsive for mobile */
         @media (max-width: 980px) {
-            .layout { 
-                grid-template-columns: 1fr; 
-            }
-            .preview-card { 
-                order: -1; 
-                position: relative; /* no sticky on mobile */
-                top: auto;
-                margin-bottom: 20px;
-            }
+            .layout { grid-template-columns: 1fr; }
+            .preview-card { position: relative; top: auto; margin-bottom: 20px; }
         }
-
     </style>
 </head>
+
+
+
 <body>
+
     <h1>Player Performance — {{ match }}</h1>
     <div class="sub">Click a row to preview detailed radar for that player</div>
 
+
+    <!-- MAIN LAYOUT (SIDEBAR + TABLE) -->
     <div class="layout">
+
+        <!-- LEFT SIDE -->
         <div>
-
-
 
             <div style="max-height: 600px; overflow-y: auto;">
                 <table class="ratings-table">
-                    <!-- thead & tbody -->
+                    <!-- your earlier table placeholder -->
                 </table>
             </div>
-
 
             <div style="max-height: 600px; overflow-y: auto;">
                 <table class="ratings-table">
@@ -145,15 +133,20 @@
                             <th>Technical</th>
                             <th>Discipline</th>
                             <th>Avg</th>
+                            <th>Season</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         {% for r in ratings %}
-                        <tr class="player-row" data-radar="{{ r.radar_dataset|safe }}" data-player-name="{{ r.player.name }}">
+                        <tr class="player-row"
+                            data-radar="{{ r.radar_dataset|safe }}"
+                            data-player-name="{{ r.player.name }}">
+
                             <td>
                                 <div class="player-name">
                                     {% if r.player.photo %}
-                                        <img src="{{ r.player.photo.url }}" class="player-thumb" alt="{{ r.player.name }}">
+                                        <img src="{{ r.player.photo.url }}" class="player-thumb">
                                     {% endif %}
                                     <div>
                                         <div class="name">{{ r.player.name }}</div>
@@ -235,14 +228,24 @@
                             </td>
 
                             <td><span class="avg-badge">{{ r.average }}</span></td>
+
+                            <td>
+                                <a href="{% url 'performance_rating_app:season_player_overview'  season=match.season %}"
+                                   style="color:#0d6efd; font-weight:600;">
+                                    View
+                                </a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
+
                 </table>
             </div>
         </div>
-        
 
+
+
+        <!-- RIGHT SIDE (RADAR PREVIEW SIDEBAR) -->
         <aside class="preview-card">
             <div class="preview-title">Player radar preview</div>
             <canvas id="radarPreview"></canvas>
@@ -251,22 +254,22 @@
             </div>
         </aside>
 
-
     </div>
 
+
+
+    <!-- JS SCRIPT: RADAR LOGIC -->
     <script>
-        // parse data-radar attribute into array numbers
         function parseRadarData(str) {
-            // incoming looks like: [1,2,3,4,5,5] (from Python list)
             try {
                 return JSON.parse(str.replace(/'/g, '"'));
             } catch (e) {
-                // fallback: try simple split
                 return str.replace(/[\[\]\s]/g,'').split(',').map(n => Number(n||0));
             }
         }
 
         let ctx = document.getElementById('radarPreview').getContext('2d');
+
         let radarChart = new Chart(ctx, {
             type: 'radar',
             data: {
@@ -282,31 +285,26 @@
             },
             options: {
                 scales: {
-                    r: {
-                        suggestedMin: 0,
-                        suggestedMax: 5,
-                        ticks: { stepSize: 1 }
-                    }
+                    r: { suggestedMin: 0, suggestedMax: 5, ticks: { stepSize: 1 } }
                 },
                 responsive: true,
                 maintainAspectRatio: false
             }
         });
 
-        // update radar when row clicked
         document.querySelectorAll('.player-row').forEach(row => {
             row.addEventListener('click', () => {
                 const raw = row.getAttribute('data-radar');
                 const data = parseRadarData(raw);
                 radarChart.data.datasets[0].data = data;
-                radarChart.data.datasets[0].label = row.getAttribute('data-player-name') || 'Player';
+                radarChart.data.datasets[0].label = row.getAttribute('data-player-name');
                 radarChart.update();
             });
         });
 
-        // init with first player if exists
         const firstRow = document.querySelector('.player-row');
         if (firstRow) firstRow.click();
     </script>
+
 </body>
 </html>

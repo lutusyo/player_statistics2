@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Season {{ season }} Player Ratings</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* LEFT LIST */
+        .left-panel {
+            width: 35%;
+            padding: 20px;
+            height: 100vh;
+            overflow-y: auto;
+            background: #f4f4f4;
+            border-right: 2px solid #ddd;
+        }
+
+        .player-card {
+            padding: 12px;
+            background: white;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            border-left: 8px solid #007bff;
+        }
+
+        .player-card:hover {
+            background: #e9f3ff;
+        }
+
+        .rating-number {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 18px;
+        }
+
+        /* RIGHT CHART */
+        .right-panel {
+            width: 65%;
+            padding: 30px;
+        }
+
+        #playerNameTitle {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 60%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table th, table td {
+            border: 1px solid #666;
+            padding: 8px;
+        }
+
+        table th {
+            background: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LEFT: PLAYER LIST SORTED BY RATING -->
+    <div class="left-panel">
+        <h2>Season {{ season }} Ratings</h2>
+        {% for row in players %}
+            <div class="player-card"
+                onclick="loadPlayer(
+                    '{{ row.player.name }}',
+                    {{ row.attacking }},
+                    {{ row.creativity }},
+                    {{ row.defending }},
+                    {{ row.tactical }},
+                    {{ row.technical }}
+                )">
+                <div><strong>{{ row.player.name }}</strong></div>
+                <div class="rating-number">Avg: {{ row.average|floatformat:1 }}</div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- RIGHT: PLAYER DETAILS + RADAR CHART -->
+    <div class="right-panel">
+        <h1 id="playerNameTitle">Click a player to view details</h1>
+
+        <table id="ratingTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Season Average</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Attacking</td><td id="attVal"></td></tr>
+                <tr><td>Creativity</td><td id="creVal"></td></tr>
+                <tr><td>Defending</td><td id="defVal"></td></tr>
+                <tr><td>Tactical</td><td id="tacVal"></td></tr>
+                <tr><td>Technical</td><td id="tecVal"></td></tr>
+            </tbody>
+        </table>
+
+        <canvas id="radarCanvas" width="450" height="450"></canvas>
+    </div>
+
+<script>
+let radarChart;
+
+function loadPlayer(name, attacking, creativity, defending, tactical, technical) {
+
+    document.getElementById("playerNameTitle").textContent =
+        name + " - Season {{ season }} Ratings";
+
+    document.getElementById("ratingTable").style.display = "block";
+
+    document.getElementById("attVal").textContent = attacking;
+    document.getElementById("creVal").textContent = creativity;
+    document.getElementById("defVal").textContent = defending;
+    document.getElementById("tacVal").textContent = tactical;
+    document.getElementById("tecVal").textContent = technical;
+
+    const data = [attacking, creativity, defending, tactical, technical];
+
+    if (radarChart) {
+        radarChart.destroy();
+    }
+
+    const ctx = document.getElementById('radarCanvas').getContext('2d');
+    radarChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Attacking', 'Creativity', 'Defending', 'Tactical', 'Technical'],
+            datasets: [{
+                label: name,
+                data: data,
+                borderColor: 'rgba(54,162,235,1)',
+                backgroundColor: 'rgba(54,162,235,0.2)',
+            }]
+        },
+        options: {
+            scales: {
+                r: {
+                    suggestedMin: 0,
+                    suggestedMax: 5
+                }
+            }
+        }
+    });
+}
+</script>
+
+</body>
+</html>

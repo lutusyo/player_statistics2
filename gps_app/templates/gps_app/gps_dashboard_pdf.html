@@ -1,57 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        h1 { color: darkblue; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #333; padding: 6px; text-align: center; }
+        th { background-color: #4CAF50; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        img.chart { display: block; margin: 10px auto; max-width: 100%; }
+    </style>
+</head>
+<body>
+    <h1>GPS Dashboard - Session Data</h1>
 
-    <haed>
-        <meta charset="UTF-8">
-        <title>GPS Dashboard - {{ match }}</title>
+    <table>
+        <thead>
+            <tr>
+                <th>Player</th>
+                <th>Position</th>
+                <th>Distance</th>
+                <th>Accel/Decel</th>
+                <th>Sprint Efforts</th>
+                <th>High Speed</th>
+                <th>Walking</th>
+                <th>Jogging</th>
+                <th>Running</th>
+                <th>High Speed Dist</th>
+                <th>Sprint Dist</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in gps_data %}
+            <tr>
+                <td>{{ row.player }}</td>
+                <td>{{ row.position }}</td>
+                <td>{{ row.distance }}</td>
+                <td>{{ row.accel_decel }}</td>
+                <td>{{ row.sprint_efforts }}</td>
+                <td>{{ row.high_speed }}</td>
+                <td>{{ row.walking_distance }}</td>
+                <td>{{ row.jogging_distance }}</td>
+                <td>{{ row.running_distance }}</td>
+                <td>{{ row.high_speed_distance }}</td>
+                <td>{{ row.sprint_distance }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-        <style>
-            body { font-family: Arial, sans-serif; margin: 40px; }
-            h1 { text-align: center; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ccc; padding: 8px; text-align: center;}
-            th { background: #f2f2f2; }
-
-        </style>
-        
-    </haed>
-    <body>
-        <h1>{{ match.home_team.name }} vs {{ match.away_team.name }}</h1>
-        <p><strong>Date:</strong>{{ match.date }}</p>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Player</th>
-                    <th>Total Distance</th>
-                    <th>High Speed distance</th>
-                    <th>Top Speed (km/h)</th>
-                </tr>
-
-            </thead>
-            <tbody>
-                {% for records in gps_records %}
-                <tr>
-                    <td>{{ record.player.name }}</td>
-                    <td>{{ record.total_distance }}</td>
-                    <td>{{ record.high_speed_distance }}</td>
-                    <td>{{ record.top_speed }}</td>
-                    <td></td>
-                </tr>
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-
-        <!-- optional chart images (base64-encoded passed from view or JS) -->
-        {% if chart_image %}
-            <img src="data:image/png;base64,{{ chart_image }}" alt="Radar Chart" style="width:100%; margin-top: 20px;">
-        {% endif %}
-
-    </body>
-
-
-
+    {% for img in chart_images %}
+        <img src="{{ img }}" class="chart">
+    {% endfor %}
+</body>
 </html>

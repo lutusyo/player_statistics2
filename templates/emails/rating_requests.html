@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+      body {
+          font-family: Arial, sans-serif;
+          background: #f4f6f8;
+          padding: 0;
+          margin: 0;
+      }
+      .email-container {
+          max-width: 600px;
+          background: white;
+          margin: 20px auto;
+          padding: 20px;
+          border-radius: 10px;
+          border: 1px solid #ddd;
+      }
+      .header {
+          text-align: center;
+          padding: 20px;
+          background: #002d62; /* Azam FC dark blue */
+          border-radius: 10px 10px 0 0;
+          color: white;
+      }
+      .logo {
+          width: 120px;
+          margin-bottom: 10px;
+      }
+      .content {
+          padding: 20px;
+          color: #333;
+          line-height: 1.6;
+      }
+      .btn {
+          display: inline-block;
+          padding: 12px 20px;
+          margin-top: 20px;
+          background: #1e90ff;
+          color: white !important;
+          text-decoration: none;
+          border-radius: 6px;
+          font-size: 16px;
+      }
+      .footer {
+          margin-top: 30px;
+          font-size: 12px;
+          color: #777;
+          text-align: center;
+      }
+  </style>
+</head>
+<body>
+
+<div class="email-container">
+
+    <div class="header">
+        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/5/5f/Azam_FC_Logo.png/200px-Azam_FC_Logo.png" class="logo">
+        <h2>Player Rating Request</h2>
+    </div>
+
+    <div class="content">
+        <p>Hello <strong>{{ staff_name }}</strong>,</p>
+
+        <p>Please rate the players for the match:</p>
+
+        <p><strong>{{ match.home_team.name }} vs {{ match.away_team.name }} ({{ match.date }})</strong></p>
+
+        <p>Your rating link (single-use only):</p>
+
+        <p style="text-align:center;">
+            <a href="{{ rating_link }}" class="btn">Rate Players Now</a>
+        </p>
+
+        <p>If the button doesn’t work, copy and paste this link into your browser:</p>
+        <p>{{ rating_link }}</p>
+
+        <p>Thank you,<br>Azam FC Technical Department</p>
+    </div>
+
+    <div class="footer">
+        © {{ year }} Azam Football Club. All rights reserved.
+    </div>
+
+</div>
+
+</body>
+</html>

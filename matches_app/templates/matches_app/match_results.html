@@ -29,9 +29,23 @@
                             <a href="{% url 'tagging_app:pass_network_enter_data' match.id %}">Pass Tagging</a> |
                             <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive Stats</a> |
                             <a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}">FULL REPORT</a> |
+                            <a href="{% url 'performance_rating_app:send_rating_links' match.id %}"
+                                class="btn btn-primary mt-3">
+                                Send Rating Links to Staff
+                            </a>
                             {% if match.has_gps_data %}
                                 <a href="{% url 'gps_app:gps_dashboard' match.id %}">View GPS Dashboard</a>
+                                <a href="{% url 'performance_rating_app:send_rating_links' match.id %}"
+                                    class="btn btn-primary mt-3">
+                                    Send Rating Links to Staff
+                                </a>
+
                             {% else %}
+                                <a href="{% url 'performance_rating_app:send_rating_links' match.id %}"
+                                    class="btn btn-primary mt-3">
+                                    Send Rating Links to Staff
+                                </a>
+
                                 <a href="{% url 'gps_app:gps_upload' match.id %}">Upload GPS Data</a>
                             {% endif %}
                         </li>
@@ -45,8 +59,12 @@
                             {% endif %}
                             {% if match.has_gps_data %}
                                 <a href="{% url 'gps_app:gps_dashboard' match.id %}">View GPS Dashboard</a>
+                                <a href="{% url 'performance_rating_app:send_rating_links' match.id %}"
+                                    class="btn btn-primary mt-3">Send Rating Links to Staff</a>
                             {% else %}
                                 <a href="{% url 'gps_app:gps_upload' match.id %}">Upload GPS Data</a>
+                                <a href="{% url 'performance_rating_app:send_rating_links' match.id %}"
+                                    class="btn btn-primary mt-3">Send Rating Links to Staff</a>
                             {% endif %}
                         </li>
                     {% endif %}

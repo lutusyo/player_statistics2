@@ -2,6 +2,10 @@
 {% load static %}
 
 {% block content %}
+
+<!-- Download PDF Button -->
+<a href="{% url 'gps_app:gps_pdf_export' match.id %}" class="btn btn-danger mb-3">Download PDF</a>
+
 <div class="container mt-4">
     <h1>GPS Dashboard for Match: {{ match.home_team.name }} vs {{ match.away_team.name }} ({{ match.date }})</h1>
 
@@ -49,13 +53,12 @@
         </table>
     </div>
 
-    <!-- Distance Chart -->
+    <!-- Charts -->
     <h3 class="mt-4 text-center">Distance per Player</h3>
     <div class="chart-container mb-5">
         <canvas id="distanceChart"></canvas>
     </div>
 
-    <!-- Radar Charts -->
     <div class="chart-container mb-5">
         <h4 class="text-center">Accel/Decel Efforts</h4>
         <canvas id="accelDecelChart" height="300"></canvas>
@@ -76,7 +79,6 @@
         <canvas id="walkingChart" height="300"></canvas>
     </div>
 
-    <!-- New radar charts -->
     <div class="chart-container mb-5">
         <h4 class="text-center">Jogging Distance</h4>
         <canvas id="joggingChart" height="300"></canvas>
@@ -150,6 +152,7 @@ let runningChart = createRadar(runningCtx, 'Running Distance', 'rgba(255,205,86,
 let hsDistanceChart = createRadar(hsDistanceCtx, 'High Speed Distance', 'rgba(54,162,235,1)');
 let sprintDistanceChart = createRadar(sprintDistanceCtx, 'Sprint Distance', 'rgba(255,99,132,1)');
 
+// Fetch GPS Data
 function fetchGPSData() {
     const period = periodSelect.value;
     const position = positionSelect.value;
@@ -202,5 +205,22 @@ function fetchGPSData() {
 fetchGPSData();
 periodSelect.addEventListener('change', fetchGPSData);
 positionSelect.addEventListener('change', fetchGPSData);
+
+// ✅ Export Charts as Images
+function exportChartsAsImages() {
+    document.querySelectorAll("canvas").forEach((canvas) => {
+        const img = document.createElement("img");
+        img.src = canvas.toDataURL("image/png");
+        canvas.setAttribute("data-image", img.src);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const pdfBtn = document.querySelector("a.btn-danger");
+    if (pdfBtn) {
+        pdfBtn.addEventListener("click", exportChartsAsImages);
+    }
+});
+
 </script>
 {% endblock %}

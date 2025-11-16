@@ -1,0 +1,15 @@
+<h1>Aggregated Staff Ratings — {{ match }}</h1>
+<table>
+  <thead>
+    <tr><th>Player</th><th>Avg Rating</th><th>Num Staff</th></tr>
+  </thead>
+  <tbody>
+    {% for a in aggregates %}
+      <tr>
+        <td>{{ a.player__name }}</td>
+        <td>{{ a.avg_rating|floatformat:1 }}</td>
+        <td>{{ a.count }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

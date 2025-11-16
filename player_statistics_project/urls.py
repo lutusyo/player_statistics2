@@ -30,7 +30,7 @@ urlpatterns = [
     path('lineup_app/', include('lineup_app.urls')),
  
 
-    path('performance/', include('perfomance_rating_app.urls')),
+    path('performance_rating_app/', include('perfomance_rating_app.urls')),
 
     path('training/', include('training_app.urls')),
 

@@ -1,28 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
 
-
     <a href="{% url 'reports_app:download_full_report_pdf' match.id our_team_id %}" class="btn btn-primary" style="margin: 20px;">
         📄 Download Full Report (PDF)
     </a>
 
-    <!-- Post-match summary -->
+    <!-- 1. Post-match summary -->
     {% include "reports_app/match_report_templates/1_post_match_summary/post_match_summary.html" %}
+
+    <!-- 2. Match-summary-team -->
+
+    <!-- 3. Match-summary-key-statistics-->
+
 
     <!--4_in_possession-->
     {% include "reports_app/match_report_templates/4_in_possession/intro.html" %}
     {% include "reports_app/match_report_templates/4_in_possession/attempt_to_goal.html" %}
     {% include "reports_app/match_report_templates/4_in_possession/pass_network.html" %}
 
-    <!-- Goalkeeping -->
+    <!-- 5. out of possession -->
+
+    <!-- 6. Goalkeeping -->
     {% include "reports_app/match_report_templates/6_goalkeeping/goalkeeping_intro.html" %}
     {% include "reports_app/match_report_templates/6_goalkeeping/goalkeeping.html" %}
 
-    <!-- Set Plays -->
+    <!-- 7. Set Plays -->
     {% include "reports_app/match_report_templates/7_set_plays/set_plays_intro.html" %}
     {% include "reports_app/match_report_templates/7_set_plays/set_plays.html" %}
 
-    <!--outro page-->
+    <!-- 8. Individual-data-in-possession-->
+    <!-- 9. Individual-data-out-of-possession-->
+    <!-- 10. Individual-data-in-physical-->
+
+    <!--11.outro page-->
     {% include "reports_app/match_report_templates/11_outro_page/outro.html" %}
 
 

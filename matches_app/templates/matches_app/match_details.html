@@ -395,11 +395,12 @@ table tbody tr:hover {
     <a href="{% url 'tagging_app:goalkeeper_distribution_dashboard' match.id %}" class="btn btn-primary m-1"> Goalkeeping Distribution</a>
     <a href="{% url 'defensive_app:defensive_summary' match.id %}" class="btn btn-primary m-1"> Other Statistics</a>
 
-    <a href="{% url 'tagging_app:full_report' match.id our_team_id %}" 
-        class="btn btn-primary" style="margin-top: 5px;">
-        View Full Report
-    </a>
+    <a href="{% url 'tagging_app:full_report' match.id our_team_id %}" class="btn btn-primary" style="margin-top: 5px;">View Full Report</a>
 
+    <p>
+        <a href="{% url 'performance_rating_app:match_staff_aggregates' match.id %}" class="btn btn-primary">
+            View Aggregated Staff Ratings</a>
+    </p>
 </div>
 
 <!-- Scripts -->

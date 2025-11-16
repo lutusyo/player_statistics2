@@ -1,6 +1,7 @@
 from django.urls import path
 from gps_app.views import gps_visualization, upload_gps_data, gps_match_list, gps_match_detail_positions
 from gps_app.views.gps_visualization import gps_dashboard, gps_dashboard_data
+from gps_app.views.gps_visualization_pdf import gps_pdf_export
 
 
 app_name = 'gps_app'
@@ -12,6 +13,8 @@ urlpatterns = [
 
         # Dashboard page (HTML template)
     path('match/<int:match_id>/dashboard/', gps_dashboard, name='gps_dashboard'),
+    path("export/pdf/<int:match_id>/", gps_pdf_export, name="gps_pdf_export"),
+
 
     # Dashboard JSON data endpoint
     path('match/<int:match_id>/dashboard/data/', gps_dashboard_data, name='gps_dashboard_data'),
