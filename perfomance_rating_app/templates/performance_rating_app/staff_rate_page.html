@@ -1,14 +1,134 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Rate Players — {{ match }}</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
-    .player-card { padding:10px; border:1px solid #ddd; margin-bottom:8px; border-radius:6px; }
-    input[type="number"] { width:90px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 25px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      font-size: 22px;
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    h3 {
+      font-size: 16px;
+      text-align: center;
+      font-weight: normal;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    form {
+      width: 100%;
+    }
+
+    .player-card {
+      background: #ffffff;
+      padding: 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .player-card:hover {
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .player-name {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #2c3e50;
+    }
+
+    .form-field {
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 4px;
+    }
+
+    input[type="number"],
+    textarea,
+    select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      width: 100%;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      height: 70px;
+      resize: vertical;
+    }
+
+    .error {
+      color: red;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 14px;
+      background: #007bff;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background 0.2s ease;
+    }
+
+    button[type="submit"]:hover {
+      background: #0056b3;
+    }
+
+    /* MOBILE */
+    @media (max-width: 600px) {
+      .container {
+        margin: 10px;
+        padding: 15px;
+      }
+      .player-card {
+        padding: 12px;
+      }
+    }
   </style>
 </head>
 <body>
+
+<div class="container">
   <h1>Rate Players — {{ match }}</h1>
   <h3>Staff: {{ staff.name }}</h3>
 
@@ -17,18 +137,27 @@
 
     {% for player, form in forms %}
       <div class="player-card">
-        <strong>{{ player.name }}</strong> — {{ player.position|default:"" }}
-        <div>
-          {{ form.rating.label_tag }} {{ form.rating }}
+        <div class="player-name">{{ player.name }} — {{ player.position|default:"" }}</div>
+
+        <div class="form-field">
+          {{ form.rating.label_tag }}
+          {{ form.rating }}
         </div>
-        <div>{{ form.comment.label_tag }} {{ form.comment }}</div>
+
+        <div class="form-field">
+          {{ form.comment.label_tag }}
+          {{ form.comment }}
+        </div>
+
         {% if form.errors %}
-          <div style="color:red;">{{ form.errors }}</div>
+          <div class="error">{{ form.errors }}</div>
         {% endif %}
       </div>
     {% endfor %}
 
     <button type="submit">Submit Ratings</button>
   </form>
+</div>
+
 </body>
 </html>

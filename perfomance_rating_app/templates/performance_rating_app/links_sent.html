@@ -1,17 +1,137 @@
-<h2>Rating links sent for {{ match }}</h2>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Rating Links Sent — {{ match }}</title>
 
-<p>Sent to:</p>
-<ul>
-  {% for s in sent %}
-    <li>{{ s.name }} ({{ s.email }})</li>
-  {% endfor %}
-</ul>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-{% if failed %}
-<p>Failed to send to:</p>
-<ul>
-  {% for f in failed %}
-    <li>{{ f.name }} ({{ f.email }})</li>
-  {% endfor %}
-</ul>
-{% endif %}
+    <!-- Simple Modern Styling -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            color: #1a73e8;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        p {
+            font-size: 16px;
+            color: #333;
+            text-align: center;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 10px;
+        }
+
+        ul li {
+            background: #eef3fb;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            font-size: 15px;
+            color: #2d3e50;
+        }
+
+        .failed-list li {
+            background: #fdecea;
+            color: #b71c1c;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-top: 25px;
+            margin-bottom: 8px;
+            color: #2d3e50;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 22px;
+            background: #1a73e8;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: #0c59c9;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            .container {
+                padding: 18px;
+                margin: 15px;
+            }
+
+            ul li {
+                font-size: 14px;
+                padding: 10px 12px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h2>Rating Links Sent</h2>
+    <p>Match: <strong>{{ match }}</strong></p>
+
+    <div class="section-title">Sent To:</div>
+    <ul>
+        {% for s in sent %}
+            <li>{{ s.name }} — {{ s.email }}</li>
+        {% endfor %}
+    </ul>
+
+    {% if failed %}
+        <div class="section-title" style="color:#b71c1c;">Failed to Send:</div>
+        <ul class="failed-list">
+            {% for f in failed %}
+                <li>{{ f.name }} — {{ f.email }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="btn-container">
+        <a href="{% url 'home' %}" class="btn">Back to Portal</a>
+    </div>
+
+</div>
+</body>
+</html>

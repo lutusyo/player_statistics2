@@ -1,7 +1,7 @@
 {% extends 'matches_app/matches_base.html' %}
 {% load static %}
 
-{% block title %}{{ team }} Results {% endblock %}
+{% block title %}{{ team }} Results{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'matches_app/css/results_style.css' %}">
@@ -12,80 +12,91 @@
 
     <hr>
     <h2 style="text-align: center; margin-top: 40px;">Past Matches</h2>
-    
-
 
     {% if past_matches %}
         {% for match in past_matches %}
 
-            <!-- Admin Action Buttons -->
-
-
+            <!-- ====================== ADMIN ACTIONS ====================== -->
+            {% if user.is_authenticated and user.username == 'Azam2' %}
             <div class="admin-actions">
-                {% if user.is_authenticated and user.username == 'Azam2' %}
+
+                <li>
                     {% if match.home_lineup_exists and match.away_lineup_exists %}
-                        <li>
-                            <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}">Goal Tagging</a> |
-                            <a href="{% url 'tagging_app:pass_network_enter_data' match.id %}">Pass Tagging</a> |
-                            <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive Stats</a> |
-                            <a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}">FULL REPORT</a> |
-                            <a href="{% url 'performance_rating_app:send_rating_links' match.id %}"
-                                class="btn btn-primary mt-3">
-                                Send Rating Links to Staff
+                        
+                        <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}">Goal Tagging</a> |
+                        <a href="{% url 'tagging_app:pass_network_enter_data' match.id %}">Pass Tagging</a> |
+                        <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive Stats</a> |
+                        <a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}">FULL REPORT</a> |
+
+                        {% if match.rating_links_sent %}
+                            <span style="color: green; font-weight: bold;">Rating Links Already Sent</span>
+                        {% else %}
+                            <a href="{% url 'performance_rating_app:send_rating_links' match.id %}" 
+                               class="btn btn-primary btn-sm">
+                               Send Rating Links to Staff
                             </a>
-                            {% if match.has_gps_data %}
-                                <a href="{% url 'gps_app:gps_dashboard' match.id %}">View GPS Dashboard</a>
-                                <a href="{% url 'performance_rating_app:send_rating_links' match.id %}"
-                                    class="btn btn-primary mt-3">
-                                    Send Rating Links to Staff
-                                </a>
+                        {% endif %}
 
-                            {% else %}
-                                <a href="{% url 'performance_rating_app:send_rating_links' match.id %}"
-                                    class="btn btn-primary mt-3">
-                                    Send Rating Links to Staff
-                                </a>
+                        {% if match.has_gps_data %}
+                            | <a href="{% url 'gps_app:gps_dashboard' match.id %}">View GPS Dashboard</a>
+                        {% else %}
+                            | <a href="{% url 'gps_app:gps_upload' match.id %}">Upload GPS Data</a>
+                        {% endif %}
 
-                                <a href="{% url 'gps_app:gps_upload' match.id %}">Upload GPS Data</a>
-                            {% endif %}
-                        </li>
                     {% else %}
-                        <li>
-                            {% if not match.home_lineup_exists %}
-                                <a href="{% url 'lineup_app:create_lineup' match.id match.home_team.id %}">CREATE LINEUP (Home)</a> |
-                            {% endif %}
-                            {% if not match.away_lineup_exists %}
-                                <a href="{% url 'lineup_app:create_lineup' match.id match.away_team.id %}">CREATE LINEUP (Away)</a> |
-                            {% endif %}
-                            {% if match.has_gps_data %}
-                                <a href="{% url 'gps_app:gps_dashboard' match.id %}">View GPS Dashboard</a>
-                                <a href="{% url 'performance_rating_app:send_rating_links' match.id %}"
-                                    class="btn btn-primary mt-3">Send Rating Links to Staff</a>
-                            {% else %}
-                                <a href="{% url 'gps_app:gps_upload' match.id %}">Upload GPS Data</a>
-                                <a href="{% url 'performance_rating_app:send_rating_links' match.id %}"
-                                    class="btn btn-primary mt-3">Send Rating Links to Staff</a>
-                            {% endif %}
-                        </li>
+
+                        {% if not match.home_lineup_exists %}
+                            <a href="{% url 'lineup_app:create_lineup' match.id match.home_team.id %}">
+                                CREATE LINEUP (Home)
+                            </a> |
+                        {% endif %}
+
+                        {% if not match.away_lineup_exists %}
+                            <a href="{% url 'lineup_app:create_lineup' match.id match.away_team.id %}">
+                                CREATE LINEUP (Away)
+                            </a> |
+                        {% endif %}
+
+                        {% if match.has_gps_data %}
+                            <a href="{% url 'gps_app:gps_dashboard' match.id %}">View GPS Dashboard</a>
+                        {% else %}
+                            <a href="{% url 'gps_app:gps_upload' match.id %}">Upload GPS Data</a>
+                        {% endif %}
+
+                        {% if match.rating_links_sent %}
+                            | <span style="color: green; font-weight: bold;">
+                                Rating Links Already Sent
+                              </span>
+                        {% else %}
+                            | <a href="{% url 'performance_rating_app:send_rating_links' match.id %}" 
+                                 class="btn btn-primary btn-sm">
+                                 Send Rating Links to Staff
+                              </a>
+                        {% endif %}
+
                     {% endif %}
-                {% endif %}
+                </li>
+
             </div>
+            {% endif %}
+            <!-- ==================== END ADMIN ACTIONS ===================== -->
 
 
-
-
-            <!-- Match Card -->
-            <a href="{% url 'matches_app:match_detail' match_id=match.id %}" style="text-decoration: none; color: inherit;">
+            <!-- ================ MATCH CARD ================= -->
+            <a href="{% url 'matches_app:match_detail' match_id=match.id %}"
+               style="text-decoration: none; color: inherit;">
                 <div class="results-card">
 
-                    <!-- Match Info -->
+                    <!-- Header info -->
                     <div class="results-header">
-                        <div class="results-date">{{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}</div>
+                        <div class="results-date">
+                            {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
+                        </div>
                         <div class="results-venue">{{ match.venue }}</div>
                         <div class="results-type">{{ match.get_competition_type_display }}</div>
                     </div>
 
-                    <!-- Team Logos & Names (fixture-style layout) -->
+                    <!-- Team logos & names -->
                     <div class="results-body">
                         <div class="team">
                             {% if match.home_team.logo %}
@@ -99,15 +110,14 @@
                                 <strong>{{ match.our_team_goals }} - {{ match.opponent_goals }}</strong>
                                 <br>
                                 <small style="color: gray;">
-                                    {% if match.goals %}
-                                        {% for g in match.goals %}
-                                            {% if g.is_own_goal %}
-                                                <span title="Own Goal">⚽ OG by {{ g.scorer }} ({{ g.team_name }})</span>{% if not forloop.last %}, {% endif %}
-                                            {% else %}
-                                                <span title="Goal">⚽ {{ g.scorer }} ({{ g.team_name }})</span>{% if not forloop.last %}, {% endif %}
-                                            {% endif %}
-                                        {% endfor %}
-                                    {% endif %}
+                                    {% for g in match.goals %}
+                                        {% if g.is_own_goal %}
+                                            ⚽ OG by {{ g.scorer }} ({{ g.team_name }})
+                                        {% else %}
+                                            ⚽ {{ g.scorer }} ({{ g.team_name }})
+                                        {% endif %}
+                                        {% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
                                 </small>
                             {% else %}
                                 <span style="font-size: 14px; color: gray;">0 - 0</span>
@@ -121,13 +131,14 @@
                             <div>{{ match.away_team }}</div>
                         </div>
                     </div>
+
                 </div>
             </a>
+            <!-- ============ END MATCH CARD ============== -->
 
         {% endfor %}
     {% else %}
         <p style="text-align: center;">No past matches.</p>
     {% endif %}
-
 </div>
 {% endblock %}
