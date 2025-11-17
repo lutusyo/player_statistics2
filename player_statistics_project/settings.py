@@ -180,10 +180,15 @@ TIME_INPUT_FORMATS = ['%H:%M']
 
 # Real email via Gmail SMTP
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "lutusyob@gmail.com"  # your Gmail
-EMAIL_HOST_PASSWORD = "fsdpslcfjvxptpgs"
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_HOST = "mail.azamfcportal.com"
+EMAIL_PORT =  465 # or 587 depending on your server
+EMAIL_USE_SSL = True # for ort 465
+#EMAIL_USE_TLS = True # for port 587
+EMAIL_HOST_USER = "noreply@azamfcportal.com"  # your Gmail
+EMAIL_HOST_PASSWORD = "Nthterm@2019"
+DEFAULT_FROM_EMAIL = "Azam FC Portal <noreply@azamfcportal.com>"
+
+
+
+
 

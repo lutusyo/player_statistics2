@@ -14,75 +14,78 @@ from perfomance_rating_app.forms import SingleRatingForm
 from django.views.decorators.http import require_http_methods
 from django.db.models import Avg, Count
 
-
-
-
-from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from datetime import datetime
-
-def send_rating_email(staff, match, rating_link):
-    subject = f"Please rate players — {match}"
-    from_email = "lutusyob@gmail.com"
-    to_email = staff.email
-
-    html_content = render_to_string("emails/rating_request.html", {
-        "staff_name": staff.name,
-        "match": match,
-        "rating_link": rating_link,
-        "year": datetime.now().year,
-    })
-
-    text_content = strip_tags(html_content)
-
-    email = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
-    email.attach_alternative(html_content, "text/html")
-
-    email.send()
 
 
 
 def send_rating_links(request, match_id):
+    """
+    Sends a one-time HTML rating link email to all staff for the match.
+    Uses template: templates/emails/rating_request.html
+    """
     match = get_object_or_404(Match, id=match_id)
+
     staff_list = StaffMember.objects.filter(age_group=match.home_team.age_group)
 
     expires_at = timezone.now() + timezone.timedelta(hours=48)
 
-    sent = []
-    failed = []
+    sent, failed = [], []
 
     for staff in staff_list:
+
         token, created = RatingToken.objects.get_or_create(
-            staff=staff, match=match,
+            staff=staff,
+            match=match,
             defaults={"expires_at": expires_at}
         )
 
+        # If token expired or used → generate a new one
         if not token.is_valid():
-            token = RatingToken.objects.create(staff=staff, match=match, expires_at=expires_at)
+            token = RatingToken.objects.create(
+                staff=staff,
+                match=match,
+                expires_at=expires_at
+            )
 
-        link = request.build_absolute_uri(
+        # Rating link to send
+        rating_link = request.build_absolute_uri(
             reverse("performance_rating_app:staff_rate_with_token", args=[str(token.token)])
         )
 
+        # Context for template
+        context = {
+            "staff_name": staff.name,
+            "match": match,
+            "rating_link": rating_link,
+            "year": timezone.now().year,
+        }
+
+        # Render HTML Email
+        html_message = render_to_string("emails/rating_requests.html", context)
+        plain_message = strip_tags(html_message)  # Fallback text email
+        subject = f"Player Rating Request — {match}"
+
         try:
-            send_rating_email(staff, match, link)
+            send_mail(
+                subject,
+                plain_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [staff.email],
+                html_message=html_message,  # IMPORTANT: HTML EMAIL
+                fail_silently=False
+            )
             sent.append(staff)
-        except Exception:
+
+        except Exception as e:
+            print("Email error:", e)
             failed.append(staff)
 
-    # ----------------------------------------------------
-    # ✅ MARK LINKS AS SENT (only if AT LEAST one succeeded)
-    # ----------------------------------------------------
-    if sent:
-        match.rating_links_sent = True
-        match.save()
-
-    return render(request, "performance_rating_app/links_sent.html", {
-        "match": match,
-        "sent": sent,
-        "failed": failed
-    })
+    return render(
+        request,
+        "performance_rating_app/links_sent.html",
+        {"match": match, "sent": sent, "failed": failed}
+    )
 
 
 
