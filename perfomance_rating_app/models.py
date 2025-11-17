@@ -50,6 +50,8 @@ class StaffPlayerRating(models.Model):
     comment = models.TextField(blank=True, null=True)
 
     submitted_at = models.DateTimeField(auto_now_add=True)
+    
+
 
     class Meta:
         unique_together = ("staff", "player", "match")

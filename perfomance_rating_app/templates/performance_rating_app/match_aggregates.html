@@ -1,15 +1,127 @@
-<h1>Aggregated Staff Ratings — {{ match }}</h1>
-<table>
-  <thead>
-    <tr><th>Player</th><th>Avg Rating</th><th>Num Staff</th></tr>
-  </thead>
-  <tbody>
-    {% for a in aggregates %}
-      <tr>
-        <td>{{ a.player__name }}</td>
-        <td>{{ a.avg_rating|floatformat:1 }}</td>
-        <td>{{ a.count }}</td>
-      </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aggregated Staff Ratings — {{ match }}</title>
+
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f7fb;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 30px;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 95%;
+      max-width: 700px;
+      background: #fff;
+      padding: 25px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border: 1px solid #dce7f5;
+    }
+
+    h1 {
+      color: #005bbb;
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+      min-width: 400px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 10px;
+    }
+
+    th {
+      background-color: #005bbb;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 6px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f4f8ff;
+    }
+
+    tr:hover {
+      background-color: #e3f0ff;
+      transition: 0.2s;
+    }
+
+    td {
+      border-bottom: 1px solid #ddd;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 25px;
+      background: #005bbb;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 16px;
+      text-align: center;
+      transition: 0.2s;
+      margin-top: 15px;
+    }
+
+    .btn:hover {
+      background: #004a9f;
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 20px; }
+      th, td { padding: 10px 8px; font-size: 14px; }
+      .btn { padding: 10px 20px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Aggregated Staff Ratings — {{ match }}</h1>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Avg Rating</th>
+            <th>Num Staff</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in aggregates %}
+            <tr>
+              <td>{{ a.player__name }}</td>
+              <td>{{ a.avg_rating|floatformat:1 }}</td>
+              <td>{{ a.count }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <a href="/" class="btn">Return to Portal</a>
+  </div>
+</body>
+</html>

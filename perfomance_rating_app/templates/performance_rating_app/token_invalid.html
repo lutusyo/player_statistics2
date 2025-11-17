@@ -1,2 +1,74 @@
-<h2>Link not valid</h2>
-<p>This rating link is invalid, expired, or already used.</p>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invalid Rating Link</title>
+
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f7fb;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .box {
+      background: #fff;
+      padding: 30px 25px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      border: 1px solid #dce7f5;
+    }
+
+    h2 {
+      color: #d9534f; /* red */
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
+
+    p {
+      font-size: 16px;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .btn {
+      margin-top: 20px;
+      display: inline-block;
+      padding: 12px 25px;
+      background: #005bbb;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background: #004a9f;
+    }
+
+    @media (max-width: 480px) {
+      h2 { font-size: 20px; }
+      p { font-size: 15px; }
+      .btn { font-size: 14px; padding: 10px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Link Not Valid</h2>
+    <p>This rating link is invalid, expired, or has already been used.</p>
+    <a href="{% url 'home' %}" class="btn">Return to Portal</a>
+  </div>
+</body>
+</html>

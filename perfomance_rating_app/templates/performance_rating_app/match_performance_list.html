@@ -3,21 +3,50 @@
 {% block content %}
 <div class="container mt-4">
 
-  <h2 class="mb-3">
-    {{ team.age_group }} 
+  <h2 class="mb-4 text-center" style="color: #005bbb;">
+    {{ team.age_group }} — Matches
   </h2>
   
   <div class="list-group">
     {% for match in matches %}
-      <a href="{% url 'performance_rating_app:match_performance' match.id %}" 
-         class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-        <span>{{ match }}</span>
-        <span class="badge bg-primary">Evaluate</span>
-      </a>
+      <div class="list-group-item flex-column align-items-start mb-2 p-3" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+          <div>
+            <strong>{{ match }}</strong>
+            <div style="font-size: 14px; color: #666;">{{ match.date|date:"D, M d, Y" }} — {{ match.get_competition_type_display }}</div>
+          </div>
+          <div class="mt-2 mt-md-0">
+            <a href="{% url 'performance_rating_app:match_performance' match.id %}" 
+               class="btn btn-primary btn-sm me-2">System Ratings</a>
+            <a href="{% url 'performance_rating_app:match_staff_aggregates' match.id %}" 
+               class="btn btn-outline-primary btn-sm">Staff Ratings</a>
+          </div>
+        </div>
+      </div>
     {% empty %}
-      <p>No matches available for this team.</p>
+      <p class="text-center" style="color: #555;">No matches available for this team.</p>
     {% endfor %}
   </div>
 
 </div>
+
+<style>
+  .btn {
+    transition: 0.2s;
+  }
+  .btn:hover {
+    opacity: 0.9;
+  }
+
+  @media (max-width: 480px) {
+    .list-group-item {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .list-group-item .btn {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+  }
+</style>
 {% endblock %}

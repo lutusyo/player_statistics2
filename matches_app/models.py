@@ -55,6 +55,7 @@ class Match(models.Model):
     # NEW FIELDS FOR CLOCK
     start_time = models.DateTimeField(null=True, blank=True, help_text="When the match actually started (UTC).")
     end_time = models.DateTimeField(null=True, blank=True, help_text="When the match ended (UTC).")
+    rating_links_sent = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.home_team.name} vs {self.away_team.name} ({self.date})"

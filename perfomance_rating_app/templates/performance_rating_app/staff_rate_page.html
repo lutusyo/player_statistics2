@@ -1,34 +1,129 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rate Players — {{ match }}</title>
+
   <style>
-    .player-card { padding:10px; border:1px solid #ddd; margin-bottom:8px; border-radius:6px; }
-    input[type="number"] { width:90px; }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f7fb;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 40px;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      background: #fff;
+      padding: 30px 25px;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 95%;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      border: 1px solid #dce7f5;
+    }
+
+    h1 {
+      color: #005bbb;
+      font-size: 26px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    h3 {
+      font-size: 18px;
+      color: #444;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .player-card {
+      border: 1px solid #ddd;
+      padding: 15px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background: #f9fbff;
+    }
+
+    .player-card strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #005bbb;
+    }
+
+    input[type="number"], textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: #005bbb;
+      color: #fff;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+      margin-top: 15px;
+    }
+
+    button:hover {
+      background: #004a9f;
+    }
+
+    .error {
+      color: red;
+      margin-top: 5px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 22px; }
+      h3 { font-size: 16px; }
+      button { font-size: 14px; }
+    }
   </style>
 </head>
 <body>
-  <h1>Rate Players — {{ match }}</h1>
-  <h3>Staff: {{ staff.name }}</h3>
+  <div class="container">
+    <h1>Rate Players — {{ match }}</h1>
+    <h3>Staff: {{ staff.name }}</h3>
 
-  <form method="post">
-    {% csrf_token %}
+    <form method="post">
+      {% csrf_token %}
 
-    {% for player, form in forms %}
-      <div class="player-card">
-        <strong>{{ player.name }}</strong> — {{ player.position|default:"" }}
-        <div>
-          {{ form.rating.label_tag }} {{ form.rating }}
+      {% for player, form in forms %}
+        <div class="player-card">
+          <strong>{{ player.name }} — {{ player.position|default:"" }}</strong>
+          <div>
+            {{ form.rating.label_tag }}<br>{{ form.rating }}
+          </div>
+          <div>
+            {{ form.comment.label_tag }}<br>{{ form.comment }}
+          </div>
+          {% if form.errors %}
+            <div class="error">{{ form.errors }}</div>
+          {% endif %}
         </div>
-        <div>{{ form.comment.label_tag }} {{ form.comment }}</div>
-        {% if form.errors %}
-          <div style="color:red;">{{ form.errors }}</div>
-        {% endif %}
-      </div>
-    {% endfor %}
+      {% endfor %}
 
-    <button type="submit">Submit Ratings</button>
-  </form>
+      <button type="submit">Submit Ratings</button>
+    </form>
+  </div>
 </body>
 </html>
