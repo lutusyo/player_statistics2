@@ -57,7 +57,7 @@ def team_reports_dashboard(request, team_id):
         **section_data,
     }
 
-    return render(request, 'reports_app/reports_dashboard.html', context)
+    return render(request, 'reports_app/daily_report_templates/reports_dashboard.html', context)
 
 
 

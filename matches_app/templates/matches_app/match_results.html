@@ -26,7 +26,8 @@
                         <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}">Goal Tagging</a> |
                         <a href="{% url 'tagging_app:pass_network_enter_data' match.id %}">Pass Tagging</a> |
                         <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive Stats</a> |
-                        <a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}">FULL REPORT</a> |
+                        <a href="{% url 'reports_app:match_report_dashboard' match.id match.home_team.id %}">Match Report</a> |
+
 
                         {% if match.rating_links_sent %}
                             <span style="color: green; font-weight: bold;">Rating Links Already Sent</span>

@@ -1,106 +1,258 @@
 {% load static %}
 
-<div class="container mt-4">
+<style>
 
-    <!-- Match and Goalkeeper Info -->
-    <div class="card mb-4 p-4 shadow-sm">
-        <h5 class="text-primary">Match: {{ match }}</h5>
-        {% if goalkeeper %}
-            <p><strong>Goalkeeper:</strong> {{ goalkeeper.name }}</p>
-        {% else %}
-            <p class="text-danger"><strong>No goalkeeper found in this team.</strong></p>
-        {% endif %}
+    /* -------------------- GENERAL STYLE -------------------- */
+    body {
+        background-color: #f4f6f9;
+        font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    h1, h2, h3, h4 {
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .card {
+        border-radius: 12px;
+        border: none;
+        background: white;
+    }
+
+    table.table th {
+        width: 60%;
+        background: #f2f4f7;
+    }
+
+    table.table td, table.table th {
+        padding: 10px 12px !important;
+        font-size: 15px;
+    }
+
+    /* -------------------- FULLSCREEN INTRO -------------------- */
+    #gk_fullscreen_container {
+        height: 100vh;
+        width: 100%;
+        background: linear-gradient(150deg, #000000, #0f1b1d);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        text-align: center;
+        padding: 0 20px;
+    }
+
+    #gk_company_logo {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        text-align: right;
+    }
+
+    #gk_company_logo img {
+        height: 70px;
+    }
+
+    #gk_title {
+        font-size: 60px;
+        font-weight: 900;
+        margin-bottom: 40px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+    }
+
+    #gk_teams {
+        display: flex;
+        gap: 80px;
+        align-items: center;
+    }
+
+    .gk_team {
+        text-align: center;
+    }
+
+    .gk_team img {
+        height: 80px;
+        filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.4));
+    }
+
+    .gk_team_name {
+        margin-top: 8px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .gk_vs {
+        font-size: 30px;
+        font-weight: bold;
+        color: #00d8ff;
+    }
+
+    /* -------------------- CHARTS -------------------- */
+
+    .chart-container {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+        margin: 20px auto;
+        width: 100%;
+        max-width: 550px;
+    }
+
+    .radar-container img {
+        max-width: 320px;
+        margin-top: 10px;
+    }
+
+    .bar-container img {
+        max-width: 420px;
+        margin-top: 10px;
+    }
+
+</style>
+
+
+<!-- ------------------ FULLSCREEN INTRO ------------------ -->
+<div id="gk_fullscreen_container">
+
+    <div id="gk_company_logo">
+        <strong>{{ company }}</strong><br>
+        <img src="{% static 'goalkeeping_app/azamfc_logo.png' %}" alt="Logo">
     </div>
 
-    <div class="row g-3">
-        <!-- Defensive Summary -->
-        <div class="col-md-6">
-            <div class="card p-3 shadow-sm">
-                <h5 class="text-primary mb-3">Defensive Summary</h5>
-                <ul class="list-unstyled">
-                    <li>• Total Attempts Faced: <strong>{{ total_attempts_faced|default:"0" }}</strong></li>
-                    <li>• On Target Faced: <strong>{{ goalkeeper_on_target_faced|default:"0" }}</strong></li>
-                    <li>• Saves Made: <strong>{{ goalkeeper_saves_made|default:"0" }}</strong></li>
-                    <li>• Goals Conceded: <strong>{{ our_goalkeeper_goals_conceded|default:"0" }}</strong></li>
-                    <li>• Save Percentage: <strong>{{ our_goalkeeper_save_percentage|default:"0" }}%</strong></li>
-                    <li>• Clean Sheet: <strong>{{ clean_sheet|yesno:"Yes,No" }}</strong></li>
-                </ul>
-                {% if goalkeeper %}
-                <canvas id="saveChart"></canvas>
-                {% endif %}
-            </div>
+    <h1 id="gk_title">Goalkeeping</h1>
+
+    <div id="gk_teams">
+
+        <div class="gk_team">
+            {% if home_team.logo %}
+                <img src="{{ home_team.logo.url }}" alt="{{ home_team.name }}">
+            {% endif %}
+            <p class="gk_team_name">{{ match.home_team.name }}</p>
         </div>
 
-        <!-- Distribution Summary -->
-        <div class="col-md-6">
-            <div class="card p-3 shadow-sm">
-                <h5 class="text-success mb-3">Distribution Summary</h5>
-                <ul class="list-unstyled">
-                    <li>• Total Passes: <strong>{{ total_passes|default:"0" }}</strong></li>
-                    <li>• Successful Passes: <strong>{{ successful_passes|default:"0" }}</strong></li>
-                    <li>• Pass Accuracy: <strong>{{ our_goalkeeper_pass_accuracy|default:"0" }}%</strong></li>
-                    <li>• Total Involvements: <strong>{{ our_goalkeeper_total_involvements|default:"0" }}</strong></li>
-                    <li>• Long Passes: <strong>{{ our_goalkeeper_long_passes|default:"0" }}</strong></li>
-                    <li>• Long Pass Ratio: <strong>{{ our_goalkeeper_long_passes_ratio|default:"0" }}%</strong></li>
-                </ul>
-                {% if goalkeeper %}
-                <canvas id="longPassChart"></canvas>
-                {% endif %}
-            </div>
+        <div class="gk_vs">VS</div>
+
+        <div class="gk_team">
+            {% if away_team.logo %}
+                <img src="{{ match.away_team.logo.url }}" alt="{{ match.away_team.name }}">
+            {% endif %}
+            <p class="gk_team_name">{{ match.away_team.name }}</p>
         </div>
+
     </div>
 </div>
 
-{% comment %}
-    Chart.js scripts only load when goalkeeper exists to avoid errors in PDF rendering
-{% endcomment %}
-{% if goalkeeper %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Save vs Goals Conceded Pie Chart
-    const ctxSave = document.getElementById('saveChart').getContext('2d');
-    new Chart(ctxSave, {
-        type: 'pie',
-        data: {
-            labels: ['Saves Made', 'Goals Conceded'],
-            datasets: [{
-                data: [{{ goalkeeper_saves_made|default:"0" }}, {{ our_goalkeeper_goals_conceded|default:"0" }}],
-                backgroundColor: ['#28a745', '#dc3545'],
-            }]
-        },
-        options: {
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Save vs Goals Conceded',
-                    font: { size: 14 }
-                }
-            }
-        }
-    });
 
-    // Long Pass Distribution Bar Chart
-    const ctxPass = document.getElementById('longPassChart').getContext('2d');
-    new Chart(ctxPass, {
-        type: 'bar',
-        data: {
-            labels: ['Long Passes Attempted', 'Successful Long Passes'],
-            datasets: [{
-                label: 'Long Pass Performance',
-                data: [{{ our_goalkeeper_long_passes|default:"0" }}, {{ our_goalkeeper_successful_long_passes|default:"0" }}],
-                backgroundColor: ['#17a2b8', '#28a745']
-            }]
-        },
-        options: {
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Long Pass Distribution',
-                    font: { size: 14 }
-                }
+
+<!-- ------------------ MATCH SUMMARY ------------------ -->
+
+<div class="container mt-5">
+
+    <div class="row">
+
+        <!-- TEAM A -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm p-3">
+                <h4 class="text-primary">{{ team_a_stats.team.name }}</h4>
+                <hr>
+                <table class="table table-bordered mt-3">
+                    <tr><th>Save Percentage</th><td>{{ team_a_stats.save_percentage }}%</td></tr>
+                   <!-- <tr><th>Clean Sheet</th><td>{% if team_a_stats.clean_sheet %}✅ Yes{% else %}❌ No{% endif %}</td></tr>-->
+
+                    <!--<tr><th>Total Attempts Made</th><td>{{ team_a_stats.total_attempts }}</td></tr>
+                    <tr><th>On-Target Attempts</th><td>{{ team_a_stats.on_target_made }}</td></tr>
+                    <tr><th>Blocked Shots</th><td>{{ team_a_stats.blocked_shot_made }}</td></tr>
+                    <tr><th>Off-Target Attempts</th><td>{{ team_a_stats.off_target_made }}</td></tr>
+                    <tr><th>Incomplete</th><td>{{ team_a_stats.player_error_made }}</td></tr>
+                    <tr><th>Own Goals</th><td>{{ team_a_stats.own_goal_made }}</td></tr>-->
+
+                    <tr><th>Total Attempts Faced</th><td>{{ team_a_stats.total_faced }}</td></tr>
+                    <tr><th>On-Target Faced</th><td>{{ team_a_stats.on_target_faced }}</td></tr>
+                    <tr><th>Goals Conceded</th><td>{{ team_a_stats.on_target_goal_conceded }}</td></tr>
+                    <tr><th>Saves</th><td>{{ team_a_stats.on_target_saved }}</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- TEAM B -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm p-3">
+                <h4 class="text-danger">{{ team_b_stats.team.name }}</h4>
+                <hr>
+                <table class="table table-bordered mt-3">
+                    <tr><th>Save Percentage</th><td>{{ team_b_stats.save_percentage }}%</td></tr>
+                    <!--<tr><th>Clean Sheet</th><td>{% if team_b_stats.clean_sheet %}✅ Yes{% else %}❌ No{% endif %}</td></tr>->
+
+                    <!--<tr><th>Total Attempts Made</th><td>{{ team_b_stats.total_attempts }}</td></tr>
+                    <tr><th>On-Target Attempts</th><td>{{ team_b_stats.on_target_made }}</td></tr>
+                    <tr><th>Blocked Shots</th><td>{{ team_b_stats.blocked_shot_made }}</td></tr>
+                    <tr><th>Off-Target Attempts</th><td>{{ team_b_stats.off_target_made }}</td></tr>
+                    <tr><th>Incomplete</th><td>{{ team_b_stats.player_error_made }}</td></tr>
+                    <tr><th>Own Goals</th><td>{{ team_b_stats.own_goal_made }}</td></tr>-->
+
+                    <tr><th>Total Attempt Faced</th><td>{{ team_b_stats.total_faced }}</td></tr>
+                    <tr><th>On-Target Faced</th><td>{{ team_b_stats.on_target_faced }}</td></tr>
+                    <tr><th>Goals Conceded</th><td>{{ team_b_stats.on_target_goal_conceded }}</td></tr>
+                    <tr><th>Saves</th><td>{{ team_b_stats.on_target_saved }}</td></tr>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- RADAR A -->
+    <div class="chart-container radar-container">
+        <h4 class="text-center">{{ team_a_stats.team.name }} Radar</h4>
+        <img src="data:image/png;base64,{{ radar_a }}" class="img-fluid">
+    </div>
+
+    <!-- RADAR B -->
+    <div class="chart-container radar-container">
+        <h4 class="text-center">{{ team_b_stats.team.name }} Radar</h4>
+        <img src="data:image/png;base64,{{ radar_b }}" class="img-fluid">
+    </div>
+
+
+    <!-- CHART JS BAR -->
+    <div class="chart-container mt-5">
+        <h4 class="text-center">Team Comparison (Interactive)</h4>
+        <canvas id="teamComparisonChart"></canvas>
+    </div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+var ctx = document.getElementById('teamComparisonChart');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [
+            {
+                label: "{{ team_a_stats.team.name }}",
+                data: {{ team_a_values|safe }},
+                backgroundColor: "rgba(0, 123, 255, 0.6)"
             },
-            scales: { y: { beginAtZero: true } }
-        }
-    });
+            {
+                label: "{{ team_b_stats.team.name }}",
+                data: {{ team_b_values|safe }},
+                backgroundColor: "rgba(220, 53, 69, 0.6)"
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins:{ legend:{ position:'bottom' }},
+        scales: { y: { beginAtZero: true } }
+    }
+});
 </script>
-{% endif %}

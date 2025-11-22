@@ -1,5 +1,4 @@
-{% extends "base.html" %}
-{% block content %}
+
 
     <a href="{% url 'reports_app:download_full_report_pdf' match.id our_team_id %}" class="btn btn-primary" style="margin: 20px;">
         📄 Download Full Report (PDF)
@@ -21,11 +20,9 @@
     <!-- 5. out of possession -->
 
     <!-- 6. Goalkeeping -->
-    {% include "reports_app/match_report_templates/6_goalkeeping/goalkeeping_intro.html" %}
     {% include "reports_app/match_report_templates/6_goalkeeping/goalkeeping.html" %}
 
     <!-- 7. Set Plays -->
-    {% include "reports_app/match_report_templates/7_set_plays/set_plays_intro.html" %}
     {% include "reports_app/match_report_templates/7_set_plays/set_plays.html" %}
 
     <!-- 8. Individual-data-in-possession-->
@@ -36,4 +33,4 @@
     {% include "reports_app/match_report_templates/11_outro_page/outro.html" %}
 
 
-{% endblock %}
+

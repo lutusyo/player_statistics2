@@ -460,3 +460,298 @@
   
 
   
+
+
+
+
+
+
+
+
+
+  ########################################################################################################################################
+
+
+
+  <div class="attempts-dashboard">
+
+    <!-- OPPONENT TEAM SUMMARY -->
+    <div class="summary-pitch-container">
+
+      <table class="summary-table">
+        <thead>
+          <tr><th>Key</th><th>Outcome</th><th>Shots</th></tr>
+        </thead>
+        <tbody>
+          <tr><td style="color:red;">●</td><td>Goals</td><td>{{ opponent_summary.goals|default:0 }}</td></tr>
+          <tr><td style="color:cyan;">●</td><td>On Target</td><td>{{ opponent_summary.on_target_total|default:0 }}</td></tr>
+          <tr><td style="color:orange;">●</td><td>Off Target</td><td>{{ opponent_summary.off_target|default:0 }}</td></tr>
+          <tr><td style="color:gold;">●</td><td>Blocked</td><td>{{ opponent_summary.blocked|default:0 }}</td></tr>
+          <tr><td style="color:black;">●</td><td>Incomplete</td><td>{{ opponent_summary.incomplete|default:0 }}</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Optional Pitch Visualization-->
+      <div class="pitch">
+        <img src="{% static 'images/pitch-2.jpg' %}" alt="Pitch" class="pitch-bg">
+        {% for attempt in opponent_attempts %}
+          <div class="shot {{ attempt.outcome|slugify }}" style="top:{{ attempt.y_percent }}%; left:{{ attempt.x_percent }}%;">
+            {{ attempt.player.squad_number }}
+          </div>
+        {% endfor %}
+      </div>
+
+    </div>
+
+    <!-- GOALS LIST -->
+    <h2>Goals</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Minute</th>
+          <th>Scorer</th>
+          <th>Assist</th>
+          <th>Pre-Assist</th>
+          <th>Delivery Type</th>
+          <th>Own Goal</th>
+          <th>Team</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for g in goals %}
+          <tr>
+            <td>{{ g.minute }}{% if g.second %}:{{ g.second|stringformat:"02d" }}{% endif %}</td>
+            <td>
+              {% if g.is_own_goal %}
+                🥅 Own Goal
+              {% elif g.player %}
+                {{ g.player.name }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+            <td>{% if g.assist_by %}{{ g.assist_by.name }}{% else %}-{% endif %}</td>
+            <td>{% if g.pre_assist_by %}{{ g.pre_assist_by.name }}{% else %}-{% endif %}</td>
+            <td>{{ g.get_delivery_type_display }}</td>
+            <td>{% if g.is_own_goal %}✅ Yes (for {{ g.own_goal_for.name }}){% else %}No{% endif %}</td>
+            <td>{{ g.team.name }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">No goals recorded</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- SHOT CATEGORIES-->
+    
+    <h3>Shots On Target</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Minute</th>
+          <th>Name</th>
+          <th>Outcome</th>
+          <th>Body Part</th>
+          <th>Location</th>
+          <th>Delivery Type</th>
+          <th>Assist</th>
+          <th>Pre-Assist</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for shot in opponent_shots_on_target %}
+          <tr>
+            <td>{{ shot.minute }}'</td>
+            <td>{{ shot.player.name }}</td>
+            <td>{{ shot.outcome }}</td>
+            <td>{{ shot.get_body_part_display }}</td>
+            <td>{{ shot.get_location_tag_display }}</td>
+            <td>{{ shot.get_delivery_type_display }}</td>
+            <td>{% if shot.assist_by %}{{ shot.assist_by.name }}{% else %}-{% endif %}</td>
+            <td>{% if shot.pre_assist_by %}{{ shot.pre_assist_by.name }}{% else %}-{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8">No data available</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+
+    <h3>Shots Off Target</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Minute</th>
+          <th>Name</th>
+          <th>Outcome</th>
+          <th>Body Part</th>
+          <th>Location</th>
+          <th>Delivery Type</th>
+          <th>Assist</th>
+          <th>Pre-Assist</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for shot in opponent_shots_off_target %}
+          <tr>
+            <td>{{ shot.minute }}'</td>
+            <td>{{ shot.player.name }}</td>
+            <td>{{ shot.outcome }}</td>
+            <td>{{ shot.get_body_part_display }}</td>
+            <td>{{ shot.get_location_tag_display }}</td>
+            <td>{{ shot.get_delivery_type_display }}</td>
+            <td>{% if shot.assist_by %}{{ shot.assist_by.name }}{% else %}-{% endif %}</td>
+            <td>{% if shot.pre_assist_by %}{{ shot.pre_assist_by.name }}{% else %}-{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8">No data available</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+
+
+    <h3>Blocked Shots</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Minute</th>
+          <th>Name</th>
+          <th>Outcome</th>
+          <th>Body Part</th>
+          <th>Location</th>
+          <th>Delivery Type</th>
+          <th>Assist</th>
+          <th>Pre-Assist</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for shot in opponent_blocked_shots %}
+          <tr>
+            <td>{{ shot.minute }}'</td>
+            <td>{{ shot.player.name }}</td>
+            <td>{{ shot.outcome }}</td>
+            <td>{{ shot.get_body_part_display }}</td>
+            <td>{{ shot.get_location_tag_display }}</td>
+            <td>{{ shot.get_delivery_type_display }}</td>
+            <td>{% if shot.assist_by %}{{ shot.assist_by.name }}{% else %}-{% endif %}</td>
+            <td>{% if shot.pre_assist_by %}{{ shot.pre_assist_by.name }}{% else %}-{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8">No data available</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+
+
+
+    <!-- DELIVERY SUMMARY -->
+    <div class="delivery-summary">
+      <h3>Effective Delivery</h3>
+      <table style="width:50%;">
+        <thead>
+          <tr><th>Delivery Type</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+          {% for item in total_delivery_types %}
+            <tr>
+              <td>{{ item.delivery_type }}</td>
+              <td style="text-align:center;">{{ item.total }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- OTHER ACTIONS -->
+    <h3>Corners</h3>
+    <table>
+      <tr><th>Name</th><th>Minute</th><th>Outcome</th></tr>
+      {% for corner in our_corners %}
+        <tr>
+          <td>{{ corner.assist_by.name }}</td>
+          <td>{{ corner.minute }}'</td>
+          <td>{{ corner.outcome }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3">No corners recorded</td></tr>
+      {% endfor %}
+    </table>
+
+    <h3>Crosses</h3>
+    <table>
+      <tr><th>Name</th><th>Minute</th><th>Outcome</th></tr>
+      {% for cross in opponent_crosses %}
+        <tr>
+          <td>{{ cross.assist_by.name }}</td>
+          <td>{{ cross.minute }}'</td>
+          <td>{{ cross.outcome }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3">No crosses recorded</td></tr>
+      {% endfor %}
+    </table>
+
+    <h3>Loose Balls</h3>
+    <table>
+      <tr><th>Name</th><th>Minute</th></tr>
+      {% for ball in opponent_effective_loose_ball %}
+        <tr>
+          <td>{{ ball.player.name }}</td>
+          <td>{{ ball.minute }}'</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="2">No loose balls recorded</td></tr>
+      {% endfor %}
+    </table>
+
+    <h3>Effective Delivery Passes</h3>
+    <table>
+      <tr><th>Name</th><th>Minute</th><th>Outcome</th></tr>
+      {% for pass in our_effective_pass %}
+        <tr>
+          <td>{{ pass.assist_by.name }}</td>
+          <td>{{ pass.minute }}'</td>
+          <td>{{ pass.outcome }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3">No effective passes recorded</td></tr>
+      {% endfor %}
+    </table>
+
+    <!-- TEAM ATTEMPTS -->
+    <h2>OPPONENT Goal Attempts</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Player</th>
+          <th>Outcome</th>
+          <th>Body Part</th>
+          <th>Delivery Type</th>
+          <th>Location</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for attempt in opponent_attempts %}
+          <tr>
+            <td>{{ attempt.minute }}:{{ attempt.second|stringformat:"02d" }}</td>
+            <td>{{ attempt.player.name }}</td>
+            <td>{{ attempt.outcome }}</td>
+            <td>{{ attempt.get_body_part_display }}</td>
+            <td>{{ attempt.get_delivery_type_display }}</td>
+            <td>{{ attempt.get_location_tag_display }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" style="text-align:center;">No attempts recorded</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </div> <!-- end .attempts-dashboard -->
+
+  
+  
+
+  

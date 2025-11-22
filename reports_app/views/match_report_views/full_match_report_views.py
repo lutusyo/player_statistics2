@@ -1,25 +1,10 @@
 from django.shortcuts import render, get_object_or_404
 from matches_app.models import Match
-
-# Import each section view with context-returning capability
-from reports_app.views.match_report_views.post_match_summary_views import (
-    full_match_context_view as post_match_summary,
-)
-from reports_app.views.match_report_views.summary_key_statistics_views import summary_key_statistics_view
-from reports_app.views.match_report_views.in_possession_views import attempt_to_goal_dashboard
-from reports_app.views.match_report_views.goalkeeping_view import goalkeeping_view
-from reports_app.views.match_report_views.goalkeeping_intro_view import goalkeeping_intro_view
-
-from reports_app.views.match_report_views.set_plays_intro_view import setplays_dashboard_intro
-from reports_app.views.match_report_views.set_plays_views import setplays_dashboard
-
 # Get all sections’ contexts just like in full_match_report_view
 from reports_app.views.match_report_views.post_match_summary_views import full_match_context_view as post_match_summary
 from reports_app.views.match_report_views.summary_key_statistics_views import summary_key_statistics_view
 from reports_app.views.match_report_views.in_possession_views import attempt_to_goal_dashboard
 from reports_app.views.match_report_views.goalkeeping_view import goalkeeping_view
-from reports_app.views.match_report_views.goalkeeping_intro_view import goalkeeping_intro_view
-from reports_app.views.match_report_views.set_plays_intro_view import setplays_dashboard_intro
 from reports_app.views.match_report_views.set_plays_views import setplays_dashboard
 
 from django.http import HttpResponse
@@ -40,11 +25,9 @@ def full_match_report_view(request, match_id, our_team_id):
     attempt_context = attempt_to_goal_dashboard(request, match_id, return_context=True)
 
     # 4️⃣ Goalkeeping
-    goalkeeping_intro_context = goalkeeping_intro_view(request, match_id, return_context=True)
     goalkeeping_context = goalkeeping_view(request, match_id, our_team_id, return_context=True)
 
     # 5️⃣ Set Plays
-    setplays_intro_context = setplays_dashboard_intro(request, match_id, return_context=True)
     setplays_context = setplays_dashboard(request, match_id, our_team_id, return_context=True)
 
     # 🧩 Merge all contexts into one
@@ -54,11 +37,7 @@ def full_match_report_view(request, match_id, our_team_id):
         **post_summary_context,
         **match_summary_context,
         **attempt_context,
-
         **goalkeeping_context,
-        **goalkeeping_intro_context,
-
-        **setplays_intro_context,
         **setplays_context,
     }
 
@@ -81,9 +60,7 @@ def download_full_report_pdf(request, match_id, our_team_id):
     post_summary_context = post_match_summary(request, match_id, our_team_id, return_context=True)
     match_summary_context = summary_key_statistics_view(request, match_id, return_context=True)
     attempt_context = attempt_to_goal_dashboard(request, match_id, return_context=True)
-    goalkeeping_intro_context = goalkeeping_intro_view(request, match_id, return_context=True)
     goalkeeping_context = goalkeeping_view(request, match_id, our_team_id, return_context=True)
-    setplays_intro_context = setplays_dashboard_intro(request, match_id, return_context=True)
     setplays_context = setplays_dashboard(request, match_id, our_team_id, return_context=True)
 
     full_context = {
@@ -92,9 +69,7 @@ def download_full_report_pdf(request, match_id, our_team_id):
         **post_summary_context,
         **match_summary_context,
         **attempt_context,
-        **goalkeeping_intro_context,
         **goalkeeping_context,
-        **setplays_intro_context,
         **setplays_context,
     }
 

@@ -78,7 +78,7 @@ def reports_dashboard(request, team_id=None):
             section_data[key.lower()] = qs
 
     context.update(section_data)
-    return render(request, 'reports_app/reports_dashboard.html', context)
+    return render(request, 'reports_app/daily_report_templates/reports_dashboard.html', context)
 
 
 

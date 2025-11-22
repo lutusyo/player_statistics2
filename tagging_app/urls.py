@@ -8,6 +8,9 @@ from tagging_app.views.output.summary_key_statistics import summary_key_statisti
 from tagging_app.views.output import full_report, table_of_contents, post_match_summary
 from tagging_app.views2 import delivery_type, pdf_download, attempt_summary
 
+ 
+from tagging_app.views.shotmaps_csv import download_attempts_csv
+
 app_name = 'tagging_app'
 
 urlpatterns = [
@@ -65,6 +68,10 @@ urlpatterns = [
     # All summary key statistics ( attempToGoal,Pass,Goalkeeper)
     path("summary_key_statistics/<int:match_id>/", summary_key_statistics_view, name="summary_key_statistics"),
 
+
+    # shotmaps
+
+    path('download-attempts/<int:match_id>/<str:team_type>/', download_attempts_csv, name='download_attempts_csv'),
 
 ]
 

@@ -393,9 +393,18 @@ table tbody tr:hover {
     <a href="{% url 'matches_app:individual_data_in_possession' match.id %}"  class="btn btn-primary m-1">Individual data in possession</a>
     <a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" class="btn btn-primary m-1"> Pass Network</a>
     <a href="{% url 'tagging_app:goalkeeper_distribution_dashboard' match.id %}" class="btn btn-primary m-1"> Goalkeeping Distribution</a>
-    <a href="{% url 'defensive_app:defensive_summary' match.id %}" class="btn btn-primary m-1"> Other Statistics</a>
+    <a href="{% url 'defensive_app:defensive_summary' match.id %}" class="btn btn-primary m-1"> Out of possession</a>
 
     <a href="{% url 'tagging_app:full_report' match.id our_team_id %}" class="btn btn-primary" style="margin-top: 5px;">View Full Report</a>
+
+
+    <a href="{% url 'tagging_app:download_attempts_csv' match.id 'our' %}" class="btn btn-success">
+    Download Our Team Attempts CSV</a>
+
+    <a href="{% url 'tagging_app:download_attempts_csv' match.id 'opponent' %}" class="btn btn-danger">
+    Download Opponent Attempts CSV</a>
+
+
 
     <p>
         <a href="{% url 'performance_rating_app:match_staff_aggregates' match.id %}" class="btn btn-primary">

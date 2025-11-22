@@ -1,10 +1,9 @@
 from io import BytesIO
 from django.shortcuts import get_object_or_404, render
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
 from django.db.models import Count, Q
-
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
@@ -14,31 +13,15 @@ from matches_app.models import Match
 from players_app.models import Player
 from teams_app.models import Team
 from lineup_app.models import MatchLineup
-from tagging_app.models import AttemptToGoal, DeliveryTypeChoices, OutcomeChoices, BodyPartChoices, LocationChoices
+from tagging_app.models import AttemptToGoal, DeliveryTypeChoices, OutcomeChoices, BodyPartChoices, LocationChoices, PassEvent
 from tagging_app.utils.attempt_to_goal_utils import get_match_full_context
 import json
 import traceback
-
-# tagging_app/views/pass_network.py
-from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse, HttpResponse, FileResponse
-from django.views.decorators.csrf import csrf_exempt
-
 from collections import defaultdict
 import csv
 import io
-import json
-
-from django.db.models import Count
-from players_app.models import Player
-from matches_app.models import Match
-from lineup_app.models import MatchLineup
-from tagging_app.models import PassEvent
-from teams_app.models import Team
 
 # ReportLab (PDF)
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
 from reportlab.platypus import Table, TableStyle, SimpleDocTemplate, Paragraph, Image, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 
@@ -49,13 +32,9 @@ from openpyxl import Workbook
 import matplotlib
 matplotlib.use('Agg')  # non-GUI backend for servers
 import matplotlib.pyplot as plt
-# tagging_app/views/pass_network.py
-from django.shortcuts import render, get_object_or_404
+
 from tagging_app.utils.pass_network_utils import get_pass_network_context  # ✅ add this
 
-
-
-    
 
 def attempt_to_goal_dashboard(request, match_id, return_context=False):
     match = get_object_or_404(Match, id=match_id)
@@ -132,7 +111,7 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
         "incomplete": opponent_attempts.filter(outcome="Incomplete").count(),
     }
 
-    #opponent_summary["on_target_total"] = opponent_summary["goals"] + opponent_summary["on_target_save"]
+    opponent_summary["on_target_total"] = opponent_summary["goals"] + opponent_summary["on_target_save"]
 
 
 
@@ -152,15 +131,20 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
     our_effective_pass = our_attempts.filter(delivery_type=DeliveryTypeChoices.PASS)
 
         
-   # opponent_attempts = AttemptToGoal.objects.filter(match=match, is_opponent=True)     # opponents team attempts
-    # Filter by categories
-    #opponent_shots_on_target = opponent_attempts.filter(outcome__in=[OutcomeChoices.ON_TARGET_GOAL, OutcomeChoices.ON_TARGET_SAVED])
-    #opponent_shots_off_target = opponent_attempts.filter(outcome=OutcomeChoices.OFF_TARGET)
-    #opponent_blocked_shots = opponent_attempts.filter(outcome=OutcomeChoices.BLOCKED)
-    #opponent_player_errors = opponent_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR)
+    opponent_attempts = AttemptToGoal.objects.filter(match=match, is_opponent=True)     # opponents team attempts
 
-    #opponent_corners = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.CORNER)
-    #opponent_crosses = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.CROSS)
+
+    # Filter by categories
+
+    opponent_shots_on_target = opponent_attempts.filter(outcome__in=[OutcomeChoices.ON_TARGET_GOAL, OutcomeChoices.ON_TARGET_SAVED])
+    opponent_shots_off_target = opponent_attempts.filter(outcome=OutcomeChoices.OFF_TARGET)
+    opponent_blocked_shots = opponent_attempts.filter(outcome=OutcomeChoices.BLOCKED)
+    opponent_player_errors = opponent_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR)
+
+    opponent_corners = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.CORNER)
+    opponent_crosses = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.CROSS)
+    opponent_effective_loose_ball = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.LOOSE_BALL)
+    opponent_effective_pass = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.PASS)
 
 
     # ✅ Update context
@@ -186,6 +170,19 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
         "our_crosses": our_crosses,
         "our_effective_loose_ball": our_effective_loose_ball,
         "our_effective_pass": our_effective_pass,
+
+
+        "opponent_shots_on_target": opponent_shots_on_target,
+        "opponent_shots_off_target": opponent_shots_off_target,
+        "opponent_blocked_shots": opponent_blocked_shots,
+        "opponent_player_errors": opponent_player_errors,
+
+        "opponent_corners": opponent_corners,
+        "opponent_crosses": opponent_crosses,
+        "opponent_effective_loose_ball": opponent_effective_loose_ball,
+        "opponent_effective_pass": opponent_effective_pass,
+
+
         "home_team": match.home_team,
         "away_team": match.away_team,
     })
