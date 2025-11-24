@@ -24,9 +24,7 @@ MEDICAL_TEST_CHOICES = [
     ('NOT DONE', 'NOT DONE'),
 ]
 
-
 # position choices
-
 
 # Specific position choices
 SPECIFIC_POSITION_CHOICES = [
@@ -54,8 +52,6 @@ SPECIFIC_POSITION_CHOICES = [
     ('ST', 'Striker'),
 ]
 
-
-# Player model
 class Player(models.Model):
     name = models.CharField(max_length=50)
     second_name = models.CharField(max_length=50, default='Second_name')
@@ -65,11 +61,9 @@ class Player(models.Model):
     birthdate = models.DateField(null=True, blank=True)
     place_of_birth = models.CharField(max_length=100, default="Tanzania")
     nationality = models.CharField(max_length=50, default="Tanzania")
-
     passport_number = models.CharField(max_length=20, null=True, blank=True)
     medical_test = models.CharField(max_length=10, choices=MEDICAL_TEST_CHOICES, default='NOT DONE')
-    joined_azamfc_year = models.PositiveIntegerField(null=True, blank=True)
-    
+    joined_year = models.PositiveIntegerField(null=True, blank=True)
     position = models.CharField(
         max_length=50,
         choices=[
@@ -77,33 +71,59 @@ class Player(models.Model):
             ('Winger', 'Winger'),
             ('Midfielder', 'Midfielder'),
             ('Defender', 'Defender'),
-            ('Goalkeeper', 'Goalkeeper'),
-            
+            ('Goalkeeper', 'Goalkeeper'),       
         ]
     )
     specific_position = models.CharField(max_length=10, choices=SPECIFIC_POSITION_CHOICES, null=True, blank=True,help_text="e.g., CB, RW, LW, CM, etc.")
-
-    height = models.DecimalField(max_digits=5, decimal_places=0, default=170)
-    weight = models.DecimalField(max_digits=5, decimal_places=0, default=65)
-
-    foot_preference = models.CharField(
-        max_length=5,
-        choices=[('Left', 'Left'), ('Right', 'Right')],
-        default='Right'
-    )
-
+    foot_preference = models.CharField(max_length=5, choices=[('Left', 'Left'), ('Right', 'Right')], default='Right')
     jersey_number = models.PositiveIntegerField(default=0)
     former_club = models.CharField(max_length=50, default="Null")
     photo = models.ImageField(
         upload_to='player_photos/',
         default='files_to_be_imported/default_image.png'
     )
-
     age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)
+    player_phone = models.CharField(max_length=20, null=True, blank=True)
+    parent_phone =models.CharField(max_length=20, null=True, blank=True)
+
+
     is_active = models.BooleanField(default=True)
     
     def __str__(self):
         return f"{self.name} - {self.age_group} - {self.team}"
+    
+
+    @property
+    def bmi(self):
+        latest = self.measurements.order_by('-date_measured').first()
+        if latest:
+            h = float(latest.height)/100
+            w = float(latest.weight)
+            return round(w/(h*h),1)
+        return None
+    
+    @property
+    def current_measurement(self):
+        return self.measurements.order_by('-date_measured').first()
+
+
+    @property
+    def last_three_measurements(self):
+        return self.measurements.order_by('-date_measured')[:3]
+    
+
+class PlayerMeasurement(models.Model):
+    player =models.ForeignKey(Player, on_delete=models.CASCADE, related_name='measurements')
+    height = models.DecimalField(max_digits=5, decimal_places=2, default=170)
+    weight = models.DecimalField(max_digits=5, decimal_places=2, default=65)
+    date_measured = models.DateField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-date_measured']
+
+    def __str__(self):
+        return f"{self.player.name} - {self.date_measured}"
+
 
 # Career stage for each player
 class PlayerCareerStage(models.Model):

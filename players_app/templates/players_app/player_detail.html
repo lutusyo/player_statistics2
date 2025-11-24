@@ -193,7 +193,6 @@
 
 
 
-
 <div class="player-detail-wrapper">
     <div class="player-sidebar">
         <h3>All ({{ player.age_group }}) players</h3>
@@ -219,17 +218,58 @@
             <button id="statsBtn">Stats</button>
         </div>
 
-        <div id="profileSection" class="section">
+
+        <div id="profileSection" class="section"></div>
             <div class="player-attributes-grid">
-                <div class="attribute-block"><p class="label">Position</p><p class="value blue-text">{{ player.position }}</p></div>
-                <div class="attribute-block"><p class="label">Shirt</p><p class="value blue-text">{{ player.jersey_number }}</p></div>
-                <div class="attribute-block"><p class="label">Birthdate</p><p class="value blue-text">{{ player.birthdate }}</p></div>
-                <div class="attribute-block"><p class="label">Height</p><p class="value blue-text">{{ player.height }} cm</p></div>
-                <div class="attribute-block"><p class="label">Weight</p><p class="value blue-text">{{ player.weight }} kg</p></div>
-                <div class="attribute-block"><p class="label">Preferred Foot</p><p class="value blue-text">{{ player.foot_preference }}</p></div>
+            <div class="attribute-block"><p class="label">Position</p><p class="value blue-text">{{ player.position }}</p></div>
+            <div class="attribute-block"><p class="label">Shirt</p><p class="value blue-text">{{ player.jersey_number }}</p></div>
+            <div class="attribute-block"><p class="label">Birthdate</p><p class="value blue-text">{{ player.birthdate }}</p></div>
+
+            <div class="attribute-block">
+                <p class="label">Height</p>
+                <p class="value blue-text">
+                    {% if latest_measurement %}{{ latest_measurement.height }} cm{% else %}-{% endif %}
+                </p>
             </div>
-            {% include "matches_app/player_timeline.html" %}
+
+            <div class="attribute-block">
+                <p class="label">Weight</p>
+                <p class="value blue-text">
+                    {% if latest_measurement %}{{ latest_measurement.weight }} kg{% else %}-{% endif %}
+                </p>
+            </div>
+
+            <div class="attribute-block">
+                <p class="label">BMI</p>
+                <p class="value blue-text">
+                    {% if bmi %}{{ bmi }}{% else %}-{% endif %}
+                </p>
+            </div>
+
+            <div class="attribute-block"><p class="label">Preferred Foot</p><p class="value blue-text">{{ player.foot_preference }}</p></div>
         </div>
+
+        {% if last_three_measurements %}
+        <h4>Last 3 Measurements</h4>
+        <ul>
+            {% for m in last_three_measurements %}
+            <li>{{ m.date_measured }} — Height: {{ m.height }} cm, Weight: {{ m.weight }} kg, BMI: {{ m.bmi }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% include "matches_app/player_timeline.html" %}
+
+    </div>
+
+
+
+
+
+
+
+
+
 
         <div id="statsSection" class="section">
             <div class="filter-container">

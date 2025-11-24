@@ -80,6 +80,7 @@ urlpatterns = [
 
     # 4. In possession
     path('match/<int:match_id>/attempt-to-goal-dashboard/', in_possession_views.attempt_to_goal_dashboard,name='attempt_to_goal_dashboard'),
+    path("shotmap/<int:match_id>/<str:team_type>/", in_possession_views.create_shotmap_base64, name="generate_shotmap"),
 
     # 6. Goalkeeping
     path("match/<int:match_id>/<int:our_team_id>/goalkeeping/", goalkeeping_view.goalkeeping_view,name="goalkeeping_report"),

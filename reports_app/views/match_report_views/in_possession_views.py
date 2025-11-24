@@ -21,6 +21,13 @@ from collections import defaultdict
 import csv
 import io
 
+import pandas as pd
+import matplotlib.pyplot as plt
+from mplsoccer import Pitch
+from django.http import HttpResponse
+import io
+import os
+
 # ReportLab (PDF)
 from reportlab.platypus import Table, TableStyle, SimpleDocTemplate, Paragraph, Image, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
@@ -34,6 +41,59 @@ matplotlib.use('Agg')  # non-GUI backend for servers
 import matplotlib.pyplot as plt
 
 from tagging_app.utils.pass_network_utils import get_pass_network_context  # ✅ add this
+
+
+
+
+import base64
+
+def create_shotmap_base64(attempts_queryset):
+    if attempts_queryset.count() == 0:
+        return None
+
+    df = pd.DataFrame(list(attempts_queryset.values("x", "y", "outcome")))
+
+    color_map = {
+        'On Target Goal': '#00ff00',
+        'On Target Saved': '#1e90ff',
+        'Off Target': '#ffcc00',
+        'Blocked': '#ff8c00',
+        'Player Error': '#ff0000',
+    }
+
+    df["color"] = df["outcome"].map(color_map).fillna("#ffffff")
+
+    fig, ax = plt.subplots(figsize=(13, 8.5))
+    fig.set_facecolor('#22312b')
+
+    pitch = Pitch(
+        pitch_type='statsbomb',
+        pitch_color='#22312b',
+        line_color='#7d5ccc'
+    )
+    pitch.draw(ax=ax)
+
+    plt.scatter(
+        df['x'], df['y'],
+        c=df['color'],
+        s=120,
+        edgecolors='black',
+        linewidth=0.5,
+        alpha=0.85,
+    )
+
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png', dpi=300, bbox_inches='tight')
+    plt.close(fig)
+    buffer.seek(0)
+
+    return base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+
+
+
+
+
 
 
 def attempt_to_goal_dashboard(request, match_id, return_context=False):
@@ -147,6 +207,17 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
     opponent_effective_pass = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.PASS)
 
 
+
+
+    our_shotmap = create_shotmap_base64(our_attempts)
+    opponent_shotmap = create_shotmap_base64(opponent_attempts)
+
+
+
+
+
+
+
     # ✅ Update context
     context.update({
         "players": players,
@@ -187,10 +258,21 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
         "away_team": match.away_team,
     })
 
+    context["our_shotmap"] = our_shotmap
+    context["opponent_shotmap"] = opponent_shotmap
+
+
     if return_context:
         return context
 
     return render(request, "reports_app/match_report_templates/4_in_possession/attempt_to_goal.html", context)
+
+
+
+###################################################################################################################################33
+
+
+
 
 
 

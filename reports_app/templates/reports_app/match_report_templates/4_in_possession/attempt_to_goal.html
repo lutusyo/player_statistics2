@@ -197,14 +197,17 @@
       </table>
 
       <!-- Optional Pitch Visualization-->
+      <!-- Optional Pitch Visualization -->
       <div class="pitch">
-        <img src="{% static 'images/pitch-2.jpg' %}" alt="Pitch" class="pitch-bg">
-        {% for attempt in our_attempts %}
-          <div class="shot {{ attempt.outcome|slugify }}" style="top:{{ attempt.y_percent }}%; left:{{ attempt.x_percent }}%;">
-            {{ attempt.player.squad_number }}
-          </div>
-        {% endfor %}
+          {% if our_shotmap %}
+              <img src="data:image/png;base64,{{ our_shotmap }}" 
+                  style="width:100%; height:auto; display:block; margin:0 auto;" 
+                  alt="Our Team Shotmap" />
+          {% else %}
+              <p style="text-align:center; margin-top:40%;">No shotmap available</p>
+          {% endif %}
       </div>
+
 
     </div>
 
@@ -491,15 +494,17 @@
         </tbody>
       </table>
 
-      <!-- Optional Pitch Visualization-->
+      <!-- Optional Pitch Visualization -->
       <div class="pitch">
-        <img src="{% static 'images/pitch-2.jpg' %}" alt="Pitch" class="pitch-bg">
-        {% for attempt in opponent_attempts %}
-          <div class="shot {{ attempt.outcome|slugify }}" style="top:{{ attempt.y_percent }}%; left:{{ attempt.x_percent }}%;">
-            {{ attempt.player.squad_number }}
-          </div>
-        {% endfor %}
+          {% if opponent_shotmap %}
+              <img src="data:image/png;base64,{{ opponent_shotmap }}" 
+                  style="width:100%; height:auto; display:block; margin:0 auto;" 
+                  alt="Opponent Shotmap" />
+          {% else %}
+              <p style="text-align:center; margin-top:40%;">No shotmap available</p>
+          {% endif %}
       </div>
+
 
     </div>
 
@@ -668,7 +673,7 @@
     <h3>Corners</h3>
     <table>
       <tr><th>Name</th><th>Minute</th><th>Outcome</th></tr>
-      {% for corner in our_corners %}
+      {% for corner in opponent_corners %}
         <tr>
           <td>{{ corner.assist_by.name }}</td>
           <td>{{ corner.minute }}'</td>
@@ -709,7 +714,7 @@
     <h3>Effective Delivery Passes</h3>
     <table>
       <tr><th>Name</th><th>Minute</th><th>Outcome</th></tr>
-      {% for pass in our_effective_pass %}
+      {% for pass in opponent_effective_pass %}
         <tr>
           <td>{{ pass.assist_by.name }}</td>
           <td>{{ pass.minute }}'</td>
