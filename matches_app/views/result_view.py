@@ -18,45 +18,102 @@ from matches_app.utils.match_details_utils import get_match_detail_context
 def results_view(request, team):
     age_group = AgeGroup.objects.get(code=team)
     our_teams = Team.objects.filter(age_group=age_group)
-    #our_teams = Team.objects.filter(age_group=age_group, team_type="OUR_TEAM")
 
+    # --- NEW: COMPETITION FILTER ---
+    competition = request.GET.get("competition", "all")
+
+    # Base Query
     past_matches = Match.objects.filter(
         Q(home_team__in=our_teams) | Q(away_team__in=our_teams),
         date__lt=date.today()
-    ).order_by("-date")
+    )
 
-    past_matches = [m for m in past_matches if m.home_team in our_teams or m.away_team in our_teams]
+    # Apply competition filter
+    if competition != "all":
+        past_matches = past_matches.filter(competition_type=competition)
 
+    past_matches = past_matches.order_by("-date")
+
+    # Process matches
     for match in past_matches:
         match.has_lineup = MatchLineup.objects.filter(match=match).exists()
         match.has_gps_data = GPSRecord.objects.filter(match=match).exists()
 
-        if match.home_team in our_teams:
-            our_team = match.home_team
-        else:
-            our_team = match.away_team
-
+        our_team = match.home_team if match.home_team in our_teams else match.away_team
         match.our_team_id = our_team.id
 
-    
-        # Use the updated detail context
         detail_context = get_match_detail_context(match)
-        match.our_team_goals = detail_context["home_team_goals"] if our_team == match.home_team else detail_context["away_team_goals"]
-        match.opponent_goals = detail_context["away_team_goals"] if our_team == match.home_team else detail_context["home_team_goals"]
+        match.our_team_goals = (
+            detail_context["home_team_goals"] if our_team == match.home_team 
+            else detail_context["away_team_goals"]
+        )
+        match.opponent_goals = (
+            detail_context["away_team_goals"] if our_team == match.home_team 
+            else detail_context["home_team_goals"]
+        )
 
-    for match in past_matches:
         match.home_lineup_exists = MatchLineup.objects.filter(match=match, team=match.home_team).exists()
         match.away_lineup_exists = MatchLineup.objects.filter(match=match, team=match.away_team).exists()
 
+    # --- SEND COMPETITION LIST FOR DROPDOWN ---
+    competition_choices = [c[0] for c in Match._meta.get_field("competition_type").choices]
 
     context = {
         "team": team,
         "team_selected": team,
         "past_matches": past_matches,
+        "competition_selected": competition,
+        "competition_choices": competition_choices,
         "active_tab": "results",
-        
     }
     return render(request, "matches_app/match_results.html", context)
+
+
+@login_required
+def results_by_competition(request, team, competition):
+    age_group = AgeGroup.objects.get(code=team)
+    our_teams = Team.objects.filter(age_group=age_group)
+
+    # Filter by competition type
+    past_matches = Match.objects.filter(
+        Q(home_team__in=our_teams) | Q(away_team__in=our_teams),
+        date__lt=date.today(),
+        competition_type=competition
+    ).order_by("-date")
+
+    for match in past_matches:
+        match.has_lineup = MatchLineup.objects.filter(match=match).exists()
+        match.has_gps_data = GPSRecord.objects.filter(match=match).exists()
+
+        # Determine our team
+        our_team = match.home_team if match.home_team in our_teams else match.away_team
+        match.our_team_id = our_team.id
+
+        # Goals (uses your existing function)
+        detail_context = get_match_detail_context(match)
+        match.our_team_goals = (
+            detail_context["home_team_goals"] if our_team == match.home_team 
+            else detail_context["away_team_goals"]
+        )
+        match.opponent_goals = (
+            detail_context["away_team_goals"] if our_team == match.home_team 
+            else detail_context["home_team_goals"]
+        )
+
+        # Lineups
+        match.home_lineup_exists = MatchLineup.objects.filter(match=match, team=match.home_team).exists()
+        match.away_lineup_exists = MatchLineup.objects.filter(match=match, team=match.away_team).exists()
+
+    context = {
+        "team": team,
+        "team_selected": team,
+        "past_matches": past_matches,
+        "competition": competition,
+        "active_tab": "results",
+    }
+
+    return render(request, "matches_app/match_results.html", context)
+
 
 
 

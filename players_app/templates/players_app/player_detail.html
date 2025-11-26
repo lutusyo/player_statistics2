@@ -219,11 +219,14 @@
         </div>
 
 
-        <div id="profileSection" class="section"></div>
+        
+        <div id="profileSection" class="section">
+
             <div class="player-attributes-grid">
             <div class="attribute-block"><p class="label">Position</p><p class="value blue-text">{{ player.position }}</p></div>
             <div class="attribute-block"><p class="label">Shirt</p><p class="value blue-text">{{ player.jersey_number }}</p></div>
             <div class="attribute-block"><p class="label">Birthdate</p><p class="value blue-text">{{ player.birthdate }}</p></div>
+            <div class="attribute-block"><p class="label">Age</p><p class="value blue-text">{{ player.age_using_birthdate }} years</p></div>
 
             <div class="attribute-block">
                 <p class="label">Height</p>

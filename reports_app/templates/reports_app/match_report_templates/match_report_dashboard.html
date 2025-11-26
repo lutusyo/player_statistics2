@@ -62,7 +62,7 @@
           <a href="#" class="btn btn-outline-primary">Individual — In Poss.</a>
         </div>
         <div class="col-auto">
-          <a href="#" class="btn btn-outline-success">Individual — Out Poss.</a>
+          <a href="{% url 'defensive_app:defensive_summary' match.id %}" class="btn btn-primary m-1"> Out of possession</a>
         </div>
         <div class="col-auto">
           <a href="{% url 'gps_app:gps_dashboard' match.id %}" class="btn btn-outline-warning">Physical</a>

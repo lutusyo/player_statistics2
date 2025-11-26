@@ -7,7 +7,40 @@
 <link rel="stylesheet" href="{% static 'matches_app/css/results_style.css' %}">
 {% endblock %}
 
+
+
+
+
+
+
+
+
 {% block match_content %}
+
+
+
+
+
+
+
+<form method="get" class="filter-form">
+    <label>Competition:</label>
+    <select name="competition" onchange="this.form.submit()">
+        <option value="all" {% if competition_selected == 'all' %}selected{% endif %}>All Competitions</option>
+        {% for comp in competition_choices %}
+            <option value="{{ comp }}" {% if comp == competition_selected %}selected{% endif %}>
+                {{ comp }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
+
+
+
+
+
+
+
 <div class="results-container">
 
     <hr>

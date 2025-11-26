@@ -207,4 +207,5 @@ def player_detail(request, player_id):
         'latest_measurement': latest_measurement,
         'last_three_measurements': last_three_measurements,
         'bmi': bmi,
+        "age_using_birthdate": player.age_using_birthdate,
     })

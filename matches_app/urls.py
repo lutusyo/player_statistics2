@@ -42,8 +42,23 @@ urlpatterns = [
     path('<str:team>/player-statistics/', player_statistics.player_statistics_view, name='players_statistics'),
     path('career-stage/<int:stage_id>/', career_stage.career_stage_detail, name='career_stage_detail'),
     path('dashboard/<int:team_id>/', team_dashboard.team_dashboard_view, name='team_dashboard'),
-    path('<str:team>/fixtures/', fixture_view.fixtures_view, name='team_fixtures'),
-    path('<str:team>/results/', result_view.results_view, name='team_results'),
+
+
+    #path('<str:team>/fixtures/', fixture_view.fixtures_view, name='team_fixtures'),
+
+
+    #path('<str:team>/results/', result_view.results_view, name='team_results'),
+    #path('<str:team>/results/', result_view.results_view, name='results'),
+    #path('<str:team>/results/<str:competition>/', result_view.results_view, name='results_filtered'),
+
+    path('<str:team>/results/', result_view.results_view, name="team_results"),
+    path('<str:team>/results/<str:competition>/', result_view.results_by_competition, name="team_results_filtered"),
+
+    path('<str:team>/fixtures/', fixture_view.fixtures_view, name="team_fixtures"),
+    path('<str:team>/fixtures/<str:competition>/', fixture_view.fixtures_by_competition, name="team_fixtures_filtered"),
+
+
+
     path('<str:code>/table/', table_view.table_view, name='team_table'),
     # Match details
     path('match/<int:match_id>/', match_detail.match_detail, name='match_detail'),

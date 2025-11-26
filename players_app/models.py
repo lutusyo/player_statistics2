@@ -1,6 +1,7 @@
 from django.db import models
 from teams_app.models import AgeGroup, Team
 from django import forms
+from datetime import date
 
 # Season choices
 SEASON_CHOICES = [
@@ -59,6 +60,12 @@ class Player(models.Model):
     jina_maarufu = models.CharField(max_length=50, default='nickname', null=True, blank=True)
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='players')
     birthdate = models.DateField(null=True, blank=True)
+
+
+    leve_of_education = models.CharField(max_length=20, default='FORM-4', null=True, blank=True)
+
+    real_dob = models.DateField(null=True, blank=True)
+
     place_of_birth = models.CharField(max_length=100, default="Tanzania")
     nationality = models.CharField(max_length=50, default="Tanzania")
     passport_number = models.CharField(max_length=20, null=True, blank=True)
@@ -110,6 +117,23 @@ class Player(models.Model):
     @property
     def last_three_measurements(self):
         return self.measurements.order_by('-date_measured')[:3]
+    
+
+    @property
+    def age_using_birthdate(self):
+        """ Age calculated using birthdate fields"""
+        if not self.birthdate:
+            return None
+        today = date.today()
+        return today.year - self.birthdate.year - ((today.month, today.day)<(self.birthdate.month, self.birthdate.day))
+    
+    @property
+    def real_age(self):
+        """ Age calculated using real_dob fields"""
+        if not self.real_dob:
+            return None
+        today = date.today()
+        return today.year - self.real_dob.year - ((today.month, today.day)<(self.real_dob.month, self.real_dob.day))
     
 
 class PlayerMeasurement(models.Model):

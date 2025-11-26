@@ -51,14 +51,82 @@
                             </ul>
                         </li>
 
-                        <li>
-                            <a href="#">MATCHES</a>
+
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">MATCHES</a>
                             <ul class="dropdown-menu">
+
                                 {% for team in our_teams %}
-                                    <li><a href="{% url 'matches_app:team_dashboard' team.id %}">{{ team.age_group.code }}</a></li>
+                                <li class="dropdown-submenu">
+                                    <!-- AGE GROUP (first level) -->
+                                    <a class="dropdown-item dropdown-toggle" href="#">
+                                        {{ team.age_group.code }}
+                                    </a>
+
+                                    <ul class="dropdown-menu">
+
+                                        <!-- ALL MATCHES -->
+                                        <li>
+                                            <a class="dropdown-item"
+                                            href="{% url 'matches_app:team_results' team.age_group.code %}">
+                                                All Matches
+                                            </a>
+                                        </li>
+
+                                        <!-- COMPETITIONS -->
+                                        <li>
+                                            <a class="dropdown-item"
+                                            href="{% url 'matches_app:team_results_filtered' team.age_group.code 'Local Friendly' %}">
+                                                Local Friendly
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item"
+                                            href="{% url 'matches_app:team_results_filtered' team.age_group.code 'International Friendly' %}">
+                                            International Friendly
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item"
+                                            href="{% url 'matches_app:team_results_filtered' team.age_group.code 'NBC Youth League' %}">
+                                            NBC Youth League
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item"
+                                            href="{% url 'matches_app:team_results_filtered' team.age_group.code 'NBC Premier League' %}">
+                                            NBC Premier League
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item"
+                                            href="{% url 'matches_app:team_results_filtered' team.age_group.code 'CAF Confederation Cup' %}">
+                                            CAF Confederation Cup
+                                            </a>
+                                        </li>
+
+                                    </ul>
+                                </li>
                                 {% endfor %}
+
                             </ul>
                         </li>
+
+
+
+
+
+
+
+
+
+
+
 
 
 
