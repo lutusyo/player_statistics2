@@ -41,12 +41,19 @@
         <div class="col-auto">
           <a href="{% url 'reports_app:post_match_summary' match.id team.id %}" class="btn btn-outline-primary">Post Match</a>
         </div>
+
         <div class="col-auto">
-          <a href="{% url 'reports_app:attempt_to_goal_dashboard' match.id %}" class="btn btn-outline-info">In Possession</a>
+          <a href="{% url 'reports_app:match_lineup_report' match.id %}" class="btn btn-outline-dark">Teams</a>
         </div>
+
         <div class="col-auto">
           <a href="{% url 'reports_app:summary_key_statistics' match.id %}" class="btn btn-outline-dark">Key Stats</a>
         </div>
+
+        <div class="col-auto">
+          <a href="{% url 'reports_app:attempt_to_goal_dashboard' match.id %}" class="btn btn-outline-info">In Possession</a>
+        </div>
+
         <div class="col-auto">
           <a href="{% url 'reports_app:goalkeeping_report' match.id team.id %}" class="btn btn-outline-danger">Goalkeeping</a>
         </div>

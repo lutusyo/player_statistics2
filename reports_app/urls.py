@@ -15,6 +15,7 @@ from reports_app.views.match_report_views import (
 
 from reports_app.views.match_report_views.full_match_report_views import full_match_report_view, download_full_report_pdf
 from reports_app.views.match_report_views.match_report_dashboard_view import match_report_dashboard
+from reports_app.views.match_report_views import match_summary_team_view
 
 app_name = 'reports_app'
 
@@ -74,6 +75,9 @@ urlpatterns = [
 
     # 1. Post match summary
     path('match/<int:match_id>/<int:our_team_id>/post-match-summary/', post_match_summary_views.full_match_context_view, name='post_match_summary'),
+
+    # 2. Match summary team
+    path("match-lineup/<int:match_id>/", match_summary_team_view.match_lineup_report, name="match_lineup_report"),
 
     # 3. Key statistics summary
     path("match/<int:match_id>/summary-key-statistics/",summary_key_statistics_views.summary_key_statistics_view, name="summary_key_statistics"),

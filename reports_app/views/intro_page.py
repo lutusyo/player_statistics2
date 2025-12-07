@@ -5,10 +5,6 @@ from matches_app.models import Match
 from tagging_app.utils.attempt_to_goal_utils_opp import get_opponent_goals_for_match
 from tagging_app.utils.attempt_to_goal_utils import get_match_full_context
 
-
-
-
-
 def get_dynamic_match_result(match, our_team_id):
     """
     Returns home_score, away_score, result string, and full context

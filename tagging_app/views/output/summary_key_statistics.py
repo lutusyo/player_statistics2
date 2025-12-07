@@ -4,9 +4,6 @@ from matches_app.models import Match
 from tagging_app.services.summary_key_statistics import get_match_summary
 
 
-
-
-
 def summary_key_statistics_view(request, match_id):
     match = get_object_or_404(Match, id=match_id)
     summary = get_match_summary(match, match.home_team, match.away_team)

@@ -6,6 +6,7 @@ from reports_app.views.match_report_views.summary_key_statistics_views import su
 from reports_app.views.match_report_views.in_possession_views import attempt_to_goal_dashboard, pass_network_dashboard
 from reports_app.views.match_report_views.goalkeeping_view import goalkeeping_view
 from reports_app.views.match_report_views.set_plays_views import setplays_dashboard
+from reports_app.views.match_report_views.match_summary_team_view import match_lineup_report
 
 from django.http import HttpResponse
 from django.template.loader import get_template
@@ -18,10 +19,13 @@ def full_match_report_view(request, match_id, our_team_id):
     # 1️⃣ Post-match summary
     post_summary_context = post_match_summary(request, match_id, our_team_id, return_context=True)
 
-    # 2️⃣ Match Summary Key Statistics (no our_team_id here)
-    match_summary_context = summary_key_statistics_view(request, match_id, return_context=True)
+    # 2 match summary team
+    match_summary_team_context = match_lineup_report(request, match_id, return_context=True)
 
-    # 3️⃣ Attempt-to-goal dashboard
+    # 3 Match Summary Key Statistics (no our_team_id here)
+    match_summary_key_statistics_context = summary_key_statistics_view(request, match_id, return_context=True)
+
+    # 4 Attempt-to-goal dashboard
     attempt_context = attempt_to_goal_dashboard(request, match_id, return_context=True)
 
     # Pass network
@@ -38,10 +42,12 @@ def full_match_report_view(request, match_id, our_team_id):
         'match': match,
         'our_team_id': our_team_id,
         **post_summary_context,
-        **match_summary_context,
+        **match_summary_team_context, 
+        **match_summary_key_statistics_context,
         **attempt_context,
         **goalkeeping_context,
         **setplays_context,
+
     }
 
     return render(

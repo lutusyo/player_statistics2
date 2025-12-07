@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Match Summary - Teams</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .teams-title {
+            text-align: center;
+            font-size: 22px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .columns {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .team-box {
+            width: 48%;
+        }
+
+        .section-title {
+            font-weight: bold;
+            background: #eee;
+            padding: 5px;
+            font-size: 18px;
+            margin-top: 15px;
+            border: 1px solid #ccc;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+
+        table td {
+            padding: 6px;
+            border-bottom: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        .print-btn {
+            margin-bottom: 20px;
+        }
+
+        @media print {
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <button onclick="window.print()" class="print-btn">Print</button>
+
+    <h2>Match Summary -Teams</h2>
+    <div class="teams-title">
+        <small>{{ match.date }}</small>
+    </div>
+
+    <div class="columns">
+
+        <!-- HOME TEAM -->
+        <div class="team-box">
+            <h3>Home Team</h3>
+            <h3>{{ match.home_team.name }}</h3>
+
+            <div class="section-title">Starting XI</div>
+            <table>
+                {% for row in home_starting %}
+                <tr>
+                    <td>
+                        {{ row.player.jersey_number }} - 
+                        {{ row.player.name }} {{ row.player.second_name }} {{ row.player.surname }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <div class="section-title">Substitutes</div>
+            <table>
+                {% for row in home_subs %}
+                <tr>
+                    <td>
+                        {{ row.player.jersey_number }} - 
+                        {{ row.player.name }} {{ row.player.second_name }} {{ row.player.surname }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <!-- AWAY TEAM -->
+        <div class="team-box">
+            <h3>Away Team</h3>
+            <h3>{{ match.away_team.name }}</h3>
+
+            <div class="section-title">Starting XI</div>
+            <table>
+                {% for row in away_starting %}
+                <tr>
+                    <td>
+                        {{ row.player.jersey_number }} -
+                        {{ row.player.name }} {{ row.player.second_name }} {{ row.player.surname }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <div class="section-title">Substitutes</div>
+            <table>
+                {% for row in away_subs %}
+                <tr>
+                    <td>
+                        {{ row.player.jersey_number }} -
+                        {{ row.player.name }} {{ row.player.second_name }} {{ row.player.surname }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    </div>
+
+</body>
+</html>
