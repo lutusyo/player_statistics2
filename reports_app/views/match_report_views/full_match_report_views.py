@@ -3,7 +3,7 @@ from matches_app.models import Match
 # Get all sections’ contexts just like in full_match_report_view
 from reports_app.views.match_report_views.post_match_summary_views import full_match_context_view as post_match_summary
 from reports_app.views.match_report_views.summary_key_statistics_views import summary_key_statistics_view
-from reports_app.views.match_report_views.in_possession_views import attempt_to_goal_dashboard
+from reports_app.views.match_report_views.in_possession_views import attempt_to_goal_dashboard, pass_network_dashboard
 from reports_app.views.match_report_views.goalkeeping_view import goalkeeping_view
 from reports_app.views.match_report_views.set_plays_views import setplays_dashboard
 
@@ -23,6 +23,9 @@ def full_match_report_view(request, match_id, our_team_id):
 
     # 3️⃣ Attempt-to-goal dashboard
     attempt_context = attempt_to_goal_dashboard(request, match_id, return_context=True)
+
+    # Pass network
+    pass_context = pass_network_dashboard(request, match_id, return_context=True)
 
     # 4️⃣ Goalkeeping
     goalkeeping_context = goalkeeping_view(request, match_id, our_team_id, return_context=True)

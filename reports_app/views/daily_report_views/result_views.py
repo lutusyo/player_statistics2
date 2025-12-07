@@ -13,6 +13,9 @@ from reports_app.models import Result
 from reports_app.forms import ReportFilterForm
 from teams_app.models import Team, StaffMember
 
+from django.conf import settings
+import os
+
 
 # ---- Display result reports ----
 def result_reports(request, team_id):
@@ -101,11 +104,16 @@ def export_results_pdf(request, team_id):
     results = Result.objects.filter(our_team=team).order_by('date')
     staff_members = StaffMember.objects.filter(age_group=team.age_group)
 
+
+
+    footer_image_path = os.path.join(settings.STATIC_ROOT, "reports_app/daily_report_statics/images/footer.png")
+
     context = {
         'team': team,
         'results': results,
         'staff_members': staff_members,
         'generated_on': timezone.now(),
+        "footer_image_path": "file://" + footer_image_path, 
     }
 
     html_string = render_to_string('reports_app/daily_report_templates/8results/results_pdf.html', context)

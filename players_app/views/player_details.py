@@ -209,3 +209,5 @@ def player_detail(request, player_id):
         'bmi': bmi,
         "age_using_birthdate": player.age_using_birthdate,
     })
+
+

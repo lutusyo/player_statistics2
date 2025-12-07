@@ -1,0 +1,119 @@
+{% load numbers %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Match Lineup Sheet</title>
+    <style>
+        body {
+            font-family: Arial;
+            margin: 40px;
+        }
+
+        h2, h3 {
+            text-align: center;
+            margin: 5px;
+        }
+
+        .section {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 15px;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 6px;
+            text-align: left;
+        }
+
+        .header-table td {
+            border: none;
+            font-size: 16px;
+        }
+
+        .signature-area {
+            margin-top: 60px;
+        }
+    </style>
+</head>
+
+<body>
+
+<a href="{% url 'sheets_generator_app:download_lineup_excel' %}" 
+    style="padding: 8px 14px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+    Download Excel
+</a>
+
+
+<h2>AZAM FOOTBALL CLUB ACADEMY</h2>
+<h3>MATCH LINE-UP SHEET</h3>
+
+<!-- Match Information -->
+<table class="header-table">
+    <tr>
+        <td><strong>Competition:</strong> ________________________</td>
+        <td><strong>Age Group:</strong> ________________________</td>
+    </tr>
+    <tr>
+        <td><strong>Date:</strong> ________________________</td>
+        <td><strong>Kickoff Time:</strong> ________________________</td>
+    </tr>
+    <tr>
+        <td><strong>Opponent:</strong> ________________________</td>
+        <td><strong>Pitch No.:</strong> ________________________</td>
+    </tr>
+</table>
+
+<!-- Starting XI -->
+<div class="section">
+    <h3>STARTING XI</h3>
+    <table>
+        <tr>
+            <th>No.</th>
+            <th>Player Name</th>
+            <th>Position</th>
+        </tr>
+        {% for i in 1|to:11 %}
+        <tr>
+            <td>________</td>
+            <td>________________________________________</td>
+            <td>________________</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<!-- Substitutes -->
+<div class="section">
+    <h3>SUBSTITUTES</h3>
+    <table>
+        <tr>
+            <th>No.</th>
+            <th>Player Name</th>
+        </tr>
+        {% for i in 1|to:10 %}
+        <tr>
+            <td>________</td>
+            <td>_______________________________________________</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<!-- Staff -->
+<div class="section signature-area">
+    <strong>Coach Name:</strong> ___________________________________________
+</div>
+
+</body>
+</html>

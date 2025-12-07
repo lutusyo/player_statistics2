@@ -24,8 +24,6 @@ import io
 import pandas as pd
 import matplotlib.pyplot as plt
 from mplsoccer import Pitch
-from django.http import HttpResponse
-import io
 import os
 
 # ReportLab (PDF)
@@ -41,9 +39,6 @@ matplotlib.use('Agg')  # non-GUI backend for servers
 import matplotlib.pyplot as plt
 
 from tagging_app.utils.pass_network_utils import get_pass_network_context  # ✅ add this
-
-
-
 
 import base64
 
@@ -88,11 +83,6 @@ def create_shotmap_base64(attempts_queryset):
     buffer.seek(0)
 
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
-
-
-
-
-
 
 
 
@@ -268,8 +258,16 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
     return render(request, "reports_app/match_report_templates/4_in_possession/attempt_to_goal.html", context)
 
 
+def pass_network_dashboard(request, match_id, return_context=False):
+    match = get_object_or_404(Match, id=match_id)  # ✅ Add this line
+    context = get_pass_network_context(match)      # ✅ Use the Match object, not match_id
+    context['match'] = match                       # ✅ Add match to context explicitly
 
-###################################################################################################################################33
+    if return_context:
+        return context
+
+    return render(request, "reports_app/match_report_templates/4_in_possession/pass_network.html", context)
+
 
 
 

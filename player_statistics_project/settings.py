@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'lineup_app',
     'perfomance_rating_app',
     'training_app',
+    'sheets_generator_app'
 ]
 
 MIDDLEWARE = [

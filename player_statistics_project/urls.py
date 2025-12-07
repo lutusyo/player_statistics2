@@ -34,6 +34,9 @@ urlpatterns = [
 
     path('training/', include('training_app.urls')),
 
+    #sheets generator
+    path("sheets/", include("sheets_generator_app.urls")),
+
   
 ]
 

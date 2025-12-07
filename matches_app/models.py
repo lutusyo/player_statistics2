@@ -4,15 +4,11 @@ from players_app.models import Player
 from teams_app.models import Team, AgeGroup
 from django.utils import timezone
 
-
-### CHOICES ###
-
 class SeasonChoices(models.TextChoices):
     SEASON_2022_2023 = "2022-2023", "2022-2023"
     SEASON_2023_2024 = "2023-2024", "2023-2024"
     SEASON_2024_2025 = "2024-2025", "2024-2025"
     SEASON_2025_2026 = "2025-2026", "2025-2026"
-
 
 class CompetitionType(models.TextChoices):
     LOCAL_FRIENDLY = 'Local Friendly', 'Local Friendly'
@@ -20,9 +16,7 @@ class CompetitionType(models.TextChoices):
     NBC_YOUTH_LEAGUE = 'NBC Youth League', 'NBC Youth League'
     NBC_PREMIER_LEAGUE = 'NBC Premier League', 'NBC Premier League'
     CAF_CONFEDERATION_CUP = 'CAF Confederation Cup', 'CAF Confederation Cup'
-
-
-
+    AZAM_INTERNATIONAL_TALENT_SHOWCASE = 'Azam International Talent Showcase', 'Azam International Talent Showcase'
 
 class Region(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -36,7 +30,6 @@ class Venue(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.region.name})"
-
 
 class Match(models.Model):
     home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home_matches')
