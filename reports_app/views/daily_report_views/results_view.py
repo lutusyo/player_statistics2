@@ -17,7 +17,6 @@ from openpyxl.utils import get_column_letter
 # ✅ For PDF (xhtml2pdf)
 from xhtml2pdf import pisa
 
-
 def parse_date(s):
     try:
         return datetime.datetime.strptime(s, "%Y-%m-%d").date()
@@ -66,8 +65,6 @@ def get_date_range_from_request(request):
         qs = qs.filter(Q(home_team_id=team_id) | Q(away_team_id=team_id))
 
     return start, end, qs.order_by('date')
-
-
 
 def compute_score_for_match(match):
     """Compute scoreline using AttemptToGoal model."""

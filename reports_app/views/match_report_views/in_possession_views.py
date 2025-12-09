@@ -23,7 +23,8 @@ import io
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from mplsoccer import Pitch
+# from mplsoccer import Pitch  # ❌ Commented out
+
 import os
 
 # ReportLab (PDF)
@@ -41,6 +42,7 @@ import matplotlib.pyplot as plt
 from tagging_app.utils.pass_network_utils import get_pass_network_context  # ✅ add this
 
 import base64
+
 
 def create_shotmap_base64(attempts_queryset):
     if attempts_queryset.count() == 0:
@@ -61,12 +63,13 @@ def create_shotmap_base64(attempts_queryset):
     fig, ax = plt.subplots(figsize=(13, 8.5))
     fig.set_facecolor('#22312b')
 
-    pitch = Pitch(
-        pitch_type='statsbomb',
-        pitch_color='#22312b',
-        line_color='#7d5ccc'
-    )
-    pitch.draw(ax=ax)
+    # ❌ Commented out mplsoccer Pitch
+    # pitch = Pitch(
+    #     pitch_type='statsbomb',
+    #     pitch_color='#22312b',
+    #     line_color='#7d5ccc'
+    # )
+    # pitch.draw(ax=ax)
 
     plt.scatter(
         df['x'], df['y'],
@@ -83,7 +86,6 @@ def create_shotmap_base64(attempts_queryset):
     buffer.seek(0)
 
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
-
 
 
 def attempt_to_goal_dashboard(request, match_id, return_context=False):
@@ -149,7 +151,6 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
         "incomplete": our_attempts.filter(outcome="Player Error").count(),
     }
 
-
     our_summary["on_target_total"] = our_summary["goals"] + our_summary["on_target_saved"]
 
     opponent_summary = {
@@ -163,13 +164,10 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
 
     opponent_summary["on_target_total"] = opponent_summary["goals"] + opponent_summary["on_target_save"]
 
-
-
 ##############################################################################################################################
     our_attempts = AttemptToGoal.objects.filter(match=match, is_opponent=False)   # our team attempts
     
     # Filter by categories
-
     our_shots_on_target = our_attempts.filter(outcome__in=[OutcomeChoices.ON_TARGET_GOAL, OutcomeChoices.ON_TARGET_SAVED])
     our_shots_off_target = our_attempts.filter(outcome=OutcomeChoices.OFF_TARGET)
     our_blocked_shots = our_attempts.filter(outcome=OutcomeChoices.BLOCKED)
@@ -180,12 +178,9 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
     our_effective_loose_ball = our_attempts.filter(delivery_type=DeliveryTypeChoices.LOOSE_BALL)
     our_effective_pass = our_attempts.filter(delivery_type=DeliveryTypeChoices.PASS)
 
-        
     opponent_attempts = AttemptToGoal.objects.filter(match=match, is_opponent=True)     # opponents team attempts
 
-
     # Filter by categories
-
     opponent_shots_on_target = opponent_attempts.filter(outcome__in=[OutcomeChoices.ON_TARGET_GOAL, OutcomeChoices.ON_TARGET_SAVED])
     opponent_shots_off_target = opponent_attempts.filter(outcome=OutcomeChoices.OFF_TARGET)
     opponent_blocked_shots = opponent_attempts.filter(outcome=OutcomeChoices.BLOCKED)
@@ -196,17 +191,9 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
     opponent_effective_loose_ball = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.LOOSE_BALL)
     opponent_effective_pass = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.PASS)
 
-
-
-
+    # ❌ Commented out mplsoccer shotmaps
     our_shotmap = create_shotmap_base64(our_attempts)
     opponent_shotmap = create_shotmap_base64(opponent_attempts)
-
-
-
-
-
-
 
     # ✅ Update context
     context.update({
@@ -220,7 +207,6 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
         "match": match,
         'total_delivery_types': total_delivery_types,
 
-
         "match": match,
         "our_shots_on_target": our_shots_on_target,
         "our_shots_off_target": our_shots_off_target,
@@ -232,7 +218,6 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
         "our_effective_loose_ball": our_effective_loose_ball,
         "our_effective_pass": our_effective_pass,
 
-
         "opponent_shots_on_target": opponent_shots_on_target,
         "opponent_shots_off_target": opponent_shots_off_target,
         "opponent_blocked_shots": opponent_blocked_shots,
@@ -243,14 +228,12 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
         "opponent_effective_loose_ball": opponent_effective_loose_ball,
         "opponent_effective_pass": opponent_effective_pass,
 
-
         "home_team": match.home_team,
         "away_team": match.away_team,
     })
 
     context["our_shotmap"] = our_shotmap
     context["opponent_shotmap"] = opponent_shotmap
-
 
     if return_context:
         return context
@@ -267,64 +250,3 @@ def pass_network_dashboard(request, match_id, return_context=False):
         return context
 
     return render(request, "reports_app/match_report_templates/4_in_possession/pass_network.html", context)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    

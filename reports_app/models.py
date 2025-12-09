@@ -24,8 +24,6 @@ class Medical(models.Model):
     comments = models.CharField(max_length=150, blank=True)
     status = models.CharField(max_length=50)
 
-    
-
     def __str__(self):
         return f"{self.name} - {self.status}"
 
@@ -191,11 +189,6 @@ class Result(models.Model):
 
     def __str__(self):
         return f"{self.home_team} {self.home_score} - {self.away_score} {self.away_team} ({self.date})"
-
-
-
-
-
 
 class TrainingMinutes(models.Model):
     date = models.DateField(default=timezone.now)

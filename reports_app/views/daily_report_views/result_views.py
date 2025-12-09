@@ -12,10 +12,10 @@ from weasyprint import HTML, CSS
 from reports_app.models import Result
 from reports_app.forms import ReportFilterForm
 from teams_app.models import Team, StaffMember
+from reports_app.models import TrainingMinutes
 
 from django.conf import settings
 import os
-
 
 # ---- Display result reports ----
 def result_reports(request, team_id):
