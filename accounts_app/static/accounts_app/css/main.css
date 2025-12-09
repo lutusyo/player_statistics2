@@ -1930,7 +1930,7 @@ input, select, textarea {
     position: relative;
     max-width: 1200px;  /* Decrease navbar width */
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 5px;
 }
 
 /* Logo */
