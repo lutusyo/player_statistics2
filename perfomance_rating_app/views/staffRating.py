@@ -22,15 +22,17 @@ from django.utils.html import strip_tags
 def send_rating_links(request, match_id):
     """
     Sends a one-time HTML rating link email to all staff for the match.
-    Uses template: templates/emails/rating_request.html
+    If a link was already used, it is NOT resent.
     """
     match = get_object_or_404(Match, id=match_id)
 
-    staff_list = StaffMember.objects.filter(age_group=match.home_team.age_group)
+    staff_list = StaffMember.objects.filter(
+        age_group=match.home_team.age_group
+    )
 
     expires_at = timezone.now() + timezone.timedelta(hours=48)
 
-    sent, failed = [], []
+    sent, skipped = [], []
 
     for staff in staff_list:
 
@@ -40,20 +42,22 @@ def send_rating_links(request, match_id):
             defaults={"expires_at": expires_at}
         )
 
-        # If token expired or used → generate a new one
-        if not token.is_valid():
-            token = RatingToken.objects.create(
-                staff=staff,
-                match=match,
-                expires_at=expires_at
-            )
+        # 🚫 If token already used → DO NOT resend
+        if token.used:
+            skipped.append(staff)
+            continue
 
-        # Rating link to send
+        # ♻ If token exists but expired → refresh it
+        if token.is_expired():
+            token.refresh(expires_at=expires_at)
+
         rating_link = request.build_absolute_uri(
-            reverse("performance_rating_app:staff_rate_with_token", args=[str(token.token)])
+            reverse(
+                "performance_rating_app:staff_rate_with_token",
+                args=[str(token.token)]
+            )
         )
 
-        # Context for template
         context = {
             "staff_name": staff.name,
             "match": match,
@@ -61,31 +65,39 @@ def send_rating_links(request, match_id):
             "year": timezone.now().year,
         }
 
-        # Render HTML Email
-        html_message = render_to_string("emails/rating_requests.html", context)
-        plain_message = strip_tags(html_message)  # Fallback text email
-        subject = f"Player Rating Request — {match}"
+        html_message = render_to_string(
+            "emails/rating_request.html", context
+        )
+        plain_message = strip_tags(html_message)
 
         try:
             send_mail(
-                subject,
-                plain_message,
-                settings.DEFAULT_FROM_EMAIL,
-                [staff.email],
-                html_message=html_message,  # IMPORTANT: HTML EMAIL
-                fail_silently=False
+                subject=f"Player Rating Request — {match}",
+                message=plain_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[staff.email],
+                html_message=html_message,
+                fail_silently=False,
             )
             sent.append(staff)
 
         except Exception as e:
             print("Email error:", e)
-            failed.append(staff)
+
+    # ✅ Mark match once links are sent
+    match.rating_links_sent = True
+    match.save()
 
     return render(
         request,
         "performance_rating_app/links_sent.html",
-        {"match": match, "sent": sent, "failed": failed}
+        {
+            "match": match,
+            "sent": sent,
+            "skipped": skipped,
+        },
     )
+
 
 
 

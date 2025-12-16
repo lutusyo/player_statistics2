@@ -51,8 +51,6 @@ class StaffPlayerRating(models.Model):
 
     submitted_at = models.DateTimeField(auto_now_add=True)
     
-
-
     class Meta:
         unique_together = ("staff", "player", "match")
         ordering = ["-submitted_at"]
@@ -62,10 +60,6 @@ class StaffPlayerRating(models.Model):
     
 
 class RatingToken(models.Model):
-    """
-    one token per ( staff, match). Token is single use and can expire. 
-    We generate a token and Email it to a staff when they visit the link we validate token
-    """
     staff = models.ForeignKey(StaffMember, on_delete=models.CASCADE, related_name="rating_tokens")
     match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name="rating_tokens")
     token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -78,17 +72,28 @@ class RatingToken(models.Model):
         unique_together = ("staff", "match")
 
     def is_valid(self):
-
         if self.used:
             return False
         if self.expires_at and timezone.now() > self.expires_at:
             return False
         return True
-    
+
+    def is_expired(self):
+        return self.expires_at and timezone.now() > self.expires_at
+
+    def refresh(self, expires_at):
+        """Reuse SAME row, avoid unique constraint violation"""
+        self.token = uuid.uuid4()
+        self.expires_at = expires_at
+        self.used = False
+        self.used_at = None
+        self.save(update_fields=["token", "expires_at", "used", "used_at"])
+
     def mark_used(self):
         self.used = True
         self.used_at = timezone.now()
-        self.save()
+        self.save(update_fields=["used", "used_at"])
+
 
 
 
