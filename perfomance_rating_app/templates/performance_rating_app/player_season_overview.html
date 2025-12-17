@@ -2,21 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Season {{ season }} Player Ratings</title>
+    <title>Season {{ selected_season|default:"All" }} Player Overview</title>
+
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         body {
-            display: flex;
             margin: 0;
             font-family: Arial, sans-serif;
         }
 
-        /* LEFT LIST */
+        /* PAGE LAYOUT */
+        .page-wrapper {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* LEFT PANEL */
         .left-panel {
             width: 35%;
             padding: 20px;
-            height: 100vh;
             overflow-y: auto;
             background: #f4f4f4;
             border-right: 2px solid #ddd;
@@ -41,10 +47,11 @@
             font-size: 18px;
         }
 
-        /* RIGHT CHART */
+        /* RIGHT PANEL */
         .right-panel {
             width: 65%;
             padding: 30px;
+            overflow-y: auto;
         }
 
         #playerNameTitle {
@@ -52,27 +59,37 @@
             margin-bottom: 10px;
         }
 
+        /* TABLES */
         table {
-            width: 60%;
+            width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         table th, table td {
-            border: 1px solid #666;
+            border: 1px solid #999;
             padding: 8px;
+            text-align: center;
         }
 
         table th {
             background: #ddd;
         }
+
+        /* FILTER */
+        .filter-box {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- LEFT: PLAYER LIST SORTED BY RATING -->
+<div class="page-wrapper">
+
+    <!-- ================= LEFT PANEL ================= -->
     <div class="left-panel">
-        <h2>Season {{ season }} Ratings</h2>
+        <h2>Season {{ selected_season|default:"All" }} Ratings</h2>
+
         {% for row in players %}
             <div class="player-card"
                 onclick="loadPlayer(
@@ -86,12 +103,31 @@
                 <div><strong>{{ row.player.name }}</strong></div>
                 <div class="rating-number">Avg: {{ row.average|floatformat:1 }}</div>
             </div>
+        {% empty %}
+            <p>No ratings available.</p>
         {% endfor %}
     </div>
 
-    <!-- RIGHT: PLAYER DETAILS + RADAR CHART -->
+    <!-- ================= RIGHT PANEL ================= -->
     <div class="right-panel">
-        <h1 id="playerNameTitle">Click a player to view details</h1>
+
+        <!-- SEASON FILTER -->
+        <div class="filter-box">
+            <form method="get">
+                <label><strong>Select Season:</strong></label>
+                <select name="season" onchange="this.form.submit()">
+                    <option value="">All seasons</option>
+                    {% for s in seasons %}
+                        <option value="{{ s }}" {% if s == selected_season %}selected{% endif %}>
+                            {{ s }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        <!-- PLAYER DETAIL -->
+        <h1 id="playerNameTitle">Click a player to view ratings</h1>
 
         <table id="ratingTable" style="display:none;">
             <thead>
@@ -109,18 +145,63 @@
             </tbody>
         </table>
 
-        <canvas id="radarCanvas" width="450" height="450"></canvas>
-    </div>
+        <canvas id="radarCanvas" width="400" height="400"></canvas>
 
+        <hr>
+
+        <!-- ================= SEASON AGGREGATED STATS ================= -->
+        <h2>Season Aggregated Statistics</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Apps</th>
+                    <th>Minutes</th>
+                    <th>Starts</th>
+                    <th>Goals</th>
+                    <th>Assists</th>
+                    <th>YC</th>
+                    <th>RC</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in players_stats %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'players_app:player_detail' row.player.id %}">
+                                {{ row.player }}
+                            </a>
+                        </td>
+                        <td>{{ row.appearances }}</td>
+                        <td>{{ row.minutes }}</td>
+                        <td>{{ row.starts }}</td>
+                        <td>{{ row.goals }}</td>
+                        <td>{{ row.assists }}</td>
+                        <td>{{ row.yellow_cards }}</td>
+                        <td>{{ row.red_cards }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="8">No data available for this season.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<!-- ================= JAVASCRIPT ================= -->
 <script>
 let radarChart;
 
 function loadPlayer(name, attacking, creativity, defending, tactical, technical) {
 
     document.getElementById("playerNameTitle").textContent =
-        name + " - Season {{ season }} Ratings";
+        name + " - Season {{ selected_season|default:'All' }} Ratings";
 
-    document.getElementById("ratingTable").style.display = "block";
+    document.getElementById("ratingTable").style.display = "table";
 
     document.getElementById("attVal").textContent = attacking;
     document.getElementById("creVal").textContent = creativity;
@@ -144,6 +225,7 @@ function loadPlayer(name, attacking, creativity, defending, tactical, technical)
                 data: data,
                 borderColor: 'rgba(54,162,235,1)',
                 backgroundColor: 'rgba(54,162,235,0.2)',
+                borderWidth: 2
             }]
         },
         options: {

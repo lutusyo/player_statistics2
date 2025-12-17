@@ -10,7 +10,8 @@ from teams_app.models import StaffMember
 from players_app.models import Player
 from matches_app.models import Match
 from perfomance_rating_app.models import StaffPlayerRating, RatingToken, PerformanceRating
-from perfomance_rating_app.forms import SingleRatingForm
+from perfomance_rating_app.forms.single_rating_form import SingleRatingForm
+from perfomance_rating_app.forms.staff_selection import SendRatingLinksForm
 from django.views.decorators.http import require_http_methods
 from django.db.models import Avg, Count
 
@@ -18,43 +19,58 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
 
-
 def send_rating_links(request, match_id):
-    """
-    Sends a one-time HTML rating link email to all staff for the match.
-    If a link was already used, it is NOT resent.
-    """
     match = get_object_or_404(Match, id=match_id)
 
-    staff_list = StaffMember.objects.filter(
+    staff_queryset = StaffMember.objects.filter(
         age_group=match.home_team.age_group
     )
 
-    expires_at = timezone.now() + timezone.timedelta(hours=48)
+    if request.method == "GET":
+        form = SendRatingLinksForm(staff_queryset=staff_queryset)
+        return render(
+            request,
+            "performance_rating_app/send_rating_links.html",
+            {"match": match, "form": form},
+        )
 
+    # POST
+    form = SendRatingLinksForm(
+        request.POST, staff_queryset=staff_queryset
+    )
+
+    if not form.is_valid():
+        return render(
+            request,
+            "performance_rating_app/send_rating_links.html",
+            {"match": match, "form": form},
+        )
+
+    selected_staff = form.cleaned_data["staff"]
+
+    expires_at = timezone.now() + timezone.timedelta(hours=48)
     sent, skipped = [], []
 
-    for staff in staff_list:
-
+    for staff in selected_staff:
         token, created = RatingToken.objects.get_or_create(
             staff=staff,
             match=match,
-            defaults={"expires_at": expires_at}
+            defaults={"expires_at": expires_at},
         )
 
-        # 🚫 If token already used → DO NOT resend
+        # already used → skip
         if token.used:
             skipped.append(staff)
             continue
 
-        # ♻ If token exists but expired → refresh it
+        # expired → refresh
         if token.is_expired():
             token.refresh(expires_at=expires_at)
 
         rating_link = request.build_absolute_uri(
             reverse(
                 "performance_rating_app:staff_rate_with_token",
-                args=[str(token.token)]
+                args=[str(token.token)],
             )
         )
 
@@ -70,23 +86,16 @@ def send_rating_links(request, match_id):
         )
         plain_message = strip_tags(html_message)
 
-        try:
-            send_mail(
-                subject=f"Player Rating Request — {match}",
-                message=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[staff.email],
-                html_message=html_message,
-                fail_silently=False,
-            )
-            sent.append(staff)
+        send_mail(
+            subject=f"Player Rating Request — {match}",
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[staff.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
 
-        except Exception as e:
-            print("Email error:", e)
-
-    # ✅ Mark match once links are sent
-    match.rating_links_sent = True
-    match.save()
+        sent.append(staff)
 
     return render(
         request,
@@ -97,7 +106,6 @@ def send_rating_links(request, match_id):
             "skipped": skipped,
         },
     )
-
 
 
 
