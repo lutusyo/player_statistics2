@@ -61,7 +61,6 @@ class Player(models.Model):
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='players')
     birthdate = models.DateField(null=True, blank=True)
 
-
     leve_of_education = models.CharField(max_length=20, default='FORM-4', null=True, blank=True)
 
     real_dob = models.DateField(null=True, blank=True)

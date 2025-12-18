@@ -177,13 +177,29 @@ def player_detail(request, player_id):
     tab = request.GET.get('tab', 'profile')
 
     matches_played = []
+
+    # Pre-group goals by match to avoid repeated DB hits
+    goals_by_match = defaultdict(int)
+    for g in goals_qs:
+        goals_by_match[g.match_id] += 1
+
     for match in matches:
         lineup = MatchLineup.objects.filter(match=match, player=player).first()
-        if lineup or match.id in goals_match_ids or match.id in assists_match_ids or match.id in defensive_match_ids:
+
+        played = (
+            lineup
+            or match.id in goals_match_ids
+            or match.id in assists_match_ids
+            or match.id in defensive_match_ids
+        )
+
+        if played:
             matches_played.append({
                 'match': match,
                 'minutes_played': lineup.minutes_played if lineup else 0,
+                'goals': goals_by_match.get(match.id, 0),  # ✅ goals per match
             })
+
 
     # --- NEW MEASUREMENT DATA ---
     latest_measurement = player.current_measurement

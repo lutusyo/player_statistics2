@@ -362,6 +362,7 @@
                         <th>Competition</th>
                         <th>Result</th>
                         <th>Minutes Played</th>
+                        <th>Goals</th> 
                     </tr>
                 </thead>
                 <tbody>
@@ -372,6 +373,7 @@
                         <td>{{ item.match.competition_type }}</td>
                         <td>{{ item.match.home_score }} - {{ item.match.away_score }}</td>
                         <td>{{ item.minutes_played }}</td>
+                        <td>{{ item.goals }}</td>
                     </tr>
                     {% empty %}
                     <tr><td colspan="5">No matches played yet.</td></tr>
