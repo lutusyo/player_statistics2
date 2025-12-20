@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from perfomance_rating_app.models import PerformanceRating
 from perfomance_rating_app.services import compute_player_rating
 from matches_app.models import Match
+from lineup_app.models import MatchLineup
 from players_app.models import Player
 
 def _star_color_for_score(score):
@@ -35,17 +36,28 @@ def _make_star_list(score):
 def match_performance(request, match_id):
     match = get_object_or_404(Match, id=match_id)
 
-    # Combine home + away players and remove duplicates
-    players_qs = match.home_team.players.all() | match.away_team.players.all()
-    players = players_qs.distinct()
+    # 1️⃣ Get ONLY lineups from OUR TEAM for this match
+    our_team_lineups = MatchLineup.objects.filter(
+        match=match,
+        team__team_type='OUR_TEAM'
+    ).select_related('player', 'team')
+
+    # 2️⃣ Get ONLY players who actually played
+    players = Player.objects.filter(
+        id__in=our_team_lineups.values_list('player_id', flat=True)
+    ).distinct()
 
     ratings_for_template = []
+
     for player in players:
-        rating = PerformanceRating.objects.filter(player=player, match=match).first()
+        rating = PerformanceRating.objects.filter(
+            player=player,
+            match=match
+        ).first()
+
         if not rating or not rating.is_computed:
             rating = compute_player_rating(player, match)
 
-        # build star lists for each metric
         attacking_stars = _make_star_list(getattr(rating, 'attacking', 0))
         creativity_stars = _make_star_list(getattr(rating, 'creativity', 0))
         defending_stars = _make_star_list(getattr(rating, 'defending', 0))
@@ -53,18 +65,15 @@ def match_performance(request, match_id):
         technical_stars = _make_star_list(getattr(rating, 'technical', 0))
         discipline_stars = _make_star_list(getattr(rating, 'discipline', 5))
 
-        # average
-        avg = round((
-            (getattr(rating, 'attacking',0) +
-             getattr(rating, 'creativity',0) +
-             getattr(rating, 'defending',0) +
-             getattr(rating, 'tactical',0) +
-             getattr(rating, 'technical',0) +
-             getattr(rating, 'discipline',5))
-            / 6
-        ), 1)
+        average = round((
+            getattr(rating, 'attacking', 0) +
+            getattr(rating, 'creativity', 0) +
+            getattr(rating, 'defending', 0) +
+            getattr(rating, 'tactical', 0) +
+            getattr(rating, 'technical', 0) +
+            getattr(rating, 'discipline', 5)
+        ) / 6, 1)
 
-        # payload for template
         ratings_for_template.append({
             'player': player,
             'rating': rating,
@@ -74,7 +83,7 @@ def match_performance(request, match_id):
             'tactical_stars': tactical_stars,
             'technical_stars': technical_stars,
             'discipline_stars': discipline_stars,
-            'average': avg,
+            'average': average,
             'radar_dataset': [
                 getattr(rating, 'attacking', 0),
                 getattr(rating, 'creativity', 0),
@@ -85,11 +94,12 @@ def match_performance(request, match_id):
             ]
         })
 
-    # Sort players by average descending
+    # 3️⃣ Sort by performance
     ratings_for_template.sort(key=lambda x: x['average'], reverse=True)
 
     return render(request, 'performance_rating_app/match_performance.html', {
         'match': match,
         'ratings': ratings_for_template,
     })
+
 

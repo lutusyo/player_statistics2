@@ -10,35 +10,49 @@ from lineup_app.models import MatchLineup
 from tagging_app.models import AttemptToGoal
 from defensive_app.models import PlayerDefensiveStats
 
-
 @login_required
 def season_player_overview(request, season=None):
     selected_season = season or request.GET.get('season')
-    selected_age_group = request.GET.get('age_group')
+    selected_age_group = request.GET.get('age_group')  # this should be the Player.age_group ID
 
-    # -----------------------
-    # SEASONS
-    # -----------------------
+    # -------------------------
+    # SEASONS FOR DROPDOWN
+    # -------------------------
     seasons = Match.objects.values_list('season', flat=True).distinct().order_by('season')
 
-    # -----------------------
-    # MATCH FILTER
-    # -----------------------
-    matches = Match.objects.all()
+    # -------------------------
+    # GET LINEUPS FOR OUR TEAM
+    # -------------------------
+    lineups = MatchLineup.objects.filter(team__team_type='OUR_TEAM')
+
     if selected_season:
-        matches = matches.filter(season=selected_season)
+        lineups = lineups.filter(match__season=selected_season)
 
-    match_ids = matches.values_list('id', flat=True)
+    lineups = lineups.select_related('player', 'team', 'match')
 
-    players = Player.objects.filter(is_active=True)
+    # -------------------------
+    # GET PLAYERS FROM LINEUPS
+    # -------------------------
+    player_ids = lineups.values_list('player_id', flat=True).distinct()
 
     if selected_age_group:
-        players = players.filter(age_group=selected_age_group)
+        # Filter players directly by their age_group
+        players = Player.objects.filter(
+            id__in=player_ids,
+            age_group__id=selected_age_group,
+            is_active=True
+        ).distinct()
+    else:
+        players = Player.objects.filter(
+            id__in=player_ids,
+            is_active=True
+        ).distinct()
 
+    match_ids = lineups.values_list('match_id', flat=True)
 
-    # ==========================================================
-    # 1️⃣ PERFORMANCE RATINGS (LEFT PANEL)
-    # ==========================================================
+    # =========================
+    # SEASON PERFORMANCE RATINGS
+    # =========================
     players_ratings = []
 
     for player in players:
@@ -47,7 +61,6 @@ def season_player_overview(request, season=None):
             match_id__in=match_ids,
             is_computed=True
         )
-
         count = ratings.count()
         if count == 0:
             continue
@@ -72,9 +85,9 @@ def season_player_overview(request, season=None):
 
     players_ratings.sort(key=lambda x: x["average"], reverse=True)
 
-    # ==========================================================
-    # 2️⃣ SEASON AGGREGATED STATS (BOTTOM TABLE)
-    # ==========================================================
+    # =========================
+    # SEASON AGGREGATED STATS
+    # =========================
     stats = defaultdict(lambda: {
         'appearances': 0,
         'minutes': 0,
@@ -85,15 +98,12 @@ def season_player_overview(request, season=None):
         'red_cards': 0,
     })
 
-    lineups = MatchLineup.objects.filter(
+    goals = AttemptToGoal.objects.filter(
         match_id__in=match_ids,
-        player__in=players
-        ).select_related('player')
-
-
-
-    goals = AttemptToGoal.objects.filter(match_id__in=match_ids, outcome='On Target Goal', is_own_goal=False)
-    assists = AttemptToGoal.objects.filter(match_id__in=match_ids, outcome='On Target Goal', is_own_goal=False).exclude(assist_by=None)
+        outcome='On Target Goal',
+        is_own_goal=False
+    )
+    assists = goals.exclude(assist_by=None)
     defensive = PlayerDefensiveStats.objects.filter(match_id__in=match_ids)
 
     for lu in lineups:
@@ -107,26 +117,26 @@ def season_player_overview(request, season=None):
 
     for g in goals:
         stats[g.player_id]['goals'] += 1
-
     for a in assists:
         stats[a.assist_by_id]['assists'] += 1
-
     for d in defensive:
         s = stats[d.player_id]
         s['yellow_cards'] += d.yellow_card or 0
         s['red_cards'] += d.red_card or 0
 
-    players_stats = []
-    for player in players:
-        players_stats.append({
-            'player': player,
-            **stats[player.id]
-        })
+    players_stats = [{'player': player, **stats[player.id]} for player in players]
 
-    # ==========================================================
-    return render(request, "performance_rating_app/player_season_overview.html", {
-        "players": players_ratings,
-        "players_stats": players_stats,
-        "seasons": seasons,
-        "selected_season": selected_season,
-    })
+    # =========================
+    # RENDER TEMPLATE
+    # =========================
+    return render(
+        request,
+        "performance_rating_app/player_season_overview.html",
+        {
+            "players": players_ratings,
+            "players_stats": players_stats,
+            "seasons": seasons,
+            "selected_season": selected_season,
+            "selected_age_group": selected_age_group,
+        }
+    )

@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'matches_app',
     'actions_app',
     'gps_app',
-    'teams_app',
+    'teams_app.apps.TeamsAppConfig',
     'announcements_app',
     'reports_app',
     'tagging_app',

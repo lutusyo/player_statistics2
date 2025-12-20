@@ -2,7 +2,6 @@
 from django.db import models
 from datetime import date
 
-
 class AgeGroup(models.Model):
     code = models.CharField(max_length=10, unique=True)  # e.g., U20
     name = models.CharField(max_length=50)  # e.g., Under 20
@@ -32,7 +31,6 @@ class Team(models.Model):
             return f"{self.name} ({self.age_group.name})"
         return self.name
 
-
 class StaffMember(models.Model):
     ROLE_CHOICES = [
         ('HEAD_COACH', 'Head Coach'),
@@ -57,11 +55,7 @@ class StaffMember(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.get_role_display()} ({self.age_group})"
-    
 
-
-
- 
 
 class TeamSeasonMembership(models.Model):
     SEASON_CHOICES = [
