@@ -8,17 +8,29 @@ import matplotlib.pyplot as plt
 
 from matches_app.models import Match
 from gps_app.models import GPSRecord
+from lineup_app.models import MatchLineup
+
 
 def gps_pdf_export(request, match_id):
     match = get_object_or_404(Match, id=match_id)
 
     # Only include Session data
-    gps_records = GPSRecord.objects.filter(match=match, period_name='Session')
+    gps_records = GPSRecord.objects.filter(
+        match=match,
+        period_name='Session'
+    ).select_related('player')
+
+    # 🔹 Minutes played lookup (player_id → minutes)
+    minutes_map = {
+        ml.player_id: ml.minutes_played
+        for ml in MatchLineup.objects.filter(match=match)
+    }
 
     gps_data = []
     for r in gps_records:
         gps_data.append({
             'player': r.player.name,
+            'minutes': minutes_map.get(r.player_id, 0),  # ✅ ADDED
             'position': getattr(r.player, 'position', 'N/A'),
             'distance': r.distance or 0,
             'accel_decel': r.accel_decel_efforts or 0,
@@ -33,7 +45,7 @@ def gps_pdf_export(request, match_id):
 
     chart_images = []
 
-    # Helper: generate colored bar chart
+    # ---------- BAR CHART ----------
     def generate_bar_chart(labels, values, title, ylabel, color='skyblue'):
         plt.figure(figsize=(8, 4))
         plt.bar(labels, values, color=color, edgecolor='black')
@@ -42,28 +54,30 @@ def gps_pdf_export(request, match_id):
         plt.ylabel(ylabel, fontsize=12, color='darkred')
         plt.grid(axis='y', linestyle='--', alpha=0.7)
         plt.tight_layout()
+
         buf = BytesIO()
         plt.savefig(buf, format='png', facecolor='white')
         buf.seek(0)
-        img_base64 = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode('utf-8')
+        img_base64 = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
         buf.close()
         plt.close()
         return img_base64
 
     players = [r['player'] for r in gps_data]
 
-    # Distance chart
     distances = [r['distance'] for r in gps_data]
-    chart_images.append(generate_bar_chart(players, distances, 'Distance per Player', 'Distance (m)', color='skyblue'))
+    chart_images.append(
+        generate_bar_chart(players, distances, 'Distance per Player', 'Distance (m)')
+    )
 
-    # Radar-style charts
+    # ---------- RADAR CHART ----------
     def generate_radar_chart(values, labels, title, color='#1f77b4'):
         N = len(values)
         angles = [n / float(N) * 2 * 3.14159265 for n in range(N)]
-        values += values[:1]
-        angles += angles[:1]
+        values = values + values[:1]
+        angles = angles + angles[:1]
 
-        fig, ax = plt.subplots(figsize=(6,6), subplot_kw=dict(polar=True))
+        fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
         ax.plot(angles, values, color=color, linewidth=2)
         ax.fill(angles, values, color=color, alpha=0.25)
         ax.set_xticks(angles[:-1])
@@ -71,10 +85,11 @@ def gps_pdf_export(request, match_id):
         ax.set_title(title, fontsize=14, y=1.1, color='darkgreen')
         ax.set_yticks([])
         plt.tight_layout()
+
         buf = BytesIO()
         plt.savefig(buf, format='png', facecolor='white')
         buf.seek(0)
-        img_base64 = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode('utf-8')
+        img_base64 = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
         buf.close()
         plt.close()
         return img_base64
@@ -94,12 +109,15 @@ def gps_pdf_export(request, match_id):
         values = [r[field] for r in gps_data]
         chart_images.append(generate_radar_chart(values, players, title))
 
-    # Render HTML with table styling
-    html_string = render_to_string('gps_app/gps_dashboard_pdf.html', {
-        'match': match,
-        'gps_data': gps_data,
-        'chart_images': chart_images
-    })
+    # ---------- RENDER PDF ----------
+    html_string = render_to_string(
+        'gps_app/gps_dashboard_pdf.html',
+        {
+            'match': match,
+            'gps_data': gps_data,
+            'chart_images': chart_images,
+        }
+    )
 
     pdf_file = HTML(string=html_string).write_pdf()
     response = HttpResponse(pdf_file, content_type='application/pdf')

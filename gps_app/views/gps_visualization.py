@@ -3,6 +3,8 @@ from matches_app.models import Match
 from gps_app.models import GPSRecord
 from django.http import JsonResponse
 
+from lineup_app.models import MatchLineup
+
 def gps_dashboard(request, match_id):
     match = get_object_or_404(Match, id=match_id)
     periods = ["Session", "First Half", "Second Half"]
@@ -12,21 +14,47 @@ def gps_dashboard(request, match_id):
 def gps_dashboard_data(request, match_id):
     period = request.GET.get("period", "Session")
     match = get_object_or_404(Match, id=match_id)
-    gps_records = GPSRecord.objects.filter(match=match, period_name=period)
 
-    players = [r.player_name for r in gps_records]
-    positions = [r.player.position for r in gps_records]
-    data = {
-        "players": players,
-        "positions": positions,
-        "distances": [r.distance or 0 for r in gps_records],
-        "accel_decel": [r.accel_decel_efforts or 0 for r in gps_records],
-        "sprint_efforts": [r.sprint_efforts or 0 for r in gps_records],
-        "high_speed": [r.high_speed_efforts or 0 for r in gps_records],
-        "walking_distance": [r.walking_distance or 0 for r in gps_records],
-        "jogging_distance": [r.jogging_distance or 0 for r in gps_records],
-        "running_distance": [r.running_distance or 0 for r in gps_records],
-        "high_speed_distance": [r.high_speed_distance or 0 for r in gps_records],
-        "sprint_distance": [r.sprint_distance or 0 for r in gps_records],
+    gps_records = GPSRecord.objects.select_related("player").filter(
+        match=match,
+        period_name=period
+    )
+
+    minutes_map = {
+        ml.player_id: ml.minutes_played
+        for ml in MatchLineup.objects.filter(match=match)
     }
+
+    data = {
+        "players": [],
+        "minutes": [],
+        "positions": [],
+        "distances": [],
+        "accel_decel": [],
+        "sprint_efforts": [],
+        "high_speed": [],
+        "walking_distance": [],
+        "jogging_distance": [],
+        "running_distance": [],
+        "high_speed_distance": [],
+        "sprint_distance": [],
+    }
+
+    for r in gps_records:
+        player_id = r.player_id
+
+        data["players"].append(r.player_name or r.player.name)
+        data["minutes"].append(minutes_map.get(player_id, 0))
+        data["positions"].append(r.player.position)
+        data["distances"].append(r.distance or 0)
+        data["accel_decel"].append(r.accel_decel_efforts or 0)
+        data["sprint_efforts"].append(r.sprint_efforts or 0)
+        data["high_speed"].append(r.high_speed_efforts or 0)
+        data["walking_distance"].append(r.walking_distance or 0)
+        data["jogging_distance"].append(r.jogging_distance or 0)
+        data["running_distance"].append(r.running_distance or 0)
+        data["high_speed_distance"].append(r.high_speed_distance or 0)
+        data["sprint_distance"].append(r.sprint_distance or 0)
+
     return JsonResponse(data)
+

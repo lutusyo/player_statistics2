@@ -37,6 +37,7 @@
             <thead class="table-dark">
                 <tr>
                     <th>Player</th>
+                    <th>Minutes</th>
                     <th>Position</th>
                     <th>Distance (m)</th>
                     <th>Accel/Decel Efforts</th>
@@ -170,6 +171,7 @@ function fetchGPSData() {
                 const row = `
                 <tr>
                     <td>${data.players[i]}</td>
+                    <td>${data.minutes[i]}</td>
                     <td>${data.positions[i]}</td>
                     <td>${data.distances[i]}</td>
                     <td>${data.accel_decel[i]}</td>

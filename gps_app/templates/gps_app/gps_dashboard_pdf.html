@@ -19,6 +19,7 @@
         <thead>
             <tr>
                 <th>Player</th>
+                <th>Minutes</th>
                 <th>Position</th>
                 <th>Distance</th>
                 <th>Accel/Decel</th>
@@ -35,6 +36,7 @@
             {% for row in gps_data %}
             <tr>
                 <td>{{ row.player }}</td>
+                <td>{{ row.minutes }}</td>
                 <td>{{ row.position }}</td>
                 <td>{{ row.distance }}</td>
                 <td>{{ row.accel_decel }}</td>
