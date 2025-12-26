@@ -8,7 +8,6 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-
 from matches_app.models import Match
 from players_app.models import Player
 from teams_app.models import Team
@@ -20,29 +19,21 @@ import traceback
 from collections import defaultdict
 import csv
 import io
-
 import pandas as pd
 import matplotlib.pyplot as plt
 # from mplsoccer import Pitch  # ❌ Commented out
-
 import os
-
 # ReportLab (PDF)
 from reportlab.platypus import Table, TableStyle, SimpleDocTemplate, Paragraph, Image, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-
 # Excel
 from openpyxl import Workbook
-
 # Matplotlib (server-side)
 import matplotlib
 matplotlib.use('Agg')  # non-GUI backend for servers
 import matplotlib.pyplot as plt
-
 from tagging_app.utils.pass_network_utils import get_pass_network_context  # ✅ add this
-
 import base64
-
 
 def create_shotmap_base64(attempts_queryset):
     if attempts_queryset.count() == 0:
@@ -119,8 +110,8 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
         .select_related("player", "team")
         .order_by("minute", "second")
     )
-    opponent_attempts = (
-        AttemptToGoal.objects.filter(match=match).exclude(team_id=our_team_id)
+    opponent_attempts = (AttemptToGoal.objects.filter(match=match)
+        .exclude(team_id=our_team_id)
         .select_related("player", "team")
         .order_by("minute", "second")
     )
@@ -133,11 +124,11 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
     ).order_by("minute", "second")
 
 
-    our_team_attempts = AttemptToGoal.objects.filter(match_id=match_id, is_opponent=False)
+    our_attempts = AttemptToGoal.objects.filter(match=match, is_opponent=False)
 
     # Get totals for each delivery type
     total_delivery_types = (
-        our_team_attempts.values('delivery_type')
+        our_attempts.values('delivery_type')
         .annotate(total=Count('id'))
         .order_by('delivery_type')
     )
@@ -165,26 +156,55 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
     opponent_summary["on_target_total"] = opponent_summary["goals"] + opponent_summary["on_target_save"]
 
 ##############################################################################################################################
-    our_attempts = AttemptToGoal.objects.filter(match=match, is_opponent=False)   # our team attempts
-    
     # Filter by categories
     our_shots_on_target = our_attempts.filter(outcome__in=[OutcomeChoices.ON_TARGET_GOAL, OutcomeChoices.ON_TARGET_SAVED])
     our_shots_off_target = our_attempts.filter(outcome=OutcomeChoices.OFF_TARGET)
     our_blocked_shots = our_attempts.filter(outcome=OutcomeChoices.BLOCKED)
-    our_player_errors = our_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR)
+    our_player_errors = our_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR).exclude(body_part=BodyPartChoices.OTHER)
+    our_unsuccessful_crosses = our_attempts.filter(
+        outcome=OutcomeChoices.PLAYER_ERROR, 
+        body_part=BodyPartChoices.OTHER, 
+        delivery_type=DeliveryTypeChoices.CROSS
+        ).select_related("assist_by", "player")
+    our_unsuccessful_cross_assisters = (our_unsuccessful_crosses
+    .exclude(assist_by__isnull=True)
+    .values(
+        "assist_by__id",
+        "assist_by__name"
+    )
+    .annotate(total=Count("id"))
+    .order_by("-total")
+    )
+
+
 
     our_corners = our_attempts.filter(delivery_type=DeliveryTypeChoices.CORNER)
     our_crosses = our_attempts.filter(delivery_type=DeliveryTypeChoices.CROSS)
     our_effective_loose_ball = our_attempts.filter(delivery_type=DeliveryTypeChoices.LOOSE_BALL)
     our_effective_pass = our_attempts.filter(delivery_type=DeliveryTypeChoices.PASS)
 
+    # Filter by categories for opponents
     opponent_attempts = AttemptToGoal.objects.filter(match=match, is_opponent=True)     # opponents team attempts
 
-    # Filter by categories
     opponent_shots_on_target = opponent_attempts.filter(outcome__in=[OutcomeChoices.ON_TARGET_GOAL, OutcomeChoices.ON_TARGET_SAVED])
     opponent_shots_off_target = opponent_attempts.filter(outcome=OutcomeChoices.OFF_TARGET)
     opponent_blocked_shots = opponent_attempts.filter(outcome=OutcomeChoices.BLOCKED)
-    opponent_player_errors = opponent_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR)
+    opponent_player_errors = opponent_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR).exclude(body_part=BodyPartChoices.OTHER)
+    opponent_unsuccessful_crosses = opponent_attempts.filter(
+        outcome=OutcomeChoices.PLAYER_ERROR, 
+        body_part=BodyPartChoices.OTHER, 
+        delivery_type=DeliveryTypeChoices.CROSS
+        ).select_related("assist_by", "player")
+    
+    opponent_unsuccessful_cross_assisters = (opponent_unsuccessful_crosses
+    .exclude(assist_by__isnull=True)
+    .values(
+        "assist_by__id",
+        "assist_by__name"
+    )
+    .annotate(total=Count("id"))
+    .order_by("-total")
+    )    
 
     opponent_corners = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.CORNER)
     opponent_crosses = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.CROSS)
@@ -212,6 +232,8 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
         "our_shots_off_target": our_shots_off_target,
         "our_blocked_shots": our_blocked_shots,
         "our_player_errors": our_player_errors,
+        "our_unsuccessful_crosses": our_unsuccessful_crosses,
+        "our_unsuccessful_cross_assisters": our_unsuccessful_cross_assisters,
 
         "our_corners": our_corners,
         "our_crosses": our_crosses,
@@ -222,6 +244,8 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
         "opponent_shots_off_target": opponent_shots_off_target,
         "opponent_blocked_shots": opponent_blocked_shots,
         "opponent_player_errors": opponent_player_errors,
+        "opponent_unsuccessful_crosses": opponent_unsuccessful_crosses,
+        "opponent_unsuccessful_cross_assisters": opponent_unsuccessful_cross_assisters,
 
         "opponent_corners": opponent_corners,
         "opponent_crosses": opponent_crosses,

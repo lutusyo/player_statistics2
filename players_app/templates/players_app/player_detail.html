@@ -368,7 +368,7 @@
                 <tbody>
                     {% for item in matches_played %}
                     <tr>
-                        <td>{{ item.match.date }}</td>
+                        <td><a href="{% url 'gps_app:player_gps_overview' player.id %}">{{ item.match.date }}</a></td>
                         <td>{{ item.match.away_team }}</td>
                         <td>{{ item.match.competition_type }}</td>
                         <td>{{ item.match.home_score }} - {{ item.match.away_score }}</td>

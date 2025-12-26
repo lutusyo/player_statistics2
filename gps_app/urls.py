@@ -2,7 +2,7 @@ from django.urls import path
 from gps_app.views import gps_visualization, upload_gps_data, gps_match_list, gps_match_detail_positions
 from gps_app.views.gps_visualization import gps_dashboard, gps_dashboard_data
 from gps_app.views.gps_visualization_pdf import gps_pdf_export
-
+from gps_app.views.player_gps import player_gps_overview
 
 app_name = 'gps_app'
 
@@ -22,6 +22,12 @@ urlpatterns = [
 
      # ... gps data according to position
     path('match/<int:match_id>/position_detail/', gps_match_detail_positions.gps_position_detail, name='gps_position_detail'),
+
+    # individual player individual data
+    path("player/<int:player_id>/", player_gps_overview, name="player_gps_overview"),
 ]
+
+
+
 
 

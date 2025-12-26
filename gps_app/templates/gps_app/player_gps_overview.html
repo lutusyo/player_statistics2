@@ -1,0 +1,46 @@
+<!-- templates/gps_app/player_gps_overview.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<h2>{{ player.name }} – GPS Match Data</h2>
+
+{% for match, records in match_data.items %}
+    <hr>
+    <h3>
+        {{ match.date }} vs {{ match.opponent }}
+    </h3>
+
+    <table border="1" cellpadding="6" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Period</th>
+                <th>Minutes</th>
+                <th>Total Distance (m)</th>
+                <th>Running Distance (m)</th>
+                <th>HI Distance (m)</th>
+                <th>Sprint Distance (m)</th>
+                <th>Max Speed (km/h)</th>
+                <th>Player Load</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in records %}
+            <tr>
+                <td>{{ r.period_name }}</td>
+                <td>{{ r.duration|floatformat:1 }}</td>
+                <td>{{ r.distance|floatformat:0 }}</td>
+                <td>{{ r.running_distance|floatformat:0 }}</td>
+                <td>{{ r.hi_distance|floatformat:0 }}</td>
+                <td>{{ r.sprint_distance|floatformat:0 }}</td>
+                <td>{{ r.max_velocity|floatformat:2 }}</td>
+                <td>{{ r.player_load|floatformat:1 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% empty %}
+    <p>No GPS data available for this player.</p>
+{% endfor %}
+
+{% endblock %}

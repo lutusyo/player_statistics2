@@ -401,6 +401,31 @@
       {% endfor %}
     </table>
 
+    <!--#########################################################################-->  
+    <h3>Unsuccessful Crosses</h3>
+
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th>Player</th>
+                <th>Unsuccessful Crosses</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in our_unsuccessful_cross_assisters %}
+                <tr>
+                    <td>{{ row.assist_by__name }}</td>
+                    <td>{{ row.total }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2">No unsuccessful crosses</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+<!--##########################################################################-->
+
     <h3>Loose Balls</h3>
     <table>
       <tr><th>Name</th><th>Minute</th></tr>
@@ -697,6 +722,33 @@
         <tr><td colspan="3">No crosses recorded</td></tr>
       {% endfor %}
     </table>
+
+
+<!--#########################################################################-->  
+    <h3>Unsuccessful Crosses</h3>
+
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th>Player</th>
+                <th>Unsuccessful Crosses</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in opponent_unsuccessful_cross_assisters %}
+                <tr>
+                    <td>{{ row.assist_by__name }}</td>
+                    <td>{{ row.total }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2">No unsuccessful crosses</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+<!--##########################################################################-->
+
 
     <h3>Loose Balls</h3>
     <table>
