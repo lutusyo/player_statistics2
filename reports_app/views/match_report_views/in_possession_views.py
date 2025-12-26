@@ -176,8 +176,6 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
     .order_by("-total")
     )
 
-
-
     our_corners = our_attempts.filter(delivery_type=DeliveryTypeChoices.CORNER)
     our_crosses = our_attempts.filter(delivery_type=DeliveryTypeChoices.CROSS)
     our_effective_loose_ball = our_attempts.filter(delivery_type=DeliveryTypeChoices.LOOSE_BALL)

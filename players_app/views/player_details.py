@@ -176,12 +176,39 @@ def player_detail(request, player_id):
 
     tab = request.GET.get('tab', 'profile')
 
+
+
+
+
+
+    # --- PRE-GROUP SHOTS & PASSES PER MATCH ---
+
+    shots_by_match = defaultdict(int)
+    for a in attempts_qs:
+        shots_by_match[a.match_id] += 1
+
+    passes_by_match = defaultdict(int)
+    for p in passes_qs:
+        passes_by_match[p.match_id] += 1
+
+
+
+
+
+
+
+
+
+
+
+
     matches_played = []
 
     # Pre-group goals by match to avoid repeated DB hits
     goals_by_match = defaultdict(int)
     for g in goals_qs:
         goals_by_match[g.match_id] += 1
+
 
     for match in matches:
         lineup = MatchLineup.objects.filter(match=match, player=player).first()
@@ -197,8 +224,13 @@ def player_detail(request, player_id):
             matches_played.append({
                 'match': match,
                 'minutes_played': lineup.minutes_played if lineup else 0,
-                'goals': goals_by_match.get(match.id, 0),  # ✅ goals per match
+                'goals': goals_by_match.get(match.id, 0),
+                'total_shots': shots_by_match.get(match.id, 0),   # ✅ NEW
+                'total_passes': passes_by_match.get(match.id, 0), # ✅ NEW
             })
+
+
+
 
 
     # --- NEW MEASUREMENT DATA ---

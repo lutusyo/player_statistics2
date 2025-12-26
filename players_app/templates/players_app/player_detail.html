@@ -362,23 +362,35 @@
                         <th>Competition</th>
                         <th>Result</th>
                         <th>Minutes Played</th>
-                        <th>Goals</th> 
+                        <th>Goals</th>
+                        <th>Shots</th>      <!-- ✅ NEW -->
+                        <th>Passes</th>    <!-- ✅ NEW -->
                     </tr>
                 </thead>
+
                 <tbody>
                     {% for item in matches_played %}
                     <tr>
-                        <td><a href="{% url 'gps_app:player_gps_overview' player.id %}">{{ item.match.date }}</a></td>
+                        <td>
+                            <a href="{% url 'gps_app:player_gps_overview' player.id %}">
+                                {{ item.match.date }}
+                            </a>
+                        </td>
                         <td>{{ item.match.away_team }}</td>
                         <td>{{ item.match.competition_type }}</td>
                         <td>{{ item.match.home_score }} - {{ item.match.away_score }}</td>
                         <td>{{ item.minutes_played }}</td>
                         <td>{{ item.goals }}</td>
+                        <td>{{ item.total_shots }}</td>     <!-- ✅ NEW -->
+                        <td>{{ item.total_passes }}</td>    <!-- ✅ NEW -->
                     </tr>
                     {% empty %}
-                    <tr><td colspan="5">No matches played yet.</td></tr>
+                    <tr>
+                        <td colspan="8">No matches played yet.</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
+
             </table>
             </div>
 
