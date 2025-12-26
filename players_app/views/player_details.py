@@ -8,6 +8,8 @@ from players_app.models import Player
 from defensive_app.models import PlayerDefensiveStats
 from tagging_app.models import AttemptToGoal, PassEvent, GoalkeeperDistributionEvent
 from lineup_app.models import MatchLineup, Substitution
+from teams_app.models import Team
+
 
 
 @login_required
@@ -221,13 +223,25 @@ def player_detail(request, player_id):
         )
 
         if played:
+            # ✅ FIND OPPONENT BASED ON team_type
+            if match.home_team and match.home_team.team_type == 'OPPONENT':
+                opponent = match.home_team
+            elif match.away_team and match.away_team.team_type == 'OPPONENT':
+                opponent = match.away_team
+            else:
+                opponent = None
+
             matches_played.append({
                 'match': match,
+                'opponent': opponent.name if opponent else "Unknown",
                 'minutes_played': lineup.minutes_played if lineup else 0,
                 'goals': goals_by_match.get(match.id, 0),
-                'total_shots': shots_by_match.get(match.id, 0),   # ✅ NEW
-                'total_passes': passes_by_match.get(match.id, 0), # ✅ NEW
+                'total_shots': shots_by_match.get(match.id, 0),
+                'total_passes': passes_by_match.get(match.id, 0),
             })
+
+
+
 
 
 
