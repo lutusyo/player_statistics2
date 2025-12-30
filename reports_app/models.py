@@ -8,6 +8,9 @@ from django.utils import timezone
 class ActivityChoices(models.TextChoices):
     MATCH = 'MATCH', 'Match'
     TRAINING = 'TRAINING', 'Training'
+    GYME_SESSION = 'GYME SESSION', 'Gyme Session'
+    TEAM_VIDEO_SESSION = 'TEAM VIDEO SESSION', 'Team Video Session'
+    INDIVIDUAL_VIDEO_SESSION = 'INDIVIDUAL VIDEO SESSION', 'Individual Video Session'
 
 
 class AgreementChoices(models.TextChoices):
