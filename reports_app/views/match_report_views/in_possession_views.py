@@ -264,9 +264,9 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
 
 
 def pass_network_dashboard(request, match_id, return_context=False):
-    match = get_object_or_404(Match, id=match_id)  # ✅ Add this line
-    context = get_pass_network_context(match)      # ✅ Use the Match object, not match_id
-    context['match'] = match                       # ✅ Add match to context explicitly
+    match = get_object_or_404(Match, id=match_id)  
+    context = get_pass_network_context(match)      
+    context['match'] = match                      
 
     if return_context:
         return context

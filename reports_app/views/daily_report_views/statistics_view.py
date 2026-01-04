@@ -49,12 +49,20 @@ def get_statistics_report(filter_type="all", team=None, start_date=None, end_dat
         sub_out = lineups.filter(time_out__isnull=False).count()
         game_minutes = lineups.aggregate(total=Sum('minutes_played'))['total'] or 0
 
+        # Goals
         goals = AttemptToGoal.objects.filter(
             player=player, outcome='On Target Goal'
         ).filter(match_filter).count()
 
+        # Assists (player assisted a goal)
         assists = AttemptToGoal.objects.filter(
             assist_by=player, outcome='On Target Goal'
+        ).filter(match_filter).count()
+
+        # Pre-assists (player made the pass before the assist)
+        pre_assists = AttemptToGoal.objects.filter(
+            pre_assist_by=player,  # assuming you have a field pre_assist_by
+            outcome='On Target Goal'
         ).filter(match_filter).count()
 
         # Training minutes
@@ -79,10 +87,12 @@ def get_statistics_report(filter_type="all", team=None, start_date=None, end_dat
             "sub_out": sub_out,
             "goals": goals,
             "assists": assists,
+            "pre_assists": pre_assists,  # <-- new field
             "note": "",
         })
 
     return report
+
 
 
 # ====================== NORMAL VIEW ======================
