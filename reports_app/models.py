@@ -35,7 +35,7 @@ class Transition(models.Model):
     born = models.DateField(null=True, blank=True)
     squad = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='transition_team')
     played_for = models.CharField(max_length=100)
-    activity = models.CharField(max_length=20, choices=ActivityChoices.choices)
+    activity = models.CharField(max_length=200, choices=ActivityChoices.choices)
     comments = models.CharField(max_length=150, blank=True)
     date = models.DateField(auto_now_add=True)
 
@@ -79,7 +79,7 @@ class Scouting(models.Model):
 class Performance(models.Model):
     date = models.DateField()
     squad = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='performance_team')
-    activity = models.CharField(max_length=20, choices=ActivityChoices.choices)
+    activity = models.CharField(max_length=200, choices=ActivityChoices.choices)
     comments = models.TextField(blank=True)
 
     def __str__(self):

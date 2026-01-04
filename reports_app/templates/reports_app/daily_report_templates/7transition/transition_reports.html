@@ -11,33 +11,70 @@
   <div class="container">
     <div class="sticky-nav">
       <div class="row g-2 justify-content-center">
+
         <div class="col-auto">
-          <a href="{% url 'reports_app:mesocycle_reports' team_id=team.id %}" class="btn btn-outline-primary">Mesocycle</a>
+          <a href="{% url 'reports_app:mesocycle_reports' team_id=team.id %}"
+             class="btn btn-outline-primary {% if request.resolver_match.url_name == 'mesocycle_reports' %}active{% endif %}">
+            Mesocycle
+          </a>
         </div>
+
         <div class="col-auto">
-          <a href="{% url 'reports_app:fitness_reports' team_id=team.id %}" class="btn btn-outline-success">Fitness Plan</a>
+          <a href="{% url 'reports_app:fitness_reports' team_id=team.id %}"
+             class="btn btn-outline-success {% if request.resolver_match.url_name == 'fitness_reports' %}active{% endif %}">
+            Fitness Plan
+          </a>
         </div>
+
         <div class="col-auto">
-          <a href="{% url 'reports_app:iap_reports' team_id=team.id %}" class="btn btn-outline-warning">IDPs</a>
+          <a href="{% url 'reports_app:iap_reports' team_id=team.id %}"
+             class="btn btn-outline-warning {% if request.resolver_match.url_name == 'iap_reports' %}active{% endif %}">
+            IDPs
+          </a>
         </div>
+
         <div class="col-auto">
-          <a href="{% url 'reports_app:performance_reports' team_id=team.id %}" class="btn btn-outline-info">Performance</a>
+          <a href="{% url 'reports_app:performance_reports' team_id=team.id %}"
+             class="btn btn-outline-info {% if request.resolver_match.url_name == 'performance_reports' %}active{% endif %}">
+            Performance
+          </a>
         </div>
+
         <div class="col-auto">
-          <a href="{% url 'reports_app:scouting_reports' team_id=team.id %}" class="btn btn-outline-dark">Scouting</a>
+          <a href="{% url 'reports_app:scouting_reports' team_id=team.id %}"
+             class="btn btn-outline-dark {% if request.resolver_match.url_name == 'scouting_reports' %}active{% endif %}">
+            Scouting
+          </a>
         </div>
+
         <div class="col-auto">
-          <a href="{% url 'reports_app:medical_reports' team_id=team.id %}" class="btn btn-outline-danger">Medical</a>
+          <a href="{% url 'reports_app:medical_reports' team_id=team.id %}"
+             class="btn btn-outline-danger {% if request.resolver_match.url_name == 'medical_reports' %}active{% endif %}">
+            Medical
+          </a>
         </div>
+
         <div class="col-auto">
-          <a href="{% url 'reports_app:transition_reports' team_id=team.id %}" class="btn btn-outline-secondary">Transition</a>
+          <a href="{% url 'reports_app:transition_reports' team_id=team.id %}"
+             class="btn btn-outline-secondary {% if request.resolver_match.url_name == 'transition_reports' %}active{% endif %}">
+            Transition
+          </a>
         </div>
+
         <div class="col-auto">
-          <a href="{% url 'reports_app:result_reports' team_id=team.id %}" class="btn btn-outline-secondary">Results</a>
+          <a href="{% url 'reports_app:result_reports' team_id=team.id %}"
+             class="btn btn-outline-secondary {% if request.resolver_match.url_name == 'result_reports' %}active{% endif %}">
+            Results
+          </a>
         </div>
+
         <div class="col-auto">
-          <a href="{% url 'reports_app:statistics_list' team_id=team.id %}" class="btn btn-outline-secondary">Statistics</a>
+          <a href="{% url 'reports_app:statistics_list' team_id=team.id %}"
+             class="btn btn-outline-secondary {% if request.resolver_match.url_name == 'statistics_list' %}active{% endif %}">
+            Statistics
+          </a>
         </div>
+
       </div>
     </div>
   </div>
@@ -51,16 +88,17 @@
 
 
 
+
 <div class="container mt-4">
   <h2 class="mb-3">Transition Reports</h2>
 
-  <!--<form method="get" class="row g-3 mb-3">
+  <form method="get" class="row g-3 mb-3">
     <div class="col-md-3">{{ form.team.label_tag }} {{ form.team }}</div>
     <div class="col-md-2">{{ form.period.label_tag }} {{ form.period }}</div>
     <div class="col-md-2">{{ form.start_date.label_tag }} {{ form.start_date }}</div>
     <div class="col-md-2">{{ form.end_date.label_tag }} {{ form.end_date }}</div>
     <div class="col-md-1"><button type="submit" class="btn btn-primary">Filter</button></div>
-  </form>-->
+  </form>
 
   <div class="mb-3">
     <a href="{% url 'reports_app:export_transition_excel' team.id %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-success btn-sm">Export Excel</a>
