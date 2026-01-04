@@ -26,13 +26,7 @@ class PassEvent_v2(models.Model):
     )
 
     # Receiver (can be OUR or OPPONENT lineup)
-    receiver = models.ForeignKey(
-        MatchLineup,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="events_as_receiver"
-    )
+    receiver = models.ForeignKey(MatchLineup, null=True, blank=True, on_delete=models.SET_NULL, related_name="events_as_receiver")
 
     timestamp = models.PositiveIntegerField(
         help_text="Match time in seconds",

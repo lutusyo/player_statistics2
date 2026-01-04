@@ -55,8 +55,10 @@ def get_statistics_report(filter_type="all", team=None):
         ).filter(match_filter).count()
 
         assists = AttemptToGoal.objects.filter(
-            assist_by=player
+            assist_by=player,
+            outcome='On Target Goal'  # <-- only count assists leading to a goal
         ).filter(match_filter).count()
+
 
         # Training minutes from new model
         training_minutes_qs = PlayerTrainingMinutes.objects.filter(

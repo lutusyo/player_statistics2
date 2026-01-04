@@ -36,6 +36,13 @@ def result_reports(request, team_id):
     })
 
 
+
+
+
+
+
+
+
 # ---- Export to Excel ----
 def export_results_excel(request, team_id):
     """Generate Excel file with team info and results."""
@@ -73,7 +80,7 @@ def export_results_excel(request, team_id):
     for i, r in enumerate(results, start=5):
         opponent = r.away_team.name if r.our_team == r.home_team else r.home_team.name
         ws.cell(row=i, column=1, value=str(r.date))
-        ws.cell(row=i, column=2, value=r.venue)
+        ws.cell(row=i, column=2, value=r.venue.name if r.venue else "")
         ws.cell(row=i, column=3, value=r.competition_type)
         ws.cell(row=i, column=4, value=opponent)
         ws.cell(row=i, column=5, value=f"{r.home_score}-{r.away_score}")

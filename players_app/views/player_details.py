@@ -211,6 +211,12 @@ def player_detail(request, player_id):
     for g in goals_qs:
         goals_by_match[g.match_id] += 1
 
+    # --- PRE-GROUP ASSISTS PER MATCH ---
+    assists_by_match = defaultdict(int)
+    for a in assists_qs:
+        assists_by_match[a.match_id] += 1
+
+
 
     for match in matches:
         lineup = MatchLineup.objects.filter(match=match, player=player).first()
@@ -236,15 +242,10 @@ def player_detail(request, player_id):
                 'opponent': opponent.name if opponent else "Unknown",
                 'minutes_played': lineup.minutes_played if lineup else 0,
                 'goals': goals_by_match.get(match.id, 0),
+                'assists': assists_by_match.get(match.id, 0),
                 'total_shots': shots_by_match.get(match.id, 0),
                 'total_passes': passes_by_match.get(match.id, 0),
             })
-
-
-
-
-
-
 
 
     # --- NEW MEASUREMENT DATA ---

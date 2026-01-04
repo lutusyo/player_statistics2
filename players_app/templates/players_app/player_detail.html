@@ -363,8 +363,9 @@
                         <th>Result</th>
                         <th>Minutes Played</th>
                         <th>Goals</th>
-                        <th>Shots</th>      <!-- ✅ NEW -->
-                        <th>Passes</th>    <!-- ✅ NEW -->
+                        <th>Assists</th>
+                        <th>Shots</th>     
+                        <th>Passes</th>    
                     </tr>
                 </thead>
 
@@ -381,8 +382,9 @@
                         <td>{{ item.match.home_score }} - {{ item.match.away_score }}</td>
                         <td>{{ item.minutes_played }}</td>
                         <td>{{ item.goals }}</td>
-                        <td>{{ item.total_shots }}</td>     <!-- ✅ NEW -->
-                        <td>{{ item.total_passes }}</td>    <!-- ✅ NEW -->
+                        <td>{{ item.assists }}</td>
+                        <td>{{ item.total_shots }}</td>    
+                        <td>{{ item.total_passes }}</td>    
                     </tr>
                     {% empty %}
                     <tr>

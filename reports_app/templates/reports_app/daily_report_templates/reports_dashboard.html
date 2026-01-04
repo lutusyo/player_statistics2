@@ -124,10 +124,20 @@
           </a>
         </div>
 
+        <div class="col-auto">
+          <a href="{% url 'reports_app:download_technical_report' team.id %}?season={{ request.GET.season }}"
+            class="btn btn-success">
+            ⬇ Technical Full Report
+          </a>
+        </div>
+
+
       </div>
     </div>
   </div>
 </div>
+
+
 
 
 {% endblock %}
