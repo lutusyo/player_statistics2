@@ -78,7 +78,7 @@
         <div class="col-auto">
           <a href="{% url 'reports_app:iap_reports' team_id=team.id %}"
              class="btn btn-outline-warning {% if request.resolver_match.url_name == 'iap_reports' %}active{% endif %}">
-            IDPs
+            IAP
           </a>
         </div>
 
@@ -125,11 +125,16 @@
         </div>
 
         <div class="col-auto">
-          <a href="{% url 'reports_app:download_technical_report' team.id %}?season={{ request.GET.season }}"
-            class="btn btn-success">
-            ⬇ Technical Full Report
-          </a>
+          <form method="get" action="{% url 'reports_app:download_technical_report' team.id %}" class="d-flex align-items-center">
+            <input type="date" name="start_date" class="form-control form-control-sm me-1"
+                  value="{{ request.GET.start_date }}" placeholder="Start Date">
+            <input type="date" name="end_date" class="form-control form-control-sm me-1"
+                  value="{{ request.GET.end_date }}" placeholder="End Date">
+            <input type="hidden" name="season" value="{{ request.GET.season }}">
+            <button type="submit" class="btn btn-success btn-sm">⬇ TR</button>
+          </form>
         </div>
+
 
 
       </div>

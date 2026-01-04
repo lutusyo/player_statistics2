@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Technical Report Download</title>
+</head>
+<body>
+    <h1>Download Technical Report - {{ team.name }}</h1>
+
+    <form method="get" action="{% url 'download_technical_report' team.id %}">
+        <label>Start Date:</label>
+        <input type="date" name="start_date">
+
+        <label>End Date:</label>
+        <input type="date" name="end_date">
+
+        <label>Season:</label>
+        <input type="text" name="season" placeholder="e.g., 2025/26">
+
+        <label>Filter:</label>
+        <select name="filter">
+            <option value="all">All Players</option>
+            <option value="starters">Starters Only</option>
+            <option value="substitutes">Substitutes Only</option>
+        </select>
+
+        <button type="submit">Download Report</button>
+    </form>
+</body>
+</html>

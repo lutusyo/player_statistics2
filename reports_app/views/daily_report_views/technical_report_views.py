@@ -1,20 +1,12 @@
 import openpyxl
 from openpyxl.styles import Font
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
+from django.utils.dateparse import parse_date
 
 from teams_app.models import Team
-from matches_app.models import Match
-from reports_app.models import (
-    Result, Medical, Transition, Scouting,
-    Performance, IndividualActionPlan, TrainingMinutes, PlayerTrainingMinutes
-)
-from tagging_app.models import (
-    AttemptToGoal, PassEvent, GoalkeeperDistributionEvent
-)
-
+from reports_app.models import Result, Medical, Transition, Scouting, Performance, IndividualActionPlan
 from reports_app.views.daily_report_views.statistics_view import get_statistics_report
-
 
 
 def write_sheet(ws, headers, rows):
@@ -27,110 +19,91 @@ def write_sheet(ws, headers, rows):
 
 def download_technical_report(request, team_id):
     team = get_object_or_404(Team, id=team_id)
-    age_group = team.age_group
-    season = request.GET.get("season")
+    season = request.GET.get("season", "")
+
+    # Safe date parsing
+    start_date_str = request.GET.get("start_date")
+    end_date_str = request.GET.get("end_date")
+    start_date = parse_date(start_date_str) if start_date_str else None
+    end_date = parse_date(end_date_str) if end_date_str else None
 
     wb = openpyxl.Workbook()
     wb.remove(wb.active)
 
-    # ================= RESULTS =================
-    ws = wb.create_sheet("Results")
-    results = Result.objects.filter(our_team=team)
-    if season:
-        results = results.filter(season=season)
+    # Helper function to filter by date and season if applicable
+    def filter_by_date(queryset, date_field='date'):
+        if start_date:
+            queryset = queryset.filter(**{f"{date_field}__gte": start_date})
+        if end_date:
+            queryset = queryset.filter(**{f"{date_field}__lte": end_date})
+        if season and hasattr(queryset.model, 'season'):
+            queryset = queryset.filter(season=season)
+        return queryset
 
+    # ================ RESULTS ================
+    ws = wb.create_sheet("Results")
+    results = filter_by_date(Result.objects.filter(our_team=team))
     write_sheet(
         ws,
         ["Date", "Competition", "Home", "Score", "Away", "Result"],
-        [
-            [
-                r.date,
-                r.competition_type,
-                r.home_team.name,
-                f"{r.home_score}-{r.away_score}",
-                r.away_team.name,
-                r.result,
-            ]
-            for r in results
-        ],
+        [[r.date, r.competition_type, r.home_team.name, f"{r.home_score}-{r.away_score}", r.away_team.name, r.result] for r in results]
     )
 
-    # ================= MEDICAL =================
+    # ================ MEDICAL ================
     ws = wb.create_sheet("Medical")
-    medicals = Medical.objects.filter(squad=team)
+    medicals = filter_by_date(Medical.objects.filter(squad=team))
     write_sheet(
         ws,
         ["Player", "Date", "Injury / Illness", "Status", "Comments"],
-        [
-            [m.name.name, m.date, m.injury_or_illness, m.status, m.comments]
-            for m in medicals
-        ],
+        [[m.name.name, m.date, m.injury_or_illness, m.status, m.comments] for m in medicals]
     )
 
-    # ================= TRANSITION =================
+    # ================ TRANSITION ================
     ws = wb.create_sheet("Transition")
-    transitions = Transition.objects.filter(squad=team)
+    transitions = filter_by_date(Transition.objects.filter(squad=team))
     write_sheet(
         ws,
         ["Player", "Activity", "Played For", "Comments", "Date"],
-        [
-            [t.name.name, t.activity, t.played_for, t.comments, t.date]
-            for t in transitions
-        ],
+        [[t.name.name, t.activity, t.played_for, t.comments, t.date] for t in transitions]
     )
 
-    # ================= SCOUTING =================
+    # ================ SCOUTING ================
     ws = wb.create_sheet("Scouting")
-    scouting = Scouting.objects.filter(squad=team)
+    scouting = filter_by_date(Scouting.objects.filter(squad=team))
     write_sheet(
         ws,
         ["Name", "DOB", "Position", "Agreement", "Former Club", "Comments"],
-        [
-            [s.name, s.dob, s.pos, s.agreement, s.former_club, s.comments]
-            for s in scouting
-        ],
+        [[s.name, s.dob, s.pos, s.agreement, s.former_club, s.comments] for s in scouting]
     )
 
-    # ================= PERFORMANCE =================
+    # ================ PERFORMANCE ================
     ws = wb.create_sheet("Performance")
-    performances = Performance.objects.filter(squad=team)
+    performances = filter_by_date(Performance.objects.filter(squad=team))
     write_sheet(
         ws,
         ["Date", "Activity", "Comments"],
-        [[p.date, p.activity, p.comments] for p in performances],
+        [[p.date, p.activity, p.comments] for p in performances]
     )
 
-    # ================= IAP =================
+    # ================ INDIVIDUAL ACTION PLAN ================
     ws = wb.create_sheet("Individual Action Plan")
-    iaps = IndividualActionPlan.objects.filter(squad=team)
+    iaps = filter_by_date(IndividualActionPlan.objects.filter(squad=team))
     write_sheet(
         ws,
         ["Player", "Category", "Responsibility", "Action", "Status", "Follow Up"],
-        [
-            [
-                i.name.name,
-                i.category,
-                i.responsibility,
-                i.action,
-                i.status,
-                i.follow_up,
-            ]
-            for i in iaps
-        ],
+        [[i.name.name, i.category, i.responsibility, i.action, i.status, i.follow_up] for i in iaps]
     )
 
-    # ================= STATISTICS (PLAYER SUMMARY) =================
+    # ================ STATISTICS ================
     ws = wb.create_sheet("Statistics")
     stats_report = get_statistics_report(
         filter_type=request.GET.get("filter", "all"),
-        team=team
+        team=team,
+        start_date=start_date,
+        end_date=end_date
     )
 
-    headers = [
-        "NAME", "POS", "TRAINING MINS", "GAME MINS",
-        "APPS", "STARTS", "SUB IN", "SUB OUT",
-        "GOALS", "ASSISTS", "NOTE"
-    ]
+    headers = ["NAME", "POS", "TRAINING MINS", "GAME MINS", "APPS", "STARTS", "SUB IN", "SUB OUT", "GOALS", "ASSISTS", "NOTE"]
     ws.append(headers)
     for cell in ws[1]:
         cell.font = Font(bold=True)
@@ -150,7 +123,7 @@ def download_technical_report(request, team_id):
             r["note"],
         ])
 
-    # ================= DOWNLOAD =================
+    # ================ DOWNLOAD ================
     response = HttpResponse(
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
@@ -159,3 +132,9 @@ def download_technical_report(request, team_id):
 
     wb.save(response)
     return response
+
+
+# Optional template view for filter form
+def technical_report_filter(request, team_id):
+    team = get_object_or_404(Team, id=team_id)
+    return render(request, "reports_app/technical_report_filter.html", {"team": team})

@@ -29,7 +29,7 @@
         <div class="col-auto">
           <a href="{% url 'reports_app:iap_reports' team_id=team.id %}"
              class="btn btn-outline-warning {% if request.resolver_match.url_name == 'iap_reports' %}active{% endif %}">
-            IDPs
+            IAP
           </a>
         </div>
 
@@ -84,13 +84,7 @@
 
 
 
-
-
-
-
-
 <div class="container mt-4">
-  <h2 class="mb-3">Transition Reports</h2>
 
   <form method="get" class="row g-3 mb-3">
     <div class="col-md-3">{{ form.team.label_tag }} {{ form.team }}</div>
