@@ -58,9 +58,9 @@ class MesocycleAdmin(admin.ModelAdmin):
 
 @admin.register(FitnessPlan)
 class FitnessPlanAdmin(admin.ModelAdmin):
-    list_display = ('team', 'focus_area', 'week_number', 'date')
-    list_filter = ('team', 'week_number')
-    search_fields = ('team__name', 'focus_area')
+    list_display = ('title', 'team', 'start_date', 'end_date', 'uploaded_at')
+    list_filter = ('team',)
+    search_fields = ('title', 'team__name')
 
 
 @admin.register(Result)

@@ -43,6 +43,7 @@ urlpatterns = [
     path('fitness/<int:team_id>/', fitness_views.fitness_reports, name='fitness_reports'),
     path('fitness/<int:team_id>/export/excel/', fitness_views.export_fitness_excel, name='export_fitness_excel'),
     path('fitness/<int:team_id>/export/pdf/', fitness_views.export_fitness_pdf, name='export_fitness_pdf'),
+    path('fitness/<int:team_id>/export-all-pdfs/', fitness_views.export_all_fitness_pdfs, name='export_all_fitness_pdfs'),
     # IAP
     path('iap/<int:team_id>/', iap_views.iap_reports, name='iap_reports'),
     path('iap/<int:team_id>/export/excel/', iap_views.export_iap_excel, name='export_iap_excel'),

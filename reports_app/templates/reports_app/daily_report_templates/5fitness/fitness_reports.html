@@ -2,12 +2,6 @@
 
 {% block content %}
 
-
-
-
-
-
-
 <div class="sticky-nav-wrapper">
   <div class="container">
     <div class="sticky-nav">
@@ -81,44 +75,65 @@
   </div>
 </div>
 
-
-
-
-
 <div class="container mt-4">
-  <h2 class="mb-3">Fitness Plans</h2>
-
- <form method="get" class="row g-3 mb-3">
-    <div class="col-md-3">{{ form.team.label_tag }} {{ form.team }}</div>
-    <div class="col-md-2">{{ form.period.label_tag }} {{ form.period }}</div>
-    <div class="col-md-2"><button type="submit" class="btn btn-primary">Filter</button></div>
-  </form>
+  <h2 class="mb-3">Fitness Plan Uploads</h2>
 
   <div class="mb-3">
-    <a href="{% url 'reports_app:export_fitness_excel' team_id=team.id %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-success btn-sm">Export Excel</a>
-    <a href="{% url 'reports_app:export_fitness_pdf' team_id=team.id %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-danger btn-sm">Export PDF</a>
+    {% if latest_fitness_plan and latest_fitness_plan.pdf %}
+      <a href="{{ latest_fitness_plan.pdf.url }}" class="btn btn-danger btn-sm">
+        Download Latest PDF
+      </a>
+    {% else %}
+      <span class="text-muted">No file</span>
+    {% endif %}
+
+    <a href="{% url 'reports_app:export_all_fitness_pdfs' team_id=team.id %}"
+       class="btn btn-danger btn-sm">
+      Export All PDFs
+    </a>
   </div>
 
   <div class="table-responsive">
     <table class="table table-sm table-bordered">
       <thead class="table-light">
-        <tr><th>Date</th><th>Team</th><th>Focus Area</th><th>Objective</th><th>Week</th><th>Comments</th></tr>
+        <tr>
+          <th>Title</th>
+          <th>Team</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Uploaded At</th>
+          <th>PDF</th>
+        </tr>
       </thead>
       <tbody>
         {% for r in records %}
-        <tr>
-          <td>{{ r.date }}</td>
-          <td>{{ r.team.name }}</td>
-          <td>{{ r.focus_area }}</td>
-          <td>{{ r.objective }}</td>
-          <td>{{ r.week_number }}</td>
-          <td>{{ r.comments }}</td>
-        </tr>
+          <tr>
+            <td>{{ r.title }}</td>
+            <td>{{ r.team.name }}</td>
+            <td>{{ r.start_date }}</td>
+            <td>{{ r.end_date }}</td>
+            <td>{{ r.uploaded_at }}</td>
+            <td>
+              {% if r.pdf %}
+                <a href="{{ r.pdf.url }}" target="_blank"
+                   class="btn btn-sm btn-outline-primary">
+                  View PDF
+                </a>
+              {% else %}
+                <span class="text-muted">No file</span>
+              {% endif %}
+            </td>
+          </tr>
         {% empty %}
-        <tr><td colspan="6" class="text-center text-muted">No fitness plans found.</td></tr>
+          <tr>
+            <td colspan="6" class="text-center text-muted">
+              No fitness plan uploads found.
+            </td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
+
 {% endblock %}

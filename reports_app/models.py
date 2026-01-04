@@ -119,19 +119,17 @@ class Mesocycle(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.team})"
-
-
-
+    
 class FitnessPlan(models.Model):
-    date = models.DateField()
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='fitness_plans')
-    focus_area = models.CharField(max_length=100)
-    objective = models.TextField()
-    week_number = models.PositiveIntegerField(null=True, blank=True)
-    comments = models.TextField(blank=True)
+    title = models.CharField(max_length=100, null='True', blank='True')
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='fitness_plans', null='True', blank='True')
+    start_date = models.DateField(null='True', blank='True')
+    end_date = models.DateField(null='True', blank='True')
+    pdf = models.FileField(upload_to='fitness_plan_pdfs/', null='True', blank='True')
+    uploaded_at = models.DateTimeField(auto_now_add=True, null='True', blank='True')
 
     def __str__(self):
-        return f"{self.team} - {self.focus_area} ({self.date})"
+        return f"{self.team}"
 
 
 class Result(models.Model):
