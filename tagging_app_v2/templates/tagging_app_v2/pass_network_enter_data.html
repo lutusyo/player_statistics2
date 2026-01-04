@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 900px;">
+
+    <h3 class="mb-3">Match Tagging Panel</h3>
+
+    <div class="row">
+
+        <!-- PLAYERS LIST -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <h5>Select Player</h5>
+
+                    <ul class="list-group" id="players-list">
+                        {% for lineup in form.actor.field.queryset %}
+                        <li class="list-group-item player-item"
+                            data-id="{{ lineup.id }}"
+                            data-team="{{ lineup.team.team_type }}">
+                            {{ lineup.player.name }} ({{ lineup.team.name }})
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTION PANEL -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <h5>Action</h5>
+
+                    <!-- ACTION TYPE -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Ball Action</label>
+                        {{ form.action_type }}
+                    </div>
+
+                    <!-- TIME -->
+                    <div class="mb-3">
+                        <label class="form-label">Time (seconds)</label>
+                        {{ form.timestamp }}
+                    </div>
+
+                    <button class="btn btn-primary w-100" onclick="submitEvent()">
+                        Save Event
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- HIDDEN FORM -->
+    <form method="post" id="hidden-form" style="display:none;">
+        {% csrf_token %}
+        {{ form.actor }}
+        {{ form.receiver }}
+        {{ form.action_type }}
+        {{ form.timestamp }}
+    </form>
+
+</div>
+
+<style>
+.player-item {
+    cursor: pointer;
+}
+.player-item.selected {
+    background-color: #0d6efd;
+    color: #fff;
+}
+</style>
+
+<script>
+let actor = null;
+let receiver = null;
+
+document.querySelectorAll(".player-item").forEach(item => {
+    item.addEventListener("click", () => {
+
+        // FIRST CLICK → ACTOR
+        if (!actor) {
+            actor = item.dataset.id;
+            markSelected(item);
+        }
+        // SECOND CLICK → RECEIVER
+        else {
+            receiver = item.dataset.id;
+            markSelected(item);
+        }
+    });
+});
+
+function markSelected(el) {
+    document.querySelectorAll(".player-item").forEach(p =>
+        p.classList.remove("selected")
+    );
+    el.classList.add("selected");
+}
+
+function submitEvent() {
+    if (!actor || !receiver) {
+        alert("Select actor and receiver");
+        return;
+    }
+
+    document.getElementById("id_actor").value = actor;
+    document.getElementById("id_receiver").value = receiver;
+
+    document.getElementById("hidden-form").submit();
+}
+</script>
+
+{% endblock %}
