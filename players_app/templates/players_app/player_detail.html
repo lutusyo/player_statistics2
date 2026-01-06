@@ -1,6 +1,9 @@
 {% load static %}
 
-{% block title %}{{ player.name }}{% endblock %}
+{% block title %}{{ player.full_name }}{% endblock %}
+
+
+
 <link rel="stylesheet" href="{% static 'players_app/css/player.css' %}">
 <style>
 /* --- Base styling --- */
@@ -54,11 +57,20 @@
 }
 
 /* Player photo */
+
+
 .player-photo-centered img {
-    max-width: 220px;
+    max-width: 300px;   /* increased size */
     width: 100%;
-    border-radius: 12px;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
 }
+
+
+
+
+
+
 
 /* Toggle buttons */
 .toggle-buttons {
@@ -85,30 +97,47 @@
 }
 
 /* Player attribute grid */
+
+
+
+/* Player attribute grid (more compact) */
 .player-attributes-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(4, 1fr); /* more columns = smaller boxes */
+    gap: 8px;
+    margin-bottom: 15px;
 }
 
 .attribute-block {
     background: #f1f5f9;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 6px 4px; /* reduced padding */
+    border-radius: 6px;
     text-align: center;
 }
 
+/* Labels smaller */
 .attribute-block .label {
-    font-size: 12px;
+    font-size: 11px;
     color: #6b7280;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
+/* Values slightly smaller */
 .attribute-block .value {
-    font-weight: bold;
-    font-size: 14px;
+    font-weight: 600;
+    font-size: 13px;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 /* Stats table */
 .stats-table-container {
@@ -189,6 +218,17 @@
         padding: 8px 10px;
     }
 }
+
+.player-full-name {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #1f2937; /* dark slate */
+    letter-spacing: 0.5px;
+}
+
+
 </style>
 
 
@@ -202,17 +242,32 @@
                 <li>
                     <a href="{% url 'players_app:player_detail' related.id %}">
                         <img src="{{ related.photo.url }}" alt="{{ related.name }}" class="sidebar-player-photo">
-                        <span class="sidebar-player-name">{{ related.name }}</span>
+                        <span class="sidebar-player-name">{{ related.full_name }}</span>
                     </a>
                 </li>
             {% endfor %}
         </ul>
     </div>
 
+
     <div class="player-profile-container">
+
+        <a href="{% url 'teams_app:team_squad' player.team.id %}" class="back-button">
+    ← Back to Squad
+</a>
+
+
+
+        <!-- PLAYER NAME ON TOP -->
+        <h2 class="player-full-name">
+            {{ player.full_name }}
+        </h2>
+
+        <!-- PLAYER PHOTO -->
         <div class="player-photo-centered">
-            <img src="{{ player.photo.url }}" alt="{{ player.name }}">
+            <img src="{{ player.photo.url }}" alt="{{ player.full_name }}">
         </div>
+
 
         <div class="toggle-buttons">
             <button id="profileBtn">Profile</button>

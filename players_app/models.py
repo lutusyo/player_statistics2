@@ -95,9 +95,17 @@ class Player(models.Model):
 
     is_active = models.BooleanField(default=True)
     
-    def __str__(self):
-        return f"{self.name} - {self.age_group} - {self.team}"
     
+    def __str__(self):
+        return f"{self.full_name} - {self.age_group} - {self.team}"
+
+    
+
+    @property
+    def full_name(self):
+        parts = [self.name, self.second_name, self.surname]
+        return " ".join([p for p in parts if p and p.lower() not in ["second_name", "surname"]])
+
 
     @property
     def bmi(self):
