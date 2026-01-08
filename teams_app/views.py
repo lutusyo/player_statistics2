@@ -7,18 +7,21 @@ from teams_app.models import Team
 
 @login_required
 def team_squad_view(request, pk):
-    team = Team.objects.filter(id=pk, team_type='OUR_TEAM').select_related('age_group').first()
+    team = Team.objects.filter(
+        id=pk,
+        team_type='OUR_TEAM'
+    ).select_related('age_group').first()
+
     if not team:
         return render(request, '404.html', status=404)
 
-    # ✅ Get only players in our_team and matching this team's age group
+    # ✅ ONLY ACTIVE PLAYERS
     players = Player.objects.filter(
         team__team_type='OUR_TEAM',
-        age_group=team.age_group
+        age_group=team.age_group,
+        is_active=True
     ).select_related('team')
 
-    # Group players by position
-    from collections import defaultdict
     grouped_players = defaultdict(list)
     for player in players:
         grouped_players[player.position].append(player)
@@ -32,6 +35,7 @@ def team_squad_view(request, pk):
         'active_tab': 'squad',
         'team': team,
     })
+
 
 
 
