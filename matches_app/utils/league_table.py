@@ -2,10 +2,12 @@ from collections import defaultdict
 from matches_app.models import Match
 from matches_app.utils.match_score import get_match_score
 from teams_app.models import Team
+from django.utils import timezone  # make sure to import this
 
 def build_league_table(competition_type, season, age_group=None):
     """
     Build league table dynamically from match events (AttemptToGoal).
+    Only include matches that have ended.
     """
 
     matches = Match.objects.filter(
@@ -15,6 +17,10 @@ def build_league_table(competition_type, season, age_group=None):
 
     if age_group:
         matches = matches.filter(age_group=age_group)
+
+    # --- Filter only ended matches ---
+    now = timezone.now()
+    matches = [m for m in matches if m.end_time and m.end_time <= now]
 
     table = defaultdict(lambda: {
         "P": 0,
@@ -77,5 +83,3 @@ def build_league_table(competition_type, season, age_group=None):
     )
 
     return sorted_table
-
-

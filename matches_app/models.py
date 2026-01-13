@@ -5,6 +5,7 @@ from teams_app.models import Team, AgeGroup
 from django.utils import timezone
 from datetime import datetime, timedelta
 
+
 class SeasonChoices(models.TextChoices):
     SEASON_2022_2023 = "2022-2023", "2022-2023"
     SEASON_2023_2024 = "2023-2024", "2023-2024"
@@ -62,12 +63,16 @@ class Match(models.Model):
     def __str__(self):
         return f"{self.home_team.name} vs {self.away_team.name} ({self.date})"
 
+
+
     @property
     def start_time(self):
-        """Return kickoff as datetime."""
+        """Return kickoff as timezone-aware datetime."""
         if self.time:
-            return datetime.combine(self.date, self.time)
+            dt = datetime.combine(self.date, self.time)  # naive
+            return timezone.make_aware(dt)  # make it aware using Django settings
         return None
+
 
     @property
     def end_time(self):
