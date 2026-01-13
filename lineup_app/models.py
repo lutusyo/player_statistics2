@@ -167,14 +167,13 @@ class MatchLineup(models.Model):
         mp = end_minute - time_in
         return mp if mp > 0 else 0
 
-
     def save(self, *args, **kwargs):
-        """
-        Override save so minutes_played always updates automatically.
-        By default assume 90 minutes match duration if still active.
-        """
+        if self.player and not self.team:
+            self.team = self.player.team
+
         self.minutes_played = self.calculate_minutes_played(final_minute=90)
         super().save(*args, **kwargs)
+
 
 
 class Substitution(models.Model):

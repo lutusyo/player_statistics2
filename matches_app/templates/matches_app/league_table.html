@@ -1,15 +1,15 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "matches_app/matches_base.html" %}
+{% block match_content %}
 
 <!-- Filter Form -->
 <form id="filterForm" method="get" style="display: flex; flex-wrap: wrap; align-items: center; gap: 15px; margin-bottom: 20px;">
 
     <!-- Competition -->
-    <div>
-        <label for="competition">Competition:</label>
-        <select name="competition" id="competition" onchange="document.getElementById('filterForm').submit();">
+    <div style="display: flex; flex-direction: column; border: 1px solid #ccc; padding: 5px 12px; border-radius: 5px; background-color: #f9f9f9;">
+        <label for="competition" style="font-weight: bold; margin-bottom: 4px;">Competition:</label>
+        <select name="competition" id="competition" onchange="document.getElementById('filterForm').submit();" style="font-weight: bold;">
             {% for value, label in competitions %}
-                <option value="{{ value }}" {% if value == competition %}selected{% endif %}>
+                <option value="{{ value }}" {% if value == competition %}selected style="font-weight:bold;"{% endif %}>
                     {{ label }}
                 </option>
             {% endfor %}
@@ -17,11 +17,11 @@
     </div>
 
     <!-- Season -->
-    <div>
-        <label for="season">Season:</label>
-        <select name="season" id="season" onchange="document.getElementById('filterForm').submit();">
+    <div style="display: flex; flex-direction: column; border: 1px solid #ccc; padding: 8px 12px; border-radius: 5px; background-color: #f9f9f9;">
+        <label for="season" style="font-weight: bold; margin-bottom: 4px;">Season:</label>
+        <select name="season" id="season" onchange="document.getElementById('filterForm').submit();" style="font-weight: bold;">
             {% for value, label in seasons %}
-                <option value="{{ value }}" {% if value == season %}selected{% endif %}>
+                <option value="{{ value }}" {% if value == season %}selected style="font-weight:bold;"{% endif %}>
                     {{ label }}
                 </option>
             {% endfor %}
@@ -29,12 +29,12 @@
     </div>
 
     <!-- Age Group -->
-    <div>
-        <label for="age_group">Age Group:</label>
-        <select name="age_group" id="age_group" onchange="document.getElementById('filterForm').submit();">
+    <div style="display: flex; flex-direction: column; border: 1px solid #ccc; padding: 8px 12px; border-radius: 5px; background-color: #f9f9f9;">
+        <label for="age_group" style="font-weight: bold; margin-bottom: 4px;">Age Group:</label>
+        <select name="age_group" id="age_group" onchange="document.getElementById('filterForm').submit();" style="font-weight: bold;">
             <option value="">All</option>
             {% for ag in age_groups %}
-                <option value="{{ ag.id }}" {% if age_group and ag.id == age_group.id %}selected{% endif %}>
+                <option value="{{ ag.id }}" {% if age_group and ag.id == age_group.id %}selected style="font-weight:bold;"{% endif %}>
                     {{ ag.name }}
                 </option>
             {% endfor %}
@@ -43,8 +43,8 @@
 
 </form>
 
-<h3>{{ competition }} ({{ season }})</h3>
-{% endif %}
+
+
 
 <table border="1" cellpadding="5">
     <tr>

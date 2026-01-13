@@ -20,22 +20,22 @@ from django.db.models import Sum, Count, Avg
 def player_list(request):
     age_group_code = request.GET.get('age_group')
 
+    players = Player.objects.filter(is_active=True)
+
     if age_group_code:
         try:
             age_group = AgeGroup.objects.get(code=age_group_code)
-            players = Player.objects.filter(age_group=age_group, is_active=True)
+            players = players.filter(age_group=age_group)
         except AgeGroup.DoesNotExist:
             players = Player.objects.none()
     else:
-        players = Player.objects.filter(age_group__code='U20', is_active=True)
+        players = players.filter(age_group__code='U20')
 
-    # Group players by position
     grouped_players = defaultdict(list)
     for player in players:
         grouped_players[player.position].append(player)
 
     position_order = ['Goalkeeper', 'Defender', 'Midfielder', 'Forward']
-
     age_groups = AgeGroup.objects.values_list('code', flat=True)
 
     return render(request, 'players_app/player_list.html', {

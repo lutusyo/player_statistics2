@@ -16,6 +16,13 @@ from collections import Counter
 
 from collections import defaultdict
 from matches_app.views.get_match_goals import get_match_goals
+from django.shortcuts import render, get_object_or_404
+from matches_app.utils.league_table import build_league_table
+from matches_app.models import CompetitionType, SeasonChoices
+from django.contrib.auth.decorators import login_required
+
+
+
 
 # position coordinates (x: left-right %, y: top-bottom %)
 POSITION_COORDINATES = {
@@ -36,17 +43,77 @@ POSITION_COORDINATES = {
 }
 
 
-
-
-
 @login_required
 def table_view(request, code):
+    """
+    Team-specific league table view.
+    'code' is the AgeGroup code of the team.
+    """
     age_group = get_object_or_404(AgeGroup, code=code)
 
-    context = {
-        'age_group_selected': age_group,
-        'active_tab': 'table',
-        'team_selected': age_group.code, 
-    }
-    return render(request, 'matches_app/matches_table.html', context)
+    # Filters (auto from GET params, with defaults)
+    competition = request.GET.get("competition", CompetitionType.NBC_YOUTH_LEAGUE)
+    season = request.GET.get("season", SeasonChoices.SEASON_2025_2026)
 
+    # Build league table filtered by this age group
+    table = build_league_table(
+        competition_type=competition,
+        season=season,
+        age_group=age_group
+    )
+
+    context = {
+        "active_tab": "table",
+        "team_selected": age_group.code,  # ensures base template links work
+
+        # table data
+        "league_table": table,
+        "competition": competition,
+        "season": season,
+        "age_group": age_group,
+
+        # filter options
+        "competitions": CompetitionType.choices,
+        "seasons": SeasonChoices.choices,
+        "age_groups": AgeGroup.objects.all(),
+    }
+
+    return render(request, "matches_app/league_table.html", context)
+
+
+def league_table_view(request):
+    """
+    General league table view (not tied to a specific team)
+    """
+    # Filters (auto from GET params)
+    competition = request.GET.get("competition", CompetitionType.NBC_YOUTH_LEAGUE)
+    season = request.GET.get("season", SeasonChoices.SEASON_2025_2026)
+
+    age_group_id = request.GET.get("age_group")
+    age_group = None
+    if age_group_id:
+        age_group = AgeGroup.objects.filter(id=age_group_id).first()
+
+    table = build_league_table(
+        competition_type=competition,
+        season=season,
+        age_group=age_group
+    )
+
+    context = {
+        "active_tab": "table",
+        "team_selected": None,  # important: no team selected here
+
+        # table data
+        "league_table": table,
+        "competition": competition,
+        "season": season,
+        "age_group": age_group,
+
+        # filter options
+        "competitions": CompetitionType.choices,
+        "seasons": SeasonChoices.choices,
+        "age_groups": AgeGroup.objects.all(),
+    }
+
+    return render(request, "matches_app/league_table.html", context)

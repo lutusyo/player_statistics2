@@ -62,7 +62,6 @@ class Player(models.Model):
     birthdate = models.DateField(null=True, blank=True)
 
     leve_of_education = models.CharField(max_length=20, default='FORM-4', null=True, blank=True)
-
     real_dob = models.DateField(null=True, blank=True)
 
     place_of_birth = models.CharField(max_length=100, default="Tanzania")
@@ -92,14 +91,12 @@ class Player(models.Model):
     player_phone = models.CharField(max_length=20, null=True, blank=True)
     parent_phone =models.CharField(max_length=20, null=True, blank=True)
 
-
     is_active = models.BooleanField(default=True)
     
     
     def __str__(self):
         return f"{self.full_name} - {self.age_group} - {self.team}"
 
-    
 
     @property
     def full_name(self):
@@ -142,6 +139,11 @@ class Player(models.Model):
         today = date.today()
         return today.year - self.real_dob.year - ((today.month, today.day)<(self.real_dob.month, self.real_dob.day))
     
+
+
+
+
+
 
 class PlayerMeasurement(models.Model):
     player =models.ForeignKey(Player, on_delete=models.CASCADE, related_name='measurements')

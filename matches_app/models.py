@@ -19,12 +19,32 @@ class CompetitionType(models.TextChoices):
     AZAM_INTERNATIONAL_TALENT_SHOWCASE = 'Azam International Talent Showcase', 'Azam International Talent Showcase'
     NMB_MAPINDUZI_CUP = 'NMB Mapinduzi Cup', 'NMB Mapinduzi Cup'
 
-class Region(models.Model):
+
+class Country(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
+
+
+
+class Region(models.Model):
+    name = models.CharField(max_length=50)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, related_name="regions", null=True, blank=True)
+
+    class Meta:
+        unique_together = ("name", "country")
+
+    def __str__(self):
+        if self.country:
+            return f"{self.name} ({self.country.name})"
+        return self.name
+
+
+
     
+
+
 class Venue(models.Model):
     name = models.CharField(max_length=100, unique=True)
     region = models.ForeignKey (Region, on_delete=models.CASCADE, related_name='venues')

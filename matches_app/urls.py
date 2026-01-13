@@ -20,6 +20,8 @@ from lineup_app.views.substitution_panel import (
     api_undo_substitution,
 )
 
+from matches_app.views import table_view
+
 app_name = 'matches_app'
 
 urlpatterns = [
@@ -60,6 +62,7 @@ urlpatterns = [
 
 
     path('<str:code>/table/', table_view.table_view, name='team_table'),
+
     # Match details
     path('match/<int:match_id>/', match_detail.match_detail, name='match_detail'),
 
@@ -67,9 +70,13 @@ urlpatterns = [
 
     path(
     "match/<int:match_id>/individual-data-in-possession/",
-    individual_data_in_possession.individual_data_in_possession_view,
-    name="individual_data_in_possession",
-),
+    individual_data_in_possession.individual_data_in_possession_view, name="individual_data_in_possession",),
+
+    # Table
+    path("league-table/", table_view.league_table_view, name="league_table"),
+
+    # Team-specific table
+    path('<str:code>/table/', table_view.table_view, name='team_table'),
 
 
 ]

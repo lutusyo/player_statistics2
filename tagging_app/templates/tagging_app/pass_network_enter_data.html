@@ -59,6 +59,14 @@
   line-height: 1;
 }
 
+
+.player-btn span strong {
+  font-size: 20px;
+  color: #ffd700;
+}
+
+
+
 .player-btn .pass-count {
   position: absolute;
   top: -5px;
@@ -154,7 +162,10 @@ window.PassNetwork = {
             <button class="player-btn" id="player-${p.id}"
                     data-player-id="${p.id}" data-team-id="${p.team_id}"
                     style="background-image:url('${p.photo_url || '/static/default_player.png'}');">
-              <span>${p.name}</span>
+              <span>
+                ${p.name}<br>
+                <strong>${p.jersey_number}</strong>
+              </span>
               <span class="pass-count">0</span>
             </button>`;
           if (p.team_id == window.PassNetwork.ourTeamId)

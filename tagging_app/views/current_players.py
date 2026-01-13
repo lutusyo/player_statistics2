@@ -19,10 +19,12 @@ def api_current_on_field_players(request, match_id):
         .order_by("order", "player__name")
     )
 
+
     players = [
         {
             "id": l.player.id,
-            "name": l.player.name,
+            "name": l.player.full_name,   # ✅ FULL NAME
+            "jersey_number": l.player.jersey_number,
             "photo_url": l.player.photo.url if l.player.photo else "",
             "team_name": l.team.name if l.team else "",
             "team_id": l.team.id if l.team else None,
