@@ -3,6 +3,7 @@ from django.db import models
 from players_app.models import Player
 from teams_app.models import Team, AgeGroup
 from django.utils import timezone
+from datetime import datetime, timedelta
 
 class SeasonChoices(models.TextChoices):
     SEASON_2022_2023 = "2022-2023", "2022-2023"
@@ -19,14 +20,11 @@ class CompetitionType(models.TextChoices):
     AZAM_INTERNATIONAL_TALENT_SHOWCASE = 'Azam International Talent Showcase', 'Azam International Talent Showcase'
     NMB_MAPINDUZI_CUP = 'NMB Mapinduzi Cup', 'NMB Mapinduzi Cup'
 
-
 class Country(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
-
-
 
 class Region(models.Model):
     name = models.CharField(max_length=50)
@@ -40,11 +38,6 @@ class Region(models.Model):
             return f"{self.name} ({self.country.name})"
         return self.name
 
-
-
-    
-
-
 class Venue(models.Model):
     name = models.CharField(max_length=100, unique=True)
     region = models.ForeignKey (Region, on_delete=models.CASCADE, related_name='venues')
@@ -56,56 +49,48 @@ class Match(models.Model):
     home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home_matches')
     away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_matches')
     date = models.DateField()
-    time = models.TimeField(null=True, blank=True)
+    time = models.TimeField(null=True, blank=True)  # kickoff time
     venue = models.ForeignKey(Venue, on_delete=models.SET_NULL, null=True, blank=True)
     season = models.CharField(max_length=20, choices=SeasonChoices.choices)
     competition_type = models.CharField(max_length=50, choices=CompetitionType.choices)
     age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)
 
-        # Opponent team cards (for fouls won)
     opponent_yellow_cards = models.PositiveIntegerField(default=0)
     opponent_red_cards = models.PositiveIntegerField(default=0)
-
-    # NEW FIELDS FOR CLOCK
-    start_time = models.DateTimeField(null=True, blank=True, help_text="When the match actually started (UTC).")
-    end_time = models.DateTimeField(null=True, blank=True, help_text="When the match ended (UTC).")
     rating_links_sent = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.home_team.name} vs {self.away_team.name} ({self.date})"
 
-    # ---------- CLOCK HELPERS ----------
+    @property
+    def start_time(self):
+        """Return kickoff as datetime."""
+        if self.time:
+            return datetime.combine(self.date, self.time)
+        return None
 
-    def start_match(self):
-        """Set kickoff time (only if not already started)."""
-        if not self.start_time:
-            self.start_time = timezone.now()
-            self.save(update_fields=["start_time"])
-        return self.start_time
-
-    def end_match(self):
-        """Set final whistle time."""
-        if not self.end_time:
-            self.end_time = timezone.now()
-            self.save(update_fields=["end_time"])
-        return self.end_time
+    @property
+    def end_time(self):
+        """Return match end time (90 mins after start)."""
+        if self.start_time:
+            return self.start_time + timedelta(minutes=90)
+        return None
 
     def elapsed_minutes(self):
         """Return how many minutes have passed since kickoff."""
         if not self.start_time:
             return 0
-        if self.end_time:
-            return int((self.end_time - self.start_time).total_seconds() // 60)
-        return int((timezone.now() - self.start_time).total_seconds() // 60)
+        now = timezone.now()
+        if now > self.end_time:
+            return 90
+        return int((now - self.start_time).total_seconds() // 60)
 
     def status(self):
         """Return match status string."""
         if not self.start_time:
             return "not_started"
-        if self.end_time:
+        now = timezone.now()
+        if now >= self.end_time:
             return "ended"
         return "running"
-    
-    def has_lineup(self):
-        from lineup_app.models import MatchLineup   # import inside to avoid circular import
-        return MatchLineup.objects.filter(match=self).exists()
+
