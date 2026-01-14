@@ -5,7 +5,6 @@ from matches_app.models import Match
 from teams_app.models import Team
 
 
-
 # Map position codes to pitch coordinates (% from top, % from left)
 POSITION_COORDS = {
     "4-4-2": {
@@ -173,8 +172,6 @@ class MatchLineup(models.Model):
 
         self.minutes_played = self.calculate_minutes_played(final_minute=90)
         super().save(*args, **kwargs)
-
-
 
 class Substitution(models.Model):
     # A single substitution event: which player went out, which came in, and at what minute

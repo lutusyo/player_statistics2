@@ -18,6 +18,8 @@ from django.db.models import Avg, Count
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 
+from lineup_app.models import MatchLineup
+
 
 def send_rating_links(request, match_id):
     match = get_object_or_404(Match, id=match_id)
@@ -124,7 +126,10 @@ def staff_rate_with_token(request, token_uuid):
     staff = token.staff
 
     # players participating in match (home + away)
-    players = (match.home_team.players.all() | match.away_team.players.all()).distinct()
+
+
+    lineups = (MatchLineup.objects.filter(match=match, team__team_type="OUR_TEAM").select_related("player"))
+    players = [l.player for l in lineups if l.player]
 
     # Build existing ratings map or create blank objects
     existing = StaffPlayerRating.objects.filter(match=match, staff=staff).select_related("player")
@@ -178,8 +183,6 @@ def staff_rate_with_token(request, token_uuid):
         return render(request, "performance_rating_app/thank_you.html", {"match": match, "staff": staff})
     
 
-
-
 def match_staff_aggregates(request, match_id):
     match = get_object_or_404(Match, id=match_id)
     qs = StaffPlayerRating.objects.filter(match=match)
@@ -187,8 +190,6 @@ def match_staff_aggregates(request, match_id):
         avg_rating=Avg("rating"),
         count=Count("id")
     ).order_by("-avg_rating")
-
-
 
     # inside some view
     #staff_avg = StaffPlayerRating.objects.filter(match=match, player=player).aggregate(avg=Avg("rating"))["avg"] or None
@@ -204,11 +205,6 @@ def match_staff_aggregates(request, match_id):
     #final = computed_overall
 
 
-
     return render(request, "performance_rating_app/match_aggregates.html", {"match": match, "aggregates": aggregates})
-
-
-
-
 
 
