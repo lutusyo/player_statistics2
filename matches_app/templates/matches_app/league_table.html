@@ -1,89 +1,85 @@
 {% extends "matches_app/matches_base.html" %}
 {% block match_content %}
 
-<!-- Filter Form -->
-<form id="filterForm" method="get" style="display: flex; flex-wrap: wrap; align-items: center; gap: 15px; margin-bottom: 20px;">
+<div class="league-table-page">
 
-    <!-- Competition -->
-    <div style="display: flex; flex-direction: column; border: 1px solid #ccc; padding: 5px 12px; border-radius: 5px; background-color: #f9f9f9;">
-        <label for="competition" style="font-weight: bold; margin-bottom: 4px;">Competition:</label>
-        <select name="competition" id="competition" onchange="document.getElementById('filterForm').submit();" style="font-weight: bold;">
-            {% for value, label in competitions %}
-                <option value="{{ value }}" {% if value == competition %}selected style="font-weight:bold;"{% endif %}>
-                    {{ label }}
+    <!-- Filter Row -->
+    <form method="get">
+        <label>Competition</label>
+        <select name="competition" onchange="this.form.submit()">
+            <option value="">All Competitions</option>
+            {% for comp in competitions %}
+                <option value="{{ comp.id }}"
+                    {% if comp.id|stringformat:"s" == competition_selected %}
+                        selected
+                    {% endif %}
+                >
+                    {{ comp.name }}
                 </option>
             {% endfor %}
         </select>
-    </div>
 
-    <!-- Season -->
-    <div style="display: flex; flex-direction: column; border: 1px solid #ccc; padding: 8px 12px; border-radius: 5px; background-color: #f9f9f9;">
-        <label for="season" style="font-weight: bold; margin-bottom: 4px;">Season:</label>
-        <select name="season" id="season" onchange="document.getElementById('filterForm').submit();" style="font-weight: bold;">
+        <label>Season</label>
+        <select name="season" onchange="this.form.submit()">
             {% for value, label in seasons %}
-                <option value="{{ value }}" {% if value == season %}selected style="font-weight:bold;"{% endif %}>
+                <option value="{{ value }}"
+                    {% if value == season_selected %}
+                        selected
+                    {% endif %}
+                >
                     {{ label }}
                 </option>
             {% endfor %}
         </select>
+    </form>
+
+
+    <!-- League Table -->
+    <div class="table-wrapper">
+        <table class="league-table compact">
+            <thead>
+                <tr>
+                    <th>Pos</th>
+                    <th>Team</th>
+                    <th>P</th>
+                    <th>W</th>
+                    <th>D</th>
+                    <th>L</th>
+                    <th>GF</th>
+                    <th>GA</th>
+                    <th>GD</th>
+                    <th>Pts</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for team, stats in league_table %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="team-cell">
+                        {% if team.logo %}
+                            <img src="{{ team.logo.url }}" alt="{{ team.name }}">
+                        {% endif %}
+                        {{ team.name }}
+                    </td>
+                    <td>{{ stats.P }}</td>
+                    <td>{{ stats.W }}</td>
+                    <td>{{ stats.D }}</td>
+                    <td>{{ stats.L }}</td>
+                    <td>{{ stats.GF }}</td>
+                    <td>{{ stats.GA }}</td>
+                    <td>{{ stats.GD }}</td>
+                    <td class="points">{{ stats.Pts }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10" class="no-data">No data found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
-    <!-- Age Group -->
-    <div style="display: flex; flex-direction: column; border: 1px solid #ccc; padding: 8px 12px; border-radius: 5px; background-color: #f9f9f9;">
-        <label for="age_group" style="font-weight: bold; margin-bottom: 4px;">Age Group:</label>
-        <select name="age_group" id="age_group" onchange="document.getElementById('filterForm').submit();" style="font-weight: bold;">
-            <option value="">All</option>
-            {% for ag in age_groups %}
-                <option value="{{ ag.id }}" {% if age_group and ag.id == age_group.id %}selected style="font-weight:bold;"{% endif %}>
-                    {{ ag.name }}
-                </option>
-            {% endfor %}
-        </select>
-    </div>
-
-</form>
-
-
-
-
-<table border="1" cellpadding="5">
-    <tr>
-        <th>Pos</th>
-        <th>Team</th>
-        <th>P</th>
-        <th>W</th>
-        <th>D</th>
-        <th>L</th>
-        <th>GF</th>
-        <th>GA</th>
-        <th>GD</th>
-        <th>Pts</th>
-    </tr>
-
-    {% for team, stats in league_table %}
-    <tr>
-        <td>{{ forloop.counter }}</td>
-        <!-- Team with logo -->
-        <td style="display: flex; align-items: center; gap: 8px;">
-            {% if team.logo %}
-                <img src="{{ team.logo.url }}" alt="{{ team.name }} logo" style="width: 30px; height: 30px; object-fit: contain;">
-            {% endif %}
-            {{ team.name }}
-        </td>
-        <td>{{ stats.P }}</td>
-        <td>{{ stats.W }}</td>
-        <td>{{ stats.D }}</td>
-        <td>{{ stats.L }}</td>
-        <td>{{ stats.GF }}</td>
-        <td>{{ stats.GA }}</td>
-        <td>{{ stats.GD }}</td>
-        <td><strong>{{ stats.Pts }}</strong></td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="10">No data found.</td>
-    </tr>
-    {% endfor %}
-</table>
+</div>
 
 {% endblock %}

@@ -11,19 +11,19 @@ from matches_app.utils.match_details_utils import get_match_detail_context
 def full_match_context_view(request, match_id, our_team_id, return_context=False):
     """
     Returns a full context for a match, including:
-    - Team stats (attempts, passes, goalkeeper)
+    - Team stats
     - Opponent goals
     - GPS, match stats, pass network, match details
     """
     match = get_object_or_404(Match, id=match_id)
- 
+
     # TEAM CONTEXT
     full_context = get_match_full_context(match_id, our_team_id)
 
     our_team = full_context['our_team']['obj']
     opponent_team = full_context['opponent_team']['obj']
 
-    # SCORES    
+    # MATCH DETAILS
     match_detail_context = get_match_detail_context(match)
 
     if match.home_team == our_team:
@@ -39,7 +39,6 @@ def full_match_context_view(request, match_id, our_team_id, return_context=False
     gps_context = get_gps_context(match)
     stats_context = get_match_stats(match)
     pass_network_context = get_pass_network_context(match_id)
-    match_detail_context = get_match_detail_context(match)
 
     # FINAL CONTEXT
     context = {
@@ -53,13 +52,17 @@ def full_match_context_view(request, match_id, our_team_id, return_context=False
         'result': result,
         'title': 'Full Match Context',
         'company': 'Azam Fc Analyst',
-        'competition': match.competition_type,
+
+        # ✅ FIXED HERE
+        'competition': match.competition,
+
         'venue': match.venue,
         'date': match.date,
         'kickoff_time': match.time,
         'season': match.season,
         'match_number': getattr(match, 'match_number', None),
-        # Additional contexts
+
+        # Extra contexts
         **gps_context,
         **stats_context,
         **pass_network_context,
@@ -69,4 +72,8 @@ def full_match_context_view(request, match_id, our_team_id, return_context=False
     if return_context:
         return context
 
-    return render(request, 'reports_app/match_report_templates/1_post_match_summary/post_match_summary.html', context)
+    return render(
+        request,
+        'reports_app/match_report_templates/1_post_match_summary/post_match_summary.html',
+        context
+    )

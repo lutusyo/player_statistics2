@@ -52,9 +52,15 @@ INSTALLED_APPS = [
     'perfomance_rating_app',
     'training_app',
     'sheets_generator_app',
+    'loans_app',
+
+    
 
     # Third party
      'rest_framework',
+
+    ##version2
+     'tagging_app_v2'
      
 ]
 
@@ -83,8 +89,12 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'players_app.context_processors.player_filters',
                 'teams_app.context_processors.our_teams_context',
+
                 # Add this line
                 'django.template.context_processors.debug',
+
+                # local
+                "matches_app.context_processors.competitions_processor",
 
             ],
             'builtins': [

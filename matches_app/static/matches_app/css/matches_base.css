@@ -1,125 +1,123 @@
-/* === Reset & Base Typography === */
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', 'Roboto', sans-serif;
-    background-color: #f4f6f9;
-    color: #222;
-    font-size: 16px;
-    line-height: 1.6;
+/* === Background === */
+.matches-background {
+    min-height: 100vh;
+    background:
+        linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
+        url("../images/U20-squad.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }
 
-/* === Header Styling === */
-.header {
-    background: linear-gradient(135deg, #0033A0, #002266);
-    color: white;
-    padding: 50px 20px 30px;
-    text-align: center;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-    border-bottom: 4px solid #FFD700;
-}
-
-.team-title {
-    font-size: 42px;
-    margin: 0;
-    letter-spacing: 3px;
-    font-weight: 900;
-    text-transform: uppercase;
-}
-
-/* === Tab Navigation === */
-.team-tabs {
+/* === Tabs (Compact) === */
+.compact-tabs {
     display: flex;
     justify-content: center;
-    gap: 18px;
-    background-color: #ffffff;
-    border-bottom: 3px solid #0033A0;
-    padding: 15px 0;
-    flex-wrap: wrap;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    gap: 10px;
+    background: #fff;
+    padding: 8px;
+    border-bottom: 2px solid #0033A0;
 }
 
-.team-tabs a {
-    text-decoration: none;
-    font-size: 15px;
+.compact-tabs a {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
     font-weight: 600;
-    padding: 10px 22px;
-    border-radius: 30px;
-    transition: all 0.3s ease;
     color: #0033A0;
-    border: 2px solid #e0e0e0;
-    background-color: #fafafa;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background: #f2f2f2;
+    text-decoration: none;
 }
 
-.team-tabs a:hover {
-    background-color: #0033A0;
-    color: #ffffff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.team-tabs a.active {
-    background-color: #FFD700;
+.compact-tabs a.active {
+    background: #FFD700;
     color: #0033A0;
-    border: 2px solid #0033A0;
-    font-weight: 700;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-/* === Tab Content === */
-.tab-content {
-    max-width: 1100px;
-    margin: 30px auto;
-    padding: 35px 25px;
-    background-color: #fff;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    border-radius: 12px;
-    animation: fadeIn 0.4s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* === Responsive Design === */
-@media (max-width: 768px) {
-    .team-tabs {
-        gap: 8px;
-        padding: 12px 0;
-    }
-
-    .team-tabs a {
-        font-size: 14px;
-        padding: 8px 14px;
-    }
-
-    .team-title {
-        font-size: 30px;
-    }
-
-    .tab-content {
-        padding: 20px 12px;
-    }
-}
-
-/* === Optional Accent Block === */
-.zebra-bg {
-    background: repeating-linear-gradient(
-        45deg,
-        #0033A0,
-        #0033A0 12px,
-        #FFD700 12px,
-        #FFD700 24px
-    );
-    color: white;
-    padding: 25px;
+/* === Content Card === */
+.compact-content {
+    max-width: 1150px;
+    margin: 15px auto;
+    background: rgba(255,255,255,0.96);
+    padding: 18px;
     border-radius: 10px;
-    margin: 25px 0;
+}
+
+/* === Filters Row === */
+.filter-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.filter-inline {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f4f6f9;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.filter-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #333;
+}
+
+.filter-inline select {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 2px 4px;
+}
+
+/* === Table === */
+.league-table.compact {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.league-table th {
+    background: #0033A0;
+    color: #fff;
+    padding: 6px;
+}
+
+.league-table td {
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.league-table tr:nth-child(even) {
+    background: #f5f7fa;
+}
+
+.team-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-align: left;
+}
+
+.team-cell img {
+    width: 22px;
+    height: 22px;
+}
+
+.points {
+    font-weight: 700;
+    color: #0033A0;
+}
+
+.no-data {
+    padding: 15px;
     text-align: center;
     font-weight: bold;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
+
+

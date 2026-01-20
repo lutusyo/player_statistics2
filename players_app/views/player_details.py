@@ -11,7 +11,6 @@ from lineup_app.models import MatchLineup, Substitution
 from teams_app.models import Team
 
 
-
 @login_required
 def player_detail(request, player_id):
     player = get_object_or_404(Player, id=player_id)
@@ -30,7 +29,7 @@ def player_detail(request, player_id):
         if selected_season != 'all':
             qs = qs.filter(match__season=selected_season)
         if selected_competition != 'all':
-            qs = qs.filter(match__competition_type=selected_competition)
+            qs = qs.filter(match__competition__type=selected_competition)
         return qs
 
     # --- QuerySets with safe conditional filtering ---
@@ -68,15 +67,33 @@ def player_detail(request, player_id):
     subs_in_qs = apply_match_filters(subs_in_qs)
     subs_out_qs = apply_match_filters(subs_out_qs)
 
+    # Collect all match IDs
     lineup_match_ids = set(lineup_qs.values_list('match_id', flat=True))
     goals_match_ids = set(goals_qs.values_list('match_id', flat=True))
     assists_match_ids = set(assists_qs.values_list('match_id', flat=True))
     defensive_match_ids = set(defensive_qs.values_list('match_id', flat=True))
     subs_in_match_ids = set(subs_in_qs.values_list('match_id', flat=True))
     subs_out_match_ids = set(subs_out_qs.values_list('match_id', flat=True))
-
     all_match_ids = lineup_match_ids | goals_match_ids | defensive_match_ids | assists_match_ids | subs_in_match_ids | subs_out_match_ids
 
+    matches = Match.objects.filter(id__in=all_match_ids).select_related(
+        'home_team', 'away_team', 'competition', 'venue'
+    )
+
+    # Preprocess lineups and substitutions
+    lineups_by_match = defaultdict(list)
+    for lu in lineup_qs:
+        lineups_by_match[lu.match_id].append(lu)
+
+    subs_in_by_match = defaultdict(int)
+    for s in subs_in_qs:
+        subs_in_by_match[s.match_id] += 1
+
+    subs_out_by_match = defaultdict(int)
+    for s in subs_out_qs:
+        subs_out_by_match[s.match_id] += 1
+
+    # Stats dictionary by competition
     stats_dict = defaultdict(lambda: {
         'appearances': 0,
         'minutes': 0,
@@ -91,30 +108,13 @@ def player_detail(request, player_id):
         'red_cards': 0
     })
 
-    matches = Match.objects.filter(id__in=all_match_ids).select_related()
-    lineups_by_match = {lu.match_id: [] for lu in lineup_qs}
-    for lu in lineup_qs:
-        lineups_by_match[lu.match_id].append(lu)
-
-    subs_in_by_match = {}
-    for s in subs_in_qs:
-        subs_in_by_match.setdefault(s.match_id, 0)
-        subs_in_by_match[s.match_id] += 1
-
-    subs_out_by_match = {}
-    for s in subs_out_qs:
-        subs_out_by_match.setdefault(s.match_id, 0)
-        subs_out_by_match[s.match_id] += 1
-
     for match in matches:
-        comp = match.competition_type or 'Unknown'
+        comp = match.competition.type if match.competition else 'Unknown'
         stats = stats_dict[comp]
 
-        try:
-            final_minute = match.elapsed_minutes() if callable(getattr(match, 'elapsed_minutes', None)) else 90
-        except Exception:
-            final_minute = 90
+        final_minute = match.elapsed_minutes() if callable(getattr(match, 'elapsed_minutes', None)) else 90
 
+        # Minutes played & starts
         mp_for_match = 0
         starts_for_match = 0
         if match.id in lineups_by_match:
@@ -137,22 +137,26 @@ def player_detail(request, player_id):
             stats['sub_in'] += subs_in_by_match.get(match.id, 0)
             stats['sub_out'] += subs_out_by_match.get(match.id, 0)
 
+    # Goals
     for g in goals_qs:
-        comp = g.match.competition_type or 'Unknown'
+        comp = g.match.competition.type if g.match.competition else 'Unknown'
         stats_dict[comp]['goals'] += 1
 
+    # Assists
     for a in assists_qs:
-        comp = a.match.competition_type or 'Unknown'
+        comp = a.match.competition.type if a.match.competition else 'Unknown'
         stats_dict[comp]['assists'] += 1
 
+    # Defensive stats
     for d in defensive_qs:
-        comp = d.match.competition_type or 'Unknown'
+        comp = d.match.competition.type if d.match.competition else 'Unknown'
         s = stats_dict[comp]
         s['tackles_won'] += getattr(d, 'tackle_won', 0) or 0
         s['tackles_lost'] += getattr(d, 'tackle_lost', 0) or 0
         s['yellow_cards'] += getattr(d, 'yellow_card', 0) or 0
         s['red_cards'] += getattr(d, 'red_card', 0) or 0
 
+    # Compile final stats
     player_stats = []
     totals = dict.fromkeys([
         'appearances', 'minutes', 'starts', 'sub_in', 'sub_out',
@@ -173,18 +177,13 @@ def player_detail(request, player_id):
             for key in totals:
                 totals[key] += stats[key]
 
+    # Selections for filters
     seasons = Match.objects.values_list('season', flat=True).distinct().order_by('season')
-    competitions = Match.objects.values_list('competition_type', flat=True).distinct().order_by('competition_type')
+    competitions = Match.objects.values_list('competition__type', flat=True).distinct().order_by('competition__type')
 
     tab = request.GET.get('tab', 'profile')
 
-
-
-
-
-
-    # --- PRE-GROUP SHOTS & PASSES PER MATCH ---
-
+    # Shots & passes per match
     shots_by_match = defaultdict(int)
     for a in attempts_qs:
         shots_by_match[a.match_id] += 1
@@ -193,43 +192,23 @@ def player_detail(request, player_id):
     for p in passes_qs:
         passes_by_match[p.match_id] += 1
 
-
-
-
-
-
-
-
-
-
-
-
-    matches_played = []
-
-    # Pre-group goals by match to avoid repeated DB hits
+    # Goals & assists per match
     goals_by_match = defaultdict(int)
     for g in goals_qs:
         goals_by_match[g.match_id] += 1
 
-    # --- PRE-GROUP ASSISTS PER MATCH ---
     assists_by_match = defaultdict(int)
     for a in assists_qs:
         assists_by_match[a.match_id] += 1
 
-
-
+    # Matches played list
+    matches_played = []
     for match in matches:
         lineup = MatchLineup.objects.filter(match=match, player=player).first()
-
-        played = (
-            lineup
-            or match.id in goals_match_ids
-            or match.id in assists_match_ids
-            or match.id in defensive_match_ids
-        )
+        played = lineup or match.id in goals_match_ids or match.id in assists_match_ids or match.id in defensive_match_ids
 
         if played:
-            # ✅ FIND OPPONENT BASED ON team_type
+            # Find opponent team
             if match.home_team and match.home_team.team_type == 'OPPONENT':
                 opponent = match.home_team
             elif match.away_team and match.away_team.team_type == 'OPPONENT':
@@ -238,17 +217,18 @@ def player_detail(request, player_id):
                 opponent = None
 
             matches_played.append({
-                'match': match,
-                'opponent': opponent.name if opponent else "Unknown",
-                'minutes_played': lineup.minutes_played if lineup else 0,
-                'goals': goals_by_match.get(match.id, 0),
-                'assists': assists_by_match.get(match.id, 0),
-                'total_shots': shots_by_match.get(match.id, 0),
-                'total_passes': passes_by_match.get(match.id, 0),
-            })
+            'match': match,
+            'opponent': opponent.name if opponent else "Unknown",
+            'minutes_played': lineup.minutes_played if lineup else 0,
+            'goals': goals_by_match.get(match.id, 0),
+            'assists': assists_by_match.get(match.id, 0),
+            'total_shots': shots_by_match.get(match.id, 0),
+            'total_passes': passes_by_match.get(match.id, 0),
+            'competition_type': match.competition.type if match.competition else "Unknown",
+        })
 
 
-    # --- NEW MEASUREMENT DATA ---
+    # Measurements
     latest_measurement = player.current_measurement
     last_three_measurements = player.last_three_measurements
     bmi = player.bmi
@@ -272,5 +252,3 @@ def player_detail(request, player_id):
         'bmi': bmi,
         "age_using_birthdate": player.age_using_birthdate,
     })
-
-

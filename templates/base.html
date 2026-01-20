@@ -1,348 +1,306 @@
-<!-- templates/base.html -->
 {% load static %}
 {% load tagging_custom_filters %}
 {% load custom_filters %}
-<!DOCTYPE HTML>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <title>{% block title %}Azam FC Academy{% endblock %}</title>
 
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap JS (with Popper) -->
-    
-    <link rel="stylesheet" href="{% static 'accounts_app/css/main.css' %}" />
-    
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{% static 'accounts_app/css/main.css' %}">
+
     {% block extra_head %}{% endblock %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-
 
     <style>
+        :root {
+            --azam-blue: #0b5ed7;
+            --azam-blue-dark: #084298;
+            --azam-text-light: #ffffff;
+            --azam-gray: #f4f6f9;
+        }
 
-
-
-
-        /* Make body take full height */
         html, body {
             height: 100%;
             margin: 0;
-            padding: 0;
+            background: var(--azam-gray);
         }
 
-        /* Page wrapper full height using flexbox */
         #page-wrapper {
             min-height: 100%;
             display: flex;
             flex-direction: column;
         }
 
-        /* Main content expands */
         #main-wrapper {
-            flex: 1;  
+            flex: 1;
         }
 
-        /* Footer style - reduce padding + stick bottom */
-        #footer-wrapper {
-            margin: 0 !important;
-            padding: 10px 0 !important;
-            background: #121519;
-        }
-
-        #footer {
-            margin: 0 !important;
-            padding: 10px 0 !important;
-        }
-
-        #footer h3 {
-            margin-bottom: 5px !important;
-        }
-
-        #footer p {
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-
-
-
-        #banner-wrapper {
-            padding: 0px 0 !important;
-            margin: 0 !important;
-        }
-
-        #banner {
-            padding: 0px !important;
-            margin: 0 auto !important;
-        }
-
-        #banner h2 {
-            margin-bottom: 1px !important;
-        }
-
-        #banner p {
-            margin-top: 0 !important;
-        }
-
-
-        /* Reduce header spacing */
+        /* HEADER */
         #header-wrapper {
-            padding: 5px 0 !important;
-            margin: 0 !important;
+            background: linear-gradient(90deg, var(--azam-blue-dark), var(--azam-blue));
+            padding: 6px 0;
         }
 
-        #header {
-            padding: 5px 0 !important;
-            margin: 0 auto !important;
-        }
-
-        /* Reduce logo image size */
         #logo img {
-            height: 60px !important;
+            height: 55px;
         }
 
-        /* Reduce text margin beside logo */
-        #logo h1 {
-            margin: 0 !important;
-            padding: 0 !important;
-            font-size: 1.5rem !important;
+        #logo h1 a {
+            color: var(--azam-text-light);
+            font-size: 1.4rem;
+            text-decoration: none;
+            font-weight: 700;
         }
 
-        /* Reduce nav spacing */
-        #nav ul li a {
-            padding: 8px 10px !important;
-            margin: 0 !important;
+        /* NAV */
+        #nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 14px;
+            align-items: center;
         }
 
-        #nav {
-            margin-top: 0 !important;
-            padding-top: 0 !important;
+        #nav a {
+            color: var(--azam-text-light);
+            text-decoration: none;
+            padding: 8px 14px;
+            font-weight: 500;
+            border-radius: 6px;
         }
 
+        #nav a:hover {
+            background: rgba(255,255,255,.15);
+        }
+
+        /* BOOTSTRAP DROPDOWNS (NO HOVER LOGIC) */
+        .dropdown-menu {
+            background: var(--azam-blue-dark);
+            border-radius: 10px;
+            border: none;
+            min-width: 200px;
+        }
+
+        .dropdown-item {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255,255,255,.15);
+            color: #fff;
+        }
+
+        /* SUBMENU */
+        .dropdown-submenu {
+            position: relative;
+        }
+
+        .dropdown-submenu > .dropdown-menu {
+            top: 0;
+            left: 100%;
+        }
+
+        /* FOOTER */
+        #footer-wrapper {
+            background: var(--azam-blue-dark);
+            color: #dbe7ff;
+            padding: 16px 0;
+        }
+
+        .logout-link {
+            background: none;
+            border: none;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 6px;
+        }
+
+        .logout-link:hover {
+            background: rgba(255,255,255,.15);
+        }
+
+        .nav-active {
+            background: rgba(255,255,255,.25);
+        }
     </style>
-
-
-
 </head>
-<body class="is-preload homepage">
-    <div id="page-wrapper">
 
-        {% block header %}
-        <!-- Header -->
-        <div id="header-wrapper">
-            <header id="header" class="container">
+<body>
+<div id="page-wrapper">
 
-                <div id="logo" style="display: flex; align-items: center; gap: 10px;">
-                    <a href="{% url 'home' %}">
-                        <img src="{% static 'accounts_app/images/logo.png' %}" alt="Azam FC Logo" style="height: 100px;">
-                    </a>
-                    <h1><a href="{% url 'home' %}">Azam FC Youth</a></h1>
-                </div>
-               
-                <nav id="nav">
-                    <ul>
-                        <li><a href="{% url 'home' %}">Home</a></li>
+<div id="header-wrapper">
+<header class="container d-flex justify-content-between align-items-center">
 
-                        <li>
-                            <a href="#">TEAMS</a>
-                            <ul class="dropdown-menu">
-                                {% for team in our_teams %}
-                                    <li><a href="{% url 'teams_app:team_squad' team.id %}">{{ team.age_group.code }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </li>
+    {% if competition and competition.logo %}
+    <div style="position:absolute; top:12px; left:20px;">
+        <img src="{{ competition.logo.url }}" style="height:55px;">
+    </div>
+    {% endif %}
 
+    <div id="logo" class="d-flex align-items-center gap-2">
+        <a href="{% url 'home' %}">
+            <img src="{% static 'accounts_app/images/logo.png' %}">
+        </a>
+        <h1 class="m-0">
+            <a href="{% url 'home' %}">Azam FC Youth</a>
+        </h1>
+    </div>
 
+    <nav id="nav">
+        <ul>
 
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown">MATCHES</a>
-                            <ul class="dropdown-menu">
+            <li>
+                <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}nav-active{% endif %}">
+                    Home
+                </a>
+            </li>
 
-                                {% for team in our_teams %}
-                                <li class="dropdown-submenu">
-                                    <!-- AGE GROUP (first level) -->
-                                    <a class="dropdown-item dropdown-toggle" href="#">
-                                        {{ team.age_group.code }}
-                                    </a>
+            <!-- TEAMS -->
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#">Teams</a>
+                <ul class="dropdown-menu">
+                    {% for team in our_teams %}
+                    <li>
+                        <a class="dropdown-item" href="{% url 'teams_app:team_squad' team.id %}">
+                            {{ team.age_group.code }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </li>
 
-                                    <ul class="dropdown-menu">
+            <!-- MATCHES -->
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#">Matches</a>
+                <ul class="dropdown-menu">
 
-                                        <!-- ALL MATCHES -->
-                                        <li>
-                                            <a class="dropdown-item"
-                                            href="{% url 'matches_app:team_results' team.age_group.code %}">
-                                                All Matches
-                                            </a>
-                                        </li>
-
-                                        <!-- COMPETITIONS -->
-                                        <li>
-                                            <a class="dropdown-item"
-                                            href="{% url 'matches_app:team_results_filtered' team.age_group.code 'Local Friendly' %}">
-                                                Local Friendly
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a class="dropdown-item"
-                                            href="{% url 'matches_app:team_results_filtered' team.age_group.code 'International Friendly' %}">
-                                            International Friendly
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a class="dropdown-item"
-                                            href="{% url 'matches_app:team_results_filtered' team.age_group.code 'NBC Youth League' %}">
-                                            NBC Youth League
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a class="dropdown-item"
-                                            href="{% url 'matches_app:team_results_filtered' team.age_group.code 'NBC Premier League' %}">
-                                            NBC Premier League
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a class="dropdown-item"
-                                            href="{% url 'matches_app:team_results_filtered' team.age_group.code 'CAF Confederation Cup' %}">
-                                            CAF Confederation Cup
-                                            </a>
-                                        </li>
-
-                                    </ul>
-                                </li>
-                                {% endfor %}
-
-                            </ul>
-                        </li>
-
-
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">PERFORMANCE</a>
-                            <ul class="dropdown-menu">
-
-                                <!-- Performance Evaluation (Team Select) -->
-                                <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">Performance Evaluation</a>
-                                    <ul class="dropdown-menu">
-                                        {% for team in our_teams %}
-                                        <li>
-                                            <a class="dropdown-item" href="{% url 'performance_rating_app:performance_list' team.id %}">
-                                            {{ team.age_group.code }}
-                                            </a>
-                                        </li>
-                                        {% endfor %}
-                                    </ul>
-                                </li>
-
-                                <!-- GPS Data (Team Select) -->
-                                <li class="dropdown-submenu">
-                                <a class="dropdown-item dropdown-toggle" href="#">GPS Data</a>
-                                    <ul class="dropdown-menu">
-                                        {% for team in our_teams %}
-                                        <li>
-                                            <a class="dropdown-item" href="{% url 'gps_app:gps_list' team.id %}">
-                                            {{ team.age_group.code }}
-                                            </a>
-                                        </li>
-                                        {% endfor %}
-                                    </ul>
-                                </li>
-
-                                <!-- Technical Report (Team Select) -->
-                                <li class="dropdown-submenu">
-                                <Technical class="dropdown-item dropdown-toggle"  href="#">Technical Report</a>
-                                    <ul class="dropdown-menu">
-                                        {% for team in our_teams %}
-                                        <li>
-                                            <a class="dropdown-item" href="{% url  'reports_app:reports_dashboard' team.id %}">
-                                            {{ team.age_group.code }}
-                                            </a>
-                                        </li>
-                                        {% endfor %}
-                                    </ul>
-                                </li>
-
-                            </ul>
-                        </li>
-
-                        
-                        {% if user.is_authenticated %}
+                    {% for team in our_teams %}
+                    <li class="dropdown-submenu">
+                        <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">
+                            {{ team.age_group.code }}
+                        </a>
+                        <ul class="dropdown-menu">
                             <li>
-                                <form method="POST" action="{% url 'accounts_app:logout' %}" style="display: inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="logout-link">Logout</button>
-                                </form>
-                            </li>
-                        {% else %}
-                            <!--<li><a href="{% url 'accounts_app:login' %}">Login</a></li>
-                            <li><a href="{% url 'accounts_app:signup' %}">Signup</a></li>-->
-                        {% endif %}
-                    </ul>
-                </nav>
-            </header>
-
-            {% endblock %}
-        </div>
-
-        <!-- Main Content -->
-        <div id="main-wrapper">
-
-            {% block content %}
-            {% endblock %}
-        </div>
-
-
-{% block footer %}
-        <!-- Footer -->
-        <div id="footer-wrapper">
-            <footer id="footer" class="container">
-                <div class="row">
-                    <div class="col-6 col-12-small">
-                        <section class="widget contact">
-                            <h3>Contact</h3>
-                            <p>Email: #<br />
-                            Phone: #</p>
-                            <ul class="icons">
-                                <li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
-                                <li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
-                                <li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
-                            </ul>
-                        </section>
-                    </div>
-                    <div class="col-6 col-12-small">
-                        <section>
-                            <h3>About Azam FC Academy</h3>
-                            <p>We focus on elite youth football development...</p>
-                        </section>
-                    </div>
-                </div>
-
-                <div>
-                        {% if user.is_authenticated and user.is_superuser %}
-                            <p>
-                                <a href="{% url 'accounts_app:data_analyst_responsibilities' %}" target="_blank">
-                                    d-dp
+                                <a class="dropdown-item"
+                                   href="{% url 'matches_app:team_results' team.age_group.code %}">
+                                    All Matches
                                 </a>
-                            </p>
-                        {% endif %}
-                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% for comp in competition_choices %}
+                            <li>
+                                <a class="dropdown-item"
+                                   href="{% url 'matches_app:team_results' team.age_group.code %}?competition={{ comp.id }}">
+                                    {{ comp.name }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endfor %}
 
-            </footer>
+                </ul>
+            </li>
+
+            <!-- PERFORMANCE -->
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#">Performance</a>
+                <ul class="dropdown-menu">
+
+                    <li class="dropdown-submenu">
+                        <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">
+                            Performance Evaluation
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for team in our_teams %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'performance_rating_app:performance_list' team.id %}">
+                                    {{ team.age_group.code }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+
+                    <li class="dropdown-submenu">
+                        <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">
+                            GPS Data
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for team in our_teams %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'gps_app:gps_list' team.id %}">
+                                    {{ team.age_group.code }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+
+                    <li class="dropdown-submenu">
+                        <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">
+                            Technical Reports
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for team in our_teams %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'reports_app:reports_dashboard' team.id %}">
+                                    {{ team.age_group.code }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+
+                </ul>
+            </li>
+
+            {% if user.is_authenticated %}
+            <li>
+                <form method="POST" action="{% url 'accounts_app:logout' %}">
+                    {% csrf_token %}
+                    <button class="logout-link">Logout</button>
+                </form>
+            </li>
+            {% endif %}
+
+        </ul>
+    </nav>
+
+</header>
+</div>
+
+<div id="main-wrapper">
+    {% block content %}{% endblock %}
+</div>
+
+<div id="footer-wrapper">
+<footer class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Contact</h3>
+            <p>Email: info@azamfc.co.tz</p>
+        </div>
+        <div class="col-md-6">
+            <h3>About</h3>
+            <p>Elite youth football development.</p>
         </div>
     </div>
-{% endblock %}
+</footer>
+</div>
 
-    <!-- Scripts -->
-    <script src="{% static 'accounts_app/js/jquery.min.js' %}"></script>
-    <script src="{% static 'accounts_app/js/jquery.dropotron.min.js' %}"></script>
-    <script src="{% static 'accounts_app/js/browser.min.js' %}"></script>
-    <script src="{% static 'accounts_app/js/breakpoints.min.js' %}"></script>
-    <script src="{% static 'accounts_app/js/util.js' %}"></script>
-    <script src="{% static 'accounts_app/js/main.js' %}"></script>
+</div>
+
+<!-- BOOTSTRAP JS ONLY -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

@@ -8,18 +8,17 @@
 
     <div class="row">
 
-        <!-- PLAYERS LIST -->
+        <!-- PLAYER LIST -->
         <div class="col-md-6">
             <div class="card shadow-sm">
                 <div class="card-body">
 
-                    <h5>Select Player</h5>
+                    <h5 id="panel-title">Select Actor</h5>
 
                     <ul class="list-group" id="players-list">
                         {% for lineup in form.actor.field.queryset %}
                         <li class="list-group-item player-item"
-                            data-id="{{ lineup.id }}"
-                            data-team="{{ lineup.team.team_type }}">
+                            data-id="{{ lineup.id }}">
                             {{ lineup.player.name }} ({{ lineup.team.name }})
                         </li>
                         {% endfor %}
@@ -29,28 +28,35 @@
             </div>
         </div>
 
-        <!-- ACTION PANEL -->
+        <!-- ACTION / CONTROL PANEL -->
         <div class="col-md-6">
             <div class="card shadow-sm">
                 <div class="card-body">
 
-                    <h5>Action</h5>
-
-                    <!-- ACTION TYPE -->
-                    <div class="mb-3">
+                    <!-- STEP 1 -->
+                    <div id="step-action">
                         <label class="form-label fw-bold">Ball Action</label>
                         {{ form.action_type }}
+
+                        <button class="btn btn-primary w-100 mt-3"
+                                type="button"
+                                onclick="nextStep()">
+                            Next
+                        </button>
                     </div>
 
-                    <!-- TIME -->
-                    <div class="mb-3">
-                        <label class="form-label">Time (seconds)</label>
-                        {{ form.timestamp }}
-                    </div>
+                    <!-- STEP 2 -->
+                    <div id="step-save" style="display:none;">
+                        <p class="fw-bold text-muted">
+                            Select Target, then Receiver
+                        </p>
 
-                    <button class="btn btn-primary w-100" onclick="submitEvent()">
-                        Save Event
-                    </button>
+                        <button class="btn btn-success w-100"
+                                type="button"
+                                onclick="submitEvent()">
+                            Save Event
+                        </button>
+                    </div>
 
                 </div>
             </div>
@@ -62,6 +68,7 @@
     <form method="post" id="hidden-form" style="display:none;">
         {% csrf_token %}
         {{ form.actor }}
+        {{ form.target }}
         {{ form.receiver }}
         {{ form.action_type }}
         {{ form.timestamp }}
@@ -73,6 +80,7 @@
 .player-item {
     cursor: pointer;
 }
+
 .player-item.selected {
     background-color: #0d6efd;
     color: #fff;
@@ -80,42 +88,88 @@
 </style>
 
 <script>
+/* -----------------------------
+   STATE
+------------------------------ */
+let mode = "actor";   // actor → target → receiver
 let actor = null;
+let target = null;
 let receiver = null;
 
+/* -----------------------------
+   ELEMENTS
+------------------------------ */
+const title = document.getElementById("panel-title");
+const stepAction = document.getElementById("step-action");
+const stepSave = document.getElementById("step-save");
+
+/* -----------------------------
+   PLAYER CLICK HANDLER
+------------------------------ */
 document.querySelectorAll(".player-item").forEach(item => {
     item.addEventListener("click", () => {
 
-        // FIRST CLICK → ACTOR
-        if (!actor) {
+        if (mode === "actor") {
             actor = item.dataset.id;
-            markSelected(item);
+            select(item);
         }
-        // SECOND CLICK → RECEIVER
-        else {
+
+        else if (mode === "target") {
+            target = item.dataset.id;
+            select(item);
+
+            mode = "receiver";
+            title.innerText = "Select Receiver";
+        }
+
+        else if (mode === "receiver") {
             receiver = item.dataset.id;
-            markSelected(item);
+            select(item);
         }
     });
 });
 
-function markSelected(el) {
-    document.querySelectorAll(".player-item").forEach(p =>
-        p.classList.remove("selected")
-    );
-    el.classList.add("selected");
-}
-
-function submitEvent() {
-    if (!actor || !receiver) {
-        alert("Select actor and receiver");
+/* -----------------------------
+   STEP TRANSITION
+------------------------------ */
+function nextStep() {
+    if (!actor) {
+        alert("Please select an actor");
         return;
     }
 
     document.getElementById("id_actor").value = actor;
+
+    mode = "target";
+    title.innerText = "Select Target";
+
+    stepAction.style.display = "none";
+    stepSave.style.display = "block";
+}
+
+/* -----------------------------
+   SUBMIT
+------------------------------ */
+function submitEvent() {
+    if (!target || !receiver) {
+        alert("Select target and receiver");
+        return;
+    }
+
+    document.getElementById("id_target").value = target;
     document.getElementById("id_receiver").value = receiver;
 
     document.getElementById("hidden-form").submit();
+}
+
+/* -----------------------------
+   UI HELPERS
+------------------------------ */
+function select(el) {
+    document.querySelectorAll(".player-item").forEach(p =>
+        p.classList.remove("selected")
+    );
+    el.classList.add("selected");
 }
 </script>
 

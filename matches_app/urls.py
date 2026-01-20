@@ -54,7 +54,7 @@ urlpatterns = [
     #path('<str:team>/results/<str:competition>/', result_view.results_view, name='results_filtered'),
 
     path('<str:team>/results/', result_view.results_view, name="team_results"),
-    path('<str:team>/results/<str:competition>/', result_view.results_by_competition, name="team_results_filtered"),
+    #('<str:team>/results/<str:competition>/', result_view.results_by_competition, name="team_results_filtered"),
 
     path('<str:team>/fixtures/', fixture_view.fixtures_view, name="team_fixtures"),
     path('<str:team>/fixtures/<str:competition>/', fixture_view.fixtures_by_competition, name="team_fixtures_filtered"),

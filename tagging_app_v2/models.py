@@ -13,20 +13,35 @@ class PassEvent_v2(models.Model):
         related_name="pass_events_v2"
     )
 
-    # Player who initiates the action (from lineup)
+    # Player who performs the action
     actor = models.ForeignKey(
         MatchLineup,
         on_delete=models.CASCADE,
-        related_name="events_as_actor"
+        related_name="pass_events_as_actor"
+    )
+
+    # Intended target of the pass
+    target = models.ForeignKey(
+        MatchLineup,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="pass_events_as_target"
+    )
+
+    # Actual receiver of the ball
+    receiver = models.ForeignKey(
+        MatchLineup,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="pass_events_as_receiver"
     )
 
     action_type = models.CharField(
-        max_length=20,
+        max_length=30,
         choices=BALL_ACTION_CHOICES
     )
-
-    # Receiver (can be OUR or OPPONENT lineup)
-    receiver = models.ForeignKey(MatchLineup, null=True, blank=True, on_delete=models.SET_NULL, related_name="events_as_receiver")
 
     timestamp = models.PositiveIntegerField(
         help_text="Match time in seconds",
@@ -39,9 +54,11 @@ class PassEvent_v2(models.Model):
     class Meta:
         ordering = ["timestamp", "created_at"]
 
+    def is_successful(self):
+        return self.target == self.receiver
 
-    
     def __str__(self):
-        actor_name = self.actor.player.name if self.actor else "Unknown"
-        receiver_name = self.receiver.player.name if self.receiver else "Unknown"
-        return f"{actor_name} → {receiver_name} | {self.action_type}"
+        actor = self.actor.player.name
+        target = self.target.player.name if self.target else "—"
+        receiver = self.receiver.player.name if self.receiver else "—"
+        return f"{actor} → {target} ({self.action_type}) | Received: {receiver}"

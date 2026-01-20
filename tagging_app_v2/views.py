@@ -17,58 +17,52 @@ def create_pass_event_v2(request, match_id):
         if form.is_valid():
 
             actor = form.cleaned_data["actor"]
+            target = form.cleaned_data["target"]
             receiver = form.cleaned_data["receiver"]
             action_type = form.cleaned_data["action_type"]
             timestamp = form.cleaned_data.get("timestamp")
 
-            # Save the base event (what analyst actually tagged)
             event = PassEvent_v2.objects.create(
                 match=match,
                 actor=actor,
+                target=target,
                 receiver=receiver,
                 action_type=action_type,
                 timestamp=timestamp,
             )
 
-            # --------------------------------
-            # DERIVED LOGIC (NO USER INPUT)
-            # --------------------------------
+            # ---------------------------
+            # DERIVED LOGIC
+            # ---------------------------
 
             actor_team = actor.team.team_type
-            receiver_team = receiver.team.team_type
+            receiver_team = receiver.team.team_type if receiver else None
 
-            # 1️⃣ PASS / BALL LOST LOGIC
-            if actor_team == "OUR_TEAM":
+            # PASS SUCCESS
+            if target and receiver:
+                if target == receiver:
+                    # completed pass
+                    pass
+                else:
+                    # failed pass / interception
+                    pass
 
-                if action_type == "SHORT_PASS":
-                    if receiver_team == "OUR_TEAM":
-                        # PASS COMPLETED
-                        # (later → increment completed pass stat)
-                        pass
-                    else:
-                        # BALL LOST
-                        # (later → increment ball lost stat)
-                        pass
-
-            # 2️⃣ AERIAL DUEL LOGIC (AUTO)
-            if actor_team == "OUR_TEAM" and action_type in [
+            # AERIAL DUEL AUTO TAG
+            if action_type in [
                 "LONG_PASS",
                 "GOAL_KICK",
                 "CLEARANCE",
                 "CROSS",
                 "LONG_THROW_IN",
             ]:
-                if receiver_team == "OUR_TEAM":
-                    # AERIAL DUEL WON (receiver)
-                    # (later → increment aerial won for receiver.player)
+                if receiver and receiver.team.team_type == actor_team:
+                    # aerial duel won
                     pass
                 else:
-                    # AERIAL DUEL LOST
-                    # (later → increment aerial lost)
+                    # aerial duel lost
                     pass
 
             return redirect("tagging_app_v2:tag_panel_v2", match_id=match.id)
-
 
     else:
         form = PassEventV2Form(match=match)

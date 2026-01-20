@@ -15,10 +15,17 @@
 <form method="get" class="filter-form">
     <label>Competition:</label>
     <select name="competition" onchange="this.form.submit()">
-        <option value="all" {% if competition_selected == 'all' %}selected{% endif %}>All Competitions</option>
+        <option value="all" {% if competition_selected == "all" %}selected{% endif %}>
+            All Competitions
+        </option>
+
         {% for comp in competition_choices %}
-            <option value="{{ comp }}" {% if comp == competition_selected %}selected{% endif %}>
-                {{ comp }}
+            <option value="{{ comp.id }}"
+                {% if comp.id|stringformat:"s" == competition_selected %}
+                    selected
+                {% endif %}
+            >
+                {{ comp.name }}
             </option>
         {% endfor %}
     </select>
@@ -43,6 +50,7 @@
                         
                         <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}">Goal Tagging</a> |
                         <a href="{% url 'tagging_app:pass_network_enter_data' match.id %}">Pass Tagging</a> |
+                        <a href="{% url 'tagging_app_v2:tag_panel_v2' match.id %}">Pass_tag_v2</a> |
                         <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive Stats</a> |
                         <a href="{% url 'reports_app:match_report_dashboard' match.id match.home_team.id %}">Match Report</a> |
 
@@ -112,7 +120,7 @@
                             {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
                         </div>
                         <div class="results-venue">{{ match.venue }}</div>
-                        <div class="results-type">{{ match.get_competition_type_display }}</div>
+                        <div class="results-type">{{ match.competition.name }}</div>
                     </div>
 
                     <!-- Team logos & names -->
