@@ -22,6 +22,7 @@ class CompetitionType(models.TextChoices):
     CAF_CONFEDERATION_CUP = 'CAF Confederation Cup', 'CAF Confederation Cup'
     AZAM_INTERNATIONAL_TALENT_SHOWCASE = 'Azam International Talent Showcase', 'Azam International Talent Showcase'
     NMB_MAPINDUZI_CUP = 'NMB Mapinduzi Cup', 'NMB Mapinduzi Cup'
+    TOURNAMENT = 'Tournament', 'Tournament'
 
 
 # -------------------------------
