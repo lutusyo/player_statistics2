@@ -1,0 +1,11 @@
+<div class="player player-card" data-id="{{ lineup.id }}">
+    <div class="photo-wrapper">
+        {% if lineup.player.photo %}
+            <img src="{{ lineup.player.photo.url }}" alt="{{ lineup.player.first_name }}">
+        {% else %}
+            <div class="photo-fallback">{{ lineup.player.first_name|slice:":1" }}</div>
+        {% endif %}
+    </div>
+    <div class="jersey">{{ lineup.player.jersey_number }}</div>
+    <div class="name">{{ lineup.player.first_name }} {{ lineup.player.last_name }}</div>
+</div>

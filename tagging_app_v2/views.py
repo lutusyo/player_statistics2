@@ -1,77 +1,80 @@
 # tagging_app_v2/views.py
-
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 
 from matches_app.models import Match
-from tagging_app_v2.forms import PassEventV2Form
 from tagging_app_v2.models import PassEvent_v2
+from lineup_app.models import MatchLineup
+from tagging_app_v2.forms import PassEventV2Form
 
 
 @login_required
 def create_pass_event_v2(request, match_id):
     match = get_object_or_404(Match, id=match_id)
 
-    if request.method == "POST":
-        form = PassEventV2Form(request.POST, match=match)
-        if form.is_valid():
+    # ---------- AJAX SAVE ----------
+    if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
 
-            actor = form.cleaned_data["actor"]
-            target = form.cleaned_data["target"]
-            receiver = form.cleaned_data["receiver"]
-            action_type = form.cleaned_data["action_type"]
-            timestamp = form.cleaned_data.get("timestamp")
+        actor_id = request.POST.get("actor")
+        target_id = request.POST.get("target")
+        receiver_id = request.POST.get("receiver")
+        action_type = request.POST.get("action_type")
 
-            event = PassEvent_v2.objects.create(
+        if not all([actor_id, target_id, receiver_id, action_type]):
+            return JsonResponse({"success": False, "error": "Missing data"}, status=400)
+
+        try:
+            actor = MatchLineup.objects.get(id=actor_id)
+            target = MatchLineup.objects.get(id=target_id)
+            receiver = MatchLineup.objects.get(id=receiver_id)
+
+            PassEvent_v2.objects.create(
                 match=match,
                 actor=actor,
                 target=target,
                 receiver=receiver,
-                action_type=action_type,
-                timestamp=timestamp,
+                action_type=action_type
             )
 
-            # ---------------------------
-            # DERIVED LOGIC
-            # ---------------------------
+            return JsonResponse({"success": True})
 
-            actor_team = actor.team.team_type
-            receiver_team = receiver.team.team_type if receiver else None
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
 
-            # PASS SUCCESS
-            if target and receiver:
-                if target == receiver:
-                    # completed pass
-                    pass
-                else:
-                    # failed pass / interception
-                    pass
+    # ---------- NORMAL PAGE LOAD ----------
+    form = PassEventV2Form(match=match)
 
-            # AERIAL DUEL AUTO TAG
-            if action_type in [
-                "LONG_PASS",
-                "GOAL_KICK",
-                "CLEARANCE",
-                "CROSS",
-                "LONG_THROW_IN",
-            ]:
-                if receiver and receiver.team.team_type == actor_team:
-                    # aerial duel won
-                    pass
-                else:
-                    # aerial duel lost
-                    pass
+    home_lineups = MatchLineup.objects.filter(match=match, team=match.home_team)
+    away_lineups = MatchLineup.objects.filter(match=match, team=match.away_team)
 
-            return redirect("tagging_app_v2:tag_panel_v2", match_id=match.id)
 
-    else:
-        form = PassEventV2Form(match=match)
+    
 
-    return render(
-        request,
-        "tagging_app_v2/pass_network_enter_data.html",
-        {
-            "form": form,
-            "match": match,
-        },
-    )
+    home_forwards = ["LW", "ST", "RW"]
+    home_midfield = ["LCM", "CM", "RCM"]
+    home_defence = ["LB", "LCB", "RCB", "RB"]
+    home_goalkeeper = ["GK"]
+
+    away_forwards = ["LW", "ST", "RW"]
+    away_midfield = ["LCM", "CM", "RCM"]
+    away_defence = ["LB", "LCB", "RCB", "RB"]
+    away_goalkeeper = ["GK"]
+
+    context = {
+        "form": form,
+        "match": match,
+        "home_lineups": home_lineups,
+        "away_lineups": away_lineups,
+        "home_forwards": home_forwards,
+        "home_midfield": home_midfield,
+        "home_defence": home_defence,
+        "home_goalkeeper": home_goalkeeper,
+        "away_forwards": away_forwards,
+        "away_midfield": away_midfield,
+        "away_defence": away_defence,
+        "away_goalkeeper": away_goalkeeper,
+    }
+
+
+    return render(request, "tagging_app_v2/pass_network_enter_data.html", context)

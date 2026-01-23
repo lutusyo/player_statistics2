@@ -2,174 +2,180 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4" style="max-width: 900px;">
+<div class="container-fluid mt-3">
 
-    <h3 class="mb-3">Match Tagging Panel</h3>
+    <h4 class="mb-3">Live Match Tagging</h4>
 
     <div class="row">
 
-        <!-- PLAYER LIST -->
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body">
+        <!-- HOME TEAM -->
+        <div class="col-md-4">
+            <h6 class="text-center">{{ match.home_team.name }}</h6>
 
-                    <h5 id="panel-title">Select Actor</h5>
+            <ul class="list-group">
+                {% for lineup in home_lineups %}
+                <li class="list-group-item player" data-id="{{ lineup.id }}">
+                    {{ lineup.player.name }}
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted">No players</li>
+                {% endfor %}
+            </ul>
+        </div>
 
-                    <ul class="list-group" id="players-list">
-                        {% for lineup in form.actor.field.queryset %}
-                        <li class="list-group-item player-item"
-                            data-id="{{ lineup.id }}">
-                            {{ lineup.player.name }} ({{ lineup.team.name }})
-                        </li>
-                        {% endfor %}
-                    </ul>
+        <!-- ACTIONS -->
+        <div class="col-md-4">
+            <h6 class="text-center">Ball Action</h6>
 
-                </div>
+            <div class="d-grid gap-2">
+                {% for value,label in form.action_type.field.choices %}
+                <button class="btn btn-outline-primary action-btn" data-action="{{ value }}">
+                    {{ label }}
+                </button>
+                {% endfor %}
+            </div>
+
+            <div class="alert alert-info mt-3 text-center" id="status">
+                Select Actor
             </div>
         </div>
 
-        <!-- ACTION / CONTROL PANEL -->
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body">
+        <!-- AWAY TEAM -->
+        <div class="col-md-4">
+            <h6 class="text-center">{{ match.away_team.name }}</h6>
 
-                    <!-- STEP 1 -->
-                    <div id="step-action">
-                        <label class="form-label fw-bold">Ball Action</label>
-                        {{ form.action_type }}
-
-                        <button class="btn btn-primary w-100 mt-3"
-                                type="button"
-                                onclick="nextStep()">
-                            Next
-                        </button>
-                    </div>
-
-                    <!-- STEP 2 -->
-                    <div id="step-save" style="display:none;">
-                        <p class="fw-bold text-muted">
-                            Select Target, then Receiver
-                        </p>
-
-                        <button class="btn btn-success w-100"
-                                type="button"
-                                onclick="submitEvent()">
-                            Save Event
-                        </button>
-                    </div>
-
-                </div>
-            </div>
+            <ul class="list-group">
+                {% for lineup in away_lineups %}
+                <li class="list-group-item player" data-id="{{ lineup.id }}">
+                    {{ lineup.player.name }}
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted">No players</li>
+                {% endfor %}
+            </ul>
         </div>
 
     </div>
 
-    <!-- HIDDEN FORM -->
-    <form method="post" id="hidden-form" style="display:none;">
+    <form id="hidden-form">
         {% csrf_token %}
-        {{ form.actor }}
-        {{ form.target }}
-        {{ form.receiver }}
-        {{ form.action_type }}
-        {{ form.timestamp }}
+        <input type="hidden" name="actor" id="actor">
+        <input type="hidden" name="target" id="target">
+        <input type="hidden" name="receiver" id="receiver">
+        <input type="hidden" name="action_type" id="action_type">
     </form>
 
 </div>
 
 <style>
-.player-item {
+.player {
     cursor: pointer;
+    transition: background 0.2s;
 }
 
-.player-item.selected {
-    background-color: #0d6efd;
-    color: #fff;
+.actor {
+    background-color: #198754 !important; /* green */
+    color: white;
+}
+
+.target {
+    background-color: #ffc107 !important; /* yellow */
+    color: black;
+}
+
+.receiver {
+    background-color: #0d6efd !important; /* blue */
+    color: white;
 }
 </style>
 
 <script>
-/* -----------------------------
-   STATE
------------------------------- */
-let mode = "actor";   // actor → target → receiver
-let actor = null;
-let target = null;
-let receiver = null;
+let step = "actor";
+let data = { actor: null, action: null, target: null, receiver: null };
+const status = document.getElementById("status");
 
-/* -----------------------------
-   ELEMENTS
------------------------------- */
-const title = document.getElementById("panel-title");
-const stepAction = document.getElementById("step-action");
-const stepSave = document.getElementById("step-save");
+/* ---------- PLAYER CLICK ---------- */
+document.querySelectorAll(".player").forEach(player => {
+    player.addEventListener("click", () => {
 
-/* -----------------------------
-   PLAYER CLICK HANDLER
------------------------------- */
-document.querySelectorAll(".player-item").forEach(item => {
-    item.addEventListener("click", () => {
-
-        if (mode === "actor") {
-            actor = item.dataset.id;
-            select(item);
+        /* ACTOR */
+        if (step === "actor") {
+            resetUI();
+            data.actor = player.dataset.id;
+            player.classList.add("actor");
+            step = "action";
+            status.innerText = "Select Ball Action";
         }
 
-        else if (mode === "target") {
-            target = item.dataset.id;
-            select(item);
-
-            mode = "receiver";
-            title.innerText = "Select Receiver";
+        /* TARGET */
+        else if (step === "target") {
+            if (!data.action) return alert("Please select an action first!");
+            data.target = player.dataset.id;
+            player.classList.add("target");
+            step = "receiver";
+            status.innerText = "Select Receiver";
         }
 
-        else if (mode === "receiver") {
-            receiver = item.dataset.id;
-            select(item);
+        /* RECEIVER */
+        else if (step === "receiver") {
+            data.receiver = player.dataset.id;
+            player.classList.add("receiver");
+            saveEvent(); // AUTO SAVE
         }
     });
 });
 
-/* -----------------------------
-   STEP TRANSITION
------------------------------- */
-function nextStep() {
-    if (!actor) {
-        alert("Please select an actor");
-        return;
-    }
+/* ---------- ACTION BUTTON ---------- */
+document.querySelectorAll(".action-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        if (step !== "action") return;
+        data.action = btn.dataset.action;
+        btn.classList.add("active");
+        step = "target";
+        status.innerText = "Select Target";
+    });
+});
 
-    document.getElementById("id_actor").value = actor;
+/* ---------- SAVE EVENT ---------- */
+function saveEvent() {
+    const formData = new FormData();
+    formData.append("actor", data.actor);
+    formData.append("target", data.target);
+    formData.append("receiver", data.receiver);
+    formData.append("action_type", data.action);
+    formData.append("csrfmiddlewaretoken", document.querySelector("[name=csrfmiddlewaretoken]").value);
 
-    mode = "target";
-    title.innerText = "Select Target";
-
-    stepAction.style.display = "none";
-    stepSave.style.display = "block";
+    fetch("", {
+        method: "POST",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+        body: formData
+    })
+    .then(res => res.json())
+    .then(resp => {
+        if (resp.success) {
+            resetAll();
+        } else {
+            alert("Error saving event");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Server error");
+    });
 }
 
-/* -----------------------------
-   SUBMIT
------------------------------- */
-function submitEvent() {
-    if (!target || !receiver) {
-        alert("Select target and receiver");
-        return;
-    }
-
-    document.getElementById("id_target").value = target;
-    document.getElementById("id_receiver").value = receiver;
-
-    document.getElementById("hidden-form").submit();
+/* ---------- RESET EVERYTHING ---------- */
+function resetAll() {
+    step = "actor";
+    data = { actor: null, action: null, target: null, receiver: null };
+    document.querySelectorAll(".player").forEach(p => p.classList.remove("actor", "target", "receiver"));
+    document.querySelectorAll(".action-btn").forEach(b => b.classList.remove("active"));
+    status.innerText = "Select Actor";
 }
 
-/* -----------------------------
-   UI HELPERS
------------------------------- */
-function select(el) {
-    document.querySelectorAll(".player-item").forEach(p =>
-        p.classList.remove("selected")
-    );
-    el.classList.add("selected");
+/* ---------- RESET UI ONLY ---------- */
+function resetUI() {
+    document.querySelectorAll(".player").forEach(p => p.classList.remove("actor", "target", "receiver"));
 }
 </script>
 

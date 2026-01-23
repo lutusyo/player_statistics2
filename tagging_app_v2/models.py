@@ -1,54 +1,18 @@
 # tagging_app_v2/models.py
-
 from django.db import models
 from tagging_app_v2.constants import BALL_ACTION_CHOICES
 from lineup_app.models import MatchLineup
 from matches_app.models import Match
 
-
 class PassEvent_v2(models.Model):
-    match = models.ForeignKey(
-        Match,
-        on_delete=models.CASCADE,
-        related_name="pass_events_v2"
-    )
+    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name="pass_events_v2")
 
     # Player who performs the action
-    actor = models.ForeignKey(
-        MatchLineup,
-        on_delete=models.CASCADE,
-        related_name="pass_events_as_actor"
-    )
-
-    # Intended target of the pass
-    target = models.ForeignKey(
-        MatchLineup,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="pass_events_as_target"
-    )
-
-    # Actual receiver of the ball
-    receiver = models.ForeignKey(
-        MatchLineup,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="pass_events_as_receiver"
-    )
-
-    action_type = models.CharField(
-        max_length=30,
-        choices=BALL_ACTION_CHOICES
-    )
-
-    timestamp = models.PositiveIntegerField(
-        help_text="Match time in seconds",
-        null=True,
-        blank=True
-    )
-
+    actor = models.ForeignKey(MatchLineup, on_delete=models.CASCADE, related_name="pass_events_as_actor")
+    target = models.ForeignKey(MatchLineup, null=True, blank=True, on_delete=models.SET_NULL, related_name="pass_events_as_target")
+    receiver = models.ForeignKey(MatchLineup, null=True, blank=True, on_delete=models.SET_NULL, related_name="pass_events_as_receiver")
+    action_type = models.CharField(max_length=30, choices=BALL_ACTION_CHOICES)
+    timestamp = models.PositiveIntegerField(help_text="Match time in seconds", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
