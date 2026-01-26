@@ -9,7 +9,7 @@ from defensive_app.models import PlayerDefensiveStats
 from tagging_app.models import AttemptToGoal, PassEvent, GoalkeeperDistributionEvent
 from lineup_app.models import MatchLineup, Substitution
 from teams_app.models import Team
-
+from reports_app.models import Result
 
 @login_required
 def player_detail(request, player_id):
@@ -201,6 +201,17 @@ def player_detail(request, player_id):
     for a in assists_qs:
         assists_by_match[a.match_id] += 1
 
+    # --- Fetch corresponding results for matches ---
+    result_map = {}
+    match_tuples = [(m.home_team_id, m.away_team_id, m.date) for m in matches]
+    results_qs = Result.objects.filter(
+        home_team_id__in=[m[0] for m in match_tuples],
+        away_team_id__in=[m[1] for m in match_tuples],
+        date__in=[m[2] for m in match_tuples]
+    )
+    for r in results_qs:
+        result_map[(r.home_team_id, r.away_team_id, r.date)] = r
+
     # Matches played list
     matches_played = []
     for match in matches:
@@ -216,17 +227,21 @@ def player_detail(request, player_id):
             else:
                 opponent = None
 
-            matches_played.append({
-            'match': match,
-            'opponent': opponent.name if opponent else "Unknown",
-            'minutes_played': lineup.minutes_played if lineup else 0,
-            'goals': goals_by_match.get(match.id, 0),
-            'assists': assists_by_match.get(match.id, 0),
-            'total_shots': shots_by_match.get(match.id, 0),
-            'total_passes': passes_by_match.get(match.id, 0),
-            'competition_type': match.competition.type if match.competition else "Unknown",
-        })
+            # Get result from Result table
+            result_obj = result_map.get((match.home_team_id, match.away_team_id, match.date))
+            result_display = f"{result_obj.home_score} - {result_obj.away_score}" if result_obj else "-"
 
+            matches_played.append({
+                'match': match,
+                'opponent': opponent.name if opponent else "Unknown",
+                'minutes_played': lineup.minutes_played if lineup else 0,
+                'goals': goals_by_match.get(match.id, 0),
+                'assists': assists_by_match.get(match.id, 0),
+                'total_shots': shots_by_match.get(match.id, 0),
+                'total_passes': passes_by_match.get(match.id, 0),
+                'competition_type': match.competition.type if match.competition else "Unknown",
+                'result': result_display,
+            })
 
     # Measurements
     latest_measurement = player.current_measurement
