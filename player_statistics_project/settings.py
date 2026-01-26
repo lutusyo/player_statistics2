@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'perfomance_rating_app',
     'training_app',
     'sheets_generator_app',
+
+    #loaned_players
     'loans_app',
 
     

@@ -124,6 +124,12 @@
           </a>
         </div>
 
+        <div>
+          <a href="{% url 'loans_app:player_list' %}">
+            Loaned Players
+          </a>
+        </div>
+
         <div class="col-auto">
           <form method="get" action="{% url 'reports_app:download_technical_report' team.id %}" class="d-flex align-items-center">
             <input type="date" name="start_date" class="form-control form-control-sm me-1"

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ player.full_name }}</title>
+</head>
+<body>
+
+<h1>{{ player.full_name }}</h1>
+
+{% if player.photo %}
+    <img src="{{ player.photo.url }}" width="180">
+{% endif %}
+
+<h3>Personal Info</h3>
+<ul>
+    <li><strong>Age:</strong> {{ player.age }}</li>
+    <li><strong>Position:</strong> {{ player.position }}</li>
+    <li><strong>Preferred foot:</strong> {{ player.get_preferred_foot_display }}</li>
+    <li><strong>Height:</strong> {{ player.height_cm }} cm</li>
+    <li><strong>Weight:</strong> {{ player.weight_kg }} kg</li>
+</ul>
+
+<h3>Loan Info</h3>
+<ul>
+    <li><strong>Club:</strong> {{ player.loan_club }}</li>
+    <li><strong>Region:</strong> {{ player.loan_club_region }}</li>
+    <li><strong>Country:</strong> {{ player.loan_club_country }}</li>
+    <li><strong>Period:</strong>
+        {{ player.loan_start_date }} → {{ player.loan_end_date }}
+    </li>
+</ul>
+
+<hr>
+
+<h2>Daily Entries</h2>
+
+{% for entry in daily_entries %}
+    <div style="margin-bottom: 12px;">
+        <strong>{{ entry.date }}</strong>
+        — {{ entry.get_day_type_display }}
+
+        {% if entry.day_type == "training" %}
+            <p>Training minutes: {{ entry.training_minutes }}</p>
+        {% else %}
+            <p>
+                {{ entry.match_type|title }} vs {{ entry.opponent }}<br>
+                Result: {{ entry.result }}<br>
+                Minutes: {{ entry.minutes_played }}<br>
+                Goals: {{ entry.goals }},
+                Assists: {{ entry.assists }},
+                Yellow: {{ entry.yellow_cards }},
+                Red: {{ entry.red_cards }}
+            </p>
+        {% endif %}
+    </div>
+{% empty %}
+    <p>No daily entries recorded.</p>
+{% endfor %}
+
+<a href="{% url 'loans_app:player_list' %}">← Back to list</a>
+
+</body>
+</html>

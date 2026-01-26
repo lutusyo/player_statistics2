@@ -35,8 +35,6 @@
 
 <div class="results-container">
 
-    <hr>
-    <h2 style="text-align: center; margin-top: 40px;">Past Matches</h2>
 
     {% if past_matches %}
         {% for match in past_matches %}
@@ -120,7 +118,18 @@
                             {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
                         </div>
                         <div class="results-venue">{{ match.venue }}</div>
-                        <div class="results-type">{{ match.competition.name }}</div>
+                        
+
+                        <div class="results-type">
+                            {% if match.competition.logo %}
+                                <img src="{{ match.competition.logo.url }}"
+                                    alt="{{ match.competition.name }} logo"
+                                    class="competition-logo">
+                            {% endif %}
+                            <span>{{ match.competition.name }}</span>
+                        </div>
+
+
                     </div>
 
                     <!-- Team logos & names -->

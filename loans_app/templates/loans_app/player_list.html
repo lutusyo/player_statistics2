@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>Loaned Players</title>
+    </head>
+
+    <body>
+        <h1>Loaned Players</h1>
+
+        <table border="1" cellpadding="6">
+            <tr>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Club</th>
+                <th>Country</th>
+                <th>Age</th>
+            </tr>
+
+            {% for player in players %}
+                <tr>
+                    <td>
+                        <a href="{% url 'loans_app:player_detail' player.id %}">
+                            {{ player.full_name }}
+                        </a>
+                    </td>
+                    <td>{{ player.position }}</td>
+                    <td>{{ player.loan_club }}</td>
+                    <td>{{ player.loan_club_country }}</td>
+                    <td>{{ player.age }}</td>
+                </tr>
+
+            {% empty %}
+                <tr>
+                    <td colspan="5">No players Found.</td>
+                </tr>
+
+            {% endfor %}
+
+        </table>
+    </body>
+
+
+
+</html>
+
+

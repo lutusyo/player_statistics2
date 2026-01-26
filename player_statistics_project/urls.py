@@ -38,8 +38,12 @@ urlpatterns = [
     path("sheets/", include("sheets_generator_app.urls")),
 
     #############################
-        #tagging_app_v2
+
+    #tagging_app_v2
     path('tagging_v2/', include('tagging_app_v2.urls')),
+
+    # loaned players
+    path('loans_app/', include('loans_app.urls')),
 
   
 ]
