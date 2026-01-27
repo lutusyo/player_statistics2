@@ -38,6 +38,32 @@
             border: 1px solid #ccc;
         }
 
+
+        .team-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .team-logo {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+
+
+        .player-pos {
+            font-weight: bold;
+            margin-left: 6px;
+            margin-right: 6px;
+            color: #444;
+        }
+
+
+
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -55,10 +81,15 @@
         }
 
         @media print {
-            .print-btn {
-                display: none;
-            }
+            .print-btn {display: none;}
+            .team-logo {
+                width: 60px;
+                height: 60px;}
+        
         }
+
+
+
     </style>
 </head>
 
@@ -75,19 +106,31 @@
 
         <!-- HOME TEAM -->
         <div class="team-box">
-            <h3>Home Team</h3>
-            <h3>{{ match.home_team.name }}</h3>
+  
+            <div class="team-header">
+                {% if match.home_team.logo %}
+                    <img src="{{ match.home_team.logo.url }}" alt="{{ match.home_team.name }}" class="team-logo">
+                {% endif %}
+                <h3>{{ match.home_team.name }}</h3>
+            </div>
+
 
             <div class="section-title">Starting XI</div>
             <table>
                 {% for row in home_starting %}
+
                 <tr>
                     <td>
-                        {{ row.player.jersey_number }} - 
-                        {{ row.player.name }} {{ row.player.second_name }} {{ row.player.surname }}
+                        {{ row.player.jersey_number }}
+                        {% if row.player.specific_position %}
+                            <strong>{{ row.player.specific_position }}</strong>
+                        {% endif %}
+                        -
+                        {{ row.player.full_name }}
                         — <strong>{{ row.minutes_played }}'</strong>
                     </td>
                 </tr>
+
                 {% endfor %}
             </table>
 
@@ -96,30 +139,46 @@
                 {% for row in home_subs %}
                 <tr>
                     <td>
-                        {{ row.player.jersey_number }} - 
-                        {{ row.player.name }} {{ row.player.second_name }} {{ row.player.surname }}
+                        {{ row.player.jersey_number }}
+                        {% if row.player.specific_position %}
+                            <strong>{{ row.player.specific_position }}</strong>
+                        {% endif %}
+                        -
+                        {{ row.player.full_name }}
                         — <strong>{{ row.minutes_played }}'</strong>
                     </td>
                 </tr>
+
                 {% endfor %}
             </table>
         </div>
 
         <!-- AWAY TEAM -->
         <div class="team-box">
-            <h3>Away Team</h3>
-            <h3>{{ match.away_team.name }}</h3>
+
+            <div class="team-header">
+                {% if match.away_team.logo %}
+                    <img src="{{ match.away_team.logo.url }}" alt="{{ match.away_team.name }}" class="team-logo">
+                {% endif %}
+                <h3>{{ match.away_team.name }}</h3>
+            </div>
+
 
             <div class="section-title">Starting XI</div>
             <table>
                 {% for row in away_starting %}
                 <tr>
                     <td>
-                        {{ row.player.jersey_number }} -
-                        {{ row.player.name }} {{ row.player.second_name }} {{ row.player.surname }}
+                        {{ row.player.jersey_number }}
+                        {% if row.player.specific_position %}
+                            <strong>{{ row.player.specific_position }}</strong>
+                        {% endif %}
+                        -
+                        {{ row.player.full_name }}
                         — <strong>{{ row.minutes_played }}'</strong>
                     </td>
                 </tr>
+
                 {% endfor %}
             </table>
 
@@ -128,11 +187,16 @@
                 {% for row in away_subs %}
                 <tr>
                     <td>
-                        {{ row.player.jersey_number }} -
-                        {{ row.player.name }} {{ row.player.second_name }} {{ row.player.surname }}
+                        {{ row.player.jersey_number }}
+                        {% if row.player.specific_position %}
+                            <strong>{{ row.player.specific_position }}</strong>
+                        {% endif %}
+                        -
+                        {{ row.player.full_name }}
                         — <strong>{{ row.minutes_played }}'</strong>
                     </td>
                 </tr>
+
                 {% endfor %}
             </table>
         </div>
