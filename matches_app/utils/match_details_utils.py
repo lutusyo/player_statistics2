@@ -109,11 +109,16 @@ def get_match_detail_context(match):
 
     # Pass network data - you might need to adjust import and signature
     
-    pass_context = get_pass_network_context(match)
-    players = pass_context['players']
-    player_names = pass_context['player_names']
-    total_passes = pass_context['total_passes']
-    ball_lost = pass_context['ball_lost']
+    # ✅ Pass network data (HOME + AWAY)
+    home_pass_context = get_pass_network_context(match, match.home_team.id)
+    away_pass_context = get_pass_network_context(match, match.away_team.id)
+
+    home_total_passes = home_pass_context['total_passes']
+    home_ball_lost = home_pass_context['ball_lost']
+
+    away_total_passes = away_pass_context['total_passes']
+    away_ball_lost = away_pass_context['ball_lost']
+
 
     # Prepare player stats list
     all_players = MatchLineup.objects.filter(match=match).select_related("player", "team")
@@ -131,8 +136,15 @@ def get_match_detail_context(match):
         yellow_card = getattr(ml, 'yellow_card', 0)
         red_card = getattr(ml, 'red_card', 0)
 
-        total = total_passes.get(pid, 0)
-        lost = ball_lost.get(pid, 0)
+        if ml.team_id == match.home_team_id:
+            total = home_total_passes.get(pid, 0)
+            lost = home_ball_lost.get(pid, 0)
+        else:
+            total = away_total_passes.get(pid, 0)
+            lost = away_ball_lost.get(pid, 0)
+
+
+
         successful = total - lost
         accuracy = round((successful / total) * 100, 1) if total else 0
 
@@ -153,14 +165,26 @@ def get_match_detail_context(match):
         })
 
     # Calculate team passing stats by summing individual player stats
-    def calculate_team_passing(team_player_ids):
+    def calculate_team_passing(team_player_ids, totals, losts):
         return {
-            'total_passes': sum(total_passes.get(pid, 0) for pid in team_player_ids),
-            'ball_lost': sum(ball_lost.get(pid, 0) for pid in team_player_ids),
+            'total_passes': sum(totals.get(pid, 0) for pid in team_player_ids),
+            'ball_lost': sum(losts.get(pid, 0) for pid in team_player_ids),
         }
 
-    home_pass_stats = calculate_team_passing(home_player_ids)
-    away_pass_stats = calculate_team_passing(away_player_ids)
+    home_pass_stats = calculate_team_passing(
+        home_player_ids, home_total_passes, home_ball_lost
+    )
+
+    away_pass_stats = calculate_team_passing(
+        away_player_ids, away_total_passes, away_ball_lost
+    )
+
+
+   # Correct calls (keep only these)
+    home_pass_stats = calculate_team_passing(home_player_ids, home_total_passes, home_ball_lost)
+
+    away_pass_stats = calculate_team_passing(away_player_ids, away_total_passes, away_ball_lost)
+
 
 
     return {
@@ -172,6 +196,9 @@ def get_match_detail_context(match):
         'player_stats': player_stats,
         'attempts': attempts,
         'goals': goals,
+
+        'home_pass_context': home_pass_context,
+        'away_pass_context': away_pass_context,
         'home_pass_stats': home_pass_stats,
         'away_pass_stats': away_pass_stats,
     }

@@ -261,14 +261,27 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
         return context
 
     return render(request, "reports_app/match_report_templates/4_in_possession/attempt_to_goal.html", context)
-
-
+    
 def pass_network_dashboard(request, match_id, return_context=False):
-    match = get_object_or_404(Match, id=match_id)  
-    context = get_pass_network_context(match)      
-    context['match'] = match                      
+    match = get_object_or_404(Match, id=match_id)
+
+    home_pass = get_pass_network_context(match, match.home_team.id)
+    away_pass = get_pass_network_context(match, match.away_team.id)
+
+    context = {
+        "match": match,
+        "home_team": match.home_team,
+        "away_team": match.away_team,
+
+        "home_pass": home_pass,
+        "away_pass": away_pass,
+    }
 
     if return_context:
         return context
 
-    return render(request, "reports_app/match_report_templates/4_in_possession/pass_network.html", context)
+    return render(request, "reports_app/match_report_templates/4_in_possession/pass_network.html", context )
+
+
+
+

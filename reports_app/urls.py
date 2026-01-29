@@ -112,7 +112,7 @@ urlpatterns = [
 
     # Full report
     path('match/<int:match_id>/<int:our_team_id>/full-report/',full_match_report_views.full_match_report_view,name='full_match_report'),
-    path('match/<int:match_id>/<int:our_team_id>/download-pdf/', download_full_report_pdf,name='download_full_report_pdf'),
+    path('match/<int:match_id>/download-pdf/', download_full_report_pdf,name='download_full_report_pdf'),
 
 ]
 

@@ -26,7 +26,7 @@
     <div style="display: flex; justify-content: center; align-items: center; font-size: 26px; font-weight: bold; margin-bottom: 30px;">
         <div style="text-align: right; margin-right: 40px; font-size: 18px;">
             {% if home_team.logo %}
-                <img src="{% static 'goalkeeping_app/azamfc_logo.png' %}" alt="{{ home_team.name }}" style="height: 60px;"><br>
+                <img src="{{ home_team.logo.url }}" alt="{{ home_team.name }}" style="height: 60px;"><br>
             {% endif %}
             {{ home_team.name }}
         </div>

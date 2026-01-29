@@ -6,9 +6,7 @@ import numpy as np
 import base64
 from io import BytesIO
 
-
-def goalkeeping_view(request, match_id, our_team_id, return_context=False):
-
+def goalkeeping_view(request, match_id, return_context=False):
     match = get_object_or_404(Match, id=match_id)
 
     team_a = match.home_team
@@ -71,18 +69,11 @@ def goalkeeping_view(request, match_id, our_team_id, return_context=False):
             match=match, team=opponent, outcome='On Target Goal'
         ).count()
 
-        # Save percentage
-        if on_target_faced > 0:
-            save_percentage = round((on_target_saved / on_target_faced) * 100, 1)
-        else:
-            save_percentage = 0
-
-        # Clean sheet
+        save_percentage = round((on_target_saved / on_target_faced) * 100, 1) if on_target_faced else 0
         clean_sheet = "YES" if on_target_goal_conceded == 0 else "NO"
 
         return {
             "team": team,
-
             "total_attempts": total_attempts,
             "on_target_made": on_target_made,
             "on_target_goal_made": on_target_goal_made,
@@ -90,16 +81,13 @@ def goalkeeping_view(request, match_id, our_team_id, return_context=False):
             "blocked_shot_made": blocked_shot_made,
             "player_error_made": player_error_made,
             "own_goal_made": own_goal_made,
-
             "total_faced": total_faced,
             "on_target_faced": on_target_faced,
             "off_target_faced": off_target_faced,
             "blocked_shot_faced": blocked_shot_faced,
             "player_error_faced": player_error_faced,
-
             "on_target_saved": on_target_saved,
             "on_target_goal_conceded": on_target_goal_conceded,
-
             "save_percentage": save_percentage,
             "clean_sheet": clean_sheet,
         }
@@ -107,7 +95,9 @@ def goalkeeping_view(request, match_id, our_team_id, return_context=False):
     team_a_stats = get_team_stats(team_a, team_b)
     team_b_stats = get_team_stats(team_b, team_a)
 
-    # -----------------------------------
+    # (Bar chart and radar chart generation stays the same)
+    ...
+        # -----------------------------------
     # BAR CHART (SMALL)
     # -----------------------------------
     def generate_bar_chart():
@@ -193,21 +183,18 @@ def goalkeeping_view(request, match_id, our_team_id, return_context=False):
     ]
 
 
+
     context = {
-    "match": match,
-    "team_a_stats": team_a_stats,
-    "team_b_stats": team_b_stats,
-
-    "bar_chart": bar_chart,
-    "radar_a": radar_a,
-    "radar_b": radar_b,
-
-    # ADD THESE ↓↓↓
-    "chart_labels": chart_labels,
-    "team_a_values": team_a_values,
-    "team_b_values": team_b_values,
-}
-
+        "match": match,
+        "team_a_stats": team_a_stats,
+        "team_b_stats": team_b_stats,
+        "bar_chart": bar_chart,
+        "radar_a": radar_a,
+        "radar_b": radar_b,
+        "chart_labels": chart_labels,
+        "team_a_values": team_a_values,
+        "team_b_values": team_b_values,
+    }
 
     if return_context:
         return context
