@@ -5,47 +5,61 @@ from django.utils import timezone
 from players_app.models import Player
 from matches_app.models import Match
 from teams_app.models import Team
-from lineup_app.models import MatchLineup, PositionChoices, Formation, POSITION_COORDS
+from lineup_app.models import MatchLineup, Formation, POSITION_COORDS
 import json
+
 
 def create_lineup_view(request, match_id, team_id):
     match = get_object_or_404(Match, id=match_id)
     team = get_object_or_404(Team, id=team_id)
 
-    # Fetch players **for the selected team only**
+    # Players for selected team only
     players_qs = Player.objects.filter(team=team).order_by('name')
 
     if request.method == "POST":
         starters = request.POST.getlist('starters[]')
+        formation = request.POST.get('formation')
 
-        if not starters or len(starters) != 11:
+        if not formation:
+            return JsonResponse({'error': 'Formation is required.'}, status=400)
+
+        if formation not in dict(Formation.choices):
+            return JsonResponse({'error': 'Invalid formation.'}, status=400)
+
+        if len(starters) != 11:
             return JsonResponse({'error': 'You must select exactly 11 starters.'}, status=400)
 
         with transaction.atomic():
-            MatchLineup.objects.filter(match=match, team=team).delete()
+            # 🔥 Clear ONLY previous starting XI
+            MatchLineup.objects.filter(
+                match=match,
+                team=team,
+                is_starting=True
+            ).delete()
 
-            for pid in starters:
-                position = request.POST.get(f'position_{pid}')
-                pod_number = request.POST.get(f'gps_{pid}') or None
+            # 🔥 Create starting XI (ORDER DRIVES POSITION)
+            for order, pid in enumerate(starters, start=1):
+                player = get_object_or_404(Player, id=pid, team=team)
 
-                player_obj = get_object_or_404(Player, id=pid)
                 MatchLineup.objects.create(
                     match=match,
-                    player=player_obj,
                     team=team,
+                    player=player,
+                    formation=formation,
                     is_starting=True,
-                    position=position,
-                    pod_number=pod_number,
-                    time_in=0,
+                    order=order,
+                    time_in=0
                 )
+                # ✅ position auto-assigned in model.save()
 
+            # Set match start time once
             if not match.start_time:
                 match.start_time = timezone.now()
                 match.save()
 
         return JsonResponse({'success': True})
 
-    # Send formations and position coords to template
+    # ---------- GET REQUEST ----------
     formation_coords_json = json.dumps(POSITION_COORDS)
 
     return render(request, 'lineup_app/create_lineup.html', {

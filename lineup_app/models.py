@@ -1,4 +1,3 @@
-# lineup_app/models.py
 from django.db import models
 from players_app.models import Player
 from matches_app.models import Match
@@ -72,21 +71,6 @@ POSITION_COORDS = {
         "RM": {"top": 45, "left": 75},
         "ST": {"top": 70, "left": 50},
     },
-
-    
-    #"4-2-3-1":{
-     #   "GK": {"top": 5, "left": 45},
-      #  "LB": {"top": 25, "left": 20},
-      #  "LCB": {"top": 25, "left": 40},
-       # "RCB": {"top": 25, "left": 60},
-       # "RB": {"top": 25, "left": 80},
-      #  "LM": {"top": 45, "left": 25},
-      #  "LCM": {"top": 45, "left": 40},
-      #  "CM": {"top": 50, "left": 50},
-      #  "RCM": {"top": 45, "left": 60},
-       # "RM": {"top": 45, "left": 75},
-       # "ST": {"top": 70, "left": 50},
-   # },
 }
 
 
@@ -96,7 +80,6 @@ class Formation(models.TextChoices):
     F352 = "3-5-2", "3-5-2"
     F343 = "3-4-3", "3-4-3"
     F451 = "4-5-1", "4-5-1"
-    #F4231 = "4-2-3-1", "4-2-3-1"
 
 
 class PositionChoices(models.TextChoices):
@@ -119,13 +102,37 @@ class PositionChoices(models.TextChoices):
     SUB = 'SUB', 'Substitute'
 
 
+# 🔥 LOCAL HELPER (NO IMPORTS → NO CIRCULAR BUG)
+def get_position_by_formation_and_order(formation, order):
+    if not formation or not order:
+        return None
+
+    formation_map = POSITION_COORDS.get(formation)
+    if not formation_map:
+        return None
+
+    positions = list(formation_map.keys())
+    index = order - 1
+
+    if 0 <= index < len(positions):
+        return positions[index]
+
+    return None
+
+
 class MatchLineup(models.Model):
     formation = models.CharField(max_length=10, choices=Formation.choices, blank=True, null=True)
     match = models.ForeignKey(Match, on_delete=models.CASCADE, null=True, blank=True)
     player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
     team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True)
     is_starting = models.BooleanField(default=False)
-    position = models.CharField(max_length=5, choices=PositionChoices.choices, default=PositionChoices.SUB, blank=True, null=True)
+    position = models.CharField(
+        max_length=5,
+        choices=PositionChoices.choices,
+        default=PositionChoices.SUB,
+        blank=True,
+        null=True
+    )
     pod_number = models.CharField(max_length=20, null=True, blank=True)
     time_in = models.PositiveSmallIntegerField(null=True, blank=True)
     time_out = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -147,28 +154,26 @@ class MatchLineup(models.Model):
         if self.time_in is None:
             return 0
 
-        try:
-            time_in = int(self.time_in)
-        except (ValueError, TypeError):
-            return 0  # invalid data
-
-        # Decide exit time
         if self.time_out is not None:
-            try:
-                end_minute = int(self.time_out)
-            except (ValueError, TypeError):
-                end_minute = final_minute
-        elif final_minute is not None:
-            end_minute = final_minute
-        else:
-            return 0
+            return max(self.time_out - self.time_in, 0)
 
-        mp = end_minute - time_in
-        return mp if mp > 0 else 0
+        if final_minute is not None:
+            return max(final_minute - self.time_in, 0)
+
+        return 0
 
     def save(self, *args, **kwargs):
         if self.player and not self.team:
             self.team = self.player.team
+
+        # 🔥 AUTO ASSIGN POSITION
+        if self.is_starting and self.formation and self.order:
+            self.position = get_position_by_formation_and_order(
+                self.formation,
+                self.order
+            )
+        else:
+            self.position = PositionChoices.SUB
 
         self.minutes_played = self.calculate_minutes_played(final_minute=90)
         super().save(*args, **kwargs)

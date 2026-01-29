@@ -13,23 +13,24 @@ def match_lineup_report(request, match_id, return_context=False):
             sub_in_minute = None
             sub_out_minute = None
 
-            # Check if player was substituted in
             sub_in = Substitution.objects.filter(match=match, player_in=ml).first()
             if sub_in:
                 sub_in_minute = sub_in.minute
 
-            # Check if player was substituted out
             sub_out = Substitution.objects.filter(match=match, player_out=ml).first()
             if sub_out:
                 sub_out_minute = sub_out.minute
 
             lineup.append({
                 "player": ml.player,
+                "position": ml.position,        # ✅ THIS
+                "formation": ml.formation,      # (optional)
                 "minutes_played": ml.minutes_played,
                 "sub_in_minute": sub_in_minute,
                 "sub_out_minute": sub_out_minute,
             })
         return lineup
+
 
     # HOME TEAM
     home_starting_qs = MatchLineup.objects.filter(match=match, team=match.home_team, is_starting=True).order_by("order")

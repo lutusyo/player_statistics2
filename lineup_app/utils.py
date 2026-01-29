@@ -1,5 +1,6 @@
 # lineup_app/utils.py
 from .models import MatchLineup
+from lineup_app.models import POSITION_COORDS
 
 def get_current_on_pitch_players(match, minute=None):
     """
@@ -15,3 +16,5 @@ def get_current_on_pitch_players(match, minute=None):
         qs = qs.filter(time_in__lte=minute).filter(models.Q(time_out__isnull=True) | models.Q(time_out__gt=minute))
 
     return qs.select_related("player", "team")
+
+

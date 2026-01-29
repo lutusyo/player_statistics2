@@ -3,83 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <title>Substitution Panel - {{ match }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        select, input, button { margin: 5px; padding: 5px; }
-        .section { margin-bottom: 20px; }
+        /* ===== Reset & base ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f4f6f8;
+            color: #333;
+            line-height: 1.5;
+            padding: 20px;
+        }
+        a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        h1, h2, h3 {
+            margin-bottom: 15px;
+        }
+        h1 {
+            color: #222;
+        }
+        h2 {
+            font-size: 1.2rem;
+            color: #555;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 20px 0;
+        }
+
+        /* ===== Form styling ===== */
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            max-width: 600px;
+            margin-bottom: 30px;
+        }
+        .form-section {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+        select, input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* ===== Substitutions list ===== */
+        .subs-list {
+            list-style: none;
+            padding: 0;
+            max-width: 600px;
+        }
+        .subs-list li {
+            background: #fff;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .subs-list li span.minute {
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* ===== Message styling ===== */
+        .message {
+            padding: 10px 15px;
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            max-width: 600px;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 640px) {
+            form, .subs-list li {
+                padding: 15px;
+            }
+            h2 {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
-<a href="{% url 'lineup_app:create_lineup' match.id match.away_team.id %}">BACK</a>
-<h1>Substitution Panel</h1>
-<h2>{{ match.home_team.name }} vs {{ match.away_team.name }} — {{ match.date }}</h2>
+    <a href="{% url 'lineup_app:create_lineup' match.id match.away_team.id %}">&larr; Back</a>
 
-<form method="POST" action="{% url 'lineup_app:record_substitution' match.id %}">
-    {% csrf_token %}
+    <h1>Substitution Panel</h1>
+    <h2>{{ match.home_team.name }} vs {{ match.away_team.name }} — {{ match.date }}</h2>
 
-    <div class="section">
-        <label><strong>Player Out:</strong></label><br>
-        <select name="player_out" required>
-            <option value="">-- Select Player Out --</option>
-            {% for p in home_currently_on_pitch %}
-                <option value="{{ p.id }}">{{ p.player.name }} ({{ p.player.position }})</option>
-            {% endfor %}
-            {% for p in away_currently_on_pitch %}
-                <option value="{{ p.id }}">{{ p.player.name }} ({{ p.player.position }})</option>
-            {% endfor %}
-        </select>
-    </div>
+    {% if message %}
+        <div class="message">{{ message }}</div>
+    {% endif %}
 
-    <div class="section">
-        <label><strong>Player In:</strong></label><br>
-        <select name="player_in" required>
-            <option value="">-- Select Player In --</option>
-
-            <optgroup label="{{ match.home_team.name }} Bench">
-                {% for p in home_bench %}
-                    {% if p.is_lineup %}
-                        <option value="{{ p.id }}">{{ p.name }} ({{ p.position }})</option>
-                    {% else %}
-                        <option value="{{ p.id }}">{{ p.name }} (SUB)</option>
-                    {% endif %}
+    <form method="POST" action="{% url 'lineup_app:record_substitution' match.id %}">
+        {% csrf_token %}
+        <div class="form-section">
+            <label for="player_out">Player Out:</label>
+            <select name="player_out" id="player_out" required>
+                <option value="">-- Select Player Out --</option>
+                {% for p in home_currently_on_pitch %}
+                    <option value="{{ p.id }}">{{ p.player.name }} ({{ p.player.position }})</option>
                 {% endfor %}
-            </optgroup>
-
-            <optgroup label="{{ match.away_team.name }} Bench">
-                {% for p in away_bench %}
-                    {% if p.is_lineup %}
-                        <option value="{{ p.id }}">{{ p.name }} ({{ p.position }})</option>
-                    {% else %}
-                        <option value="{{ p.id }}">{{ p.name }} (SUB)</option>
-                    {% endif %}
+                {% for p in away_currently_on_pitch %}
+                    <option value="{{ p.id }}">{{ p.player.name }} ({{ p.player.position }})</option>
                 {% endfor %}
-            </optgroup>
-        </select>
-    </div>
+            </select>
+        </div>
 
+        <div class="form-section">
+            <label for="player_in">Player In:</label>
+            <select name="player_in" id="player_in" required>
+                <option value="">-- Select Player In --</option>
 
-    <div class="section">
-        <label><strong>Minute of substitution:</strong></label><br>
-        <input type="number" name="minute" min="0" max="120" required>
-    </div>
+                <optgroup label="{{ match.home_team.name }} Bench">
+                    {% for p in home_bench %}
+                        <option value="{{ p.id }}">{{ p.name }} ({{ p.position }})</option>
+                    {% endfor %}
+                </optgroup>
 
-    <button type="submit">Confirm Substitution</button>
-</form>
+                <optgroup label="{{ match.away_team.name }} Bench">
+                    {% for p in away_bench %}
+                        <option value="{{ p.id }}">{{ p.name }} ({{ p.position }})</option>
+                    {% endfor %}
+                </optgroup>
+            </select>
+        </div>
 
-{% if message %}
-    <p style="color:green;">{{ message }}</p>
-{% endif %}
+        <div class="form-section">
+            <label for="minute">Minute of substitution:</label>
+            <input type="number" name="minute" id="minute" min="0" max="120" required>
+        </div>
 
-<hr>
-<h3>Current Substitutions</h3>
+        <button type="submit">Confirm Substitution</button>
+    </form>
 
-<ul>
-    {% for s in substitutions %}
-        <li>{{ s.player_out.player.name }} → {{ s.player_in.player.name }} ({{ s.minute }}')</li>
-    {% empty %}
-        <li>No substitutions yet.</li>
-    {% endfor %}
-</ul>
+    <hr>
 
+    <h3>Current Substitutions</h3>
+    <ul class="subs-list">
+        {% for s in substitutions %}
+            <li>
+                <span>{{ s.player_out.player.name }} → {{ s.player_in.player.name }}</span>
+                <span class="minute">{{ s.minute }}'</span>
+            </li>
+        {% empty %}
+            <li>No substitutions yet.</li>
+        {% endfor %}
+    </ul>
 </body>
 </html>

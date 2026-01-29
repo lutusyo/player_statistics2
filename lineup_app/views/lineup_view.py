@@ -89,24 +89,35 @@ def both_teams_lineup_view(request, match_id):
             "id": l.id,
             "name": l.player.name,
             "number": l.player.jersey_number,
-            "position": l.position,
+            "position": l.get_position_display() if l.position else "",
             "photo": l.player.photo.url if l.player.photo else None,
         }
 
-        if l.is_starting:
+        if l.is_starting and l.position and l.position != "SUB":
             if l.team.team_type == "OUR_TEAM":
-                coords = get_coords(our_team_formation, l.position, used_our_positions)
+                coords = get_coords(
+                    our_team_formation,
+                    l.position,
+                    used_our_positions
+                )
                 player_info.update(coords)
                 our_team_lineup.append(player_info)
             else:
-                coords = get_coords(opponent_formation, l.position, used_opponent_positions)
+                coords = get_coords(
+                    opponent_formation,
+                    l.position,
+                    used_opponent_positions
+                )
                 player_info.update(coords)
                 opponent_team_lineup.append(player_info)
+
         else:
+            # Bench players (including SUB or missing position)
             if l.team.team_type == "OUR_TEAM":
                 our_subs.append(player_info)
             else:
                 opponent_subs.append(player_info)
+
 
 
     substitutions = Substitution.objects.filter(match=match).select_related("player_out__player", "player_in__player")

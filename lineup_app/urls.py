@@ -1,14 +1,10 @@
 from django.urls import path
 from lineup_app.views.lineup_bila_uwanja import  create_lineup_view
 from lineup_app.views.match_lineup_view_with_uwanja import pitch_lineup_view
-from lineup_app.views.substitution_panel import substitution_panel
 from lineup_app.views import time
 from lineup_app.views import lineup_view
 
 from . import views
-
-
-
 
 from lineup_app.views.substitution_panel import (
     api_get_lists,
@@ -24,7 +20,7 @@ urlpatterns = [
 
     path('match/<int:match_id>/lineups/', lineup_view.both_teams_lineup_view, name='both_teams_lineup'),
 
-    path('match<int:match_id>/team/<int:team_id>/match-lineup', create_lineup_view, name='create_lineup'),
+    path('match/<int:match_id>/team/<int:team_id>/match-lineup', create_lineup_view, name='create_lineup'),
      #path('match/<int:match_id>/match-lineup/', match_lineup_view, name='create_lineup'),
 
     # lineup

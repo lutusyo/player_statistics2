@@ -137,129 +137,88 @@
 <div id="page-wrapper">
 
 <div id="header-wrapper">
-<header class="container d-flex justify-content-between align-items-center">
-
-    {% if competition and competition.logo %}
-    <div style="position:absolute; top:12px; left:20px;">
-        <img src="{{ competition.logo.url }}" style="height:55px;">
-    </div>
-    {% endif %}
+<header class="container-fluid bg-gradient d-flex flex-column flex-md-row align-items-center justify-content-between py-2">
 
     <div id="logo" class="d-flex align-items-center gap-2">
         <a href="{% url 'home' %}">
-            <img src="{% static 'accounts_app/images/logo.png' %}">
+            <img src="{% static 'accounts_app/images/logo.png' %}" style="height:55px;">
         </a>
-        <h1 class="m-0">
-            <a href="{% url 'home' %}">Azam FC Youth</a>
+        <h1 class="m-0 fs-5 text-white">
+            <a href="{% url 'home' %}" class="text-white text-decoration-none">Azam FC Youth</a>
         </h1>
     </div>
 
-    <nav id="nav">
-        <ul>
+    <!-- Mobile Navbar Toggler -->
+    <button class="navbar-toggler d-md-none btn btn-outline-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive">
+        &#9776; Menu
+    </button>
 
+    <!-- Nav links -->
+    <nav id="nav" class="collapse d-md-flex flex-column flex-md-row align-items-start align-items-md-center mt-2 mt-md-0" id="navbarResponsive">
+        <ul class="list-unstyled d-flex flex-column flex-md-row gap-2 mb-0">
             <li>
-                <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}nav-active{% endif %}">
+                <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}nav-active{% endif %}">
                     Home
                 </a>
             </li>
 
-            <!-- TEAMS -->
+            <!-- TEAMS Dropdown -->
             <li class="dropdown">
-                <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#">Teams</a>
+                <a class="dropdown-toggle nav-link" data-bs-toggle="dropdown" href="#">Teams</a>
                 <ul class="dropdown-menu">
                     {% for team in our_teams %}
-                    <li>
-                        <a class="dropdown-item" href="{% url 'teams_app:team_squad' team.id %}">
-                            {{ team.age_group.code }}
-                        </a>
-                    </li>
+                        <li><a class="dropdown-item" href="{% url 'teams_app:team_squad' team.id %}">{{ team.age_group.code }}</a></li>
                     {% endfor %}
                 </ul>
             </li>
 
-            <!-- MATCHES -->
+            <!-- MATCHES Dropdown -->
             <li class="dropdown">
-                <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#">Matches</a>
+                <a class="dropdown-toggle nav-link" data-bs-toggle="dropdown" href="#">Matches</a>
                 <ul class="dropdown-menu">
-
                     {% for team in our_teams %}
                     <li class="dropdown-submenu">
-                        <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">
-                            {{ team.age_group.code }}
-                        </a>
+                        <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">{{ team.age_group.code }}</a>
                         <ul class="dropdown-menu">
-                            <li>
-                                <a class="dropdown-item"
-                                   href="{% url 'matches_app:team_results' team.age_group.code %}">
-                                    All Matches
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item" href="{% url 'matches_app:team_results' team.age_group.code %}">All Matches</a></li>
                             <li><hr class="dropdown-divider"></li>
                             {% for comp in competition_choices %}
-                            <li>
-                                <a class="dropdown-item"
-                                   href="{% url 'matches_app:team_results' team.age_group.code %}?competition={{ comp.id }}">
-                                    {{ comp.name }}
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item" href="{% url 'matches_app:team_results' team.age_group.code %}?competition={{ comp.id }}">{{ comp.name }}</a></li>
                             {% endfor %}
                         </ul>
                     </li>
                     {% endfor %}
-
                 </ul>
             </li>
 
-            <!-- PERFORMANCE -->
+            <!-- PERFORMANCE Dropdown -->
             <li class="dropdown">
-                <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#">Performance</a>
+                <a class="dropdown-toggle nav-link" data-bs-toggle="dropdown" href="#">Performance</a>
                 <ul class="dropdown-menu">
-
                     <li class="dropdown-submenu">
-                        <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">
-                            Performance Evaluation
-                        </a>
+                        <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">Performance Evaluation</a>
                         <ul class="dropdown-menu">
                             {% for team in our_teams %}
-                            <li>
-                                <a class="dropdown-item" href="{% url 'performance_rating_app:performance_list' team.id %}">
-                                    {{ team.age_group.code }}
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item" href="{% url 'performance_rating_app:performance_list' team.id %}">{{ team.age_group.code }}</a></li>
                             {% endfor %}
                         </ul>
                     </li>
-
                     <li class="dropdown-submenu">
-                        <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">
-                            GPS Data
-                        </a>
+                        <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">GPS Data</a>
                         <ul class="dropdown-menu">
                             {% for team in our_teams %}
-                            <li>
-                                <a class="dropdown-item" href="{% url 'gps_app:gps_list' team.id %}">
-                                    {{ team.age_group.code }}
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item" href="{% url 'gps_app:gps_list' team.id %}">{{ team.age_group.code }}</a></li>
                             {% endfor %}
                         </ul>
                     </li>
-
                     <li class="dropdown-submenu">
-                        <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">
-                            Technical Reports
-                        </a>
+                        <a class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" href="#">Technical Reports</a>
                         <ul class="dropdown-menu">
                             {% for team in our_teams %}
-                            <li>
-                                <a class="dropdown-item" href="{% url 'reports_app:reports_dashboard' team.id %}">
-                                    {{ team.age_group.code }}
-                                </a>
-                            </li>
+                            <li><a class="dropdown-item" href="{% url 'reports_app:reports_dashboard' team.id %}">{{ team.age_group.code }}</a></li>
                             {% endfor %}
                         </ul>
                     </li>
-
                 </ul>
             </li>
 
@@ -267,16 +226,16 @@
             <li>
                 <form method="POST" action="{% url 'accounts_app:logout' %}">
                     {% csrf_token %}
-                    <button class="logout-link">Logout</button>
+                    <button class="logout-link btn btn-outline-light">Logout</button>
                 </form>
             </li>
             {% endif %}
-
         </ul>
     </nav>
 
 </header>
 </div>
+
 
 <div id="main-wrapper">
     {% block content %}{% endblock %}
