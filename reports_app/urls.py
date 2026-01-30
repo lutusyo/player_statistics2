@@ -105,10 +105,13 @@ urlpatterns = [
     path("shotmap/<int:match_id>/<str:team_type>/", in_possession_views.create_shotmap_base64, name="generate_shotmap"),
 
     # 6. Goalkeeping
-    path("match/<int:match_id>/<int:our_team_id>/goalkeeping/", goalkeeping_view.goalkeeping_view,name="goalkeeping_report"),
+    path("match/<int:match_id>/goalkeeping/", goalkeeping_view.goalkeeping_view,name="goalkeeping_report"),
  
     # 7. Set plays
-    path('match/<int:match_id>/<int:team_id>/setplays/', set_plays_views.setplays_dashboard, name='setplays_dashboard'),
+    path('match/<int:match_id>/setplays/', set_plays_views.setplays_dashboard, name='setplays_dashboard'),
+
+    # 9. physical data
+
 
     # Full report
     path('match/<int:match_id>/<int:our_team_id>/full-report/',full_match_report_views.full_match_report_view,name='full_match_report'),

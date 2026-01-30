@@ -55,10 +55,10 @@
         </div>
 
         <div class="col-auto">
-          <a href="{% url 'reports_app:goalkeeping_report' match.id team.id %}" class="btn btn-outline-danger">Goalkeeping</a>
+          <a href="{% url 'reports_app:goalkeeping_report' match.id  %}" class="btn btn-outline-danger">Goalkeeping</a>
         </div>
         <div class="col-auto">
-          <a href="{% url 'reports_app:setplays_dashboard' match.id team.id %}" class="btn btn-outline-secondary">Set Plays</a>
+          <a href="{% url 'reports_app:setplays_dashboard' match.id  %}" class="btn btn-outline-secondary">Set Plays</a>
         </div>
         <div class="col-auto">
           <a href="{% url 'reports_app:full_match_report' match.id team.id %}" class="btn btn-outline-info">Full Report</a>
