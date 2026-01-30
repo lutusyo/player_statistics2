@@ -1,0 +1,124 @@
+/* ================= ROOT VARIABLES ================= */
+:root {
+  --primary: #007bff;
+  --secondary: #6c757d;
+  --success: #28a745;
+  --danger: #dc3545;
+  --dark: #111;
+  --light-bg: #f4f6f9;
+  --card-bg: #ffffff;
+}
+
+/* ================= BASE ================= */
+body.report-body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: var(--light-bg);
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 700;
+  color: var(--primary);
+  text-align: center;
+  margin: 30px 0 15px;
+}
+
+/* ================= SECTIONS ================= */
+.report-section {
+  padding: 40px 20px;
+}
+
+.report-section.dark {
+  background: #000;
+  color: #fff;
+}
+
+/* ================= CARDS ================= */
+.card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  margin-bottom: 25px;
+}
+
+/* ================= TABLES ================= */
+table {
+  width: 90%;
+  margin: 20px auto;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 10px 12px;
+  text-align: center;
+  font-size: 14px;
+}
+
+th {
+  background: var(--primary);
+  color: #fff;
+}
+
+tr:nth-child(even) {
+  background: #f2f2f2;
+}
+
+/* ================= BUTTONS ================= */
+.btn {
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 6px;
+  background: var(--primary);
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.btn:hover {
+  background: #0056b3;
+}
+
+/* ================= CHART CONTAINERS ================= */
+.chart-container {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  max-width: 650px;
+  margin: 30px auto;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+
+/* ================= FULLSCREEN INTRO ================= */
+.fullscreen-intro {
+  height: 100vh;
+  background: linear-gradient(150deg, #000, #0f1b1d);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  text-align: center;
+}
+
+.fullscreen-intro h1 {
+  font-size: 56px;
+  letter-spacing: 3px;
+  color: white;
+}
+
+.intro-teams {
+  display: flex;
+  gap: 80px;
+  margin-top: 40px;
+}
+
+.intro-team img {
+  height: 80px;
+}
