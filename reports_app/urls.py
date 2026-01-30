@@ -92,7 +92,7 @@ urlpatterns = [
     path('match/<int:match_id>/<int:our_team_id>/report/',match_report_dashboard, name='match_report_dashboard'),
 
     # 1. Post match summary
-    path('match/<int:match_id>/<int:our_team_id>/post-match-summary/', post_match_summary_views.full_match_context_view, name='post_match_summary'),
+    path('match/<int:match_id>/post-match-summary/', post_match_summary_views.full_match_context_view, name='post_match_summary'),
 
     # 2. Match summary team
     path("match-lineup/<int:match_id>/", match_summary_team_view.match_lineup_report, name="match_lineup_report"),
