@@ -191,15 +191,12 @@ class Result(models.Model):
     def __str__(self):
         return f"{self.home_team} {self.home_score} - {self.away_score} {self.away_team} ({self.date})"
 
+
+
 class TrainingMinutes(models.Model):
     date = models.DateField(default=timezone.now)
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='training_minutes')
-    
     total_minutes = models.PositiveIntegerField(default=0)
-    physical_minutes = models.PositiveIntegerField(default=0)
-    tactical_minutes = models.PositiveIntegerField(default=0)
-    technical_minutes = models.PositiveIntegerField(default=0)
-    recovery_minutes = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.team.name} - {self.date} Training"
@@ -211,12 +208,12 @@ class TrainingMinutes(models.Model):
         """
         super().save(*args, **kwargs)
 
-        # Loop through all players in the team
         for player in Player.objects.filter(team=self.team):
-            # Check if player is in medical table for this date
-            injured = Medical.objects.filter(name=player, date=self.date).exists()
+            injured = Medical.objects.filter(
+                name=player,
+                date=self.date
+            ).exists()
 
-            # Create or update player’s training minutes record
             PlayerTrainingMinutes.objects.update_or_create(
                 player=player,
                 training_session=self,
@@ -224,6 +221,7 @@ class TrainingMinutes(models.Model):
                     'minutes': 0 if injured else self.total_minutes,
                 }
             )
+
 
 
 class PlayerTrainingMinutes(models.Model):

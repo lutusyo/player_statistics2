@@ -87,7 +87,7 @@ class ResultAdmin(admin.ModelAdmin):
 
 @admin.register(TrainingMinutes)
 class TrainingMinutesAdmin(admin.ModelAdmin):
-    list_display = ('date', 'team', 'total_minutes', 'physical_minutes', 'tactical_minutes', 'technical_minutes', 'recovery_minutes')
+    list_display = ('date', 'team', 'total_minutes')
     list_filter = ('team', 'date')
     search_fields = ('team__name',)
 
