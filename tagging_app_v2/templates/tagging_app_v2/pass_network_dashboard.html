@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container-fluid mt-3">
+
+    <h4 class="mb-3">
+        Pass Events – {{ match.home_team.name }} vs {{ match.away_team.name }}
+    </h4>
+
+    <table class="table table-bordered table-sm align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Actor</th>
+                <th>Target</th>
+                <th>Receiver</th>
+                <th>Action</th>
+                <th>Success</th>
+                <th>Time (s)</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for event in pass_events %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+
+                <td>{{ event.actor.player.name }}</td>
+
+                <td>
+                    {% if event.target %}
+                        {{ event.target.player.name }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if event.receiver %}
+                        {{ event.receiver.player.name }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+
+                <td>{{ event.get_action_type_display }}</td>
+
+                <td class="text-center">
+                    {% if event.is_successful %}
+                        <span class="badge bg-success">✔</span>
+                    {% else %}
+                        <span class="badge bg-danger">✖</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if event.timestamp %}
+                        {{ event.timestamp }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center text-muted">
+                    No pass events recorded
+                </td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}

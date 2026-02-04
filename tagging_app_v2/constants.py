@@ -1,8 +1,11 @@
 # tagging_app_v2/constants.py
 
+
+
 BALL_ACTION_CHOICES = [
     ("SHORT_PASS", "Short Pass"),
-    ("LONG_PASS", "Long Pass"),
+    ("HIGH_BALL", "High Ball"),      # includes aerial duels
+
     ("GOAL_KICK", "Goal Kick"),
     ("CLEARANCE", "Clearance"),
     ("CROSS", "Cross"),

@@ -19,7 +19,15 @@ class PassEvent_v2(models.Model):
         ordering = ["timestamp", "created_at"]
 
     def is_successful(self):
-        return self.target == self.receiver
+        """
+        Successful if the receiver exists and
+        receiver team is the same as actor team
+        """
+        if not self.receiver:
+            return False
+
+        return self.actor.team == self.receiver.team
+
 
     def __str__(self):
         actor = self.actor.player.name
