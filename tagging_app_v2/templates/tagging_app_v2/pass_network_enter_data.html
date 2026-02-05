@@ -4,146 +4,128 @@
 {% block content %}
 <div class="container-fluid mt-3">
 
-    <h4 class="mb-3">Live Match Tagging</h4>
+    <h4 class="mb-3 text-center">Live Match Tagging</h4>
 
     <div class="row">
 
         <!-- HOME TEAM -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <h6 class="text-center">{{ match.home_team.name }}</h6>
-
             <div class="players-grid">
                 {% for lineup in home_lineups %}
-                    <div class="player"
-                         data-id="{{ lineup.id }}"
-                         data-team="{{ lineup.team.id }}">
-                        <div class="player-box">
-                            <span class="jersey">{{ lineup.player.jersey_number }}</span>
-                            <span class="name">{{ lineup.player.name }}</span>
-                        </div>
+                <div class="player" data-id="{{ lineup.id }}" data-team="{{ lineup.team.id }}">
+                    <div class="player-box">
+                        <span class="jersey">{{ lineup.player.jersey_number }}</span>
+                        <span class="name">{{ lineup.player.name }}</span>
                     </div>
-                {% empty %}
-                    <div class="text-muted text-center">No players</div>
+                </div>
                 {% endfor %}
             </div>
         </div>
 
-        <!-- ACTIONS -->
-        <div class="col-md-4">
-            <h6 class="text-center">Ball Action</h6>
-
-            <div class="d-grid gap-2">
+        <!-- BALL ACTIONS + STATUS + SHORTCUTS -->
+        <div class="col-md-6">
+            <h6 class="text-center">Ball Actions</h6>
+            <div class="players-grid action-grid">
                 {% for value,label in form.action_type.field.choices %}
-                    <button class="btn btn-outline-primary action-btn"
-                            data-action="{{ value }}">
-                        {{ label }}
-                    </button>
+                <div class="action-btn" data-action="{{ value }}">
+                    <div class="player-box">
+                        <span class="jersey">{{ value|slice:":1"|upper }}</span>
+                        <span class="name">{{ label }}</span>
+                    </div>
+                </div>
                 {% endfor %}
             </div>
 
             <div class="alert alert-info mt-3 text-center" id="status">
                 Select Actor
             </div>
+
+            <div class="text-muted small text-center mt-2">
+                Double-click actor = Dribble
+            </div>
+
+            <div class="d-grid gap-2 mt-2">
+                <button id="undo-btn" class="btn btn-warning">↩ Undo Last Action</button>
+            </div>
+
+            <div id="warning" class="alert alert-danger mt-2 text-center d-none"></div>
         </div>
 
         <!-- AWAY TEAM -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <h6 class="text-center">{{ match.away_team.name }}</h6>
-
             <div class="players-grid">
                 {% for lineup in away_lineups %}
-                    <div class="player"
-                         data-id="{{ lineup.id }}"
-                         data-team="{{ lineup.team.id }}">
-                        <div class="player-box">
-                            <span class="jersey">{{ lineup.player.jersey_number }}</span>
-                            <span class="name">{{ lineup.player.name }}</span>
-                        </div>
+                <div class="player" data-id="{{ lineup.id }}" data-team="{{ lineup.team.id }}">
+                    <div class="player-box">
+                        <span class="jersey">{{ lineup.player.jersey_number }}</span>
+                        <span class="name">{{ lineup.player.name }}</span>
                     </div>
-                {% empty %}
-                    <div class="text-muted text-center">No players</div>
+                </div>
                 {% endfor %}
             </div>
         </div>
 
     </div>
 
-    <!-- HIDDEN FORM -->
-    <form id="hidden-form">
-        {% csrf_token %}
-    </form>
-
+    <form id="hidden-form">{% csrf_token %}</form>
 </div>
 
-<!-- ================= STYLES ================= -->
 <style>
+/* PLAYER & BALL ACTION GRIDS */
 .players-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 6px;
 }
 
-.player {
+/* PLAYER CARD */
+.player, .action-btn {
     cursor: pointer;
     border: 1px solid #dee2e6;
     border-radius: 6px;
     padding: 6px;
-    background: #ffffff;
+    text-align: center;
+    user-select: none;
     transition: all 0.15s ease;
 }
+.player:hover, .action-btn:hover { background: #f1f3f5; }
 
-.player:hover {
-    background: #f1f3f5;
+.actor { border: 2px solid #198754; background: #e9f7ef; }
+.receiver { border: 2px solid #0d6efd; background: #e7f1ff; }
+.target { border: 2px solid #ffc107; background: #fff8e1; }
+
+.action-btn.active { border: 2px solid #0d6efd; background: #e7f1ff; }
+
+/* BALL ACTION GRID - 3 per row */
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
 }
 
 .player-box {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    font-size: 12px;
-}
-
-.jersey {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    background: #e9ecef;
-    color: #212529;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    font-weight: 700;
 }
-
-.name {
-    font-size: 11px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 80px;
-    text-align: center;
-}
-
-.actor {
-    border: 2px solid #198754;
-    background-color: #e9f7ef !important;
-}
-
-.receiver {
-    border: 2px solid #0d6efd;
-    background-color: #e7f1ff !important;
-}
-
-.target {
-    border: 2px solid #ffc107;
-    background-color: #fff8e1 !important;
-}
+.player-box .jersey { font-weight: bold; font-size: 1rem; }
+.player-box .name { font-size: 0.75rem; text-align: center; }
 </style>
 
-<!-- ================= SCRIPT ================= -->
 <script>
+/* ================= CONSTANTS ================= */
+const DEFAULT_ACTION = "LOW_PASS";
+const DRIBBLE = "DRIBBLE";
+const ACTIONS_REQUIRE_TARGET = ["HIGH_BALL", "CROSS"];
+const ACTIONS_NO_TARGET = ["LOW_PASS","CLEARANCE","GOAL_KICK","THROW_IN","LONG_THROW_IN"];
+
+/* ================= STATE ================= */
 let step = "actor";
+let lastClickTime = 0;
+let history = [];
 
 let data = {
     actor: null,
@@ -155,55 +137,83 @@ let data = {
 };
 
 const status = document.getElementById("status");
+const warning = document.getElementById("warning");
 
-/* ---------- PLAYER CLICK ---------- */
+/* ================= PLAYER CLICK ================= */
 document.querySelectorAll(".player").forEach(player => {
     player.addEventListener("click", () => {
-
         const id = player.dataset.id;
         const team = player.dataset.team;
+        const now = Date.now();
+
+        // DOUBLE CLICK → DRIBBLE
+        if(step==="action" && id===data.actor && now-lastClickTime<300){
+            data.action = DRIBBLE;
+            data.receiver = id;
+            data.receiverTeam = team;
+            data.target = id;
+            saveEvent(true);
+            return;
+        }
+        lastClickTime = now;
 
         // SELECT ACTOR
-        if (step === "actor") {
+        if(step==="actor"){
             clearPlayers();
             data.actor = id;
             data.actorTeam = team;
             player.classList.add("actor");
-            step = "action";
-            status.innerText = "Select Ball Action";
+            step="action";
+            status.innerText="Select Ball Action or click receiver";
+            return;
         }
 
-        // SELECT RECEIVER
-        else if (step === "receiver") {
-            data.receiver = id;
-            data.receiverTeam = team;
-            player.classList.add("receiver");
+        // PREVENT SELF PASS
+        if((step==="action" || step==="receiver") && id===data.actor && data.action!==DRIBBLE) return;
 
-            // Same team → save directly
-            if (data.receiverTeam === data.actorTeam) {
-                data.target = null;
+        // ACTION AUTO LOW PASS
+        if(step==="action"){
+            data.action=DEFAULT_ACTION;
+            data.receiver=id;
+            data.receiverTeam=team;
+            data.target=(team===data.actorTeam)?id:data.actor;
+            saveEvent();
+            return;
+        }
+
+        // RECEIVER STEP
+        if(step==="receiver"){
+            data.receiver=id;
+            data.receiverTeam=team;
+            if(ACTIONS_REQUIRE_TARGET.includes(data.action)){
+                player.classList.add("receiver");
+                step="target";
+                status.innerText="Select Target (actor team)";
+            } else {
+                data.target=(team===data.actorTeam)?id:data.actor;
                 saveEvent();
             }
-            // Different team → need target
-            else {
-                step = "target";
-                status.innerText = "Select Target";
-            }
+            return;
         }
 
-        // SELECT TARGET (only if teams differ)
-        else if (step === "target") {
-            data.target = id;
-            player.classList.add("target");
+        // TARGET STEP
+        if(step==="target"){
+            if(team!==data.actorTeam){
+                warning.innerText="Target must be from actor team!";
+                warning.classList.remove("d-none");
+                setTimeout(()=>warning.classList.add("d-none"),2000);
+                return;
+            }
+            data.target=id;
             saveEvent();
         }
     });
 });
 
-/* ---------- ACTION BUTTON ---------- */
-document.querySelectorAll(".action-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-        if (step !== "action") return;
+/* ================= ACTION BUTTONS ================= */
+document.querySelectorAll(".action-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+        if(step!=="action") return;
         clearActions();
         data.action = btn.dataset.action;
         btn.classList.add("active");
@@ -212,67 +222,81 @@ document.querySelectorAll(".action-btn").forEach(btn => {
     });
 });
 
-/* ---------- SAVE EVENT ---------- */
-function saveEvent() {
-    const formData = new FormData();
-    formData.append("actor", data.actor);
-    formData.append("receiver", data.receiver);
-    if (data.target) formData.append("target", data.target);
-    formData.append("action_type", data.action);
-    formData.append("csrfmiddlewaretoken",
-        document.querySelector("[name=csrfmiddlewaretoken]").value
-    );
+/* ================= KEYBOARD SHORTCUTS ================= */
+document.addEventListener("keydown", e=>{
+    if(step!=="action") return;
 
-    fetch("", {
-        method: "POST",
-        headers: { "X-Requested-With": "XMLHttpRequest" },
-        body: formData
-    })
-    .then(res => res.json())
-    .then(resp => {
-        if (resp.success) {
-            setNextActor();
-        } else {
-            alert("Error saving event");
+    // dynamic shortcuts: first letter of each action
+    let action = null;
+    document.querySelectorAll(".action-btn").forEach(btn=>{
+        if(btn.dataset.action[0].toLowerCase() === e.key.toLowerCase()){
+            action = btn.dataset.action;
         }
-    })
-    .catch(() => alert("Server error"));
+    });
+    if(!action) return;
+
+    data.action = action;
+    clearActions();
+    step = "receiver";
+    status.innerText = "Select Receiver";
+});
+
+/* ================= SAVE EVENT ================= */
+function saveEvent(keepActor=false){
+    history.push({...data});
+
+    const fd = new FormData();
+    fd.append("actor", data.actor);
+    fd.append("receiver", data.receiver);
+    fd.append("target", data.target);
+    fd.append("action_type", data.action);
+    fd.append("csrfmiddlewaretoken",
+        document.querySelector("[name=csrfmiddlewaretoken]").value);
+
+    fetch("", {method:"POST", headers:{"X-Requested-With":"XMLHttpRequest"}, body:fd})
+    .then(r=>r.json()).then(resp=>{
+        if(resp.success){
+            keepActor ? resetForDribble() : setNextActor();
+        }
+    });
 }
 
-/* ---------- AUTO NEXT ACTOR ---------- */
-function setNextActor() {
+/* ================= NEXT ACTOR ================= */
+function setNextActor(){
     clearPlayers();
     clearActions();
-
-    const newActor = document.querySelector(
-        `.player[data-id="${data.receiver}"]`
-    );
-
-    if (newActor) newActor.classList.add("actor");
-
+    const p = document.querySelector(`.player[data-id="${data.receiver}"]`);
+    if(p) p.classList.add("actor");
     data.actor = data.receiver;
     data.actorTeam = data.receiverTeam;
     data.action = null;
     data.receiver = null;
     data.receiverTeam = null;
     data.target = null;
-
     step = "action";
-    status.innerText = "Select Ball Action";
+    status.innerText = "Select Ball Action or click receiver";
 }
 
-/* ---------- HELPERS ---------- */
-function clearPlayers() {
-    document.querySelectorAll(".player").forEach(p =>
-        p.classList.remove("actor", "receiver", "target")
-    );
+function resetForDribble(){
+    clearActions();
+    step = "action";
+    status.innerText = "Select Ball Action or click receiver";
 }
 
-function clearActions() {
-    document.querySelectorAll(".action-btn").forEach(b =>
-        b.classList.remove("active")
-    );
+/* ================= UNDO ================= */
+document.getElementById("undo-btn").addEventListener("click", ()=>{
+    if(history.length===0) return;
+    const last = history.pop();
+    data = {...last};
+    setNextActor();
+});
+
+/* ================= HELPERS ================= */
+function clearPlayers(){
+    document.querySelectorAll(".player").forEach(p=>p.classList.remove("actor","receiver","target"));
+}
+function clearActions(){
+    document.querySelectorAll(".action-btn").forEach(b=>b.classList.remove("active"));
 }
 </script>
-
 {% endblock %}
