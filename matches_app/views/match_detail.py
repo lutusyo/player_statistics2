@@ -23,7 +23,7 @@ def match_detail(request, match_id):
     details_context = get_match_detail_context(match)
 
     # Get pass network context
-    pass_network_context = get_pass_network_context(match)
+    pass_network_context = get_pass_network_context(match, our_team_id)
 
     # Get attempt to goal context (with is_opponent handling)
     attempt_to_goal_context = get_match_full_context(match_id, our_team_id)

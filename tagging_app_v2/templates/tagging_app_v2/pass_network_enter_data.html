@@ -23,7 +23,7 @@
             </div>
         </div>
 
-        <!-- BALL ACTIONS + STATUS + SHORTCUTS -->
+        <!-- ACTIONS -->
         <div class="col-md-6">
             <h6 class="text-center">Ball Actions</h6>
             <div class="players-grid action-grid">
@@ -73,14 +73,11 @@
 </div>
 
 <style>
-/* PLAYER & BALL ACTION GRIDS */
 .players-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
     gap: 6px;
 }
-
-/* PLAYER CARD */
 .player, .action-btn {
     cursor: pointer;
     border: 1px solid #dee2e6;
@@ -91,36 +88,49 @@
     transition: all 0.15s ease;
 }
 .player:hover, .action-btn:hover { background: #f1f3f5; }
-
 .actor { border: 2px solid #198754; background: #e9f7ef; }
 .receiver { border: 2px solid #0d6efd; background: #e7f1ff; }
 .target { border: 2px solid #ffc107; background: #fff8e1; }
-
 .action-btn.active { border: 2px solid #0d6efd; background: #e7f1ff; }
-
-/* BALL ACTION GRID - 3 per row */
-.action-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-}
-
-.player-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-.player-box .jersey { font-weight: bold; font-size: 1rem; }
-.player-box .name { font-size: 0.75rem; text-align: center; }
+.action-grid { grid-template-columns: repeat(3, 1fr); }
+.player-box { display:flex; flex-direction:column; align-items:center; }
+.jersey { font-weight:bold; }
+.name { font-size:0.75rem; }
 </style>
 
 <script>
+/* ================= OFFLINE DB ================= */
+let db;
+const req = indexedDB.open("match_tagging_db", 1);
+
+req.onupgradeneeded = e => {
+    db = e.target.result;
+    db.createObjectStore("events", { keyPath: "local_id" });
+};
+req.onsuccess = e => { db = e.target.result; };
+
+function saveLocalEvent(ev){
+    return new Promise(res=>{
+        const tx = db.transaction("events","readwrite");
+        tx.objectStore("events").put(ev);
+        tx.oncomplete = res;
+    });
+}
+function getPendingEvents(){
+    return new Promise(res=>{
+        const tx = db.transaction("events","readonly");
+        const r = tx.objectStore("events").getAll();
+        r.onsuccess = () => res(r.result);
+    });
+}
+function deleteLocalEvent(id){
+    db.transaction("events","readwrite").objectStore("events").delete(id);
+}
+
 /* ================= CONSTANTS ================= */
 const DEFAULT_ACTION = "LOW_PASS";
 const DRIBBLE = "DRIBBLE";
-const ACTIONS_REQUIRE_TARGET = ["HIGH_BALL", "CROSS"];
-const ACTIONS_NO_TARGET = ["LOW_PASS","CLEARANCE","GOAL_KICK","THROW_IN","LONG_THROW_IN"];
+const ACTIONS_REQUIRE_TARGET = ["HIGH_BALL","CROSS"];
 
 /* ================= STATE ================= */
 let step = "actor";
@@ -128,25 +138,22 @@ let lastClickTime = 0;
 let history = [];
 
 let data = {
-    actor: null,
-    actorTeam: null,
-    action: null,
-    receiver: null,
-    receiverTeam: null,
-    target: null
+    actor:null, actorTeam:null,
+    action:null,
+    receiver:null, receiverTeam:null,
+    target:null
 };
 
 const status = document.getElementById("status");
 const warning = document.getElementById("warning");
 
 /* ================= PLAYER CLICK ================= */
-document.querySelectorAll(".player").forEach(player => {
-    player.addEventListener("click", () => {
+document.querySelectorAll(".player").forEach(player=>{
+    player.addEventListener("click",()=>{
         const id = player.dataset.id;
         const team = player.dataset.team;
         const now = Date.now();
 
-        // DOUBLE CLICK → DRIBBLE
         if(step==="action" && id===data.actor && now-lastClickTime<300){
             data.action = DRIBBLE;
             data.receiver = id;
@@ -157,21 +164,15 @@ document.querySelectorAll(".player").forEach(player => {
         }
         lastClickTime = now;
 
-        // SELECT ACTOR
         if(step==="actor"){
             clearPlayers();
-            data.actor = id;
-            data.actorTeam = team;
+            data.actor=id; data.actorTeam=team;
             player.classList.add("actor");
             step="action";
             status.innerText="Select Ball Action or click receiver";
             return;
         }
 
-        // PREVENT SELF PASS
-        if((step==="action" || step==="receiver") && id===data.actor && data.action!==DRIBBLE) return;
-
-        // ACTION AUTO LOW PASS
         if(step==="action"){
             data.action=DEFAULT_ACTION;
             data.receiver=id;
@@ -181,14 +182,13 @@ document.querySelectorAll(".player").forEach(player => {
             return;
         }
 
-        // RECEIVER STEP
         if(step==="receiver"){
             data.receiver=id;
             data.receiverTeam=team;
             if(ACTIONS_REQUIRE_TARGET.includes(data.action)){
                 player.classList.add("receiver");
                 step="target";
-                status.innerText="Select Target (actor team)";
+                status.innerText="Select Target";
             } else {
                 data.target=(team===data.actorTeam)?id:data.actor;
                 saveEvent();
@@ -196,12 +196,11 @@ document.querySelectorAll(".player").forEach(player => {
             return;
         }
 
-        // TARGET STEP
         if(step==="target"){
             if(team!==data.actorTeam){
                 warning.innerText="Target must be from actor team!";
                 warning.classList.remove("d-none");
-                setTimeout(()=>warning.classList.add("d-none"),2000);
+                setTimeout(()=>warning.classList.add("d-none"),1500);
                 return;
             }
             data.target=id;
@@ -217,81 +216,73 @@ document.querySelectorAll(".action-btn").forEach(btn=>{
         clearActions();
         data.action = btn.dataset.action;
         btn.classList.add("active");
-        step = "receiver";
-        status.innerText = "Select Receiver";
+        step="receiver";
+        status.innerText="Select Receiver";
     });
 });
 
-/* ================= KEYBOARD SHORTCUTS ================= */
-document.addEventListener("keydown", e=>{
-    if(step!=="action") return;
-
-    // dynamic shortcuts: first letter of each action
-    let action = null;
-    document.querySelectorAll(".action-btn").forEach(btn=>{
-        if(btn.dataset.action[0].toLowerCase() === e.key.toLowerCase()){
-            action = btn.dataset.action;
-        }
-    });
-    if(!action) return;
-
-    data.action = action;
-    clearActions();
-    step = "receiver";
-    status.innerText = "Select Receiver";
-});
-
-/* ================= SAVE EVENT ================= */
-function saveEvent(keepActor=false){
+/* ================= SAVE EVENT (OFFLINE-FIRST) ================= */
+async function saveEvent(keepActor=false){
     history.push({...data});
 
-    const fd = new FormData();
-    fd.append("actor", data.actor);
-    fd.append("receiver", data.receiver);
-    fd.append("target", data.target);
-    fd.append("action_type", data.action);
-    fd.append("csrfmiddlewaretoken",
-        document.querySelector("[name=csrfmiddlewaretoken]").value);
+    const ev = {
+        local_id: crypto.randomUUID(),
+        match_id: {{ match.id }},
+        actor:data.actor,
+        receiver:data.receiver,
+        target:data.target,
+        action_type:data.action,
+        ts:Date.now()
+    };
 
-    fetch("", {method:"POST", headers:{"X-Requested-With":"XMLHttpRequest"}, body:fd})
-    .then(r=>r.json()).then(resp=>{
-        if(resp.success){
-            keepActor ? resetForDribble() : setNextActor();
-        }
-    });
+    await saveLocalEvent(ev); // INSTANT
+    keepActor ? resetForDribble() : setNextActor();
+    syncEvents();
 }
 
-/* ================= NEXT ACTOR ================= */
+/* ================= SYNC ================= */
+async function syncEvents(){
+    if(!navigator.onLine) return;
+    const events = await getPendingEvents();
+
+    for(const ev of events){
+        try{
+            const fd = new FormData();
+            fd.append("actor",ev.actor);
+            fd.append("receiver",ev.receiver);
+            fd.append("target",ev.target);
+            fd.append("action_type",ev.action_type);
+            fd.append("csrfmiddlewaretoken",
+                document.querySelector("[name=csrfmiddlewaretoken]").value);
+
+            const r = await fetch("",{
+                method:"POST",
+                headers:{"X-Requested-With":"XMLHttpRequest"},
+                body:fd
+            });
+            const resp = await r.json();
+            if(resp.success) deleteLocalEvent(ev.local_id);
+        }catch(e){ return; }
+    }
+}
+window.addEventListener("online", syncEvents);
+
+/* ================= UI HELPERS ================= */
 function setNextActor(){
-    clearPlayers();
-    clearActions();
+    clearPlayers(); clearActions();
     const p = document.querySelector(`.player[data-id="${data.receiver}"]`);
     if(p) p.classList.add("actor");
-    data.actor = data.receiver;
-    data.actorTeam = data.receiverTeam;
-    data.action = null;
-    data.receiver = null;
-    data.receiverTeam = null;
-    data.target = null;
-    step = "action";
-    status.innerText = "Select Ball Action or click receiver";
+    data.actor=data.receiver;
+    data.actorTeam=data.receiverTeam;
+    data.action=data.receiver=data.receiverTeam=data.target=null;
+    step="action";
+    status.innerText="Select Ball Action or click receiver";
 }
-
 function resetForDribble(){
     clearActions();
-    step = "action";
-    status.innerText = "Select Ball Action or click receiver";
+    step="action";
+    status.innerText="Select Ball Action or click receiver";
 }
-
-/* ================= UNDO ================= */
-document.getElementById("undo-btn").addEventListener("click", ()=>{
-    if(history.length===0) return;
-    const last = history.pop();
-    data = {...last};
-    setNextActor();
-});
-
-/* ================= HELPERS ================= */
 function clearPlayers(){
     document.querySelectorAll(".player").forEach(p=>p.classList.remove("actor","receiver","target"));
 }
