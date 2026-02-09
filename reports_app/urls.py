@@ -3,7 +3,17 @@ from django.urls import path
 from reports_app.views.daily_report_views import (
     report_filters
 )
-from reports_app.views.daily_report_views import fitness_views, iap_views, medical_views, mesocycle_views, performance_views, report_exports, result_views, scouting_views, statistics_view, team_reports_view, transition_views
+from reports_app.views.daily_report_views import ( 
+    fitness_views, iap_views, medical_views,
+    mesocycle_views, performance_views,
+    report_exports, result_views,
+    scouting_views,
+    statistics_view,
+    individual_statistics_view,
+    team_reports_view,
+    transition_views,
+    )
+
 from reports_app.views.match_report_views import ( 
     goalkeeping_view, 
     set_plays_views, 
@@ -77,6 +87,17 @@ urlpatterns = [
     path('team/<int:team_id>/statistics/', statistics_view.statistics_list_view, name='statistics_list'),
     path('team/<int:team_id>/statistics/export/excel/', statistics_view.statistics_export_excel, name='statistics_export_excel'),
     path('team/<int:team_id>/statistics/export/pdf/', statistics_view.statistics_export_pdf, name='statistics_export_pdf'),
+
+
+
+    # Individual statistics
+    path("player/<int:player_id>/report/", individual_statistics_view.player_report_view, name='individual_statistics'),
+    path("player/<int:player_id>/report/excel/", individual_statistics_view.player_report_export_excel, name='player_report_excel'),
+    path("player/<int:player_id>/report/pdf/", individual_statistics_view.player_report_export_pdf, name="player_report_pdf"),
+
+   
+
+
     # Dashboards
     path('team-reports/<int:team_id>/dashboard/', report_filters.reports_dashboard, name='reports_dashboard'),
     path('team-reports/<int:team_id>/', team_reports_view.team_reports_view, name='team_reports'),

@@ -107,7 +107,7 @@
         <th>Sub Out</th>
         <th>Goals</th>
         <th>Assists</th>
-        <th>Note</th>
+        <th>Link</th>
       </tr>
     </thead>
     <tbody>
@@ -123,6 +123,14 @@
         <td>{{ r.sub_out }}</td>
         <td>{{ r.goals }}</td>
         <td>{{ r.assists }}</td>
+
+        <td>
+          <a href="{% url 'reports_app:individual_statistics' player_id=r.player.id %}?filter={{ filter_type }}" class="btn btn-sm btn-outline-primary">
+            View Report
+          </a>
+        </td>
+
+
         <td>{{ r.note }}</td>
       </tr>
       {% empty %}

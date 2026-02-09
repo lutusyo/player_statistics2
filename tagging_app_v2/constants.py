@@ -8,7 +8,7 @@ BALL_ACTION_CHOICES = [
     ("CLEARANCE", "Clearance"),
     ("CROSS", "Cross"),
     ("THROW_IN", "Throw In"),
-    ("LONG_THROW_IN", "Long Throw In"),
+    ("FOULS", "Fouls"),
     ("DRIBBLE", "Dribble"),
     ("BALL_SHIELDING", "Ball Shielding"),
 ]
