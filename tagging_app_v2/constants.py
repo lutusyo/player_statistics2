@@ -11,4 +11,12 @@ BALL_ACTION_CHOICES = [
     ("FOULS", "Fouls"),
     ("DRIBBLE", "Dribble"),
     ("BALL_SHIELDING", "Ball Shielding"),
+    ("OFFSIDE", "Offside"),
+]
+
+
+FOUL_OUTCOME = [
+    ("NO CARD", "No card"),
+    ("YELLOW CARD", "Yellow card"),
+    ("RED CARD", "Red card"),
 ]

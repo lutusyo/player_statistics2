@@ -4,9 +4,6 @@ from teams_app.models import Team, AgeGroup
 from django.utils import timezone
 from datetime import datetime, timedelta
 
-# -------------------------------
-# Choices
-# -------------------------------
 class SeasonChoices(models.TextChoices):
     SEASON_2022_2023 = "2022-2023", "2022-2023"
     SEASON_2023_2024 = "2023-2024", "2023-2024"
@@ -25,9 +22,6 @@ class CompetitionType(models.TextChoices):
     TOURNAMENT = 'Tournament', 'Tournament'
 
 
-# -------------------------------
-# Countries, Regions & Venues
-# -------------------------------
 class Country(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
@@ -58,9 +52,6 @@ class Venue(models.Model):
         return f"{self.name} ({self.region.name})"
 
 
-# -------------------------------
-# Competition (to hold logo per type)
-# -------------------------------
 class Competition(models.Model):
     name = models.CharField(max_length=100, unique=True)
     type = models.CharField(max_length=50, choices=CompetitionType.choices)
@@ -69,10 +60,6 @@ class Competition(models.Model):
     def __str__(self):
         return self.name
 
-
-# -------------------------------
-# Matches
-# -------------------------------
 class Match(models.Model):
     home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home_matches')
     away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_matches')

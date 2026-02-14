@@ -72,6 +72,22 @@
     <form id="hidden-form">{% csrf_token %}</form>
 </div>
 
+<!-- ================= FOUL MODAL ================= -->
+<div class="modal fade" id="foulModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title">Select Foul Outcome</h6>
+      </div>
+      <div class="modal-body text-center">
+        <button class="btn btn-secondary m-1 foul-choice" data-value="NO CARD">No Card</button>
+        <button class="btn btn-warning m-1 foul-choice" data-value="YELLOW CARD">Yellow Card</button>
+        <button class="btn btn-danger m-1 foul-choice" data-value="RED CARD">Red Card</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <style>
 .players-grid {
     display: grid;
@@ -141,7 +157,8 @@ let data = {
     actor:null, actorTeam:null,
     action:null,
     receiver:null, receiverTeam:null,
-    target:null
+    target:null,
+    foul_outcome:null
 };
 
 const status = document.getElementById("status");
@@ -185,6 +202,13 @@ document.querySelectorAll(".player").forEach(player=>{
         if(step==="receiver"){
             data.receiver=id;
             data.receiverTeam=team;
+
+            if(data.action==="FOULS"){
+                const modal = new bootstrap.Modal(document.getElementById('foulModal'));
+                modal.show();
+                return;
+            }
+
             if(ACTIONS_REQUIRE_TARGET.includes(data.action)){
                 player.classList.add("receiver");
                 step="target";
@@ -221,7 +245,18 @@ document.querySelectorAll(".action-btn").forEach(btn=>{
     });
 });
 
-/* ================= SAVE EVENT (OFFLINE-FIRST) ================= */
+/* ================= FOUL OUTCOME ================= */
+document.querySelectorAll(".foul-choice").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+        data.foul_outcome = btn.dataset.value;
+        const modalEl = document.getElementById('foulModal');
+        bootstrap.Modal.getInstance(modalEl).hide();
+        data.target = data.actor;
+        saveEvent();
+    });
+});
+
+/* ================= SAVE EVENT ================= */
 async function saveEvent(keepActor=false){
     history.push({...data});
 
@@ -232,10 +267,11 @@ async function saveEvent(keepActor=false){
         receiver:data.receiver,
         target:data.target,
         action_type:data.action,
+        foul_outcome:data.foul_outcome,
         ts:Date.now()
     };
 
-    await saveLocalEvent(ev); // INSTANT
+    await saveLocalEvent(ev);
     keepActor ? resetForDribble() : setNextActor();
     syncEvents();
 }
@@ -252,6 +288,7 @@ async function syncEvents(){
             fd.append("receiver",ev.receiver);
             fd.append("target",ev.target);
             fd.append("action_type",ev.action_type);
+            fd.append("foul_outcome",ev.foul_outcome || "");
             fd.append("csrfmiddlewaretoken",
                 document.querySelector("[name=csrfmiddlewaretoken]").value);
 
@@ -274,7 +311,7 @@ function setNextActor(){
     if(p) p.classList.add("actor");
     data.actor=data.receiver;
     data.actorTeam=data.receiverTeam;
-    data.action=data.receiver=data.receiverTeam=data.target=null;
+    data.action=data.receiver=data.receiverTeam=data.target=data.foul_outcome=null;
     step="action";
     status.innerText="Select Ball Action or click receiver";
 }

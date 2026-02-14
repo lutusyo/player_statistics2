@@ -1,6 +1,6 @@
 # tagging_app_v2/models.py
 from django.db import models
-from tagging_app_v2.constants import BALL_ACTION_CHOICES
+from tagging_app_v2.constants import BALL_ACTION_CHOICES, FOUL_OUTCOME
 from lineup_app.models import MatchLineup
 from matches_app.models import Match
 
@@ -12,6 +12,7 @@ class PassEvent_v2(models.Model):
     target = models.ForeignKey(MatchLineup, null=True, blank=True, on_delete=models.SET_NULL, related_name="pass_events_as_target")
     receiver = models.ForeignKey(MatchLineup, null=True, blank=True, on_delete=models.SET_NULL, related_name="pass_events_as_receiver")
     action_type = models.CharField(max_length=30, choices=BALL_ACTION_CHOICES)
+    foul_outcome = models.CharField(max_length=30, choices=FOUL_OUTCOME, null=True, blank=True)
     timestamp = models.PositiveIntegerField(help_text="Match time in seconds", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -34,3 +35,9 @@ class PassEvent_v2(models.Model):
         target = self.target.player.name if self.target else "—"
         receiver = self.receiver.player.name if self.receiver else "—"
         return f"{actor} → {target} ({self.action_type}) | Received: {receiver}"
+    
+    @property
+    def minute(self):
+        if self.timestamp:
+            return self.timestamp // 60
+        return 0
