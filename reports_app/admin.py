@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.db import models
+from players_app.models import Player
+
 from .models import (
     Medical,
     Transition,
@@ -10,9 +12,9 @@ from .models import (
     FitnessPlan,
     Result,
     TrainingMinutes,
-    PlayerTrainingMinutes
+    PlayerTrainingMinutes,
+    TrainingAbsence
 )
-
 
 @admin.register(Medical)
 class MedicalAdmin(admin.ModelAdmin):
@@ -85,11 +87,35 @@ class ResultAdmin(admin.ModelAdmin):
     }
 
 
+
+
+
+class PlayerTrainingMinutesInline(admin.TabularInline):
+    model = PlayerTrainingMinutes
+    extra = 0
+    autocomplete_fields = ['player']
+
+
+class TrainingAbsenceInline(admin.TabularInline):
+    model = TrainingAbsence
+    extra = 0
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        if db_field.name == "player":
+            obj_id = request.resolver_match.kwargs.get("object_id")
+            if obj_id:
+                training = TrainingMinutes.objects.get(id=obj_id)
+                kwargs["queryset"] = Player.objects.filter(team=training.team)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
 @admin.register(TrainingMinutes)
 class TrainingMinutesAdmin(admin.ModelAdmin):
     list_display = ('date', 'team', 'total_minutes')
     list_filter = ('team', 'date')
-    search_fields = ('team__name',)
+
+    inlines = [PlayerTrainingMinutesInline, TrainingAbsenceInline]
+
 
 @admin.register(PlayerTrainingMinutes)
 class PlayerTrainingMinutesAdmin(admin.ModelAdmin):

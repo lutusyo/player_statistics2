@@ -121,12 +121,12 @@ class Mesocycle(models.Model):
         return f"{self.title} ({self.team})"
     
 class FitnessPlan(models.Model):
-    title = models.CharField(max_length=100, null='True', blank='True')
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='fitness_plans', null='True', blank='True')
-    start_date = models.DateField(null='True', blank='True')
-    end_date = models.DateField(null='True', blank='True')
-    pdf = models.FileField(upload_to='fitness_plan_pdfs/', null='True', blank='True')
-    uploaded_at = models.DateTimeField(auto_now_add=True, null='True', blank='True')
+    title = models.CharField(max_length=100, null=True, blank=True)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='fitness_plans', null=True, blank=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    pdf = models.FileField(upload_to='fitness_plan_pdfs/',null=True, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return f"{self.team}"
@@ -202,34 +202,50 @@ class TrainingMinutes(models.Model):
         return f"{self.team.name} - {self.date} Training"
 
     def save(self, *args, **kwargs):
-        """
-        When training is saved, automatically assign minutes to all players in the team.
-        Injured players (in Medical table for that date) get 0 minutes by default.
-        """
+        creating = self.pk is None
         super().save(*args, **kwargs)
 
-        for player in Player.objects.filter(team=self.team):
-            injured = Medical.objects.filter(
-                name=player,
-                date=self.date
-            ).exists()
-
-            PlayerTrainingMinutes.objects.update_or_create(
-                player=player,
-                training_session=self,
-                defaults={
-                    'minutes': 0 if injured else self.total_minutes,
-                }
-            )
+        if creating:
+            players = Player.objects.filter(team=self.team)
 
 
+            for player in players:
+                PlayerTrainingMinutes.objects.get_or_create(
+                    training_session=self,
+                    player=player,
+                    defaults={"minutes": self.total_minutes}
+                )
 
 class PlayerTrainingMinutes(models.Model):
-    training_session = models.ForeignKey(
-        TrainingMinutes, on_delete=models.CASCADE, related_name='player_minutes'
-    )
+    training_session = models.ForeignKey(TrainingMinutes, on_delete=models.CASCADE, related_name='player_minutes')
     player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='training_minutes')
     minutes = models.PositiveIntegerField(default=0)
 
+    class Meta:
+        unique_together = ('training_session', 'player')
+
     def __str__(self):
         return f"{self.player} - {self.training_session.date}: {self.minutes} min"
+    
+class TrainingAbsence(models.Model):
+    REASON_CHOICE = [ ('INJURED', 'Injured'), ('SICK', 'Sick'), ('PERSONAL', 'Personal'), ('UNEXCUSED', 'Unexcused'),]
+    training_session = models.ForeignKey(TrainingMinutes, on_delete=models.CASCADE, related_name='absences')
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    reason = models.CharField(max_length=20, choices=REASON_CHOICE)
+
+    class Meta:
+        unique_together = ('training_session', 'player')
+
+    def __str__(self):
+        return f"{self.player} - {self.reason}"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        PlayerTrainingMinutes.objects.update_or_create(
+            training_session=self.training_session,
+            player=self.player,
+            defaults={"minutes": 0}
+        )
+    
+
