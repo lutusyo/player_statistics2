@@ -101,11 +101,23 @@ def statistics_list_view(request, team_id):
     team = get_object_or_404(Team, id=team_id)
     filter_type = request.GET.get("filter", "all")
 
-    # Parse start/end dates from GET parameters
+
+
+
+    filter_type = request.GET.get("filter", "all")
+
+    # Parse start/end dates
     start_date_str = request.GET.get("start_date")
     end_date_str = request.GET.get("end_date")
     start_date = parse_date(start_date_str) if start_date_str else None
     end_date = parse_date(end_date_str) if end_date_str else None
+
+    # If filter is 'week' or 'month', compute start_date automatically
+    if filter_type == "week" and not start_date:
+        start_date = now().date() - timedelta(days=7)
+    elif filter_type == "month" and not start_date:
+        start_date = now().date().replace(day=1)
+
 
     report = get_statistics_report(
         filter_type=filter_type,
@@ -128,9 +140,21 @@ def statistics_list_view(request, team_id):
 @login_required
 def statistics_export_excel(request, team_id):
     team = get_object_or_404(Team, id=team_id)
+    
+
     filter_type = request.GET.get("filter", "all")
-    start_date = parse_date(request.GET.get("start_date"))
-    end_date = parse_date(request.GET.get("end_date"))
+
+    # Parse start/end dates
+    start_date_str = request.GET.get("start_date")
+    end_date_str = request.GET.get("end_date")
+    start_date = parse_date(start_date_str) if start_date_str else None
+    end_date = parse_date(end_date_str) if end_date_str else None
+
+    # If filter is 'week' or 'month', compute start_date automatically
+    if filter_type == "week" and not start_date:
+        start_date = now().date() - timedelta(days=7)
+    elif filter_type == "month" and not start_date:
+        start_date = now().date().replace(day=1)
 
     report = get_statistics_report(
         filter_type=filter_type,
@@ -170,9 +194,20 @@ def statistics_export_excel(request, team_id):
 @login_required
 def statistics_export_pdf(request, team_id):
     team = get_object_or_404(Team, id=team_id)
+    
     filter_type = request.GET.get("filter", "all")
-    start_date = parse_date(request.GET.get("start_date"))
-    end_date = parse_date(request.GET.get("end_date"))
+
+    # Parse start/end dates
+    start_date_str = request.GET.get("start_date")
+    end_date_str = request.GET.get("end_date")
+    start_date = parse_date(start_date_str) if start_date_str else None
+    end_date = parse_date(end_date_str) if end_date_str else None
+
+    # If filter is 'week' or 'month', compute start_date automatically
+    if filter_type == "week" and not start_date:
+        start_date = now().date() - timedelta(days=7)
+    elif filter_type == "month" and not start_date:
+        start_date = now().date().replace(day=1)
 
     report = get_statistics_report(
         filter_type=filter_type,

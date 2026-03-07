@@ -2,37 +2,62 @@
 {% load static %}
 
 {% block content %}
-
 <div class="container mt-4">
-    <h2>Player Performance Report</h2>
+    <h2 class="mb-3">Player Performance Report</h2>
     <hr/>
 
+
+    <form method="get" class="row g-2 align-items-center mb-3">
+        <div class="col-auto">
+            <label for="start_date" class="col-form-label">Start Date:</label>
+        </div>
+        <div class="col-auto">
+            <input type="date" name="start_date" id="start_date" class="form-control form-control-sm" value="{{ start_date }}">
+        </div>
+
+        <div class="col-auto">
+            <label for="end_date" class="col-form-label">End Date:</label>
+        </div>
+        <div class="col-auto">
+            <input type="date" name="end_date" id="end_date" class="form-control form-control-sm" value="{{ end_date }}">
+        </div>
+
+        <div class="col-auto">
+            <input type="hidden" name="filter" value="custom">
+            <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+        </div>
+    </form>
+
+
+
+
     <!-- ===== PLAYER PROFILE ===== -->
-    <div class="card mb-3">
-        <div class="card-body">
-            <h4 class="card-title">{{ player.name }} ({{ player.position }})</h4>
-            <p class="card-text">
-                <b>Team:</b> {{ player.team.name }}<br/>
-                <b>Filter:</b> {{ filter_type|title }}<br/>
-                {% if start_date %}<b>From:</b> {{ start_date }} {% endif %}
-                {% if end_date %}<b>To:</b> {{ end_date }} {% endif %}
-            </p>
+    <div class="card mb-4">
+        <div class="card-body d-flex align-items-center">
+            <div class="me-3">
+                {% if player.photo %}
+                    <img src="{{ player.photo.url }}" alt="{{ player.name }}" class="img-thumbnail" style="max-width:120px;">
+                {% else %}
+                    <img src="{% static 'images/default_player.png' %}" alt="No Photo" class="img-thumbnail" style="max-width:120px;">
+                {% endif %}
+            </div>
+            <div>
+                <h4>{{ player.name }} ({{ player.position }})</h4>
+                <p class="mb-1"><b>Team:</b> {{ player.team.name }}</p>
+                <p class="mb-1"><b>Filter:</b> {{ filter_type|title }}</p>
+                {% if start_date %}<p class="mb-1"><b>From:</b> {{ start_date }}</p>{% endif %}
+                {% if end_date %}<p class="mb-1"><b>To:</b> {{ end_date }}</p>{% endif %}
+            </div>
         </div>
     </div>
 
     <!-- ===== DOWNLOAD BUTTONS ===== -->
-    <div class="mb-3">
+    <div class="mb-4">
         <a href="{% url 'reports_app:player_report_excel' player.id %}?filter={{ filter_type }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" 
-        class="btn btn-success btn-sm">
-        Download Excel
-        </a>
+           class="btn btn-success btn-sm me-2">Download Excel</a>
         <a href="{% url 'reports_app:player_report_pdf' player.id %}?filter={{ filter_type }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" 
-        class="btn btn-danger btn-sm">
-        Download PDF
-        </a>
+           class="btn btn-danger btn-sm">Download PDF</a>
     </div>
-
-
 
     <!-- ===== SUMMARY STATS ===== -->
     <div class="row mb-4">
@@ -100,18 +125,21 @@
         </table>
     </div>
 
-    <!-- ===== CHARTS ===== -->
+    <!-- ===== CHARTS: FILTERED vs TOTAL ===== -->
     <div class="row">
-        <div class="col-md-4 mb-4">
-            <h5>Minutes Played</h5>
+        <!-- Minutes -->
+        <div class="col-md-6 mb-4">
+            <h5>Minutes Played (Filtered vs Total)</h5>
             <canvas id="minutesChart" height="200"></canvas>
         </div>
-        <div class="col-md-4 mb-4">
-            <h5>Goals</h5>
+        <!-- Goals -->
+        <div class="col-md-6 mb-4">
+            <h5>Goals (Filtered vs Total)</h5>
             <canvas id="goalsChart" height="200"></canvas>
         </div>
-        <div class="col-md-4 mb-4">
-            <h5>Assists</h5>
+        <!-- Assists -->
+        <div class="col-md-6 mb-4">
+            <h5>Assists (Filtered vs Total)</h5>
             <canvas id="assistsChart" height="200"></canvas>
         </div>
     </div>
@@ -125,93 +153,60 @@ const minutes = {{ minutes_json|safe }};
 const goals = {{ goals_json|safe }};
 const assists = {{ assists_json|safe }};
 
-// Minutes Played Chart
+// Total (all matches)
+const totalMinutes = {{ total_minutes_json|safe }};
+const totalGoals = {{ total_goals_json|safe }};
+const totalAssists = {{ total_assists_json|safe }};
+
+// Minutes Chart
 new Chart(document.getElementById('minutesChart').getContext('2d'), {
-    type: 'bar',
+    type: 'line',
     data: {
         labels: labels,
-        datasets: [{
-            label: 'Minutes Played',
-            data: minutes,
-            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
-        }]
+        datasets: [
+            { label: 'Filtered', data: minutes, borderColor: 'blue', backgroundColor: 'rgba(54, 162, 235, 0.2)', fill: true },
+            { label: 'Total', data: totalMinutes, borderColor: 'green', backgroundColor: 'rgba(75, 192, 192, 0.2)', fill: true }
+        ]
     },
     options: {
         responsive: true,
-        plugins: {
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        return `Minutes: ${context.raw}`;
-                    }
-                }
-            },
-            legend: { display: false }
-        },
+        plugins: { legend: { position: 'top' } },
         scales: { y: { beginAtZero: true, stepSize: 5 } }
     }
 });
 
 // Goals Chart
 new Chart(document.getElementById('goalsChart').getContext('2d'), {
-    type: 'bar',
+    type: 'line',
     data: {
         labels: labels,
-        datasets: [{
-            label: 'Goals',
-            data: goals,
-            backgroundColor: 'rgba(75, 192, 192, 0.5)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1
-        }]
+        datasets: [
+            { label: 'Filtered', data: goals, borderColor: 'orange', backgroundColor: 'rgba(255, 159, 64, 0.2)', fill: true },
+            { label: 'Total', data: totalGoals, borderColor: 'green', backgroundColor: 'rgba(75, 192, 192, 0.2)', fill: true }
+        ]
     },
     options: {
         responsive: true,
-        plugins: {
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        return `Goals: ${context.raw}`;
-                    }
-                }
-            },
-            legend: { display: false }
-        },
+        plugins: { legend: { position: 'top' } },
         scales: { y: { beginAtZero: true, stepSize: 1 } }
     }
 });
 
 // Assists Chart
 new Chart(document.getElementById('assistsChart').getContext('2d'), {
-    type: 'bar',
+    type: 'line',
     data: {
         labels: labels,
-        datasets: [{
-            label: 'Assists',
-            data: assists,
-            backgroundColor: 'rgba(255, 159, 64, 0.5)',
-            borderColor: 'rgba(255, 159, 64, 1)',
-            borderWidth: 1
-        }]
+        datasets: [
+            { label: 'Filtered', data: assists, borderColor: 'purple', backgroundColor: 'rgba(153, 102, 255, 0.2)', fill: true },
+            { label: 'Total', data: totalAssists, borderColor: 'green', backgroundColor: 'rgba(75, 192, 192, 0.2)', fill: true }
+        ]
     },
     options: {
         responsive: true,
-        plugins: {
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        return `Assists: ${context.raw}`;
-                    }
-                }
-            },
-            legend: { display: false }
-        },
+        plugins: { legend: { position: 'top' } },
         scales: { y: { beginAtZero: true, stepSize: 1 } }
     }
 });
-
 </script>
-
 {% endblock %}
