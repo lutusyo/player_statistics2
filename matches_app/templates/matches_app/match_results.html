@@ -7,9 +7,6 @@
 <link rel="stylesheet" href="{% static 'matches_app/css/results_style.css' %}">
 {% endblock %}
 
-
-
-
 {% block match_content %}
 
 <form method="get" class="filter-form">
@@ -31,150 +28,62 @@
     </select>
 </form>
 
-
-
 <div class="results-container">
 
+{% if past_matches %}
+{% for match in past_matches %}
 
-    {% if past_matches %}
-        {% for match in past_matches %}
+<a href="{% url 'matches_app:match_detail' match_id=match.id %}"
+   style="text-decoration: none; color: inherit;">
 
-            <!-- ====================== ADMIN ACTIONS ====================== -->
-            {% if user.is_authenticated and user.username == 'Azam2' %}
-            <div class="admin-actions">
+<div class="results-card">
 
-                <li>
-                    {% if match.home_lineup_exists and match.away_lineup_exists %}
-                        
-                        <a href="{% url 'tagging_app:enter_attempt_to_goal' match.id %}">Goal Tagging</a> |
-                        <a href="{% url 'tagging_app:pass_network_enter_data' match.id %}">Pass Tagging</a> |
-                        <a href="{% url 'tagging_app_v2:tag_panel_v2' match.id %}">Pass_tag_v2</a> |
-                        <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">Defensive Stats</a> |
-                        <a href="{% url 'reports_app:match_report_dashboard' match.id match.home_team.id %}">Match Report</a> |
+    <div class="results-header">
+        <div class="results-date">
+            {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
+        </div>
 
+        <div class="results-venue">{{ match.venue }}</div>
 
-                        {% if match.rating_links_sent %}
-                            <span style="color: green; font-weight: bold;">Rating Links Already Sent</span>
-                        {% else %}
-                            <a href="{% url 'performance_rating_app:send_rating_links' match.id %}" 
-                               class="btn btn-primary btn-sm">
-                               Send Rating Links to Staff
-                            </a>
-                        {% endif %}
-
-                        {% if match.has_gps_data %}
-                            | <a href="{% url 'gps_app:gps_dashboard' match.id %}">View GPS Dashboard</a>
-                        {% else %}
-                            | <a href="{% url 'gps_app:gps_upload' match.id %}">Upload GPS Data</a>
-                        {% endif %}
-
-                    {% else %}
-
-                        {% if not match.home_lineup_exists %}
-                            <a href="{% url 'lineup_app:create_lineup' match.id match.home_team.id %}">
-                                CREATE LINEUP (Home)
-                            </a> |
-                        {% endif %}
-
-                        {% if not match.away_lineup_exists %}
-                            <a href="{% url 'lineup_app:create_lineup' match.id match.away_team.id %}">
-                                CREATE LINEUP (Away)
-                            </a> |
-                        {% endif %}
-
-                        {% if match.has_gps_data %}
-                            <a href="{% url 'gps_app:gps_dashboard' match.id %}">View GPS Dashboard</a>
-                        {% else %}
-                            <a href="{% url 'gps_app:gps_upload' match.id %}">Upload GPS Data</a>
-                        {% endif %}
-
-                        {% if match.rating_links_sent %}
-                            | <span style="color: green; font-weight: bold;">
-                                Rating Links Already Sent
-                              </span>
-                        {% else %}
-                            | <a href="{% url 'performance_rating_app:send_rating_links' match.id %}" 
-                                 class="btn btn-primary btn-sm">
-                                 Send Rating Links to Staff
-                              </a>
-                        {% endif %}
-
-                    {% endif %}
-                </li>
-
-            </div>
+        <div class="results-type">
+            {% if match.competition.logo %}
+                <img src="{{ match.competition.logo.url }}" class="competition-logo">
             {% endif %}
-            <!-- ==================== END ADMIN ACTIONS ===================== -->
+            <span>{{ match.competition.name }}</span>
+        </div>
+    </div>
 
+    <div class="results-body">
+        <div class="team">
+            {% if match.home_team.logo %}
+                <img src="{{ match.home_team.logo.url }}">
+            {% endif %}
+            <div>{{ match.home_team }}</div>
+        </div>
 
-            <!-- ================ MATCH CARD ================= -->
-            <a href="{% url 'matches_app:match_detail' match_id=match.id %}"
-               style="text-decoration: none; color: inherit;">
-                <div class="results-card">
+        <div class="vs">
+            {% if match.our_team_goals is not None %}
+                <strong>{{ match.our_team_goals }} - {{ match.opponent_goals }}</strong>
+            {% else %}
+                <span style="font-size: 14px; color: gray;">0 - 0</span>
+            {% endif %}
+        </div>
 
-                    <!-- Header info -->
-                    <div class="results-header">
-                        <div class="results-date">
-                            {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
-                        </div>
-                        <div class="results-venue">{{ match.venue }}</div>
-                        
+        <div class="team">
+            {% if match.away_team.logo %}
+                <img src="{{ match.away_team.logo.url }}">
+            {% endif %}
+            <div>{{ match.away_team }}</div>
+        </div>
+    </div>
 
-                        <div class="results-type">
-                            {% if match.competition.logo %}
-                                <img src="{{ match.competition.logo.url }}"
-                                    alt="{{ match.competition.name }} logo"
-                                    class="competition-logo">
-                            {% endif %}
-                            <span>{{ match.competition.name }}</span>
-                        </div>
+</div>
+</a>
 
+{% endfor %}
+{% else %}
+<p style="text-align:center;">No past matches.</p>
+{% endif %}
 
-                    </div>
-
-                    <!-- Team logos & names -->
-                    <div class="results-body">
-                        <div class="team">
-                            {% if match.home_team.logo %}
-                                <img src="{{ match.home_team.logo.url }}" alt="{{ match.home_team }} logo">
-                            {% endif %}
-                            <div>{{ match.home_team }}</div>
-                        </div>
-
-                        <div class="vs">
-                            {% if match.our_team_goals is not None and match.opponent_goals is not None %}
-                                <strong>{{ match.our_team_goals }} - {{ match.opponent_goals }}</strong>
-                                <br>
-                                <small style="color: gray;">
-                                    {% for g in match.goals %}
-                                        {% if g.is_own_goal %}
-                                            ⚽ OG by {{ g.scorer }} ({{ g.team_name }})
-                                        {% else %}
-                                            ⚽ {{ g.scorer }} ({{ g.team_name }})
-                                        {% endif %}
-                                        {% if not forloop.last %}, {% endif %}
-                                    {% endfor %}
-                                </small>
-                            {% else %}
-                                <span style="font-size: 14px; color: gray;">0 - 0</span>
-                            {% endif %}
-                        </div>
-
-                        <div class="team">
-                            {% if match.away_team.logo %}
-                                <img src="{{ match.away_team.logo.url }}" alt="{{ match.away_team }} logo">
-                            {% endif %}
-                            <div>{{ match.away_team }}</div>
-                        </div>
-                    </div>
-
-                </div>
-            </a>
-            <!-- ============ END MATCH CARD ============== -->
-
-        {% endfor %}
-    {% else %}
-        <p style="text-align: center;">No past matches.</p>
-    {% endif %}
 </div>
 {% endblock %}

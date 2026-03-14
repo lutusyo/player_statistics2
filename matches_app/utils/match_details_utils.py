@@ -1,13 +1,12 @@
-from collections import defaultdict
 from lineup_app.models import MatchLineup, POSITION_COORDS
 from tagging_app.models import AttemptToGoal
 from tagging_app.utils.pass_network_utils import get_pass_network_context
-from tagging_app.utils.attempt_to_goal_utils import get_match_full_context
-from tagging_app.utils.attempt_to_goal_utils_opp import get_opponent_goals_for_match
+from gps_app.models import GPSRecord
 
 
 def get_match_detail_context(match):
-    # Get all goals: normal goals + own goals
+
+    # ================= GOALS =================
     goals_qs = AttemptToGoal.objects.filter(
         match=match,
         outcome='On Target Goal'
@@ -18,7 +17,6 @@ def get_match_detail_context(match):
         is_own_goal=True
     ).select_related('player', 'team')
 
-    # Player IDs for teams
     home_player_ids = MatchLineup.objects.filter(
         match=match, team=match.home_team
     ).values_list('player_id', flat=True)
@@ -29,7 +27,6 @@ def get_match_detail_context(match):
 
     home_goals, away_goals, goals = 0, 0, []
 
-    # Normal goals
     for goal in goals_qs:
         if goal.player_id in home_player_ids:
             home_goals += 1
@@ -38,14 +35,7 @@ def get_match_detail_context(match):
             away_goals += 1
             team_name = match.away_team.name
         else:
-            if goal.team_id == match.home_team_id:
-                home_goals += 1
-                team_name = match.home_team.name
-            elif goal.team_id == match.away_team_id:
-                away_goals += 1
-                team_name = match.away_team.name
-            else:
-                team_name = "Unknown"
+            team_name = "Unknown"
 
         goals.append({
             'minute': goal.minute,
@@ -56,10 +46,8 @@ def get_match_detail_context(match):
             'team_name': team_name,
         })
 
-    # Own goals
     for og in own_goals_qs:
         if og.team_id == match.home_team_id:
-            # Home scored into their own net → away gets goal
             away_goals += 1
             scoring_team_name = match.away_team.name
         elif og.team_id == match.away_team_id:
@@ -77,20 +65,17 @@ def get_match_detail_context(match):
             'team_name': scoring_team_name,
         })
 
-    # … keep lineup, stats, pass context, etc. as you had …
-
-    
-
-
-    # Prepare lineup with optional mirroring (away team mirrored)
+    # ================= LINEUPS =================
     def prepare_lineup(team, mirror=False):
-        players = MatchLineup.objects.filter(match=match, team=team, is_starting=True).select_related("player")
+        players = MatchLineup.objects.filter(
+            match=match, team=team, is_starting=True
+        ).select_related("player")
+
         lineup = []
         for ml in players:
             coords = POSITION_COORDS.get(ml.position, {"top": 50, "left": 50})
-            top = coords["top"]
-            if mirror:
-                top = 100 - top
+            top = 100 - coords["top"] if mirror else coords["top"]
+
             lineup.append({
                 "id": ml.player.id,
                 "name": ml.player.name,
@@ -104,23 +89,16 @@ def get_match_detail_context(match):
     away_lineup = prepare_lineup(match.away_team, mirror=True)
     lineup = home_lineup + away_lineup
 
-    # Get all attempts for this match
-    attempts = AttemptToGoal.objects.filter(match=match).select_related('player', 'team', 'assist_by')
-
-    # Pass network data - you might need to adjust import and signature
-    
-    # ✅ Pass network data (HOME + AWAY)
+    # ================= PASS NETWORK =================
     home_pass_context = get_pass_network_context(match, match.home_team.id)
     away_pass_context = get_pass_network_context(match, match.away_team.id)
 
     home_total_passes = home_pass_context['total_passes']
     home_ball_lost = home_pass_context['ball_lost']
-
     away_total_passes = away_pass_context['total_passes']
     away_ball_lost = away_pass_context['ball_lost']
 
-
-    # Prepare player stats list
+    # ================= PLAYER STATS =================
     all_players = MatchLineup.objects.filter(match=match).select_related("player", "team")
     player_stats = []
 
@@ -133,17 +111,12 @@ def get_match_detail_context(match):
         shots_on = shots.filter(outcome__in=['On Target Goal', 'On Target Miss']).count()
         assists = AttemptToGoal.objects.filter(match=match, assist_by=player).count()
 
-        yellow_card = getattr(ml, 'yellow_card', 0)
-        red_card = getattr(ml, 'red_card', 0)
-
         if ml.team_id == match.home_team_id:
             total = home_total_passes.get(pid, 0)
             lost = home_ball_lost.get(pid, 0)
         else:
             total = away_total_passes.get(pid, 0)
             lost = away_ball_lost.get(pid, 0)
-
-
 
         successful = total - lost
         accuracy = round((successful / total) * 100, 1) if total else 0
@@ -157,35 +130,27 @@ def get_match_detail_context(match):
             'goals': goals_count,
             'assists': assists,
             'is_starting': ml.is_starting,
-            'yellow_card': yellow_card,
-            'red_card': red_card,
+            'yellow_card': getattr(ml, 'yellow_card', 0),
+            'red_card': getattr(ml, 'red_card', 0),
             'total_passes': total,
             'ball_lost': lost,
             'pass_accuracy': accuracy,
         })
 
-    # Calculate team passing stats by summing individual player stats
-    def calculate_team_passing(team_player_ids, totals, losts):
+    # ================= TEAM PASS STATS =================
+    def calculate_team_passing(player_ids, totals, losts):
         return {
-            'total_passes': sum(totals.get(pid, 0) for pid in team_player_ids),
-            'ball_lost': sum(losts.get(pid, 0) for pid in team_player_ids),
+            'total_passes': sum(totals.get(pid, 0) for pid in player_ids),
+            'ball_lost': sum(losts.get(pid, 0) for pid in player_ids),
         }
 
-    home_pass_stats = calculate_team_passing(
-        home_player_ids, home_total_passes, home_ball_lost
-    )
-
-    away_pass_stats = calculate_team_passing(
-        away_player_ids, away_total_passes, away_ball_lost
-    )
-
-
-   # Correct calls (keep only these)
     home_pass_stats = calculate_team_passing(home_player_ids, home_total_passes, home_ball_lost)
-
     away_pass_stats = calculate_team_passing(away_player_ids, away_total_passes, away_ball_lost)
 
-
+    # ================= ADMIN FLAGS (🔥 FIX) =================
+    home_lineup_exists = MatchLineup.objects.filter(match=match, team=match.home_team).exists()
+    away_lineup_exists = MatchLineup.objects.filter(match=match, team=match.away_team).exists()
+    has_gps_data = GPSRecord.objects.filter(match=match).exists()
 
     return {
         'lineup': lineup,
@@ -194,11 +159,15 @@ def get_match_detail_context(match):
         'home_team_goals': home_goals,
         'away_team_goals': away_goals,
         'player_stats': player_stats,
-        'attempts': attempts,
         'goals': goals,
 
         'home_pass_context': home_pass_context,
         'away_pass_context': away_pass_context,
         'home_pass_stats': home_pass_stats,
         'away_pass_stats': away_pass_stats,
+
+        # ⭐ THIS FIXES YOUR PROBLEM
+        'home_lineup_exists': home_lineup_exists,
+        'away_lineup_exists': away_lineup_exists,
+        'has_gps_data': has_gps_data,
     }
