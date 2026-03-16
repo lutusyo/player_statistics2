@@ -15,8 +15,6 @@ urlpatterns = [
     # get data
     path("match/<int:match_id>/get_pass_data/", pass_network_get_data.get_pass_data_view, name="pass_data")
 
-
-    
 ]
 
 

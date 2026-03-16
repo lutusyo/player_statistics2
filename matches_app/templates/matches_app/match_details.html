@@ -32,16 +32,16 @@
                 Pass Tagging
             </a> |
 
-            <a href="{% url 'tagging_app_v2:tag_panel_v2' match.id %}">
-                Pass Tag v2
-            </a> |
+            <a href="{% url 'tagging_app_v2:tag_panel_v2' match.id %}"> Pass Tag v2 </a> |
 
-            <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}">
-                Defensive Stats
-            </a> |
+            <a href="{% url 'defensive_app:enter_defensive_stats' match.id %}"> Defensive Stats </a> |
 
              <a href="{% url 'reports_app:full_match_report' match.id team.id %}" class="btn btn-outline-info">
-            Full Report</a>
+            Full Report</a> |
+
+                <a href="{% url 'defensive_app:defensive_summary' match.id %}" class="btn btn-primary m-1">
+            Out of possession
+                </a>
 
         {% endif %}
 
@@ -69,50 +69,24 @@
         {% endif %}
 
     </li>
+
+            <a href="{% url 'performance_rating_app:match_staff_aggregates' match.id %}"
+           class="btn btn-primary">
+            Staff Ratings
+            </a>
+
+            <a href="{% url 'lineup_app:both_teams_lineup' match.id %}" class="btn btn-primary m-1">
+            Lineup
+            </a>
+
+            <a href="{% url 'tagging_app:goalkeeper_distribution_dashboard' match.id %}" class="btn btn-primary m-1">
+            Goalkeeping Distribution
+            </a>
+
 </div>
 {% endif %}
 <!-- ==================== END ADMIN ACTIONS ===================== -->
 
-<hr class="my-4">
-
-<div class="text-center">
-
-    <a href="{% url 'lineup_app:both_teams_lineup' match.id %}" class="btn btn-primary m-1">
-        Lineup
-    </a>
-
-    <a href="{% url 'tagging_app:pass_network_dashboard' match.id %}" class="btn btn-primary m-1">
-        Pass Network
-    </a>
-
-    <a href="{% url 'tagging_app:goalkeeper_distribution_dashboard' match.id %}" class="btn btn-primary m-1">
-        Goalkeeping Distribution
-    </a>
-
-    <a href="{% url 'defensive_app:defensive_summary' match.id %}" class="btn btn-primary m-1">
-        Out of possession
-    </a>
-
-    <a href="{% url 'tagging_app:full_report' match.id our_team_id %}" class="btn btn-primary m-1">
-        Full Report
-    </a>
-
-    <a href="{% url 'tagging_app:download_attempts_csv' match.id 'our' %}"
-       class="btn btn-success m-1">
-        Download Our Attempts
-    </a>
-
-    <a href="{% url 'tagging_app:download_attempts_csv' match.id 'opponent' %}"
-       class="btn btn-danger m-1">
-        Download Opponent Attempts
-    </a>
-
-    <p class="mt-2">
-        <a href="{% url 'performance_rating_app:match_staff_aggregates' match.id %}"
-           class="btn btn-primary">
-            Staff Ratings
-        </a>
-    </p>
 
 </div>
 

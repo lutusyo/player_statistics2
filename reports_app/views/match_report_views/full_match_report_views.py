@@ -7,6 +7,7 @@ from reports_app.views.match_report_views.in_possession_views import attempt_to_
 from reports_app.views.match_report_views.goalkeeping_view import goalkeeping_view
 from reports_app.views.match_report_views.set_plays_views import setplays_dashboard
 from reports_app.views.match_report_views.match_summary_team_view import match_lineup_report
+from tagging_app_v2.views.pass_network_get_data import get_pass_data_view
 
 from django.http import HttpResponse
 from django.template.loader import get_template
@@ -41,6 +42,9 @@ def full_match_report_view(request, match_id, our_team_id=None):
     # 4️⃣ Attempt-to-goal dashboard
     attempt_context = attempt_to_goal_dashboard(request, match_id, return_context=True)
 
+    # pass data
+    pass_data_context = get_pass_data_view(request, match_id, return_context=True)
+
     # 5️⃣ Pass network dashboard
     pass_context = pass_network_dashboard(request, match_id, return_context=True)
 
@@ -60,19 +64,10 @@ def full_match_report_view(request, match_id, our_team_id=None):
         **pass_context,
         **goalkeeping_context,
         **setplays_context,
+        **pass_data_context,
     }
 
-    return render(
-        request,
-        'reports_app/match_report_templates/full_match_report/full_match_report.html',
-        full_context,
-    )
-
-
-
-
-
-
+    return render(request,'reports_app/match_report_templates/full_match_report/full_match_report.html',full_context,)
 
 
 def download_full_report_pdf(request, match_id):
@@ -86,6 +81,8 @@ def download_full_report_pdf(request, match_id):
     goalkeeping_context = goalkeeping_view(request, match_id, return_context=True)
     setplays_context = setplays_dashboard(request, match_id, return_context=True)
     match_summary_team_context = match_lineup_report(request, match_id, return_context=True)
+    pass_data_context = get_pass_data_view(request, match_id, return_context=True)
+
 
     # Merge all contexts
     full_context = {
@@ -97,6 +94,7 @@ def download_full_report_pdf(request, match_id):
         **goalkeeping_context,
         **setplays_context,
         **match_summary_team_context,
+        **pass_data_context,
     }
 
     # Load template

@@ -181,6 +181,11 @@
 
   <div class="attempts-dashboard">
 
+        <a href="{% url 'tagging_app:download_attempts_csv' match.id 'our' %}"
+       class="btn btn-success m-1">
+        Download Our Attempts
+        </a>
+
     <!-- OUR TEAM SUMMARY -->
     <div class="summary-pitch-container">
       <table class="summary-table">
@@ -490,8 +495,11 @@
   ########################################################################################################################################
 
 
-
   <div class="attempts-dashboard">
+
+
+    <a href="{% url 'tagging_app:download_attempts_csv' match.id 'opponent' %}" class="btn btn-danger m-1">
+      Download Opponent Attempts</a>
 
     <!-- OPPONENT TEAM SUMMARY -->
     <div class="summary-pitch-container">

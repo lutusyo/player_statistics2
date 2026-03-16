@@ -37,32 +37,22 @@ INSTALLED_APPS = [
 
 
     # local
-    'accounts_app',
-    'players_app',
-    'matches_app',
-    'actions_app',
-    'gps_app',
-    'teams_app.apps.TeamsAppConfig',
-    'announcements_app',
-    'reports_app',
-    'tagging_app',
-    'goalkeeping_app',
-    'defensive_app',
-    'lineup_app',
-    'perfomance_rating_app',
-    'training_app',
-    'sheets_generator_app',
+    'accounts_app', 'players_app',  'matches_app',
+    'actions_app', 'gps_app',  'teams_app.apps.TeamsAppConfig',
+    'announcements_app',  'reports_app','tagging_app',
+    'goalkeeping_app', 'defensive_app', 'lineup_app',
+    'perfomance_rating_app', 'training_app', 'sheets_generator_app',
 
     #loaned_players
     'loans_app',
 
-    
 
     # Third party
      'rest_framework',
 
     ##version2
-     'tagging_app_v2'
+     'tagging_app_v2',
+     'reports_app_v2',
      
 ]
 

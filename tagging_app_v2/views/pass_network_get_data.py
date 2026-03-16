@@ -3,7 +3,8 @@ from matches_app.models import Match
 from tagging_app_v2.models import PassEvent_v2
 from django.db.models import Count, Q, F
 
-def get_pass_data_view(request, match_id):
+
+def get_pass_data_view(request, match_id, return_context=False):
     match = get_object_or_404(Match, id=match_id)
 
     events = PassEvent_v2.objects.filter(match=match).select_related(
@@ -13,9 +14,7 @@ def get_pass_data_view(request, match_id):
 
     passes = events.filter(
     Q(action_type__in=["LOW_BALL", "HIGH_BALL"]) |
-    Q(receiver__isnull=False, actor__team=F("receiver__team"))
-)
-
+    Q(receiver__isnull=False, actor__team=F("receiver__team")))
 
     teams = [match.home_team, match.away_team]
 
@@ -26,12 +25,8 @@ def get_pass_data_view(request, match_id):
 
         team_events = events.filter(actor__team=team)
 
-
-
-
-        # -------------------------
         # TOTAL PASSES (same team)
-        # -------------------------
+
         passes_qs = (
             team_events.filter(
                 receiver__isnull=False,
@@ -153,13 +148,8 @@ def get_pass_data_view(request, match_id):
         ).annotate(total=Count("id")), key=lambda x: x["total"], reverse=True
     )[:5]
 
-
-    
-
-    # =========================
-    # =========================
     # AERIAL DUELS (HIGH_BALL)
-    # =========================
+
     aerial_events = events.filter(action_type="HIGH_BALL")
 
     aerial_team_stats = {}
@@ -174,7 +164,6 @@ def get_pass_data_view(request, match_id):
             receiver_team = ev.receiver.team if ev.receiver else None
             target_team = ev.target.team if ev.target else None
 
-            # ----------------------------
             # CASE 1: Same team → Receiver WON
             # ----------------------------
             if receiver_team and actor_team == receiver_team and receiver_team == team:
@@ -223,5 +212,8 @@ def get_pass_data_view(request, match_id):
         "fouls_won": fouls_won,
         "fouls_committed": fouls_committed,
     }
+
+    if return_context:
+        return context
 
     return render(request, "tagging_app_v2/pass_network_display_data.html", context)
