@@ -12,29 +12,22 @@
     <nav class="team-tabs compact-tabs">
         {% if team_selected %}
             <a href="{% url 'matches_app:team_fixtures' team_selected %}"
-               class="{% if active_tab == 'fixtures' %}active{% endif %}">
-                Fixtures
-            </a>
+               class="{% if active_tab == 'fixtures' %}active{% endif %}">Fixtures</a>
 
             <a href="{% url 'matches_app:team_results' team_selected %}"
-               class="{% if active_tab == 'results' %}active{% endif %}">
-                Results
-            </a>
+               class="{% if active_tab == 'results' %}active{% endif %}">Results</a>
 
             <a href="{% url 'matches_app:players_statistics' team_selected %}"
-               class="{% if active_tab == 'statistics' %}active{% endif %}">
-                Stats
-            </a>
+               class="{% if active_tab == 'statistics' %}active{% endif %}">Stats</a>
 
             <a href="{% url 'matches_app:team_table' team_selected %}"
-               class="{% if active_tab == 'table' %}active{% endif %}">
-                Table
-            </a>
+               class="{% if active_tab == 'table' %}active{% endif %}">Table</a>
+
         {% else %}
+        
             <a href="{% url 'matches_app:league_table' %}"
-               class="{% if active_tab == 'table' %}active{% endif %}">
-                Table
-            </a>
+               class="{% if active_tab == 'table' %}active{% endif %}">Table</a>
+
         {% endif %}
     </nav>
 

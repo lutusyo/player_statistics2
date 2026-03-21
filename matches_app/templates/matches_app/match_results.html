@@ -15,15 +15,11 @@
         <option value="all" {% if competition_selected == "all" %}selected{% endif %}>
             All Competitions
         </option>
-
         {% for comp in competition_choices %}
-            <option value="{{ comp.id }}"
-                {% if comp.id|stringformat:"s" == competition_selected %}
-                    selected
-                {% endif %}
-            >
-                {{ comp.name }}
-            </option>
+        <option value="{{ comp.id }}"
+            {% if comp.id|stringformat:"s" == competition_selected %}selected{% endif %}>
+            {{ comp.name }}
+        </option>
         {% endfor %}
     </select>
 </form>
@@ -33,17 +29,21 @@
 {% if past_matches %}
 {% for match in past_matches %}
 
-<a href="{% url 'matches_app:match_detail' match_id=match.id %}"
-   style="text-decoration: none; color: inherit;">
-
 <div class="results-card">
 
+    <!-- HEADER -->
     <div class="results-header">
+
+        <!-- DATE LINK -->
         <div class="results-date">
-            {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
+            <a href="{% url 'matches_app:match_detail' match.id %}" class="detail-link">
+                {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
+            </a>
         </div>
 
-        <div class="results-venue">{{ match.venue }}</div>
+        <div class="results-venue">
+            {{ match.venue }}
+        </div>
 
         <div class="results-type">
             {% if match.competition.logo %}
@@ -51,8 +51,17 @@
             {% endif %}
             <span>{{ match.competition.name }}</span>
         </div>
+
+        <!-- FULL REPORT ICON -->
+        <div class="card-actions">
+            <a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}" class="report-icon">
+                <i class="fas fa-search"></i>
+            </a>
+        </div>
+
     </div>
 
+    <!-- BODY -->
     <div class="results-body">
         <div class="team">
             {% if match.home_team.logo %}
@@ -65,7 +74,7 @@
             {% if match.our_team_goals is not None %}
                 <strong>{{ match.our_team_goals }} - {{ match.opponent_goals }}</strong>
             {% else %}
-                <span style="font-size: 14px; color: gray;">0 - 0</span>
+                <span class="no-score">0 - 0</span>
             {% endif %}
         </div>
 
@@ -78,11 +87,10 @@
     </div>
 
 </div>
-</a>
 
 {% endfor %}
 {% else %}
-<p style="text-align:center;">No past matches.</p>
+<p class="no-matches">No past matches.</p>
 {% endif %}
 
 </div>
