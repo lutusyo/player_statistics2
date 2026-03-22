@@ -57,6 +57,11 @@ class AttemptToGoal(models.Model):
     body_part = models.CharField(max_length=20, choices=BodyPartChoices.choices, default=BodyPartChoices.RIGHT_FOOT)
     location_tag = models.CharField(max_length=30, choices=LocationChoices.choices, default=LocationChoices.LONG_RANGE, null=False, blank=False)
 
+
+    video_clip = models.FileField(upload_to='goal_attempt_clips/', null=True, blank=True)
+    thumbnail = models.ImageField(upload_to='goal_attempt_thumbnails/', null=True, blank=True)
+
+
     x = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     y = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     assist_by = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='assists')
@@ -81,6 +86,7 @@ class PassEvent(models.Model):
 
     minute = models.PositiveIntegerField()
     second = models.PositiveIntegerField()
+    
 
     x_start = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     y_start = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)

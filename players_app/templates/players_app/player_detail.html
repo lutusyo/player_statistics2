@@ -367,7 +367,8 @@
                         <th>Goals</th>
                         <th>Assists</th>
                         <th>Shots</th>     
-                        <th>Passes</th>    
+                        <th>Passes</th>
+                        <th>Clips</th>    
                     </tr>
                 </thead>
 
@@ -392,7 +393,12 @@
                         <td>{{ item.goals }}</td>
                         <td>{{ item.assists }}</td>
                         <td>{{ item.total_shots }}</td>    
-                        <td>{{ item.total_passes }}</td>    
+                        <td>{{ item.total_passes }}</td>
+                        <td>
+                            <a href="{% url 'players_app:player_match_clips' player.id item.match.id %}">
+                                View Clips
+                            </a>
+                        </td>   
                     </tr>
                     {% empty %}
                     <tr>

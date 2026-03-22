@@ -1,0 +1,26 @@
+<h2>{{player.full_name}} - {{ match }}</h2>
+
+<h3>Goals</h3>
+{% for g in goals %}
+    {% if g.video_clip %}
+        <div>
+            <p>{{ g.minute }}: {{ g.second }}</p>
+            <video width="300" controls>
+                <source src="{{ g.video_clip.url }}" type="video/mp4">
+        </div>
+    {% endif %}
+{% endfor %}
+
+
+
+
+<h3>All Attempts</h3>
+{% for a in attempts %}
+    {% if a.video_clip %}
+        <div>
+            <p>{{ a.minute }}: {{ a.second }}</p>
+            <video width="300" controls>
+                <source src="{{ a.video_clip.url }}" type="video/mp4">
+        </div>
+    {% endif %}
+{% endfor %}
