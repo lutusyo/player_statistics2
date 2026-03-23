@@ -201,7 +201,6 @@
         </tbody>
       </table>
 
-      <!-- Optional Pitch Visualization-->
       <!-- Optional Pitch Visualization -->
       <div class="pitch">
           {% if our_shotmap %}
@@ -221,19 +220,20 @@
     <table>
       <thead>
         <tr>
-          <th>Minute</th>
+          <!--<th>Minute</th>-->
           <th>Scorer</th>
           <th>Assist</th>
           <th>Pre-Assist</th>
           <th>Delivery Type</th>
           <th>Own Goal</th>
           <th>Team</th>
+          <th>Clips</th>
         </tr>
       </thead>
       <tbody>
         {% for g in goals %}
           <tr>
-            <td>{{ g.minute }}{% if g.second %}:{{ g.second|stringformat:"02d" }}{% endif %}</td>
+            <!--<td>{{ g.minute }}{% if g.second %}:{{ g.second|stringformat:"02d" }}{% endif %}</td>-->
             <td>
               {% if g.is_own_goal %}
                 🥅 Own Goal
@@ -248,6 +248,11 @@
             <td>{{ g.get_delivery_type_display }}</td>
             <td>{% if g.is_own_goal %}✅ Yes (for {{ g.own_goal_for.name }}){% else %}No{% endif %}</td>
             <td>{{ g.team.name }}</td>
+            <td>
+                <a href="{% url 'players_app:player_match_clips' g.player.id g.match.id %}">
+                  View Clip
+                </a>
+            </td>
           </tr>
         {% empty %}
           <tr><td colspan="7">No goals recorded</td></tr>
