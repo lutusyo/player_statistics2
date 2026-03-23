@@ -43,12 +43,13 @@
         </div>
 
         <div class="col-auto">
-          <a href="{% url 'reports_app:match_lineup_report' match.id %}" class="btn btn-outline-dark">Teams</a>
+          <a href="{% url 'reports_app:summary_key_statistics' match.id %}" class="btn btn-outline-dark">Key Stats</a>
         </div>
 
         <div class="col-auto">
-          <a href="{% url 'reports_app:summary_key_statistics' match.id %}" class="btn btn-outline-dark">Key Stats</a>
+          <a href="{% url 'reports_app:match_lineup_report' match.id %}" class="btn btn-outline-dark">Teams</a>
         </div>
+
 
         <div class="col-auto">
           <a href="{% url 'reports_app:attempt_to_goal_dashboard' match.id %}" class="btn btn-outline-info">In Possession</a>

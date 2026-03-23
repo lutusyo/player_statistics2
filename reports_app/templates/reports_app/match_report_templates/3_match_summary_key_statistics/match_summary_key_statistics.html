@@ -7,322 +7,145 @@
   <title>Match Key Statistics</title>
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f6f7f9;
-      margin: 0;
-      padding: 20px;
-      color: #222;
-    }
 
-    .container {
-      max-width: 1000px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 6px;
-    }
+body {
+  margin: 0;
+  padding: 10px;
+  font-family: Arial, sans-serif;
+}
 
-    /* Header */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
+/* Table container */
+.stats {
+  width: 65%;           /* smaller size */
+  max-width: 700px;     /* limit on big screens */
+  margin: 20px auto;    /* center */
+  overflow-x: auto;
+}
 
-    .team {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      font-size: 18px;
-    }
+/* Table rows */
+.stat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
 
-    .team img {
-      height: 45px;
-    }
+/* Cells */
+.stat-row > div {
+  border: 1px solid #ffffff;
+  padding: 8px;
+  text-align: center;
+  background: #0d47a1;  /* blue */
+  color: #ffffff;
+  font-size: 14px;
+}
 
-    .center-info {
-      text-align: center;
-    }
-
-    .score {
-      font-size: 36px;
-      font-weight: bold;
-      margin-top: 5px;
-    }
-
-    /* Possession */
-    .possession {
-      margin: 20px 0;
-    }
-
-    .possession-title {
-      text-align: center;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .possession-bar {
-      display: flex;
-      height: 16px;
-      background: #e0e0e0;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .home-possession {
-      background: #4caf50;
-      font-size: 12px;
-      color: #fff;
-      padding-left: 6px;
-    }
-
-    .away-possession {
-      background: #2196f3;
-      font-size: 12px;
-      color: #fff;
-      text-align: right;
-      padding-right: 6px;
-    }
-
-    /* Stats table */
-    .stats {
-      margin-top: 20px;
-    }
-
-    .stat-row {
-      display: grid;
-      grid-template-columns: 1fr 2fr 1fr;
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
-      align-items: center;
-      font-size: 15px;
-    }
-
-    .stat-row:last-child {
-      border-bottom: none;
-    }
-
-    .stat-left {
-      text-align: right;
-      font-weight: 600;
-    }
-
-    .stat-label {
-      text-align: center;
-      color: #555;
-    }
-
-    .stat-right {
-      text-align: left;
-      font-weight: 600;
-    }
-
-    @media print {
-      body {
-        background: #fff;
-        padding: 0;
-      }
-
-      .container {
-        box-shadow: none;
-        border-radius: 0;
-        padding: 10px;
-      }
-
-      .pos-home,
-      .pos-away {
-        color: #000;
-        font-weight: bold;
-      }
-
-      .stat-row {
-        font-size: 13px;
-      }
-
-      .score {
-        font-size: 28px;
-      }
-    }
-
-    @media (max-width: 768px) {
-
-      .header {
-        flex-direction: column;
-        gap: 15px;
-      }
-
-      .team {
-        justify-content: center;
-        font-size: 18px;
-      }
-
-      .score {
-        font-size: 30px;
-      }
-
-      .stat-row {
-        grid-template-columns: 1fr 1.5fr 1fr;
-        font-size: 14px;
-      }
-
-      .possession-bar {
-        height: 14px;
-      }
-    }
-
-    .stat-bar {
-      background: #eee;
-      height: 8px;
-      border-radius: 4px;
-      position: relative;
-    }
-
-    .bar-home {
-      background: #d32f2f;
-      height: 100%;
-    }
-
-    .bar-away {
-      background: #f9a825;
-      height: 100%;
-    }
-
-
+/* HEADER ROWS (GOLD) */
+.header-row > div,
+.sub-header-row > div {
+  background: #d4af37;  /* gold */
+  color: #000;          /* black text for contrast */
+  font-weight: bold;
+}
 
   </style>
+
 </head>
 
 <body>
 <div class="container">
 
-  <!-- Header -->
-  <div class="header">
-    <div class="team">
-      {% if match.home_team.logo %}
-        <img src="{{ match.home_team.logo.url }}">
-      {% endif %}
-      {{ match.home_team.name }}
-    </div>
 
-    <div class="center-info">
-      <div>{{ match.date }} · {{ match.venue }}</div>
-      <div class="score">
-        {{ summary_key_statistics.home_team.goals }}
-        -
-        {{ summary_key_statistics.away_team.goals }}
-      </div>
-      <div><strong>Match Key Statistics</strong></div>
-    </div>
 
-    <div class="team">
-      {{ match.away_team.name }}
-      {% if match.away_team.logo %}
-        <img src="{{ match.away_team.logo.url }}">
-      {% endif %}
-    </div>
+<!-- Stats Table -->
+<div class="stats">
+
+  <!-- Row 1: Team Names -->
+  <div class="stat-row header-row">
+    <div class="stat-left">{{ match.home_team.name }}</div>
+    <div class="stat-label"></div>
+    <div class="stat-right">{{ match.away_team.name }}</div>
   </div>
 
-  <!-- Possession -->
-  <!--<div class="possession">
-    <div class="possession-title">Possession</div>
-    <div class="possession-bar">
-      <div class="home-possession"
-           style="width: {{ summary_key_statistics.home_team.possession }}%">
-        {{ summary_key_statistics.home_team.possession }}%
-      </div>
-      <div class="away-possession"
-           style="width: {{ summary_key_statistics.away_team.possession }}%">
-        {{ summary_key_statistics.away_team.possession }}%
-      </div>
-    </div>
-  </div>-->
-
-  <!-- Stats -->
-  <div class="stats">
-
-    
-    <div class="stat-row">
-      <div class="stat-left">{{ summary_key_statistics.home_team.shots_on_target }}</div>
-      <div class="stat-label">Shots on Target</div>
-      <div class="stat-right">{{ summary_key_statistics.away_team.shots_on_target }}</div>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-left">{{ summary_key_statistics.home_team.shots_off_target }}</div>
-      <div class="stat-label">Shots Off Target</div>
-      <div class="stat-right">{{ summary_key_statistics.away_team.shots_off_target }}</div>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-left">{{ summary_key_statistics.home_team.blocked_shots }}</div>
-      <div class="stat-label">Blocked Shots</div>
-      <div class="stat-right">{{ summary_key_statistics.away_team.blocked_shots }}</div>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-left">{{ summary_key_statistics.home_team.total_passes }}</div>
-      <div class="stat-label">Total Passes</div>
-      <div class="stat-right">{{ summary_key_statistics.away_team.total_passes }}</div>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-left">{{ summary_key_statistics.home_team.pass_completed }}</div>
-      <div class="stat-label">Passes Completed</div>
-      <div class="stat-right">{{ summary_key_statistics.away_team.pass_completed }}</div>
-    </div>
-
-    <!--<div class="stat-row">
-      <div class="stat-left">{{ summary_key_statistics.home_team.ball_recovered }}</div>
-      <div class="stat-label">Ball Recoveries</div>
-      <div class="stat-right">{{ summary_key_statistics.away_team.ball_recovered }}</div>
-    </div>-->
-
-    <div class="stat-row">
-      <div class="stat-left">{{ summary_key_statistics.home_team.crosses }}</div>
-      <div class="stat-label">Crosses</div>
-      <div class="stat-right">{{ summary_key_statistics.away_team.crosses }}</div>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-left">{{ summary_key_statistics.home_team.corners }}</div>
-      <div class="stat-label">Corners</div>
-      <div class="stat-right">{{ summary_key_statistics.away_team.corners }}</div>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-left">{{ summary_key_statistics.home_team.offsides }}</div>
-      <div class="stat-label">Offsides</div>
-      <div class="stat-right">{{ summary_key_statistics.away_team.offsides }}</div>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-left">{{ summary_key_statistics.home_team.fouls }}</div>
-      <div class="stat-label">Fouls</div>
-      <div class="stat-right">{{ summary_key_statistics.away_team.fouls }}</div>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-left">{{ summary_key_statistics.home_team.yellow_cards }}</div>
-      <div class="stat-label">Yellow Cards</div>
-      <div class="stat-right">{{ summary_key_statistics.away_team.yellow_cards }}</div>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-left">{{ summary_key_statistics.home_team.red_cards }}</div>
-      <div class="stat-label">Red Cards</div>
-      <div class="stat-right">{{ summary_key_statistics.away_team.red_cards }}</div>
-    </div>
-
-    <!--<div class="stat-row">
-      <div class="stat-left">{{ summary_key_statistics.home_team.total_distance|floatformat:1 }}</div>
-      <div class="stat-label">Total Distance (km)</div>
-      <div class="stat-right">{{ summary_key_statistics.away_team.total_distance|floatformat:1 }}</div>
-    </div>-->
-
+  <!-- Row 2: Home / Away -->
+  <div class="stat-row sub-header-row">
+    <div class="stat-left">Home Team</div>
+    <div class="stat-label"></div>
+    <div class="stat-right">Away Team</div>
   </div>
+
+  <!-- Goals -->
+  <div class="stat-row">
+    <div class="stat-left">{{ summary_key_statistics.home_team.goals }}</div>
+    <div class="stat-label">Goals</div>
+    <div class="stat-right">{{ summary_key_statistics.away_team.goals }}</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-left">{{ summary_key_statistics.home_team.shots_on_target }}</div>
+    <div class="stat-label">Shots on Target</div>
+    <div class="stat-right">{{ summary_key_statistics.away_team.shots_on_target }}</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-left">{{ summary_key_statistics.home_team.shots_off_target }}</div>
+    <div class="stat-label">Shots Off Target</div>
+    <div class="stat-right">{{ summary_key_statistics.away_team.shots_off_target }}</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-left">{{ summary_key_statistics.home_team.blocked_shots }}</div>
+    <div class="stat-label">Blocked Shots</div>
+    <div class="stat-right">{{ summary_key_statistics.away_team.blocked_shots }}</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-left">{{ summary_key_statistics.home_team.total_passes }}</div>
+    <div class="stat-label">Total Passes</div>
+    <div class="stat-right">{{ summary_key_statistics.away_team.total_passes }}</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-left">{{ summary_key_statistics.home_team.pass_completed }}</div>
+    <div class="stat-label">Passes Completed</div>
+    <div class="stat-right">{{ summary_key_statistics.away_team.pass_completed }}</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-left">{{ summary_key_statistics.home_team.crosses }}</div>
+    <div class="stat-label">Crosses</div>
+    <div class="stat-right">{{ summary_key_statistics.away_team.crosses }}</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-left">{{ summary_key_statistics.home_team.corners }}</div>
+    <div class="stat-label">Corners</div>
+    <div class="stat-right">{{ summary_key_statistics.away_team.corners }}</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-left">{{ summary_key_statistics.home_team.offsides }}</div>
+    <div class="stat-label">Offsides</div>
+    <div class="stat-right">{{ summary_key_statistics.away_team.offsides }}</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-left">{{ summary_key_statistics.home_team.fouls }}</div>
+    <div class="stat-label">Fouls</div>
+    <div class="stat-right">{{ summary_key_statistics.away_team.fouls }}</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-left">{{ summary_key_statistics.home_team.yellow_cards }}</div>
+    <div class="stat-label">Yellow Cards</div>
+    <div class="stat-right">{{ summary_key_statistics.away_team.yellow_cards }}</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-left">{{ summary_key_statistics.home_team.red_cards }}</div>
+    <div class="stat-label">Red Cards</div>
+    <div class="stat-right">{{ summary_key_statistics.away_team.red_cards }}</div>
+  </div>
+
+</div>
 
 </div>
 </body>
