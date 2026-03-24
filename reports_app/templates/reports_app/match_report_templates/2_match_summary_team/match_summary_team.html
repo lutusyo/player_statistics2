@@ -1,204 +1,134 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>Match Summary - Teams</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        h2 { text-align: center; margin-bottom: 5px; }
-        .teams-title { text-align: center; font-size: 22px; margin-bottom: 20px; font-weight: bold; }
-        .columns { display: flex; justify-content: space-between; }
-        .team-box { width: 48%; }
-        .section-title { font-weight: bold; background: #eee; padding: 5px; font-size: 18px; margin-top: 15px; border: 1px solid #ccc; }
-        .team-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .team-logo { width: 50px; height: 50px; object-fit: contain; }
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        table td { padding: 6px; border-bottom: 1px solid #ddd; font-size: 16px; }
-        .print-btn { margin-bottom: 20px; }
-        @media print { .print-btn {display: none;} .team-logo {width: 60px; height: 60px;} }
-        .sub-in { color: green; font-weight: bold; margin-left: 5px; }
-        .sub-out { color: red; font-weight: bold; margin-left: 5px; }
 
-        .player-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .player-photo {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid #ccc;
-        }
-
-        @media print {
-            .player-photo {
-                width: 36px;
-                height: 36px;
-            }
-        }
-
-    </style>
+    <link rel="stylesheet" href="{% static 'reports_app/css/match_reports.css' %}">
 </head>
 
 <body>
 
 <button onclick="window.print()" class="print-btn">Print</button>
 
+<div class="main-title">STARTING XI</div>
 
 <div class="columns">
 
-    <!-- HOME TEAM -->
+    <!-- HOME -->
     <div class="team-box">
-        <div class="team-header">
-            {% if match.home_team.logo %}
-                <img src="{{ match.home_team.logo.url }}" alt="{{ match.home_team.name }}" class="team-logo">
-            {% endif %}
-            <h3>{{ match.home_team.name }}</h3>
-        </div>
+        <div class="team-name">{{ match.home_team.name }}</div>
 
-        <div class="section-title">Starting XI</div>
         <table>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>#</th>
+                <th>Age</th>
+                <th>Out</th>
+            </tr>
+
             {% for row in home_starting %}
             <tr>
                 <td>
-
-
-                    <div class="player-row">
-                        {% if row.player.photo %}
-                            <img src="{{ row.player.photo.url }}" class="player-photo">
-                        {% endif %}
-
-                        <div>
-                            {{ row.player.jersey_number }}
-                            {% if row.position %}
-                                <strong>{{ row.position }}</strong>
-                            {% endif %}
-                            - {{ row.player.full_name }} — <strong>{{ row.minutes_played }}'</strong>
-
-                            {% if row.sub_out_minute %}
-                                <span class="sub-out">&#x2191; {{ row.sub_out_minute }}'</span>
-                            {% endif %}
-                            {% if row.sub_in_minute %}
-                                <span class="sub-in">&#x2193; {{ row.sub_in_minute }}'</span>
-                            {% endif %}
-                        </div>
-                    </div>
-
-
+                    {% if row.player.photo %}
+                        <img src="{{ row.player.photo.url }}" class="player-photo">
+                    {% endif %}
+                </td>
+                <td>{{ row.player.full_name }}</td>
+                <td>{{ row.player.jersey_number }}</td>
+                <td>{{ row.player.age }}</td>
+                <td>
+                    {% if row.sub_out_minute %}
+                        <span class="sub-out">{{ row.sub_out_minute }}'</span>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
         </table>
 
-        <div class="section-title">Substitutes</div>
+        <div class="separator"></div>
+
         <table>
             {% for row in home_subs %}
             <tr>
                 <td>
-
-
-                    <div class="player-row">
-                        {% if row.player.photo %}
-                            <img src="{{ row.player.photo.url }}" class="player-photo">
-                        {% endif %}
-
-                        <div>
-                            {{ row.player.jersey_number }}
-                            {% if row.position %}
-                                <strong>{{ row.position }}</strong>
-                            {% endif %}
-                            - {{ row.player.full_name }} — <strong>{{ row.minutes_played }}'</strong>
-
-                            {% if row.sub_out_minute %}
-                                <span class="sub-out">&#x2191; {{ row.sub_out_minute }}'</span>
-                            {% endif %}
-                            {% if row.sub_in_minute %}
-                                <span class="sub-in">&#x2193; {{ row.sub_in_minute }}'</span>
-                            {% endif %}
-                        </div>
-                    </div>
-
-
+                    {% if row.player.photo %}
+                        <img src="{{ row.player.photo.url }}" class="player-photo">
+                    {% endif %}
+                </td>
+                <td>{{ row.player.full_name }}</td>
+                <td>{{ row.player.jersey_number }}</td>
+                <td>{{ row.player.age }}</td>
+                <td>
+                    {% if row.sub_in_minute %}
+                        <span class="sub-in">{{ row.sub_in_minute }}'</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if row.sub_out_minute %}
+                        <span class="sub-out">{{ row.sub_out_minute }}'</span>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
         </table>
     </div>
 
-    <!-- AWAY TEAM -->
+    <!-- AWAY -->
     <div class="team-box">
-        <div class="team-header">
-            {% if match.away_team.logo %}
-                <img src="{{ match.away_team.logo.url }}" alt="{{ match.away_team.name }}" class="team-logo">
-            {% endif %}
-            <h3>{{ match.away_team.name }}</h3>
-        </div>
+        <div class="team-name">{{ match.away_team.name }}</div>
 
-        <div class="section-title">Starting XI</div>
         <table>
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>#</th>
+                <th>Age</th>
+                <th>Out</th>
+            </tr>
+
             {% for row in away_starting %}
             <tr>
                 <td>
-
-
-                    <div class="player-row">
-                        {% if row.player.photo %}
-                            <img src="{{ row.player.photo.url }}" class="player-photo">
-                        {% endif %}
-
-                        <div>
-                            {{ row.player.jersey_number }}
-                            {% if row.position %}
-                                <strong>{{ row.position }}</strong>
-                            {% endif %}
-                            - {{ row.player.full_name }} — <strong>{{ row.minutes_played }}'</strong>
-
-                            {% if row.sub_out_minute %}
-                                <span class="sub-out">&#x2191; {{ row.sub_out_minute }}'</span>
-                            {% endif %}
-                            {% if row.sub_in_minute %}
-                                <span class="sub-in">&#x2193; {{ row.sub_in_minute }}'</span>
-                            {% endif %}
-                        </div>
-                    </div>
-
-
+                    {% if row.player.photo %}
+                        <img src="{{ row.player.photo.url }}" class="player-photo">
+                    {% endif %}
+                </td>
+                <td>{{ row.player.full_name }}</td>
+                <td>{{ row.player.jersey_number }}</td>
+                <td>{{ row.player.age }}</td>
+                <td>
+                    {% if row.sub_out_minute %}
+                        <span class="sub-out">{{ row.sub_out_minute }}'</span>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
         </table>
 
-        <div class="section-title">Substitutes</div>
+        <div class="separator"></div>
+
         <table>
             {% for row in away_subs %}
             <tr>
                 <td>
-
-
-                    <div class="player-row">
-                        {% if row.player.photo %}
-                            <img src="{{ row.player.photo.url }}" class="player-photo">
-                        {% endif %}
-
-                        <div>
-                            {{ row.player.jersey_number }}
-                            {% if row.position %}
-                                <strong>{{ row.position }}</strong>
-                            {% endif %}
-                            - {{ row.player.full_name }} — <strong>{{ row.minutes_played }}'</strong>
-
-                            {% if row.sub_out_minute %}
-                                <span class="sub-out">&#x2191; {{ row.sub_out_minute }}'</span>
-                            {% endif %}
-                            {% if row.sub_in_minute %}
-                                <span class="sub-in">&#x2193; {{ row.sub_in_minute }}'</span>
-                            {% endif %}
-                        </div>
-                    </div>
-
-
+                    {% if row.player.photo %}
+                        <img src="{{ row.player.photo.url }}" class="player-photo">
+                    {% endif %}
+                </td>
+                <td>{{ row.player.full_name }}</td>
+                <td>{{ row.player.jersey_number }}</td>
+                <td>{{ row.player.age }}</td>
+                <td>
+                    {% if row.sub_in_minute %}
+                        <span class="sub-in">{{ row.sub_in_minute }}'</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if row.sub_out_minute %}
+                        <span class="sub-out">{{ row.sub_out_minute }}'</span>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -206,5 +136,6 @@
     </div>
 
 </div>
+
 </body>
 </html>

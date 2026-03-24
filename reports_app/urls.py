@@ -1,8 +1,6 @@
 # reports_app/urls.py
 from django.urls import path
-from reports_app.views.daily_report_views import (
-    report_filters
-)
+
 from reports_app.views.daily_report_views import ( 
     fitness_views, iap_views, medical_views,
     mesocycle_views, performance_views,
@@ -12,7 +10,7 @@ from reports_app.views.daily_report_views import (
     individual_statistics_view,
     team_reports_view,
     transition_views,
-    )
+    report_filters)
 
 from reports_app.views.match_report_views import ( 
     goalkeeping_view, 
@@ -20,8 +18,7 @@ from reports_app.views.match_report_views import (
     in_possession_views, 
     post_match_summary_views, 
     full_match_report_views,
-    summary_key_statistics_views,
-    )
+    summary_key_statistics_views,)
 
 from reports_app.views.match_report_views.full_match_report_views import full_match_report_view, download_full_report_pdf
 from reports_app.views.match_report_views.match_report_dashboard_view import match_report_dashboard
@@ -30,16 +27,9 @@ from reports_app.views.daily_report_views import technical_report_views
 
 app_name = 'reports_app'
 
-
-
-
-
 urlpatterns = [
 
     path("technical-report/<int:team_id>/", technical_report_views.download_technical_report, name="download_technical_report"),
-
-
-
 
     # Medical
     path('medical/<int:team_id>/', medical_views.medical_reports, name='medical_reports'),
@@ -88,14 +78,10 @@ urlpatterns = [
     path('team/<int:team_id>/statistics/export/excel/', statistics_view.statistics_export_excel, name='statistics_export_excel'),
     path('team/<int:team_id>/statistics/export/pdf/', statistics_view.statistics_export_pdf, name='statistics_export_pdf'),
 
-
-
     # Individual statistics
     path("player/<int:player_id>/report/", individual_statistics_view.player_report_view, name='individual_statistics'),
     path("player/<int:player_id>/report/excel/", individual_statistics_view.player_report_export_excel, name='player_report_excel'),
     path("player/<int:player_id>/report/pdf/", individual_statistics_view.player_report_export_pdf, name="player_report_pdf"),
-
-   
 
 
     # Dashboards
@@ -133,10 +119,8 @@ urlpatterns = [
 
     # 9. physical data
 
-
     # Full report
     path('match/<int:match_id>/<int:our_team_id>/full-report/',full_match_report_views.full_match_report_view,name='full_match_report'),
     path('match/<int:match_id>/download-pdf/', download_full_report_pdf,name='download_full_report_pdf'),
-
 ]
 

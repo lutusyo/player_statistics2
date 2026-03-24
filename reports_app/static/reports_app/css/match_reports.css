@@ -1,226 +1,141 @@
-/* static/reports_app/css/match_report.css */
-
-/* ===== Global Styles ===== */
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f7f7f7;
-    color: #333;
+/* GENERAL */
+body {
+    font-family: Arial, sans-serif;
+    margin: 30px;
 }
 
-a { text-decoration: none; }
-
-/* ===== Report Container ===== */
-.report-container {
-    max-width: 1200px;
-    margin: 20px auto;
-    background: #fff;
-    padding: 30px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    border-radius: 10px;
-}
-
-/* ===== Header ===== */
-.header {
-    text-align: center;
-    border-bottom: 2px solid #007BFF;
-    padding-bottom: 15px;
-    margin-bottom: 30px;
-}
-
-.header h1, .header h2, .header h3 {
-    margin: 0;
-    color: #007BFF;
-}
-
-/* ===== Download Button ===== */
-.btn-download {
-    display: inline-block;
-    margin: 20px auto;
-    padding: 10px 25px;
-    background-color: #007bff;
-    color: #fff;
-    border-radius: 6px;
-    font-weight: bold;
-    transition: background-color 0.3s;
-}
-
-.btn-download:hover { background-color: #0056b3; }
-
-/* ===== Fullscreen Intro Sections (GK, Set Plays) ===== */
-.fullscreen-container {
-    height: 100vh;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    position: relative;
-    padding: 40px;
-    background-color: #000;
-    color: white;
-}
-
-.company-logo {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    text-align: right;
-}
-
-.company-logo img {
-    height: 70px;
-    margin-top: 5px;
-}
-
-.page-title {
-    font-size: 48px;
-    margin-bottom: 60px;
-}
-
-.teams {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 80px;
-    margin-top: 20px;
-}
-
-.team {
-    text-align: center;
-}
-
-.team img {
-    height: 70px;
-}
-
-.team-name {
-    margin-top: 8px;
-    font-weight: bold;
-    font-size: 16px;
-}
-
-.vs {
-    font-size: 22px;
-    font-weight: bold;
-}
-
-/* ===== Content Sections ===== */
-.content-section {
-    background-color: #f8f9fa;
-    color: black;
-    padding: 40px;
-    border-radius: 10px;
-}
-
-/* ===== Cards ===== */
-.card {
-    padding: 20px;
-    margin-bottom: 25px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    background-color: white;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-}
-
-.card h4, .card h5, .card h6 {
+/* BUTTON */
+.print-btn {
     margin-bottom: 15px;
 }
 
-/* ===== Tables ===== */
+/* ================= LAYOUT ================= */
+.columns {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.team-box {
+    width: 42%;
+}
+
+/* ================= TITLES ================= */
+.main-title {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    background: #d4af37;
+    padding: 10px;
+    text-align: left;
+}
+
+.team-name {
+    background: #d4af37;
+    color: #000;
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 17px;
+    padding: 6px;
+    text-align: left;
+}
+
+/* ================= TABLE ================= */
 table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    margin-bottom: 30px;
+    margin-bottom: 8px;
+    background: #0d47a1;
+    color: #ffffff;
+    font-size: 13px;
 }
 
 th, td {
-    padding: 10px 15px;
-    border: 1px solid #ccc;
+    border: none;
+    padding: 5px;
+}
+
+/* HEADER ROW */
+th {
+    background: #d4af37;
+    color: #000;
+    font-weight: bold;
+}
+
+/* ALIGNMENT */
+td:nth-child(2),
+th:nth-child(2) {
+    text-align: left;
+}
+
+td, th {
     text-align: center;
+}
+
+/* SEPARATOR */
+.separator {
+    border-top: 1px solid #ccc;
+    margin: 8px 0;
+}
+
+/* PLAYER PHOTO */
+.player-photo {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* SUB COLORS */
+.sub-in {
+    color: #00ff7f;
+    font-weight: bold;
+}
+
+.sub-out {
+    color: #ff5252;
+    font-weight: bold;
+}
+
+/* ================= STATS TABLE ================= */
+.stats {
+    width: 50%;
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+.stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.stat-row > div {
+    padding: 8px;
+    text-align: center;
+    background: #0d47a1;
+    color: #ffffff;
     font-size: 14px;
 }
 
-th {
-    background-color: #007bff;
-    color: white;
+.header-row > div,
+.sub-header-row > div {
+    background: #d4af37;
+    color: #fff;
     font-weight: bold;
 }
 
-tr:nth-child(even) { background-color: #f2f2f2; }
-tr:nth-child(odd)  { background-color: #fff; }
-
-/* ===== Charts ===== */
-.chart-container {
-    width: 80%;
-    max-width: 700px;
-    margin: 40px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* ===== Shots on Pitch ===== */
-.pitch {
-    position: relative;
-    width: 100%;
-    height: 400px;
-    background: #eee;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.pitch-bg { width: 100%; height: 100%; object-fit: cover; }
-
-.shot {
-    position: absolute;
-    font-size: 16px;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px #000;
-}
-
-.shot.goal        { color: red; }
-.shot.on-target   { color: cyan; }
-.shot.off-target  { color: orange; }
-.shot.blocked     { color: gold; }
-.shot.incomplete  { color: black; }
-
-/* ===== Lists ===== */
-ul { list-style: none; padding: 0; text-align: center; }
-ul li { margin: 8px 0; }
-ul li a {
-    color: #007bff;
-    text-decoration: none;
-    font-weight: bold;
-    transition: color 0.3s;
-}
-ul li a:hover { color: #0056b3; }
-
-/* ===== Responsive ===== */
+/* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
-    .teams {
+    .columns {
         flex-direction: column;
-        gap: 20px;
+        align-items: center;
     }
-    .fullscreen-container {
-        padding: 20px;
+
+    .team-box {
+        width: 90%;
     }
-    .page-title {
-        font-size: 36px;
-    }
-    .chart-container {
-        width: 100%;
+
+    .stats {
+        width: 90%;
     }
 }

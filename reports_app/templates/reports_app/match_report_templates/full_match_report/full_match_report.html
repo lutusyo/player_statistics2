@@ -1,5 +1,4 @@
 
-
     <a href="{% url 'reports_app:download_full_report_pdf' match.id %}" class="btn btn-primary" style="margin: 20px;">
         📄 Download Full Report (PDF)
     </a>
@@ -12,12 +11,6 @@
 
     <!-- 2. Match-summary-team -->
     {% include "reports_app/match_report_templates/2_match_summary_team/match_summary_team.html" %}
-
- 
-
-
-
-    
 
     <!--4_in_possession-->
     {% include "reports_app/match_report_templates/4_in_possession/attempt_to_goal.html" %}
@@ -41,6 +34,3 @@
 
     <!--11.outro page-->
     {% include "reports_app/match_report_templates/11_outro_page/outro.html" %}
-
-
-

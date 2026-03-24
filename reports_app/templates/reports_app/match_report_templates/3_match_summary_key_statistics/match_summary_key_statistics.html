@@ -6,147 +6,124 @@
   <meta charset="utf-8">
   <title>Match Key Statistics</title>
 
-  <style>
 
-body {
-  margin: 0;
-  padding: 10px;
-  font-family: Arial, sans-serif;
-}
-
-/* Table container */
-.stats {
-  width: 65%;           /* smaller size */
-  max-width: 700px;     /* limit on big screens */
-  margin: 20px auto;    /* center */
-  overflow-x: auto;
-}
-
-/* Table rows */
-.stat-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
-/* Cells */
-.stat-row > div {
-  border: 1px solid #ffffff;
-  padding: 8px;
-  text-align: center;
-  background: #0d47a1;  /* blue */
-  color: #ffffff;
-  font-size: 14px;
-}
-
-/* HEADER ROWS (GOLD) */
-.header-row > div,
-.sub-header-row > div {
-  background: #d4af37;  /* gold */
-  color: #000;          /* black text for contrast */
-  font-weight: bold;
-}
-
-  </style>
+<link rel="stylesheet" href="{% static 'reports_app/css/match_reports.css' %}">
 
 </head>
 
 <body>
-<div class="container">
+  <div class="container">
 
 
 
-<!-- Stats Table -->
-<div class="stats">
+    <!-- Stats Table -->
+    <div class="stats">
 
-  <!-- Row 1: Team Names -->
-  <div class="stat-row header-row">
-    <div class="stat-left">{{ match.home_team.name }}</div>
-    <div class="stat-label"></div>
-    <div class="stat-right">{{ match.away_team.name }}</div>
+      <!-- Row 1: Team Names -->
+      <div class="stat-row header-row">
+        <div class="stat-left">{{ match.home_team.name }}</div>
+        <div class="stat-label"></div>
+        <div class="stat-right">{{ match.away_team.name }}</div>
+      </div>
+
+      <!-- Row 2: Home / Away -->
+      <div class="stat-row sub-header-row">
+        <div class="stat-left">HOME TEAM</div>
+        <div class="stat-label"></div>
+        <div class="stat-right">AWAY TEAM</div>
+      </div>
+
+      <!-- Goals -->
+      <div class="stat-row">
+        <div class="stat-left">{{ summary_key_statistics.home_team.goals }}</div>
+        <div class="stat-label">GOALS</div>
+        <div class="stat-right">{{ summary_key_statistics.away_team.goals }}</div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-left">{{ summary_key_statistics.home_team.shots_on_target }}</div>
+        <div class="stat-label">SHOTS ON TARGET</div>
+        <div class="stat-right">{{ summary_key_statistics.away_team.shots_on_target }}</div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-left">{{ summary_key_statistics.home_team.shots_off_target }}</div>
+        <div class="stat-label">SHOTS OFF TARGET</div>
+        <div class="stat-right">{{ summary_key_statistics.away_team.shots_off_target }}</div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-left">{{ summary_key_statistics.home_team.blocked_shots }}</div>
+        <div class="stat-label">BLOCKED SHOTS</div>
+        <div class="stat-right">{{ summary_key_statistics.away_team.blocked_shots }}</div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-left">{{ summary_key_statistics.home_team.total_passes }}</div>
+        <div class="stat-label">TOTAL PASSES</div>
+        <div class="stat-right">{{ summary_key_statistics.away_team.total_passes }}</div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-left">{{ summary_key_statistics.home_team.pass_completed }}</div>
+        <div class="stat-label">PASSES COMPLETED</div>
+        <div class="stat-right">{{ summary_key_statistics.away_team.pass_completed }}</div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-left">{{ summary_key_statistics.home_team.crosses }}</div>
+        <div class="stat-label">CROSSES</div>
+        <div class="stat-right">{{ summary_key_statistics.away_team.crosses }}</div>
+      </div>
+
+      <!-- UPDATED NAME -->
+      <div class="stat-row">
+        <div class="stat-left">{{ summary_key_statistics.home_team.corners }}</div>
+        <div class="stat-label">CORNER KICKS</div>
+        <div class="stat-right">{{ summary_key_statistics.away_team.corners }}</div>
+      </div>
+
+      <!-- Already exists, just capitalized -->
+      <div class="stat-row">
+        <div class="stat-left">{{ summary_key_statistics.home_team.offsides }}</div>
+        <div class="stat-label">OFFSIDES</div>
+        <div class="stat-right">{{ summary_key_statistics.away_team.offsides }}</div>
+      </div>
+
+      <!-- NEW -->
+      <div class="stat-row">
+        <div class="stat-left">{{ summary_key_statistics.home_team.total_saves }}</div>
+        <div class="stat-label">TOTAL SAVES</div>
+        <div class="stat-right">{{ summary_key_statistics.away_team.total_saves }}</div>
+      </div>
+
+      <!-- NEW -->
+      <div class="stat-row">
+        <div class="stat-left">{{ summary_key_statistics.home_team.substitutions }}</div>
+        <div class="stat-label">TOTAL SUBSTITUTIONS</div>
+        <div class="stat-right">{{ summary_key_statistics.away_team.substitutions }}</div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-left">{{ summary_key_statistics.home_team.fouls }}</div>
+        <div class="stat-label">FOULS</div>
+        <div class="stat-right">{{ summary_key_statistics.away_team.fouls }}</div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-left">{{ summary_key_statistics.home_team.yellow_cards }}</div>
+        <div class="stat-label">YELLOW CARDS</div>
+        <div class="stat-right">{{ summary_key_statistics.away_team.yellow_cards }}</div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-left">{{ summary_key_statistics.home_team.red_cards }}</div>
+        <div class="stat-label">RED CARDS</div>
+        <div class="stat-right">{{ summary_key_statistics.away_team.red_cards }}</div>
+      </div>
+
+    </div>
+
   </div>
-
-  <!-- Row 2: Home / Away -->
-  <div class="stat-row sub-header-row">
-    <div class="stat-left">Home Team</div>
-    <div class="stat-label"></div>
-    <div class="stat-right">Away Team</div>
-  </div>
-
-  <!-- Goals -->
-  <div class="stat-row">
-    <div class="stat-left">{{ summary_key_statistics.home_team.goals }}</div>
-    <div class="stat-label">Goals</div>
-    <div class="stat-right">{{ summary_key_statistics.away_team.goals }}</div>
-  </div>
-
-  <div class="stat-row">
-    <div class="stat-left">{{ summary_key_statistics.home_team.shots_on_target }}</div>
-    <div class="stat-label">Shots on Target</div>
-    <div class="stat-right">{{ summary_key_statistics.away_team.shots_on_target }}</div>
-  </div>
-
-  <div class="stat-row">
-    <div class="stat-left">{{ summary_key_statistics.home_team.shots_off_target }}</div>
-    <div class="stat-label">Shots Off Target</div>
-    <div class="stat-right">{{ summary_key_statistics.away_team.shots_off_target }}</div>
-  </div>
-
-  <div class="stat-row">
-    <div class="stat-left">{{ summary_key_statistics.home_team.blocked_shots }}</div>
-    <div class="stat-label">Blocked Shots</div>
-    <div class="stat-right">{{ summary_key_statistics.away_team.blocked_shots }}</div>
-  </div>
-
-  <div class="stat-row">
-    <div class="stat-left">{{ summary_key_statistics.home_team.total_passes }}</div>
-    <div class="stat-label">Total Passes</div>
-    <div class="stat-right">{{ summary_key_statistics.away_team.total_passes }}</div>
-  </div>
-
-  <div class="stat-row">
-    <div class="stat-left">{{ summary_key_statistics.home_team.pass_completed }}</div>
-    <div class="stat-label">Passes Completed</div>
-    <div class="stat-right">{{ summary_key_statistics.away_team.pass_completed }}</div>
-  </div>
-
-  <div class="stat-row">
-    <div class="stat-left">{{ summary_key_statistics.home_team.crosses }}</div>
-    <div class="stat-label">Crosses</div>
-    <div class="stat-right">{{ summary_key_statistics.away_team.crosses }}</div>
-  </div>
-
-  <div class="stat-row">
-    <div class="stat-left">{{ summary_key_statistics.home_team.corners }}</div>
-    <div class="stat-label">Corners</div>
-    <div class="stat-right">{{ summary_key_statistics.away_team.corners }}</div>
-  </div>
-
-  <div class="stat-row">
-    <div class="stat-left">{{ summary_key_statistics.home_team.offsides }}</div>
-    <div class="stat-label">Offsides</div>
-    <div class="stat-right">{{ summary_key_statistics.away_team.offsides }}</div>
-  </div>
-
-  <div class="stat-row">
-    <div class="stat-left">{{ summary_key_statistics.home_team.fouls }}</div>
-    <div class="stat-label">Fouls</div>
-    <div class="stat-right">{{ summary_key_statistics.away_team.fouls }}</div>
-  </div>
-
-  <div class="stat-row">
-    <div class="stat-left">{{ summary_key_statistics.home_team.yellow_cards }}</div>
-    <div class="stat-label">Yellow Cards</div>
-    <div class="stat-right">{{ summary_key_statistics.away_team.yellow_cards }}</div>
-  </div>
-
-  <div class="stat-row">
-    <div class="stat-left">{{ summary_key_statistics.home_team.red_cards }}</div>
-    <div class="stat-label">Red Cards</div>
-    <div class="stat-right">{{ summary_key_statistics.away_team.red_cards }}</div>
-  </div>
-
-</div>
-
-</div>
 </body>
 </html>
