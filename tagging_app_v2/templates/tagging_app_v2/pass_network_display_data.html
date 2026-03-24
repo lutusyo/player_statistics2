@@ -1,216 +1,111 @@
-{% extends "base.html" %}
-{% load static %}
-{% load dict_extras static %}
+{% load dict_get %}
 
-{% block content %}
+<h1>Pass: {{ match.home_team.name }} vs {{ match.away_team.name }}</h1>
 
-<!-- Include the external CSS file -->
-<link rel="stylesheet" href="{% static 'reports_app/css/match_reports.css' %}">
+<div style="display: flex; gap: 30px; flex-wrap: wrap;">
 
-<div class="container mt-4">
+    {% for team_name, stats in team_stats.items %}
+    <div style="flex: 1; min-width: 300px;">
 
-    <h3 class="text-center main-title">Match Statistics</h3>
-    <h6 class="text-center">{{ match.home_team }} vs {{ match.away_team }}</h6>
+        <h2>{{ team_name }}</h2>
 
-    <hr>
-    <!-- ================= PASS MATRIX SIDE-BY-SIDE ================= -->
-    <h5>Pass Matrix</h5>
+        <!-- Player Stats Table -->
+        <table border="1" style="width: 100%; margin-bottom: 20px;">
+            <tr>
+                <th>Player</th>
+                <th>Total Passes</th>
+                <th>Ball Lost</th>
+                <th>Ball Recovery</th>
+            </tr>
+            {% for player, data in stats.player_stats.items %}
+            <tr>
+                <td>{{ player }}</td>
+                <td>{{ data.total_passes }}</td>
+                <td>{{ data.ball_lost }}</td>
+                <td>{{ data.ball_recovery }}</td>
+            </tr>
+            {% endfor %}
+        </table>
 
-    <div class="columns">
-
-        {% for matrix in pass_matrices %}
-        <div class="team-box">
-
-            <h6 class="team-name mt-2">{{ matrix.team.name }}</h6>
-
-            <table class="table table-sm table-bordered text-center">
-                <thead>
-                    <tr>
-                        <th>From \ To</th>
-                        {% for p in matrix.players %}
-                            <th>{{ p.player.name }}</th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for row in matrix.rows %}
-                    <tr>
-                        <th class="text-start">
-                            {{ row.from.player.name }}
-                        </th>
-                        {% for value in row.cells %}
-                        <td>{{ value }}</td>
-                        {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-        </div>
-        {% endfor %}
+        <!-- Pass Matrix Table -->
+        <h3>Pass Matrix</h3>
+        <table border="1" style="width: 100%; margin-bottom: 40px;">
+            <tr>
+                <th>From \ To</th>
+                {% for receiver in stats.pass_matrix.players %}
+                    <th>{{ receiver }}</th>
+                {% endfor %}
+            </tr>
+            {% for actor in stats.pass_matrix.players %}
+            <tr>
+                <td>{{ actor }}</td>
+                {% for receiver in stats.pass_matrix.players %}
+                    <td>{{ stats.pass_matrix.matrix|dict_get:actor|dict_get:receiver|default:0 }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
 
     </div>
+    {% endfor %}
 
-    <hr>
+</div>
 
-    <!-- ================= AERIAL DUELS ================= -->
-    <h5>Aerial Duels (Players)</h5>
-    <table class="table table-bordered table-sm text-center">
-        <thead>
+<!-- Top 5 Pass Combinations -->
+<h2>Top 5 Pass Combinations</h2>
+<table border="1" style="width: 50%; margin-bottom: 30px;">
+    <tr>
+        <th>Actor</th>
+        <th>Receiver</th>
+        <th>Total Passes</th>
+    </tr>
+    {% for combo in top_five %}
+    <tr>
+        <td>{{ combo.actor__player__name }}</td>
+        <td>{{ combo.receiver__player__name }}</td>
+        <td>{{ combo.total }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<!-- Aerial Duels -->
+<h2>Aerial Duels (High Ball)</h2>
+<div style="display: flex; gap: 30px; flex-wrap: wrap;">
+    {% for team_name, players in aerial_team_stats.items %}
+    <div style="flex: 1; min-width: 250px;">
+        <h3>{{ team_name }}</h3>
+        <table border="1" style="width: 100%; margin-bottom: 20px;">
             <tr>
                 <th>Player</th>
                 <th>Won</th>
                 <th>Lost</th>
-                <th>Total</th>
             </tr>
-        </thead>
-        <tbody>
-            {% for player, stats in aerial_player_items %}
+            {% for player, stats in players.items %}
             <tr>
-                <td>{{ player.player.name }}</td>
+                <td>{{ player }}</td>
                 <td>{{ stats.won }}</td>
                 <td>{{ stats.lost }}</td>
-                <td>{{ stats.total }}</td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="4" class="text-center text-muted">No aerial duel data</td>
+                <td colspan="3">No aerial duels recorded</td>
             </tr>
             {% endfor %}
-        </tbody>
-    </table>
-
-    <h5>Aerial Duels (Teams)</h5>
-    <table class="table table-bordered table-sm text-center">
-        <thead>
-            <tr>
-                <th>Team</th>
-                <th>Won</th>
-                <th>Lost</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for team, stats in aerial_team_items %}
-            <tr>
-                <td>{{ team.name }}</td>
-                <td>{{ stats.won }}</td>
-                <td>{{ stats.lost }}</td>
-                <td>{{ stats.total }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" class="text-center text-muted">No team aerial data</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <hr>
-
-    <!-- ================= TOTAL PASSES ================= -->
-    <div class="columns">
-
-        <div class="team-box">
-            <h5 class="team-name">Total Passes (Players)</h5>
-            <table class="table table-sm table-bordered text-center">
-                <thead>
-                    <tr>
-                        <th>Player</th>
-                        <th>Total Passes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for player, total in total_passes_player_items %}
-                    <tr>
-                        <td>{{ player.player.name }}</td>
-                        <td>{{ total }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="2" class="text-center text-muted">No pass data</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <div class="team-box">
-            <h5 class="team-name">Total Passes (Teams)</h5>
-            <table class="table table-sm table-bordered text-center">
-                <thead>
-                    <tr>
-                        <th>Team</th>
-                        <th>Total Passes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for team, total in total_passes_team_items %}
-                    <tr>
-                        <td>{{ team.name }}</td>
-                        <td>{{ total }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="2" class="text-center text-muted">No team pass data</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
+        </table>
     </div>
-
+    {% endfor %}
 </div>
 
-<hr>
+<!-- Duels -->
+<h2>Duels</h2>
+<ul>
+    <li>Physical Duel: Won {{ physical.won }}, Lost {{ physical.lost }}</li>
+    <li>1v1 Attack: Won {{ one_vs_one.won }}, Lost {{ one_vs_one.lost }}</li>
+</ul>
 
-<!-- ================= PASS EVENTS ================= -->
-<div class="container-fluid mt-3">
-    <h4 class="mb-3 main-title">
-        Pass Events – {{ match.home_team.name }} vs {{ match.away_team.name }}
-    </h4>
-
-    <table class="table table-bordered table-sm align-middle text-center">
-        <thead class="table-dark">
-            <tr>
-                <th>#</th>
-                <th>Actor</th>
-                <th>Target</th>
-                <th>Receiver</th>
-                <th>Action</th>
-                <th>Success</th>
-                <th>Time (s)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for event in pass_events %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ event.actor.player.name }}</td>
-                <td>{{ event.target.player.name|default:"—" }}</td>
-                <td>{{ event.receiver.player.name|default:"—" }}</td>
-                <td>{{ event.get_action_type_display }}</td>
-
-                <td>
-                    {% if event.is_successful %}
-                    <span class="badge bg-success">✔</span>
-                    {% else %}
-                    <span class="badge bg-danger">✖</span>
-                    {% endif %}
-                </td>
-
-                <td>{{ event.timestamp|default:"—" }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7" class="text-center text-muted">No pass events recorded</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-</div>
-
-{% endblock %}
+<!-- Fouls -->
+<h2>Fouls</h2>
+<ul>
+    <li>Fouls Committed: {{ fouls_committed }}</li>
+    <li>Fouls Won: {{ fouls_won }}</li>
+</ul>
