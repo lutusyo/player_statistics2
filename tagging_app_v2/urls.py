@@ -1,7 +1,7 @@
 # tagging_app_v2/urls.py
 from django.urls import path
 from tagging_app_v2 import views
-from tagging_app_v2.views import pass_network, pass_network_enter_data, pass_network_get_data
+from tagging_app_v2.views import pass_network_enter_data, pass_network_get_data
 
 
 app_name = 'tagging_app_v2'
