@@ -82,21 +82,21 @@ def create_shotmap_base64(attempts_queryset):
 def attempt_to_goal_dashboard(request, match_id, return_context=False):
     match = get_object_or_404(Match, id=match_id)
     
-    our_team_id = request.GET.get("our_team_id") or match.home_team.id
-    try:
-        our_team_id = int(our_team_id)
-    except ValueError:
-        our_team_id = match.home_team.id
+    home_team_id = match.home_team.id
+    away_team_id = match.away_team.id
 
-    context = get_match_full_context(match_id, our_team_id)
+    context = get_match_full_context(match_id, home_team_id)
 
-    # ✅ Players from the lineup
-    lineup = MatchLineup.objects.filter(match=match, team_id=our_team_id).select_related("player")
-    players = [entry.player for entry in lineup]
+    # Players from the lineup
+    home_lineup = MatchLineup.objects.filter(match=match, team_id=home_team_id).select_related("player")
+    home_players = [entry.player for entry in home_lineup]
 
-    # ✅ Build outcomes_matrix (per player per outcome)
+    away_lineup = MatchLineup.objects.filter(match=match, team_id=away_team_id).select_related("player")
+    away_players = [entry.player for entry in away_lineup]
+
+    # Build outcomes_matrix (per player per outcome)
     outcomes_matrix = {}
-    for player in players:
+    for player in home_players + away_players:
         counts = (
             AttemptToGoal.objects.filter(player=player, match=match)
             .values("outcome")
@@ -104,158 +104,108 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
         )
         outcomes_matrix[player.id] = {row["outcome"]: row["count"] for row in counts}
 
-    # ✅ Separate attempts (move outside the loop)
-    our_attempts = (
-        AttemptToGoal.objects.filter(match=match, team_id=our_team_id)
-        .select_related("player", "team")
-        .order_by("minute", "second")
-    )
-    opponent_attempts = (AttemptToGoal.objects.filter(match=match)
-        .exclude(team_id=our_team_id)
-        .select_related("player", "team")
-        .order_by("minute", "second")
-    )
+    # Separate attempts
+    home_attempts = AttemptToGoal.objects.filter(match=match, team_id=home_team_id).select_related("player", "team").order_by("minute", "second")
+    away_attempts = AttemptToGoal.objects.filter(match=match, team_id=away_team_id).select_related("player", "team").order_by("minute", "second")
 
-    # ✅ Add goals (move outside loop)
+    # Goals
     goals = AttemptToGoal.objects.filter(match=match).filter(
         Q(outcome="On Target Goal") | Q(is_own_goal=True)
-    ).select_related(
-        "player", "assist_by", "pre_assist_by", "team", "own_goal_for"
-    ).order_by("minute", "second")
+    ).select_related("player", "assist_by", "pre_assist_by", "team", "own_goal_for").order_by("minute", "second")
 
+    # Delivery types totals
+    home_total_delivery_types = home_attempts.values('delivery_type').annotate(total=Count('id')).order_by('delivery_type')
+    away_total_delivery_types = away_attempts.values('delivery_type').annotate(total=Count('id')).order_by('delivery_type')
 
-    our_attempts = AttemptToGoal.objects.filter(match=match, is_opponent=False)
-
-    # Get totals for each delivery type
-    total_delivery_types = (
-        our_attempts.values('delivery_type')
-        .annotate(total=Count('id'))
-        .order_by('delivery_type')
-    )
-
-    # ✅ Compute summaries
-    our_summary = {
-        "goals": our_attempts.filter(Q(outcome="On Target Goal") | Q(is_own_goal=True)).count(),
-        "on_target_saved": our_attempts.filter(outcome="On Target Saved").count(),
-        "off_target": our_attempts.filter(outcome="Off Target").count(),
-        "blocked": our_attempts.filter(outcome="Blocked").count(),
-        "incomplete": our_attempts.filter(outcome="Player Error").count(),
+    # Summary stats
+    home_summary = {
+        "goals": home_attempts.filter(Q(outcome="On Target Goal") | Q(is_own_goal=True)).count(),
+        "on_target_saved": home_attempts.filter(outcome="On Target Saved").count(),
+        "off_target": home_attempts.filter(outcome="Off Target").count(),
+        "blocked": home_attempts.filter(outcome="Blocked").count(),
+        "incomplete": home_attempts.filter(outcome="Player Error").count(),
     }
+    home_summary["on_target_total"] = home_summary["goals"] + home_summary["on_target_saved"]
 
-    our_summary["on_target_total"] = our_summary["goals"] + our_summary["on_target_saved"]
-
-    opponent_summary = {
-        "goals": opponent_attempts.filter(Q(outcome="On Target Goal") | Q(is_own_goal=True)).count(),
-        "on_target": opponent_attempts.filter(outcome="On Target").count(),
-        "on_target_save": opponent_attempts.filter(outcome="On Target Save").count(),
-        "off_target": opponent_attempts.filter(outcome="Off Target").count(),
-        "blocked": opponent_attempts.filter(outcome="Blocked").count(),
-        "incomplete": opponent_attempts.filter(outcome="Incomplete").count(),
+    away_summary = {
+        "goals": away_attempts.filter(Q(outcome="On Target Goal") | Q(is_own_goal=True)).count(),
+        "on_target_saved": away_attempts.filter(outcome="On Target Saved").count(),
+        "off_target": away_attempts.filter(outcome="Off Target").count(),
+        "blocked": away_attempts.filter(outcome="Blocked").count(),
+        "incomplete": away_attempts.filter(outcome="Player Error").count(),
     }
+    away_summary["on_target_total"] = away_summary["goals"] + away_summary["on_target_saved"]
 
-    opponent_summary["on_target_total"] = opponent_summary["goals"] + opponent_summary["on_target_save"]
-
-##############################################################################################################################
     # Filter by categories
-    our_shots_on_target = our_attempts.filter(outcome__in=[OutcomeChoices.ON_TARGET_GOAL, OutcomeChoices.ON_TARGET_SAVED])
-    our_shots_off_target = our_attempts.filter(outcome=OutcomeChoices.OFF_TARGET)
-    our_blocked_shots = our_attempts.filter(outcome=OutcomeChoices.BLOCKED)
-    our_player_errors = our_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR).exclude(body_part=BodyPartChoices.OTHER)
-    our_unsuccessful_crosses = our_attempts.filter(
-        outcome=OutcomeChoices.PLAYER_ERROR, 
-        body_part=BodyPartChoices.OTHER, 
-        delivery_type=DeliveryTypeChoices.CROSS
-        ).select_related("assist_by", "player")
-    our_unsuccessful_cross_assisters = (our_unsuccessful_crosses
-    .exclude(assist_by__isnull=True)
-    .values(
-        "assist_by__id",
-        "assist_by__name"
-    )
-    .annotate(total=Count("id"))
-    .order_by("-total")
-    )
+    home_shots_on_target = home_attempts.filter(outcome__in=[OutcomeChoices.ON_TARGET_GOAL, OutcomeChoices.ON_TARGET_SAVED])
+    home_shots_off_target = home_attempts.filter(outcome=OutcomeChoices.OFF_TARGET)
+    home_blocked_shots = home_attempts.filter(outcome=OutcomeChoices.BLOCKED)
+    home_player_errors = home_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR).exclude(body_part=BodyPartChoices.OTHER)
+    home_unsuccessful_crosses = home_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR, body_part=BodyPartChoices.OTHER, delivery_type=DeliveryTypeChoices.CROSS).select_related("assist_by", "player")
+    home_unsuccessful_cross_assisters = home_unsuccessful_crosses.exclude(assist_by__isnull=True).values("assist_by__id", "assist_by__name").annotate(total=Count("id")).order_by("-total")
+    home_corners = home_attempts.filter(delivery_type=DeliveryTypeChoices.CORNER)
+    home_crosses = home_attempts.filter(delivery_type=DeliveryTypeChoices.CROSS)
+    home_effective_loose_ball = home_attempts.filter(delivery_type=DeliveryTypeChoices.LOOSE_BALL)
+    home_effective_pass = home_attempts.filter(delivery_type=DeliveryTypeChoices.PASS)
 
-    our_corners = our_attempts.filter(delivery_type=DeliveryTypeChoices.CORNER)
-    our_crosses = our_attempts.filter(delivery_type=DeliveryTypeChoices.CROSS)
-    our_effective_loose_ball = our_attempts.filter(delivery_type=DeliveryTypeChoices.LOOSE_BALL)
-    our_effective_pass = our_attempts.filter(delivery_type=DeliveryTypeChoices.PASS)
+    away_shots_on_target = away_attempts.filter(outcome__in=[OutcomeChoices.ON_TARGET_GOAL, OutcomeChoices.ON_TARGET_SAVED])
+    away_shots_off_target = away_attempts.filter(outcome=OutcomeChoices.OFF_TARGET)
+    away_blocked_shots = away_attempts.filter(outcome=OutcomeChoices.BLOCKED)
+    away_player_errors = away_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR).exclude(body_part=BodyPartChoices.OTHER)
+    away_unsuccessful_crosses = away_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR, body_part=BodyPartChoices.OTHER, delivery_type=DeliveryTypeChoices.CROSS).select_related("assist_by", "player")
+    away_unsuccessful_cross_assisters = away_unsuccessful_crosses.exclude(assist_by__isnull=True).values("assist_by__id", "assist_by__name").annotate(total=Count("id")).order_by("-total")
+    away_corners = away_attempts.filter(delivery_type=DeliveryTypeChoices.CORNER)
+    away_crosses = away_attempts.filter(delivery_type=DeliveryTypeChoices.CROSS)
+    away_effective_loose_ball = away_attempts.filter(delivery_type=DeliveryTypeChoices.LOOSE_BALL)
+    away_effective_pass = away_attempts.filter(delivery_type=DeliveryTypeChoices.PASS)
 
-    # Filter by categories for opponents
-    opponent_attempts = AttemptToGoal.objects.filter(match=match, is_opponent=True)     # opponents team attempts
+    # Shotmaps
+    home_shotmap = create_shotmap_base64(home_attempts)
+    away_shotmap = create_shotmap_base64(away_attempts)
 
-    opponent_shots_on_target = opponent_attempts.filter(outcome__in=[OutcomeChoices.ON_TARGET_GOAL, OutcomeChoices.ON_TARGET_SAVED])
-    opponent_shots_off_target = opponent_attempts.filter(outcome=OutcomeChoices.OFF_TARGET)
-    opponent_blocked_shots = opponent_attempts.filter(outcome=OutcomeChoices.BLOCKED)
-    opponent_player_errors = opponent_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR).exclude(body_part=BodyPartChoices.OTHER)
-    opponent_unsuccessful_crosses = opponent_attempts.filter(
-        outcome=OutcomeChoices.PLAYER_ERROR, 
-        body_part=BodyPartChoices.OTHER, 
-        delivery_type=DeliveryTypeChoices.CROSS
-        ).select_related("assist_by", "player")
-    
-    opponent_unsuccessful_cross_assisters = (opponent_unsuccessful_crosses
-    .exclude(assist_by__isnull=True)
-    .values(
-        "assist_by__id",
-        "assist_by__name"
-    )
-    .annotate(total=Count("id"))
-    .order_by("-total")
-    )    
-
-    opponent_corners = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.CORNER)
-    opponent_crosses = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.CROSS)
-    opponent_effective_loose_ball = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.LOOSE_BALL)
-    opponent_effective_pass = opponent_attempts.filter(delivery_type=DeliveryTypeChoices.PASS)
-
-    # ❌ Commented out mplsoccer shotmaps
-    our_shotmap = create_shotmap_base64(our_attempts)
-    opponent_shotmap = create_shotmap_base64(opponent_attempts)
-
-    # ✅ Update context
+    # Update context
     context.update({
-        "players": players,
+        "home_players": home_players,
+        "away_players": away_players,
         "outcomes_matrix": outcomes_matrix,
-        "our_attempts": our_attempts,
-        "opponent_attempts": opponent_attempts,
-        "our_summary": our_summary,
-        "opponent_summary": opponent_summary,
+
+        "home_attempts": home_attempts,
+        "away_attempts": away_attempts,
+
+        "home_summary": home_summary,
+        "away_summary": away_summary,
         "goals": goals,
         "match": match,
-        'total_delivery_types': total_delivery_types,
 
-        "match": match,
-        "our_shots_on_target": our_shots_on_target,
-        "our_shots_off_target": our_shots_off_target,
-        "our_blocked_shots": our_blocked_shots,
-        "our_player_errors": our_player_errors,
-        "our_unsuccessful_crosses": our_unsuccessful_crosses,
-        "our_unsuccessful_cross_assisters": our_unsuccessful_cross_assisters,
+        "home_total_delivery_types": home_total_delivery_types,
+        "away_total_delivery_types": away_total_delivery_types,
 
-        "our_corners": our_corners,
-        "our_crosses": our_crosses,
-        "our_effective_loose_ball": our_effective_loose_ball,
-        "our_effective_pass": our_effective_pass,
+        "home_shots_on_target": home_shots_on_target,
+        "home_shots_off_target": home_shots_off_target,
+        "home_blocked_shots": home_blocked_shots,
+        "home_player_errors": home_player_errors,
+        "home_unsuccessful_cross_assisters": home_unsuccessful_cross_assisters,
+        "home_corners": home_corners,
+        "home_crosses": home_crosses,
+        "home_effective_loose_ball": home_effective_loose_ball,
+        "home_effective_pass": home_effective_pass,
 
-        "opponent_shots_on_target": opponent_shots_on_target,
-        "opponent_shots_off_target": opponent_shots_off_target,
-        "opponent_blocked_shots": opponent_blocked_shots,
-        "opponent_player_errors": opponent_player_errors,
-        "opponent_unsuccessful_crosses": opponent_unsuccessful_crosses,
-        "opponent_unsuccessful_cross_assisters": opponent_unsuccessful_cross_assisters,
+        "away_shots_on_target": away_shots_on_target,
+        "away_shots_off_target": away_shots_off_target,
+        "away_blocked_shots": away_blocked_shots,
+        "away_player_errors": away_player_errors,
+        "away_unsuccessful_cross_assisters": away_unsuccessful_cross_assisters,
+        "away_corners": away_corners,
+        "away_crosses": away_crosses,
+        "away_effective_loose_ball": away_effective_loose_ball,
+        "away_effective_pass": away_effective_pass,
 
-        "opponent_corners": opponent_corners,
-        "opponent_crosses": opponent_crosses,
-        "opponent_effective_loose_ball": opponent_effective_loose_ball,
-        "opponent_effective_pass": opponent_effective_pass,
+        "home_shotmap": home_shotmap,
+        "away_shotmap": away_shotmap,
 
         "home_team": match.home_team,
         "away_team": match.away_team,
     })
-
-    context["our_shotmap"] = our_shotmap
-    context["opponent_shotmap"] = opponent_shotmap
 
     if return_context:
         return context

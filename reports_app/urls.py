@@ -21,7 +21,6 @@ from reports_app.views.match_report_views import (
     summary_key_statistics_views,)
 
 from reports_app.views.match_report_views.full_match_report_views import full_match_report_view, download_full_report_pdf
-from reports_app.views.match_report_views.match_report_dashboard_view import match_report_dashboard
 from reports_app.views.match_report_views import match_summary_team_view
 from reports_app.views.daily_report_views import technical_report_views
 
@@ -30,7 +29,6 @@ app_name = 'reports_app'
 urlpatterns = [
 
     path("technical-report/<int:team_id>/", technical_report_views.download_technical_report, name="download_technical_report"),
-
     # Medical
     path('medical/<int:team_id>/', medical_views.medical_reports, name='medical_reports'),
     path('medical/<int:team_id>/export/excel/', medical_views.export_medical_excel, name='export_medical_excel'),
@@ -93,32 +91,17 @@ urlpatterns = [
     path('reports-dashboard/combined-pdf/', report_exports.export_combined_pdf, name='export_combined_pdf'),
     path('team-reports/<int:team_id>/dashboard/', report_filters.reports_dashboard, name='reports_dashboard'),
     path('team-reports/<int:team_id>/', team_reports_view.team_reports_view, name='team_reports'),
-    
 
-    # MATCH REPORT HOME PAGE
-    path('match/<int:match_id>/<int:our_team_id>/report/',match_report_dashboard, name='match_report_dashboard'),
-
-    # 1. Post match summary
+    # 1. Post match summary,Key statS,team,In possession,         Goalkeeping,Set plays
     path('match/<int:match_id>/post-match-summary/', post_match_summary_views.full_match_context_view, name='post_match_summary'),
-
-    # 2. Match summary team
-    path("match-lineup/<int:match_id>/", match_summary_team_view.match_lineup_report, name="match_lineup_report"),
-
-    # 3. Key statistics summary
     path("match/<int:match_id>/summary-key-statistics/",summary_key_statistics_views.summary_key_statistics_view, name="summary_key_statistics"),
-
-    # 4. In possession
+    path("match-lineup/<int:match_id>/", match_summary_team_view.match_lineup_report, name="match_lineup_report"),
     path('match/<int:match_id>/attempt-to-goal-dashboard/', in_possession_views.attempt_to_goal_dashboard,name='attempt_to_goal_dashboard'),
-    path("shotmap/<int:match_id>/<str:team_type>/", in_possession_views.create_shotmap_base64, name="generate_shotmap"),
+    #path("shotmap/<int:match_id>/<str:team_type>/", in_possession_views.create_shotmap_base64, name="generate_shotmap"),
 
-    # 6. Goalkeeping
     path("match/<int:match_id>/goalkeeping/", goalkeeping_view.goalkeeping_view,name="goalkeeping_report"),
- 
-    # 7. Set plays
     path('match/<int:match_id>/setplays/', set_plays_views.setplays_dashboard, name='setplays_dashboard'),
-
     # 9. physical data
-
     # Full report
     path('match/<int:match_id>/<int:our_team_id>/full-report/',full_match_report_views.full_match_report_view,name='full_match_report'),
     path('match/<int:match_id>/download-pdf/', download_full_report_pdf,name='download_full_report_pdf'),

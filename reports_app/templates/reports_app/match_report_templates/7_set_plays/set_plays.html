@@ -1,108 +1,38 @@
 {% load static %}
 
-<style>
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Set Plays Dashboard</title>
+  <link rel="stylesheet" href="{% static 'reports_app/css/match_reports.css' %}">
+</head>
 
-/* Fullscreen intro container */
-#sp_fullscreen_container {
-    height: 100vh;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: black;
-    color: white;
-    font-family: Arial, sans-serif;
-    position: relative; /* for absolute logo */
-    text-align: center;
-}
-
-/* Company logo top-right */
-#sp_company_logo {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    text-align: right;
-}
-
-#sp_company_logo img {
-    height: 70px;
-    margin-top: 5px;
-}
-
-/* Page title */
-#sp_title {
-    font-size: 48px;
-    margin-bottom: 60px;
-}
-
-/* Teams section */
-#sp_teams {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 80px;
-    margin-top: 20px;
-}
-
-.sp_team {
-    text-align: center;
-}
-
-.sp_team img {
-    height: 70px;
-}
-
-.sp_team_name {
-    font-weight: bold;
-    margin-top: 8px;
-}
-
-.sp_vs {
-    font-size: 22px;
-    font-weight: bold;
-}
-
-/* Dashboard cards and tables */
-#sp_dashboard_container {
-    padding: 30px 15px;
-    background-color: #f8f9fa;
-}
-
-.card-body h3 {
-    margin: 0;
-}
-</style>
+<body>
 
 <!-- Fullscreen Intro Section -->
-<div id="sp_fullscreen_container">
+<div id="sp_fullscreen_container" class="columns">
     <div id="sp_company_logo">
         <strong>{{ company }}</strong><br>
         <img src="{% static 'goalkeeping_app/azamfc_logo.png' %}" alt="Logo">
     </div>
 
-    <h1 id="sp_title">SET PLAYS</h1>
+    <h1 id="sp_title" class="main-title">SET PLAYS</h1>
 
-    <div id="sp_teams">
-        <div class="sp_team">
+    <div id="sp_teams" class="columns">
+        <div class="sp_team team-box">
             {% if home_team.logo %}
                 <img src="{{ home_team.logo.url }}" alt="{{ home_team.name }}">
             {% endif %}
-            <p class="sp_team_name">{{ home_team.name }}</p>
+            <p class="sp_team_name team-name">{{ home_team.name }}</p>
         </div>
 
         <div class="sp_vs">vs</div>
 
-        <div class="sp_team">
+        <div class="sp_team team-box">
             {% if away_team.logo %}
                 <img src="{{ away_team.logo.url }}" alt="{{ away_team.name }}">
             {% endif %}
-            <p class="sp_team_name">{{ away_team.name }}</p>
+            <p class="sp_team_name team-name">{{ away_team.name }}</p>
         </div>
     </div>
 </div>
@@ -111,8 +41,8 @@ html, body {
 <div id="sp_dashboard_container" class="container mt-5">
 
   <!-- Summary Cards -->
-  <div class="row text-center mb-4">
-    <div class="col-md-3 mb-3">
+  <div class="row text-center mb-4 columns">
+    <div class="col-md-3 mb-3 team-box">
       <div class="card shadow-sm border-primary">
         <div class="card-body">
           <h6 class="text-primary">Total Set Plays</h6>
@@ -120,7 +50,7 @@ html, body {
         </div>
       </div>
     </div>
-    <div class="col-md-3 mb-3">
+    <div class="col-md-3 mb-3 team-box">
       <div class="card shadow-sm border-info">
         <div class="card-body">
           <h6 class="text-info">Corners</h6>
@@ -128,7 +58,7 @@ html, body {
         </div>
       </div>
     </div>
-    <div class="col-md-3 mb-3">
+    <div class="col-md-3 mb-3 team-box">
       <div class="card shadow-sm border-success">
         <div class="card-body">
           <h6 class="text-success">Free Kicks</h6>
@@ -136,7 +66,7 @@ html, body {
         </div>
       </div>
     </div>
-    <div class="col-md-3 mb-3">
+    <div class="col-md-3 mb-3 team-box">
       <div class="card shadow-sm border-danger">
         <div class="card-body">
           <h6 class="text-danger">Penalties</h6>
@@ -153,8 +83,8 @@ html, body {
   </div>
 
   <!-- Detailed Breakdown -->
-  <div class="row">
-    <div class="col-md-4">
+  <div class="row columns">
+    <div class="col-md-4 team-box">
       <div class="card shadow-sm p-3 mb-3">
         <h5 class="text-primary mb-3">Corners ({{ corners.count }})</h5>
         <ul class="list-unstyled">
@@ -167,7 +97,7 @@ html, body {
       </div>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-4 team-box">
       <div class="card shadow-sm p-3 mb-3">
         <h5 class="text-success mb-3">Free Kicks ({{ free_kicks.count }})</h5>
         <ul class="list-unstyled">
@@ -180,7 +110,7 @@ html, body {
       </div>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-4 team-box">
       <div class="card shadow-sm p-3 mb-3">
         <h5 class="text-danger mb-3">Penalties ({{ penalties.count }})</h5>
         <ul class="list-unstyled">
@@ -223,3 +153,5 @@ html, body {
 
 </div>
 
+</body>
+</html>

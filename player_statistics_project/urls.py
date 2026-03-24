@@ -17,35 +17,18 @@ urlpatterns = [
 
     path('announcements/', include('announcements_app.urls')),
 
-    #reports_app
-    path('reports_app/', include('reports_app.urls')),
-
-    #tagging_app
-    path('tagging/', include('tagging_app.urls')),
-
-    #defensive_app
-    path('defensive/', include('defensive_app.urls')),
-
-    #lineup
-    path('lineup_app/', include('lineup_app.urls')),
- 
-
+    path('reports_app/', include('reports_app.urls')),  #reports_app
+    path('tagging/', include('tagging_app.urls')),      #tagging_app
+    path('defensive/', include('defensive_app.urls')),  #defensive_app
+    path('lineup_app/', include('lineup_app.urls')),    #lineup
     path('performance_rating_app/', include('perfomance_rating_app.urls')),
-
     path('training/', include('training_app.urls')),
-
-    #sheets generator
-    path("sheets/", include("sheets_generator_app.urls")),
+    path("sheets/", include("sheets_generator_app.urls")), #sheets generator
 
     #############################
+    path('tagging_v2/', include('tagging_app_v2.urls')), #tagging_app_v2
+    path('loans_app/', include('loans_app.urls')), # loaned players
 
-    #tagging_app_v2
-    path('tagging_v2/', include('tagging_app_v2.urls')),
-
-    # loaned players
-    path('loans_app/', include('loans_app.urls')),
-
-  
 ]
 
 if settings.DEBUG:

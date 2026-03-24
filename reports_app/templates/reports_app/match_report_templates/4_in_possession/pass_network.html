@@ -6,66 +6,17 @@
 <html>
 <head>
   <title>Pass Network Dashboard</title>
-
+  <link rel="stylesheet" href="{% static 'reports_app/css/match_reports.css' %}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f8f9fa;
-        padding: 20px;
-    }
-
-    h1, h2 {
-        text-align: center;
-        color: #007bff;
-        margin-top: 40px;
-    }
-
-    table {
-        width: 90%;
-        margin: 20px auto;
-        border-collapse: collapse;
-        background: #fff;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    th, td {
-        border: 1px solid #ccc;
-        padding: 8px;
-        text-align: center;
-    }
-
-    th {
-        background: #007bff;
-        color: #fff;
-    }
-
-    tr:nth-child(even) { background: #f2f2f2; }
-
-    .team-section {
-        margin-bottom: 80px;
-    }
-
-    .chart-container {
-        width: 80%;
-        max-width: 700px;
-        margin: 30px auto;
-        background: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-  </style>
 </head>
 
 <body>
 
-<h1>Pass Network Dashboard</h1>
+<h1 class="main-title">Pass Network Dashboard</h1>
 
 <!-- ================= HOME TEAM ================= -->
-<div class="team-section">
-  <h2>{{ home_team.name }} – Pass Data</h2>
+<div class="team-box">
+  <h2 class="team-name">{{ home_team.name }} – Pass Data</h2>
 
   <!-- Pass Matrix -->
   <h3>Pass Matrix</h3>
@@ -120,8 +71,8 @@
 </div>
 
 <!-- ================= AWAY TEAM ================= -->
-<div class="team-section">
-  <h2>{{ away_team.name }} – Pass Data</h2>
+<div class="team-box">
+  <h2 class="team-name">{{ away_team.name }} – Pass Data</h2>
 
   <!-- Pass Matrix -->
   <h3>Pass Matrix</h3>
