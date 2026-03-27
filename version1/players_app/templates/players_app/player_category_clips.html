@@ -1,0 +1,159 @@
+<style>
+.clips-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* LEFT VIDEO */
+.video-section {
+    flex: 2;
+}
+
+.video-section video {
+    width: 100%;
+    max-height: 450px;
+    border-radius: 10px;
+}
+
+/* RIGHT LIST */
+.clips-list {
+    flex: 1;
+    max-height: 450px;
+    overflow-y: auto;
+    border-left: 1px solid #ddd;
+    padding-left: 10px;
+}
+
+/* EACH ITEM */
+.clip-item {
+    display: flex;
+    gap: 10px;
+    padding: 8px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: 0.2s;
+}
+
+.clip-item:hover {
+    background: #f1f5ff;
+}
+
+/* THUMB */
+.thumb {
+    width: 80px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+/* TEXT */
+.clip-info p {
+    margin: 0;
+    font-size: 13px;
+}
+</style>
+
+
+
+<h2>{{ player.full_name }} - {{ category|title }} Clips</h2>
+
+<div class="clips-container">
+
+    <!-- LEFT: VIDEO PLAYER -->
+    <div class="video-section">
+
+        {% if first_clip %}
+            <video id="mainVideo" controls
+                {% if first_clip.thumbnail %}
+                    poster="{{ first_clip.thumbnail.url }}"
+                {% endif %}
+            >
+                <source id="videoSource" src="{{ first_clip.video_clip.url }}" type="video/mp4">
+            </video>
+        {% else %}
+            <p id="noVideoText">No video available</p>
+            <video id="mainVideo" controls style="display:none;"></video>
+        {% endif %}
+
+        <div class="video-info">
+            <p id="videoMatch">
+                {% if first_clip %}{{ first_clip.match }}{% endif %}
+            </p>
+            <p id="videoMinute">
+                {% if first_clip %}{{ first_clip.minute }}'{% endif %}
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- RIGHT: CLIPS LIST -->
+    <div class="clips-list">
+        {% for c in clips %}
+        <div class="clip-item"
+            onclick="changeVideo(
+                {% if c.video_clip %}
+                    '{{ c.video_clip.url }}',
+                {% else %}
+                    null,
+                {% endif %}
+                '{{ c.match }}',
+                '{{ c.minute }}'
+            )">
+
+            {% if c.thumbnail %}
+                <img src="{{ c.thumbnail.url }}" class="thumb">
+            {% endif %}
+
+            <div class="clip-info">
+                <p><strong>{{ c.match }}</strong></p>
+                <p>{{ c.minute }}'</p>
+
+                {% if not c.video_clip %}
+                    <p style="color:red; font-size:12px;">No video</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script>
+function changeVideo(url, match, minute) {
+    const video = document.getElementById("mainVideo");
+    let noVideoText = document.getElementById("noVideoText");
+
+    if (!url) {
+        video.style.display = "none";
+        video.pause();
+
+        if (!noVideoText) {
+            noVideoText = document.createElement("p");
+            noVideoText.id = "noVideoText";
+            noVideoText.innerText = "No video available";
+            video.parentNode.insertBefore(noVideoText, video);
+        } else {
+            noVideoText.style.display = "block";
+        }
+
+        video.src = ""; // remove src
+    } else {
+        if (noVideoText) {
+            noVideoText.style.display = "none";
+        }
+
+        video.style.display = "block";
+
+        // Directly set video src
+        video.src = url;
+
+        video.load();
+        video.play();
+    }
+
+    document.getElementById("videoMatch").innerText = match;
+    document.getElementById("videoMinute").innerText = minute + "'";
+}
+</script>

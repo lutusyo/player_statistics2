@@ -26,8 +26,6 @@ MEDICAL_TEST_CHOICES = [
     ('NOT DONE', 'NOT DONE'),
 ]
 
-# position choices
-
 # Specific position choices
 SPECIFIC_POSITION_CHOICES = [
     # Goalkeepers
@@ -98,12 +96,10 @@ class Player(models.Model):
     def __str__(self):
         return f"{self.full_name} - {self.age_group} - {self.team}"
 
-
     @property
     def full_name(self):
         parts = [self.name, self.second_name, self.surname]
         return " ".join([p for p in parts if p and p.lower() not in ["second_name", "surname"]])
-
 
     @property
     def bmi(self):
@@ -118,12 +114,10 @@ class Player(models.Model):
     def current_measurement(self):
         return self.measurements.order_by('-date_measured').first()
 
-
     @property
     def last_three_measurements(self):
         return self.measurements.order_by('-date_measured')[:3]
     
-
     @property
     def age_using_birthdate(self):
         """ Age calculated using birthdate fields"""
@@ -139,12 +133,6 @@ class Player(models.Model):
             return None
         today = date.today()
         return today.year - self.real_dob.year - ((today.month, today.day)<(self.real_dob.month, self.real_dob.day))
-    
-
-
-
-
-
 
 class PlayerMeasurement(models.Model):
     player =models.ForeignKey(Player, on_delete=models.CASCADE, related_name='measurements')
@@ -157,7 +145,6 @@ class PlayerMeasurement(models.Model):
 
     def __str__(self):
         return f"{self.player.name} - {self.date_measured}"
-
 
 # Career stage for each player
 class PlayerCareerStage(models.Model):

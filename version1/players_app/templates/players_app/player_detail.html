@@ -321,6 +321,11 @@
                                 <td>{{ stat.competition }}</td>
                                 <td>{{ stat.appearances }}</td>
                                 <td>{{ stat.minutes }}</td>
+
+                                <td>
+                                    <a href="{% url 'players_app:player_category_clips' player.id 'goals' %}">{{ stat.goals }}</a>
+                                </td>
+
                                 <td>{{ stat.goals }}</td>
                                 <td>{{ stat.assists }}</td>
                                 <td>{{ stat.starts }}</td>

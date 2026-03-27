@@ -1,7 +1,7 @@
 from django.urls import path
 from version1.players_app.views  import (
      players_list, player_details, player_matches_details,
-      export_team_players_to_excel, player_match_clips
+      export_team_players_to_excel, player_clips
      )
 
 app_name = 'players_app'
@@ -13,5 +13,10 @@ urlpatterns = [
     path('player/<int:player_id>/match/<str:match_id>/', player_matches_details.player_match_detail, name='player_match_detail'),
     # Export team players to excel
     path("export_players/<int:team_id>/", export_team_players_to_excel.export_team_players_to_excel_view, name="export_team_players"),
-    path("players/<int:player_id>/match/<int:match_id>/clips/", player_match_clips.player_match_clips, name='player_match_clips'),
+
+    # Clips
+    path("players/<int:player_id>/match/<int:match_id>/clips/", player_clips.player_match_clips, name='player_match_clips'),
+
+    path('players/<int:player_id>/clips/<str:category>/', player_clips.player_category_clips, name='player_category_clips'),
+    
 ]
