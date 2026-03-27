@@ -1,0 +1,109 @@
+{% load dict_get %}
+
+<div style="display: flex; gap: 30px; flex-wrap: wrap;">
+
+    {% for team_name, stats in team_stats.items %}
+    <div style="flex: 1; min-width: 300px;">
+
+        <h2>{{ team_name }}</h2>
+
+        <!-- Player Stats Table -->
+        <table border="1" style="width: 100%; margin-bottom: 20px;">
+            <tr>
+                <th>Player</th>
+                <th>Total Passes</th>
+                <th>Ball Lost</th>
+                <th>Ball Recovery</th>
+            </tr>
+            {% for player, data in stats.player_stats.items %}
+            <tr>
+                <td>{{ player }}</td>
+                <td>{{ data.total_passes }}</td>
+                <td>{{ data.ball_lost }}</td>
+                <td>{{ data.ball_recovery }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <!-- Pass Matrix Table -->
+        <h3>Pass Matrix</h3>
+        <table border="1" style="width: 100%; margin-bottom: 40px;">
+            <tr>
+                <th>From \ To</th>
+                {% for receiver in stats.pass_matrix.players %}
+                    <th>{{ receiver }}</th>
+                {% endfor %}
+            </tr>
+            {% for actor in stats.pass_matrix.players %}
+            <tr>
+                <td>{{ actor }}</td>
+                {% for receiver in stats.pass_matrix.players %}
+                    <td>{{ stats.pass_matrix.matrix|dict_get:actor|dict_get:receiver|default:0 }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+
+    </div>
+    {% endfor %}
+
+</div>
+
+<!-- Top 5 Pass Combinations -->
+<h2>Top 5 Pass Combinations</h2>
+<table border="1" style="width: 50%; margin-bottom: 30px;">
+    <tr>
+        <th>Actor</th>
+        <th>Receiver</th>
+        <th>Total Passes</th>
+    </tr>
+    {% for combo in top_five %}
+    <tr>
+        <td>{{ combo.actor__player__name }}</td>
+        <td>{{ combo.receiver__player__name }}</td>
+        <td>{{ combo.total }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<!-- Aerial Duels -->
+<h2>Aerial Duels (High Ball)</h2>
+<div style="display: flex; gap: 30px; flex-wrap: wrap;">
+    {% for team_name, players in aerial_team_stats.items %}
+    <div style="flex: 1; min-width: 250px;">
+        <h3>{{ team_name }}</h3>
+        <table border="1" style="width: 100%; margin-bottom: 20px;">
+            <tr>
+                <th>Player</th>
+                <th>Won</th>
+                <th>Lost</th>
+            </tr>
+            {% for player, stats in players.items %}
+            <tr>
+                <td>{{ player }}</td>
+                <td>{{ stats.won }}</td>
+                <td>{{ stats.lost }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No aerial duels recorded</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Duels -->
+<h2>Duels</h2>
+<ul>
+    <li>Physical Duel: Won {{ physical.won }}, Lost {{ physical.lost }}</li>
+    <li>1v1 Attack: Won {{ one_vs_one.won }}, Lost {{ one_vs_one.lost }}</li>
+</ul>
+
+<!-- Fouls -->
+<h2>Fouls</h2>
+<ul>
+    <li>Fouls Committed: {{ fouls_committed }}</li>
+    <li>Fouls Won: {{ fouls_won }}</li>
+</ul>

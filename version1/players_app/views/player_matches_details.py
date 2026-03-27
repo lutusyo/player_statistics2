@@ -1,0 +1,170 @@
+from django.shortcuts import render, get_object_or_404
+from django.db.models import Sum, Avg, Count
+from django.contrib.auth.decorators import login_required
+from collections import defaultdict
+from django.http import Http404
+
+from version1.teams_app.models import AgeGroup
+from version1.matches_app.models import Match
+from version1.lineup_app.models import MatchLineup
+from version1.gps_app.models import GPSRecord
+from version1.tagging_app.models import AttemptToGoal, PassEvent, GoalkeeperDistributionEvent
+
+#from goalkeeping_app.models import GoalkeeperDistributionEvent
+from version1.defensive_app.models import PlayerDefensiveStats
+from version1.players_app.models import Player, PlayerCareerStage
+from version1.defensive_app.models import  PlayerDefensiveStats
+from version1.defensive_app.models import PlayerDefensiveStats
+
+
+def player_match_detail(request, player_id, match_id=None):
+    """
+    Player profile + aggregated season stats + optional match-level stats
+    If match_id is None -> show general player overview
+    If match_id == 'total' -> show aggregated GPS & defensive totals
+    If match_id is a number -> show stats for a specific match
+    """
+
+    player = get_object_or_404(Player, id=player_id)  # 1. Player
+
+    related_players = Player.objects.filter(age_group=player.age_group).exclude(id=player.id) # 2.Related players(same age group)
+
+    # 3. Seasons & competitions
+    seasons = Match.objects.values("season").distinct()
+    competitions = Match.objects.values("competition_type").distinct()
+
+    # 4. Base aggregated stats (appearances, minutes, goals, assists)
+    lineup_stats = (
+        MatchLineup.objects.filter(player=player)
+        .values("match__competition_type")
+        .annotate(
+            appearances=Count("id"),
+            minutes=Sum("minutes_played"),
+        )
+    )
+    goal_stats = (
+        AttemptToGoal.objects.filter(player=player, outcome="On Target Goal")
+        .values("match__competition_type")
+        .annotate(goals=Count("id"))
+    )
+    assist_stats = (
+        AttemptToGoal.objects.filter(assist_by=player)
+        .values("match__competition_type")
+        .annotate(assists=Count("id"))
+    )
+
+    # Merge into competition_map
+    competition_map = {}
+    for stat in lineup_stats:
+        comp = stat["match__competition_type"]
+        competition_map[comp] = {
+            "competition__name": comp,
+            "appearances": stat["appearances"] or 0,
+            "minutes": stat["minutes"] or 0,
+            "goals": 0,
+            "assists": 0,
+        }
+    for stat in goal_stats:
+        comp = stat["match__competition_type"]
+        competition_map.setdefault(comp, {"competition__name": comp, "appearances": 0, "minutes": 0, "goals": 0, "assists": 0})
+        competition_map[comp]["goals"] = stat["goals"]
+    for stat in assist_stats:
+        comp = stat["match__competition_type"]
+        competition_map.setdefault(comp, {"competition__name": comp, "appearances": 0, "minutes": 0, "goals": 0, "assists": 0})
+        competition_map[comp]["assists"] = stat["assists"]
+
+    player_stats = list(competition_map.values())
+
+    totals = {
+        "appearances": sum(s["appearances"] for s in player_stats),
+        "minutes": sum(s["minutes"] for s in player_stats),
+        "goals": sum(s["goals"] for s in player_stats),
+        "assists": sum(s["assists"] for s in player_stats),
+    }
+
+    # 5. Matches played by player
+    player_matches = Match.objects.filter(gps_records__player=player).distinct().order_by("-date")
+
+    # 6. Handle match-specific detail (or totals)
+    match_context = {}
+    if match_id:
+        if str(match_id) == "total":
+            gps_agg = GPSRecord.objects.filter(player=player).aggregate(
+                total_distance=Sum("distance"),
+                avg_max_velocity=Avg("max_velocity"),
+                total_sprint_distance=Sum("sprint_distance"),
+                total_player_load=Sum("player_load"),
+            )
+            attempts_outcomes = AttemptToGoal.objects.filter(player=player).values("outcome").annotate(count=Count("outcome"))
+            defensive_stats_agg = PlayerDefensiveStats.objects.filter(player=player).aggregate(
+                total_aerial_won=Sum("aerial_duel_won"),
+                total_aerial_lost=Sum("aerial_duel_lost"),
+                total_tackle_won=Sum("tackle_won"),
+                total_tackle_lost=Sum("tackle_lost"),
+                total_physical_won=Sum("physical_duel_won"),
+                total_physical_lost=Sum("physical_duel_lost"),
+            )
+            gps_per_match = (
+                GPSRecord.objects.filter(player=player)
+                .values("match__id", "match__date", "match__home_team__name", "match__away_team__name")
+                .annotate(
+                    total_distance=Sum("distance"),
+                    avg_max_velocity=Avg("max_velocity"),
+                    total_sprint_distance=Sum("sprint_distance"),
+                    total_player_load=Sum("player_load"),
+                )
+                .order_by("-match__date")
+            )
+            match_context.update({
+                "selected_match": None,
+                "gps_agg": gps_agg,
+                "outcome_labels": [a["outcome"] for a in attempts_outcomes],
+                "outcome_counts": [a["count"] for a in attempts_outcomes],
+                "defensive_stats_agg": defensive_stats_agg,
+                "gps_per_match": gps_per_match,
+            })
+        else:
+            match = get_object_or_404(Match, id=match_id)
+            gps_records = GPSRecord.objects.filter(player=player, match=match)
+            attempts = AttemptToGoal.objects.filter(player=player, match=match)
+            passes_made = PassEvent.objects.filter(from_player=player, match=match)
+            passes_received = PassEvent.objects.filter(to_player=player, match=match)
+            gk_distributions = GoalkeeperDistributionEvent.objects.filter(goalkeeper=player, match=match)
+            defensive_stats = PlayerDefensiveStats.objects.filter(player=player, match=match).first()
+
+            attempts_outcomes = attempts.values("outcome").annotate(count=Count("outcome"))
+            defensive_duels = {
+                "Aerial Duel Won": defensive_stats.aerial_duel_won if defensive_stats else 0,
+                "Aerial Duel Lost": defensive_stats.aerial_duel_lost if defensive_stats else 0,
+                "Tackle Won": defensive_stats.tackle_won if defensive_stats else 0,
+                "Tackle Lost": defensive_stats.tackle_lost if defensive_stats else 0,
+            }
+
+            match_context.update({
+                "selected_match": match,
+                "gps_records": gps_records,
+                "attempts": attempts,
+                "passes_made": passes_made,
+                "passes_received": passes_received,
+                "gk_distributions": gk_distributions,
+                "defensive_stats": defensive_stats,
+                "defensive_duels": defensive_duels,
+                "defensive_duels_keys": list(defensive_duels.keys()),
+                "defensive_duels_values": list(defensive_duels.values()),
+                "outcome_labels": [a["outcome"] for a in attempts_outcomes],
+                "outcome_counts": [a["count"] for a in attempts_outcomes],
+            })
+
+    # Final context
+    context = {
+        "player": player,
+        "related_players": related_players,
+        "seasons": seasons,
+        "competitions": competitions,
+        "player_stats": player_stats,
+        "totals": totals,
+        "player_matches": player_matches,
+    }
+    context.update(match_context)
+
+    return render(request, "players_app/player_match_detail.html", context)

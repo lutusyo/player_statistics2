@@ -3,31 +3,31 @@ from django.urls import path, include
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
-from accounts_app import views 
+from version1.accounts_app import views 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('accounts_app.urls')),
-    path('players_app/', include('players_app.urls')),
-    path('matches_app/', include('matches_app.urls',  namespace='matches_app')),
-    path('actions_app/', include('actions_app.urls')),
-    path('gps_app/', include('gps_app.urls')),
+    path('accounts/', include('version1.accounts_app.urls')),
+    path('players_app/', include('version1.players_app.urls')),
+    path('matches_app/', include('version1.matches_app.urls',  namespace='matches_app')),
+    path('actions_app/', include('version1.actions_app.urls')),
+    path('gps_app/', include('version1.gps_app.urls')),
     path('', views.index, name='home'),
-    path('teams/', include('teams_app.urls')),
+    path('teams/', include('version1.teams_app.urls')),
 
-    path('announcements/', include('announcements_app.urls')),
+    path('announcements/', include('version1.announcements_app.urls')),
 
-    path('reports_app/', include('reports_app.urls')),  #reports_app
-    path('tagging/', include('tagging_app.urls')),      #tagging_app
-    path('defensive/', include('defensive_app.urls')),  #defensive_app
-    path('lineup_app/', include('lineup_app.urls')),    #lineup
-    path('performance_rating_app/', include('perfomance_rating_app.urls')),
-    path('training/', include('training_app.urls')),
-    path("sheets/", include("sheets_generator_app.urls")), #sheets generator
+    path('reports_app/', include('version1.reports_app.urls')),  #reports_app
+    path('tagging/', include('version1.tagging_app.urls')),      #tagging_app
+    path('defensive/', include('version1.defensive_app.urls')),  #defensive_app
+    path('lineup_app/', include('version1.lineup_app.urls')),    #lineup
+    path('performance_rating_app/', include('version1.perfomance_rating_app.urls')),
+    path('training/', include('version1.training_app.urls')),
+    path("sheets/", include("version1.sheets_generator_app.urls")), #sheets generator
 
     #############################
-    path('tagging_v2/', include('tagging_app_v2.urls')), #tagging_app_v2
-    path('loans_app/', include('loans_app.urls')), # loaned players
+    path('tagging_v2/', include('version2.tagging_app_v2.urls')), #tagging_app_v2
+    path('loans_app/', include('version1.loans_app.urls')), # loaned players
 
 ]
 

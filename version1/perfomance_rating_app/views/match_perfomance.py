@@ -1,0 +1,105 @@
+# perfomance_rating_app/views.py
+from django.shortcuts import render, get_object_or_404
+from version1.perfomance_rating_app.models import PerformanceRating
+from version1.perfomance_rating_app.services import compute_player_rating
+from version1.matches_app.models import Match
+from version1.lineup_app.models import MatchLineup
+from version1.players_app.models import Player
+
+def _star_color_for_score(score):
+    """
+    Map numeric score (1-5) -> color class name.
+    Adjust these mappings as you prefer.
+    """
+    try:
+        s = int(score)
+    except Exception:
+        s = 0
+    if s >= 5:
+        return 'green'
+    if s == 4:
+        return 'teal'
+    if s == 3:
+        return 'yellow'
+    if s == 2:
+        return 'orange'
+    return 'red'
+
+def _make_star_list(score):
+    """Return list of 5 dicts: {filled: bool, color: 'green'|'orange'...}"""
+    color = _star_color_for_score(score)
+    stars = []
+    for i in range(1, 6):
+        stars.append({'filled': i <= score, 'color': color})
+    return stars
+
+def match_performance(request, match_id):
+    match = get_object_or_404(Match, id=match_id)
+
+    # 1️⃣ Get ONLY lineups from OUR TEAM for this match
+    our_team_lineups = MatchLineup.objects.filter(
+        match=match,
+        team__team_type='OUR_TEAM'
+    ).select_related('player', 'team')
+
+    # 2️⃣ Get ONLY players who actually played
+    players = Player.objects.filter(
+        id__in=our_team_lineups.values_list('player_id', flat=True)
+    ).distinct()
+
+    ratings_for_template = []
+
+    for player in players:
+        rating = PerformanceRating.objects.filter(
+            player=player,
+            match=match
+        ).first()
+
+        if not rating or not rating.is_computed:
+            rating = compute_player_rating(player, match)
+
+        attacking_stars = _make_star_list(getattr(rating, 'attacking', 0))
+        creativity_stars = _make_star_list(getattr(rating, 'creativity', 0))
+        defending_stars = _make_star_list(getattr(rating, 'defending', 0))
+        tactical_stars = _make_star_list(getattr(rating, 'tactical', 0))
+        technical_stars = _make_star_list(getattr(rating, 'technical', 0))
+        discipline_stars = _make_star_list(getattr(rating, 'discipline', 5))
+
+        average = round((
+            getattr(rating, 'attacking', 0) +
+            getattr(rating, 'creativity', 0) +
+            getattr(rating, 'defending', 0) +
+            getattr(rating, 'tactical', 0) +
+            getattr(rating, 'technical', 0) +
+            getattr(rating, 'discipline', 5)
+        ) / 6, 1)
+
+        ratings_for_template.append({
+            'player': player,
+            'rating': rating,
+            'attacking_stars': attacking_stars,
+            'creativity_stars': creativity_stars,
+            'defending_stars': defending_stars,
+            'tactical_stars': tactical_stars,
+            'technical_stars': technical_stars,
+            'discipline_stars': discipline_stars,
+            'average': average,
+            'radar_dataset': [
+                getattr(rating, 'attacking', 0),
+                getattr(rating, 'creativity', 0),
+                getattr(rating, 'defending', 0),
+                getattr(rating, 'tactical', 0),
+                getattr(rating, 'technical', 0),
+                getattr(rating, 'discipline', 5),
+            ]
+        })
+
+    # 3️⃣ Sort by performance
+    ratings_for_template.sort(key=lambda x: x['average'], reverse=True)
+
+    return render(request, 'performance_rating_app/match_performance.html', {
+        'match': match,
+        'ratings': ratings_for_template,
+    })
+
+

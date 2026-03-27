@@ -1,0 +1,253 @@
+from django.db import models
+
+from version1.teams_app.models import Team
+from version1.players_app.models import Player
+from version1.matches_app.models import Venue, CompetitionType, SeasonChoices
+
+from django.utils import timezone
+
+# Common choices
+class ActivityChoices(models.TextChoices):
+    MATCH = 'MATCH', 'Match'
+    TRAINING = 'TRAINING', 'Training'
+    GYME_SESSION = 'GYME SESSION', 'Gyme Session'
+    TEAM_VIDEO_SESSION = 'TEAM VIDEO SESSION', 'Team Video Session'
+    INDIVIDUAL_VIDEO_SESSION = 'INDIVIDUAL VIDEO SESSION', 'Individual Video Session'
+
+
+class AgreementChoices(models.TextChoices):
+    TRIAL = 'TRIAL', 'Trial'
+    SIGNING = 'SIGNING', 'Signing'
+
+
+class Medical(models.Model):
+    name = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='medical_records')
+    date = models.DateField(null=True, blank=True)
+    born = models.DateField(null=True, blank=True)
+    squad = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='medical_team')
+    injury_or_illness = models.CharField(max_length=100)
+    comments = models.CharField(max_length=150, blank=True)
+    status = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.name} - {self.status}"
+
+class Transition(models.Model):
+    name = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='transition_records')
+    born = models.DateField(null=True, blank=True)
+    squad = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='transition_team')
+    played_for = models.CharField(max_length=100)
+    activity = models.CharField(max_length=200, choices=ActivityChoices.choices)
+    comments = models.CharField(max_length=150, blank=True)
+    date = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.activity}"
+
+
+class Scouting(models.Model):
+    name = models.CharField(max_length=100)
+    date = models.DateField()
+    pos = models.CharField(max_length=50)
+    dob = models.DateField()
+    squad = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='scouting_team')
+    agreement = models.CharField(max_length=20, choices=AgreementChoices.choices)
+    comments = models.TextField(blank=True)
+
+    # ✅ New fields
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    former_club = models.CharField(max_length=100, default='Unknown')
+    school_name = models.CharField(max_length=150, blank=True, null=True)
+    education_level = models.CharField(max_length=100, blank=True, null=True)
+    parent_or_coach_phone = models.CharField(max_length=20, blank=True, null=True)
+    guardian_name = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text="Name of guardian (if parent or coach)"
+    )
+    scouting_location = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        help_text="Place where the player was scouted"
+    )
+
+    def __str__(self):
+        return f"{self.name} - {self.agreement}"
+
+
+
+class Performance(models.Model):
+    date = models.DateField()
+    squad = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='performance_team')
+    activity = models.CharField(max_length=200, choices=ActivityChoices.choices)
+    comments = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.squad} - {self.activity} ({self.date})"
+
+
+class IndividualActionPlan(models.Model):
+    CATEGORY_CHOICES = [
+        ('Football', 'Football'),
+        ('Physical', 'Physical'),
+        ('Medical', 'Medical'),
+        ('Lifestyle', 'Lifestyle'),
+        ('Mental', 'Mental'),
+    ]
+
+    date = models.DateField()
+    name = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='action_plans')
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
+    responsibility = models.CharField(max_length=100)
+    action = models.TextField()
+    status = models.CharField(max_length=50)
+    follow_up = models.CharField(max_length=100, blank=True)
+    squad = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='action_plan_team')
+
+    def __str__(self):
+        return f"{self.name} - {self.category}"
+
+
+
+class Mesocycle(models.Model):
+    title = models.CharField(max_length=100)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='mesocycles')
+    start_date = models.DateField()
+    end_date = models.DateField()
+    pdf = models.FileField(upload_to='mesocycles_pdfs/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} ({self.team})"
+    
+class FitnessPlan(models.Model):
+    title = models.CharField(max_length=100, null=True, blank=True)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='fitness_plans', null=True, blank=True)
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    pdf = models.FileField(upload_to='fitness_plan_pdfs/',null=True, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.team}"
+
+
+class Result(models.Model):
+    date = models.DateField()
+    venue = models.ForeignKey(Venue, on_delete=models.SET_NULL, null=True, blank=True)
+    competition_type = models.CharField(max_length=50, choices=CompetitionType.choices, default=CompetitionType.LOCAL_FRIENDLY)
+    season = models.CharField(max_length=20, choices=SeasonChoices.choices, default=SeasonChoices.SEASON_2025_2026)
+
+    home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home_results')
+    away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_results')
+    
+    home_score = models.PositiveIntegerField(default=0)
+    away_score = models.PositiveIntegerField(default=0)
+    
+    goal_scorers = models.TextField(
+        blank=True,
+        help_text="List goal scorers with team and minute, e.g., 'Player A 23', 'Player B 45'"
+    )
+    
+    # Result choices
+    RESULT_CHOICES = [
+        ('WIN', 'Win'),
+        ('LOSE', 'Lose'),
+        ('DRAW', 'Draw'),
+    ]
+    result = models.CharField(max_length=5, choices=RESULT_CHOICES, blank=True)
+    
+    # Whether our team is involved
+    our_team = models.ForeignKey(
+        Team, on_delete=models.CASCADE, related_name='our_results',
+        null=True, blank=True,
+        help_text="Select our team if this result involves us"
+    )
+
+    # Optional column/notes
+    notes = models.CharField(max_length=200, blank=True)
+
+    def save(self, *args, **kwargs):
+        """
+        Automatically determine result if our_team is set
+        """
+        if self.our_team:
+            if self.our_team == self.home_team:
+                if self.home_score > self.away_score:
+                    self.result = 'WIN'
+                elif self.home_score < self.away_score:
+                    self.result = 'LOSE'
+                else:
+                    self.result = 'DRAW'
+            elif self.our_team == self.away_team:
+                if self.away_score > self.home_score:
+                    self.result = 'WIN'
+                elif self.away_score < self.home_score:
+                    self.result = 'LOSE'
+                else:
+                    self.result = 'DRAW'
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.home_team} {self.home_score} - {self.away_score} {self.away_team} ({self.date})"
+
+
+
+class TrainingMinutes(models.Model):
+    date = models.DateField(default=timezone.now)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='training_minutes')
+    total_minutes = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.team.name} - {self.date} Training"
+
+    def save(self, *args, **kwargs):
+        creating = self.pk is None
+        super().save(*args, **kwargs)
+
+        if creating:
+            players = Player.objects.filter(team=self.team)
+
+
+            for player in players:
+                PlayerTrainingMinutes.objects.get_or_create(
+                    training_session=self,
+                    player=player,
+                    defaults={"minutes": self.total_minutes}
+                )
+
+class PlayerTrainingMinutes(models.Model):
+    training_session = models.ForeignKey(TrainingMinutes, on_delete=models.CASCADE, related_name='player_minutes')
+    player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='training_minutes')
+    minutes = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        unique_together = ('training_session', 'player')
+
+    def __str__(self):
+        return f"{self.player} - {self.training_session.date}: {self.minutes} min"
+    
+class TrainingAbsence(models.Model):
+    REASON_CHOICE = [ ('INJURED', 'Injured'), ('SICK', 'Sick'), ('PERSONAL', 'Personal'), ('UNEXCUSED', 'Unexcused'),]
+    training_session = models.ForeignKey(TrainingMinutes, on_delete=models.CASCADE, related_name='absences')
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    reason = models.CharField(max_length=20, choices=REASON_CHOICE)
+
+    class Meta:
+        unique_together = ('training_session', 'player')
+
+    def __str__(self):
+        return f"{self.player} - {self.reason}"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        PlayerTrainingMinutes.objects.update_or_create(
+            training_session=self.training_session,
+            player=self.player,
+            defaults={"minutes": 0}
+        )
+    
+

@@ -35,24 +35,24 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-
     # local
-    'accounts_app', 'players_app',  'matches_app',
-    'actions_app', 'gps_app',  'teams_app.apps.TeamsAppConfig',
-    'announcements_app',  'reports_app','tagging_app',
-    'goalkeeping_app', 'defensive_app', 'lineup_app',
-    'perfomance_rating_app', 'training_app', 'sheets_generator_app',
+    'version1.accounts_app', 'version1.players_app',  'version1.matches_app', 'version1.actions_app',
+    'version1.gps_app', 'version1.teams_app.apps.TeamsAppConfig', 'version1.announcements_app',  'version1.reports_app',
+    'version1.tagging_app', 'version1.goalkeeping_app', 'version1.defensive_app', 'version1.lineup_app',
+    'version1.perfomance_rating_app', 'version1.training_app', 'version1.sheets_generator_app',
 
     #loaned_players
-    'loans_app',
-
+    'version1.loans_app',
 
     # Third party
      'rest_framework',
 
     ##version2
-     'tagging_app_v2',
-     'reports_app_v2',
+     'version2.tagging_app_v2',
+     'version2.reports_app_v2',
+
+    # version3
+    'version3.tagging_app_v3',
      
 ]
 
@@ -79,14 +79,14 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'players_app.context_processors.player_filters',
-                'teams_app.context_processors.our_teams_context',
+                'version1.players_app.context_processors.player_filters',
+                'version1.teams_app.context_processors.our_teams_context',
 
                 # Add this line
                 'django.template.context_processors.debug',
 
                 # local
-                "matches_app.context_processors.competitions_processor",
+                "version1.matches_app.context_processors.competitions_processor",
 
             ],
             'builtins': [
@@ -150,21 +150,29 @@ STATIC_URL = '/static_player_statistics2/'
 STATIC_ROOT = '/home/afcportal/public_html/static_player_statistics2'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'accounts_app', 'static'),
-    os.path.join(BASE_DIR, 'actions_app', 'static'),
-    #os.path.join(BASE_DIR, 'announcement_app', 'static'),
-    #os.path.join(BASE_DIR, 'defensive_app', 'static'),
-    os.path.join(BASE_DIR, 'goalkeeping_app', 'static'),
-    os.path.join(BASE_DIR, 'gps_app', 'static'),
-    #os.path.join(BASE_DIR, 'lineup_app', 'static'),
-    os.path.join(BASE_DIR, 'matches_app', 'static'),
-    #os.path.join(BASE_DIR, 'perfomance_app', 'static'),
-    os.path.join(BASE_DIR, 'players_app', 'static'),
-    os.path.join(BASE_DIR, 'reports_app', 'static'),
-    os.path.join(BASE_DIR, 'tagging_app', 'static'),
-    os.path.join(BASE_DIR, 'teams_app', 'static'),
-    #os.path.join(BASE_DIR, 'training_app', 'static'),
+
+    #version1 (FIXED PATHS)
+    os.path.join(BASE_DIR, 'version1', 'accounts_app', 'static'),
+    os.path.join(BASE_DIR, 'version1', 'actions_app', 'static'),
+    #os.path.join(BASE_DIR, 'version1', 'announcement_app', 'static'),
+    #os.path.join(BASE_DIR, 'version1', 'defensive_app', 'static'),
+    os.path.join(BASE_DIR, 'version1', 'goalkeeping_app', 'static'),
+    os.path.join(BASE_DIR, 'version1', 'gps_app', 'static'),
+    #os.path.join(BASE_DIR, 'version1', 'lineup_app', 'static'),
+    os.path.join(BASE_DIR, 'version1', 'matches_app', 'static'),
+    #os.path.join(BASE_DIR, 'version1', 'perfomance_app', 'static'),
+    os.path.join(BASE_DIR, 'version1', 'players_app', 'static'),
+    os.path.join(BASE_DIR, 'version1', 'reports_app', 'static'),
+    os.path.join(BASE_DIR, 'version1', 'tagging_app', 'static'),
+    os.path.join(BASE_DIR, 'version1', 'teams_app', 'static'),
+    #os.path.join(BASE_DIR, 'version1', 'training_app', 'static'),
+
     os.path.join(BASE_DIR, 'static'),  # optional: for global/static files
+
+    #version2 (FIXED PATH)
+    #os.path.join(BASE_DIR, 'version2', 'tagging_app_v2', 'static'),
+
+    #version3
 ]
 
 # MEDIA FILES
@@ -194,8 +202,3 @@ EMAIL_USE_SSL = True # for ort 465
 EMAIL_HOST_USER = "noreply@azamfcportal.com"  # your Gmail
 EMAIL_HOST_PASSWORD = "Nthterm@2019"
 DEFAULT_FROM_EMAIL = "Azam FC Portal <noreply@azamfcportal.com>"
-
-
-
-
-

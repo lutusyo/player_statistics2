@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+
+    <div class="row">
+
+        <!-- HOME TEAM -->
+        <div class="col-md-3">
+            <h6 class="text-center">{{ match.home_team.name }}</h6>
+            <div class="players-grid">
+                {% for lineup in home_lineups %}
+                <div class="player" data-id="{{ lineup.id }}" data-team="{{ lineup.team.id }}">
+                    <div class="player-box">
+                        <span class="jersey">{{ lineup.player.jersey_number }}</span>
+                        <span class="name">{{ lineup.player.name }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="col-md-6">
+            <div class="players-grid action-grid">
+                {% for value,label in form.action_type.field.choices %}
+                <div class="action-btn" data-action="{{ value }}">
+                    <div class="player-box">
+                        <span class="jersey">{{ value|slice:":1"|upper }}</span>
+                        <span class="name">{{ label }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="alert alert-info mt-3 text-center" id="status">
+                Select Actor
+            </div>
+
+
+            <div class="d-grid gap-2 mt-2">
+                <button id="undo-btn" class="btn btn-warning">↩ Undo Last Action</button>
+            </div>
+
+            <div id="warning" class="alert alert-danger mt-2 text-center d-none"></div>
+        </div>
+
+        <!-- AWAY TEAM -->
+        <div class="col-md-3">
+            <h6 class="text-center">{{ match.away_team.name }}</h6>
+            <div class="players-grid">
+                {% for lineup in away_lineups %}
+                <div class="player" data-id="{{ lineup.id }}" data-team="{{ lineup.team.id }}">
+                    <div class="player-box">
+                        <span class="jersey">{{ lineup.player.jersey_number }}</span>
+                        <span class="name">{{ lineup.player.name }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <form id="hidden-form">{% csrf_token %}</form>
+</div>
+
+<!-- ================= FOUL MODAL ================= -->
+<div class="modal fade" id="foulModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title">Select Foul Outcome</h6>
+      </div>
+      <div class="modal-body text-center">
+        <button class="btn btn-secondary m-1 foul-choice" data-value="NO CARD">No Card</button>
+        <button class="btn btn-warning m-1 foul-choice" data-value="YELLOW CARD">Yellow Card</button>
+        <button class="btn btn-danger m-1 foul-choice" data-value="RED CARD">Red Card</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.players-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 6px;
+}
+.player, .action-btn {
+    cursor: pointer;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 6px;
+    text-align: center;
+    user-select: none;
+    transition: all 0.15s ease;
+}
+.player:hover, .action-btn:hover { background: #f1f3f5; }
+.actor { border: 2px solid #198754; background: #e9f7ef; }
+.receiver { border: 2px solid #0d6efd; background: #e7f1ff; }
+.target { border: 2px solid #ffc107; background: #fff8e1; }
+.action-btn.active { border: 2px solid #0d6efd; background: #e7f1ff; }
+.action-grid { grid-template-columns: repeat(3, 1fr); }
+.player-box { display:flex; flex-direction:column; align-items:center; }
+.jersey { font-weight:bold; }
+.name { font-size:0.75rem; }
+</style>
+
+<script>
+/* ================= OFFLINE DB ================= */
+let db;
+const req = indexedDB.open("match_tagging_db", 1);
+
+req.onupgradeneeded = e => {
+    db = e.target.result;
+    db.createObjectStore("events", { keyPath: "local_id" });
+};
+req.onsuccess = e => { db = e.target.result; };
+
+function saveLocalEvent(ev){
+    return new Promise(res=>{
+        const tx = db.transaction("events","readwrite");
+        tx.objectStore("events").put(ev);
+        tx.oncomplete = res;
+    });
+}
+function getPendingEvents(){
+    return new Promise(res=>{
+        const tx = db.transaction("events","readonly");
+        const r = tx.objectStore("events").getAll();
+        r.onsuccess = () => res(r.result);
+    });
+}
+function deleteLocalEvent(id){
+    db.transaction("events","readwrite").objectStore("events").delete(id);
+}
+
+/* ================= CONSTANTS ================= */
+const DEFAULT_ACTION = "LOW_PASS";
+const DRIBBLE = "DRIBBLE";
+const ACTIONS_REQUIRE_TARGET = ["HIGH_BALL","CROSS"];
+
+/* ================= STATE ================= */
+let step = "actor";
+let lastClickTime = 0;
+let history = [];
+
+let data = {
+    actor:null, actorTeam:null,
+    action:null,
+    receiver:null, receiverTeam:null,
+    target:null,
+    foul_outcome:null
+};
+
+const status = document.getElementById("status");
+const warning = document.getElementById("warning");
+
+/* ================= PLAYER CLICK ================= */
+document.querySelectorAll(".player").forEach(player=>{
+    player.addEventListener("click",()=>{
+        const id = player.dataset.id;
+        const team = player.dataset.team;
+        const now = Date.now();
+
+        if(step==="action" && id===data.actor && now-lastClickTime<300){
+            data.action = DRIBBLE;
+            data.receiver = id;
+            data.receiverTeam = team;
+            data.target = id;
+            saveEvent(true);
+            return;
+        }
+        lastClickTime = now;
+
+        if(step==="actor"){
+            clearPlayers();
+            data.actor=id; data.actorTeam=team;
+            player.classList.add("actor");
+            step="action";
+            status.innerText="Select Ball Action or click receiver";
+            return;
+        }
+
+        if(step==="action"){
+            data.action=DEFAULT_ACTION;
+            data.receiver=id;
+            data.receiverTeam=team;
+            data.target=(team===data.actorTeam)?id:data.actor;
+            saveEvent();
+            return;
+        }
+
+        if(step==="receiver"){
+            data.receiver=id;
+            data.receiverTeam=team;
+
+            if(data.action==="FOULS"){
+                const modal = new bootstrap.Modal(document.getElementById('foulModal'));
+                modal.show();
+                return;
+            }
+
+            if(ACTIONS_REQUIRE_TARGET.includes(data.action)){
+                player.classList.add("receiver");
+                step="target";
+                status.innerText="Select Target";
+            } else {
+                data.target=(team===data.actorTeam)?id:data.actor;
+                saveEvent();
+            }
+            return;
+        }
+
+        if(step==="target"){
+            if(team!==data.actorTeam){
+                warning.innerText="Target must be from actor team!";
+                warning.classList.remove("d-none");
+                setTimeout(()=>warning.classList.add("d-none"),1500);
+                return;
+            }
+            data.target=id;
+            saveEvent();
+        }
+    });
+});
+
+/* ================= ACTION BUTTONS ================= */
+document.querySelectorAll(".action-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+        if(step!=="action") return;
+        clearActions();
+        data.action = btn.dataset.action;
+        btn.classList.add("active");
+        step="receiver";
+        status.innerText="Select Receiver";
+    });
+});
+
+/* ================= FOUL OUTCOME ================= */
+document.querySelectorAll(".foul-choice").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+        data.foul_outcome = btn.dataset.value;
+        const modalEl = document.getElementById('foulModal');
+        bootstrap.Modal.getInstance(modalEl).hide();
+        data.target = data.actor;
+        saveEvent();
+    });
+});
+
+/* ================= SAVE EVENT ================= */
+async function saveEvent(keepActor=false){
+    history.push({...data});
+
+    const ev = {
+        local_id: crypto.randomUUID(),
+        match_id: {{ match.id }},
+        actor:data.actor,
+        receiver:data.receiver,
+        target:data.target,
+        action_type:data.action,
+        foul_outcome:data.foul_outcome,
+        ts:Date.now()
+    };
+
+    await saveLocalEvent(ev);
+    keepActor ? resetForDribble() : setNextActor();
+    syncEvents();
+}
+
+/* ================= SYNC ================= */
+async function syncEvents(){
+    if(!navigator.onLine) return;
+    const events = await getPendingEvents();
+
+    for(const ev of events){
+        try{
+            const fd = new FormData();
+            fd.append("actor",ev.actor);
+            fd.append("receiver",ev.receiver);
+            fd.append("target",ev.target);
+            fd.append("action_type",ev.action_type);
+            fd.append("foul_outcome",ev.foul_outcome || "");
+            fd.append("csrfmiddlewaretoken",
+                document.querySelector("[name=csrfmiddlewaretoken]").value);
+
+            const r = await fetch("",{
+                method:"POST",
+                headers:{"X-Requested-With":"XMLHttpRequest"},
+                body:fd
+            });
+            const resp = await r.json();
+            if(resp.success) deleteLocalEvent(ev.local_id);
+        }catch(e){ return; }
+    }
+}
+window.addEventListener("online", syncEvents);
+
+/* ================= UI HELPERS ================= */
+function setNextActor(){
+    clearPlayers(); clearActions();
+    const p = document.querySelector(`.player[data-id="${data.receiver}"]`);
+    if(p) p.classList.add("actor");
+    data.actor=data.receiver;
+    data.actorTeam=data.receiverTeam;
+    data.action=data.receiver=data.receiverTeam=data.target=data.foul_outcome=null;
+    step="action";
+    status.innerText="Select Ball Action or click receiver";
+}
+function resetForDribble(){
+    clearActions();
+    step="action";
+    status.innerText="Select Ball Action or click receiver";
+}
+function clearPlayers(){
+    document.querySelectorAll(".player").forEach(p=>p.classList.remove("actor","receiver","target"));
+}
+function clearActions(){
+    document.querySelectorAll(".action-btn").forEach(b=>b.classList.remove("active"));
+}
+</script>
+{% endblock %}

@@ -1,0 +1,42 @@
+/* === Stats Table === */
+.stats-heading {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #0c1d36;
+}
+
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 15px;
+}
+
+.stats-table th, 
+.stats-table td {
+    border: 1px solid #ccc;
+    padding: 8px 10px;
+    text-align: center;
+}
+
+.stats-table thead {
+    background-color: #0c1d36;
+    color: white;
+}
+
+.stats-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.stats-table-section {
+    margin-top: 20px;
+}
+
+.no-data {
+    text-align: center;
+    padding: 15px;
+    font-style: italic;
+    color: #777;
+}

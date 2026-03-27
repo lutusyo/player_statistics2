@@ -1,0 +1,92 @@
+<!-- matches_app/fixtures.html -->
+{% extends 'matches_app/matches_base.html' %}
+{% load static %}
+
+{% block title %}{{ team }} Fixtures{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'matches_app/css/fixture_style.css' %}">
+{% endblock %}
+
+{% block match_content %}
+
+
+
+<select name="competition" onchange="this.form.submit()">
+    <option value="all" {% if competition_selected == 'all' %}selected{% endif %}>All Competitions</option>
+    {% for comp in competition_choices %}
+        <option value="{{ comp.id }}" {% if comp.id|stringformat:"s" == competition_selected %}selected{% endif %}>
+            {{ comp.name }}
+        </option>
+    {% endfor %}
+</select>
+
+
+
+
+
+
+
+<div class="fixture-container">
+
+    <h1 class="team-fixtures-title">{{ team }} Fixtures</h1>
+
+    <!-- Upcoming Matches -->
+    {% if upcoming_matches %}
+
+        {% for match in upcoming_matches %}
+            
+            <div class="fixture-wrapper">
+                
+
+
+                <a href="{% url 'matches_app:match_detail' match_id=match.id %}" style="text-decoration: none; color: inherit;">
+                    <div class="fixture-card">
+
+                        <div class="fixture-header">
+                            <div class="fixture-date">
+                                {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
+                            </div>
+                            <div class="fixture-venue">{{ match.venue }}</div>
+                            <div class="fixture-type">{{ match.get_competition_type_display }}</div>
+                        </div>
+
+                        <div class="fixture-body">
+                            <div class="team">
+                                {% if match.home_team.logo %}
+                                    <img src="{{ match.home_team.logo.url }}" alt="{{ match.home_team }} logo">
+                                {% endif %}
+                                <div>{{ match.home_team }}</div>
+                            </div>
+
+                            <div class="vs">
+                                {% if match.home_goals is not None and match.away_goals is not None %}
+                                    <!-- Official match goals -->
+                                    <strong>{{ match.our_team_goals }} - {{ match.opponent_goals }}</strong>
+                                    <br>
+                                {% else %}
+                                    <span style="font-size: 14px; color: gray;">0 - 0</span>
+                                {% endif %}
+                            </div>
+
+
+
+                            <div class="team">
+                                {% if match.away_team.logo %}
+                                    <img src="{{ match.away_team.logo.url }}" alt="{{ match.away_team }} logo">
+                                {% endif %}
+                                <div>{{ match.away_team }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+        <p style="text-align: center;">No upcoming matches.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

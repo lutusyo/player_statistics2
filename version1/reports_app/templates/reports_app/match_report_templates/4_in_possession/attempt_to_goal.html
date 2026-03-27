@@ -1,0 +1,259 @@
+{% load static %}
+{% load tagging_custom_filters %}
+{% load custom_filters %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Attempts Dashboard</title>
+    <link rel="stylesheet" href="{% static 'reports_app/css/match_reports.css' %}">
+</head>
+
+<body>
+<!-- = HOME / AWAY HEADER ====-->
+<div class="columns" style="margin-bottom: 15px;">
+    <div class="team-box">
+        <div class="team-name">{{ home_team.name }}</div>
+    </div>
+    <div class="team-box">
+        <div class="team-name">{{ away_team.name }}</div>
+    </div>
+</div>
+
+<!-- ================= GOALS ================= -->
+<div class="main-title">Goals</div>
+<div class="columns">
+    <div class="team-box">
+        <table>
+            <tr>
+                <th>Scorer</th>
+                <th>Assist</th>
+                <th>Pre-Assist</th>
+                <th></th>
+            </tr>
+            {% for g in goals %}
+            {% if g.team == home_team %}
+            <tr>
+                <td>{% if g.player %}{{ g.player.name }}{% else %}-{% endif %}</td>
+                <td>{% if g.assist_by %}{{ g.assist_by.name }}{% else %}-{% endif %}</td>
+                <td>{% if g.pre_assist_by %}{{ g.pre_assist_by.name }}{% else %}-{% endif %}</td>
+
+                   <td>
+                        {% if g.player %}
+                            <a href="{% url 'players_app:player_match_clips' g.player.id match.id %}"> Watch Clips</a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                                               
+                                
+
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr><td colspan="3">No data</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div class="team-box">
+        <table>
+            <tr><th>Scorer</th>
+                <th>Assist</th>
+                <th>Pre-Assist</th>
+                <th></th>
+            </tr>
+            {% for g in goals %}
+            {% if g.team == away_team %}
+            <tr>
+                <td>{% if g.player %}{{ g.player.name }}{% else %}-{% endif %}</td>
+                <td>{% if g.assist_by %}{{ g.assist_by.name }}{% else %}-{% endif %}</td>
+                <td>{% if g.pre_assist_by %}{{ g.pre_assist_by.name }}{% else %}-{% endif %}</td>
+
+                <td>
+                    {% if g.player %}
+                        <a href="{% url 'players_app:player_match_clips' g.player.id match.id %}"> Watch Clips</a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                
+            </tr>
+            {% endif %}
+            {% empty %}
+            <tr><td colspan="3">No data</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+<!-- ================= SHOTS ON TARGET ================= -->
+<div class="main-title">Shots On Target</div>
+<div class="columns">
+    <div class="team-box">
+        <table>
+            <tr><th>Min</th><th>Player</th><th>Outcome</th></tr>
+            {% for s in home_shots_on_target %}
+            <tr><td>{{ s.minute }}'</td><td>{{ s.player.name }}</td><td>{{ s.outcome }}</td></tr>
+            {% empty %}<tr><td colspan="3">No data</td></tr>{% endfor %}
+        </table>
+    </div>
+    <div class="team-box">
+        <table>
+            <tr><th>Min</th><th>Player</th><th>Outcome</th></tr>
+            {% for s in away_shots_on_target %}
+            <tr><td>{{ s.minute }}'</td><td>{{ s.player.name }}</td><td>{{ s.outcome }}</td></tr>
+            {% empty %}<tr><td colspan="3">No data</td></tr>{% endfor %}
+        </table>
+    </div>
+</div>
+
+<!-- ================= SHOTS OFF TARGET ================= -->
+<div class="main-title">Shots Off Target</div>
+<div class="columns">
+    <div class="team-box">
+        <table>
+            <tr><th>Min</th><th>Player</th><th>Outcome</th></tr>
+            {% for s in home_shots_off_target %}
+            <tr><td>{{ s.minute }}'</td><td>{{ s.player.name }}</td><td>{{ s.outcome }}</td></tr>
+            {% empty %}<tr><td colspan="3">No data</td></tr>{% endfor %}
+        </table>
+    </div>
+    <div class="team-box">
+        <table>
+            <tr><th>Min</th><th>Player</th><th>Outcome</th></tr>
+            {% for s in away_shots_off_target %}
+            <tr><td>{{ s.minute }}'</td><td>{{ s.player.name }}</td><td>{{ s.outcome }}</td></tr>
+            {% empty %}<tr><td colspan="3">No data</td></tr>{% endfor %}
+        </table>
+    </div>
+</div>
+
+<!-- ================= BLOCKED SHOTS ================= -->
+<div class="main-title">Blocked Shots</div>
+<div class="columns">
+    <div class="team-box">
+        <table>
+            <tr><th>Min</th><th>Player</th><th>Outcome</th></tr>
+            {% for s in home_blocked_shots %}
+            <tr><td>{{ s.minute }}'</td><td>{{ s.player.name }}</td><td>{{ s.outcome }}</td></tr>
+            {% empty %}<tr><td colspan="3">No data</td></tr>{% endfor %}
+        </table>
+    </div>
+    <div class="team-box">
+        <table>
+            <tr><th>Min</th><th>Player</th><th>Outcome</th></tr>
+            {% for s in away_blocked_shots %}
+            <tr><td>{{ s.minute }}'</td><td>{{ s.player.name }}</td><td>{{ s.outcome }}</td></tr>
+            {% empty %}<tr><td colspan="3">No data</td></tr>{% endfor %}
+        </table>
+    </div>
+</div>
+
+<!-- ================= EFFECTIVE DELIVERY ================= -->
+<div class="main-title">Effective Delivery</div>
+<div class="columns">
+    <div class="team-box">
+        <table>
+            <tr><th>Type</th><th>Total</th></tr>
+            {% for item in home_total_delivery_types %}
+            <tr><td>{{ item.delivery_type }}</td><td>{{ item.total }}</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div class="team-box">
+        <table>
+            <tr><th>Type</th><th>Total</th></tr>
+            {% for item in away_total_delivery_types %}
+            <tr><td>{{ item.delivery_type }}</td><td>{{ item.total }}</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+<!-- ================= CORNERS ================= -->
+<div class="main-title">Corners</div>
+<div class="columns">
+    <div class="team-box">
+        <table>
+            <tr><th>Player</th><th>Min</th><th>Outcome</th></tr>
+            {% for c in home_corners %}
+            <tr><td>{{ c.assist_by.name }}</td><td>{{ c.minute }}</td><td>{{ c.outcome }}</td></tr>
+            {% empty %}<tr><td colspan="3">No data</td></tr>{% endfor %}
+        </table>
+    </div>
+    <div class="team-box">
+        <table>
+            <tr><th>Player</th><th>Min</th><th>Outcome</th></tr>
+            {% for c in away_corners %}
+            <tr><td>{{ c.assist_by.name }}</td><td>{{ c.minute }}</td><td>{{ c.outcome }}</td></tr>
+            {% empty %}<tr><td colspan="3">No data</td></tr>{% endfor %}
+        </table>
+    </div>
+</div>
+
+<!-- ================= CROSSES ================= -->
+<div class="main-title">Crosses</div>
+<div class="columns">
+    <div class="team-box">
+        <table>
+            <tr><th>Player</th><th>Min</th><th>Outcome</th></tr>
+            {% for c in home_crosses %}
+            <tr><td>{{ c.assist_by.name }}</td><td>{{ c.minute }}</td><td>{{ c.outcome }}</td></tr>
+            {% empty %}<tr><td colspan="3">No data</td></tr>{% endfor %}
+        </table>
+    </div>
+    <div class="team-box">
+        <table>
+            <tr><th>Player</th><th>Min</th><th>Outcome</th></tr>
+            {% for c in away_crosses %}
+            <tr><td>{{ c.assist_by.name }}</td><td>{{ c.minute }}</td><td>{{ c.outcome }}</td></tr>
+            {% empty %}<tr><td colspan="3">No data</td></tr>{% endfor %}
+        </table>
+    </div>
+</div>
+
+<!-- ================= UNSUCCESSFUL CROSSES ================= -->
+<div class="main-title">Unsuccessful Crosses</div>
+<div class="columns">
+    <div class="team-box">
+        <table>
+            <tr><th>Player</th><th>Total</th></tr>
+            {% for r in home_unsuccessful_cross_assisters %}
+            <tr><td>{{ r.assist_by__name }}</td><td>{{ r.total }}</td></tr>
+            {% empty %}<tr><td colspan="2">No data</td></tr>{% endfor %}
+        </table>
+    </div>
+    <div class="team-box">
+        <table>
+            <tr><th>Player</th><th>Total</th></tr>
+            {% for r in away_unsuccessful_cross_assisters %}
+            <tr><td>{{ r.assist_by__name }}</td><td>{{ r.total }}</td></tr>
+            {% empty %}<tr><td colspan="2">No data</td></tr>{% endfor %}
+        </table>
+    </div>
+</div>
+
+<!-- ================= LOOSE BALL ================= -->
+<div class="main-title">Loose Balls</div>
+<div class="columns">
+    <div class="team-box">
+        <table>
+            <tr><th>Player</th><th>Min</th></tr>
+            {% for b in home_effective_loose_ball %}
+            <tr><td>{{ b.player.name }}</td><td>{{ b.minute }}</td></tr>
+            {% empty %}<tr><td colspan="2">No data</td></tr>{% endfor %}
+        </table>
+    </div>
+    <div class="team-box">
+        <table>
+            <tr><th>Player</th><th>Min</th></tr>
+            {% for b in away_effective_loose_ball %}
+            <tr><td>{{ b.player.name }}</td><td>{{ b.minute }}</td></tr>
+            {% empty %}<tr><td colspan="2">No data</td></tr>{% endfor %}
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
