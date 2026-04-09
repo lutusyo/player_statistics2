@@ -15,12 +15,9 @@ def team_squad_view(request, pk):
     if not team:
         return render(request, '404.html', status=404)
 
-    # ✅ ONLY ACTIVE PLAYERS
-    players = Player.objects.filter(
-        team__team_type='OUR_TEAM',
-        age_group=team.age_group,
-        is_active=True
-    ).select_related('team')
+
+
+    players = Player.objects.filter(team=team, is_active=True, status='SIGNED').select_related('team')
 
     grouped_players = defaultdict(list)
     for player in players:
@@ -28,15 +25,15 @@ def team_squad_view(request, pk):
 
     position_order = ['Goalkeeper', 'Defender', 'Midfielder', 'Winger', 'Forward']
 
-    return render(request, 'teams_app/squad.html', {
+    context = {
         'team_selected': team,
         'grouped_players': grouped_players,
         'position_order': position_order,
         'active_tab': 'squad',
         'team': team,
-    })
+    }
 
-
+    return render(request, 'teams_app/squad.html', context )
 
 
 @login_required

@@ -17,9 +17,11 @@ def player_detail(request, player_id):
     if not player.is_active:
         raise Http404("This player is inactive")
 
+
     related_players = Player.objects.filter(
-        age_group=player.age_group, is_active=True
-    ).exclude(id=player_id)
+        team=player.team,  # only players from the same team
+        is_active=True
+    ).exclude(id=player_id).order_by('jersey_number')
 
     selected_season = request.GET.get('season', 'all')
     selected_competition = request.GET.get('competition', 'all')
@@ -261,6 +263,9 @@ def player_detail(request, player_id):
                 'competition_type': match.competition.type if match.competition else "Unknown",
                 'result': result_display,
             })
+
+
+            
 
     # Measurements
     latest_measurement = player.current_measurement

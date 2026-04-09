@@ -26,6 +26,16 @@ MEDICAL_TEST_CHOICES = [
     ('NOT DONE', 'NOT DONE'),
 ]
 
+
+
+PLAYER_STATUS_CHOICES = [
+    ('SIGNED', 'Signed'),
+    ('TRIAL', 'Trial'),
+]
+
+
+
+
 # Specific position choices
 SPECIFIC_POSITION_CHOICES = [
     # Goalkeepers
@@ -56,6 +66,8 @@ class Player(models.Model):
     name = models.CharField(max_length=50)
     second_name = models.CharField(max_length=50, default='Second_name')
     surname = models.CharField(max_length=50, default='surname')
+
+
     jina_maarufu = models.CharField(max_length=50, default='nickname', null=True, blank=True)
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='players')
     birthdate = models.DateField(null=True, blank=True)
@@ -90,6 +102,7 @@ class Player(models.Model):
     player_phone = models.CharField(max_length=20, null=True, blank=True)
     parent_phone =models.CharField(max_length=20, null=True, blank=True)
 
+    status =models.CharField(max_length=10, choices=PLAYER_STATUS_CHOICES,default='SIGNED')
     is_active = models.BooleanField(default=True)
     
     
