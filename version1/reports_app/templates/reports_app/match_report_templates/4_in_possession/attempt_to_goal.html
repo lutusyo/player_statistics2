@@ -10,15 +10,7 @@
 </head>
 
 <body>
-<!-- = HOME / AWAY HEADER ====-->
-<div class="columns" style="margin-bottom: 15px;">
-    <div class="team-box">
-        <div class="team-name">{{ home_team.name }}</div>
-    </div>
-    <div class="team-box">
-        <div class="team-name">{{ away_team.name }}</div>
-    </div>
-</div>
+
 
 <!-- ================= GOALS ================= -->
 <div class="main-title">Goals</div>
@@ -92,9 +84,18 @@
 <div class="columns">
     <div class="team-box">
         <table>
-            <tr><th>Min</th><th>Player</th><th>Outcome</th></tr>
+            <tr>
+                <th>Min</th>
+                <th>Player</th>
+                <th>Outcome</th>
+                <th>Assist</th>
+            </tr>
             {% for s in home_shots_on_target %}
-            <tr><td>{{ s.minute }}'</td><td>{{ s.player.name }}</td><td>{{ s.outcome }}</td></tr>
+            <tr><td>{{ s.minute }}'</td>
+                <td>{{ s.player.name }}</td>
+                <td>{{ s.outcome }}</td>
+                <td>{{ s.assist_by }}</td>
+            </tr>
             {% empty %}<tr><td colspan="3">No data</td></tr>{% endfor %}
         </table>
     </div>
@@ -113,9 +114,9 @@
 <div class="columns">
     <div class="team-box">
         <table>
-            <tr><th>Min</th><th>Player</th><th>Outcome</th></tr>
+            <tr><th>Min</th><th>Player</th><th>Outcome</th><th>Assist</th></tr>
             {% for s in home_shots_off_target %}
-            <tr><td>{{ s.minute }}'</td><td>{{ s.player.name }}</td><td>{{ s.outcome }}</td></tr>
+            <tr><td>{{ s.minute }}'</td><td>{{ s.player.name }}</td><td>{{ s.outcome }}</td><td>{{ s.assist_by }}</td></tr>
             {% empty %}<tr><td colspan="3">No data</td></tr>{% endfor %}
         </table>
     </div>

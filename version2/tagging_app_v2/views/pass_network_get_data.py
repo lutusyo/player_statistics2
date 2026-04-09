@@ -3,14 +3,12 @@ from version1.matches_app.models import Match
 from version2.tagging_app_v2.models import PassEvent_v2
 from django.db.models import Count, Q, F
 
-
 def get_pass_data_view(request, match_id, return_context=False):
     match = get_object_or_404(Match, id=match_id)
 
     events = PassEvent_v2.objects.filter(match=match).select_related(
         "actor", "target", "receiver",
-        "actor__team", "receiver__team", "target__team"
-    )
+        "actor__team", "receiver__team", "target__team")
 
     passes = events.filter(
     Q(action_type__in=["LOW_BALL", "HIGH_BALL"]) |
@@ -22,13 +20,11 @@ def get_pass_data_view(request, match_id, return_context=False):
     team_stats = {}
     for team in teams:
 
-
         team_events = events.filter(actor__team=team)
+        total_passes = team_events.filter(receiver__isnull=False, actor__team=F("receiver__team")).count()
 
         # TOTAL PASSES (same team)
-
-        passes_qs = (
-            team_events.filter(
+        passes_qs = (team_events.filter(
                 receiver__isnull=False,
                 actor__team=F("receiver__team")
             )
@@ -36,11 +32,8 @@ def get_pass_data_view(request, match_id, return_context=False):
             .annotate(total_passes=Count("id"))
         )
 
-        # -------------------------
         # BALL LOST (actor loses)
-        # -------------------------
-        ball_lost_qs = (
-            team_events.filter(
+        ball_lost_qs = (team_events.filter(
                 Q(receiver__isnull=True) |
                 ~Q(actor__team=F("receiver__team"))
             )
@@ -48,9 +41,7 @@ def get_pass_data_view(request, match_id, return_context=False):
             .annotate(total_lost=Count("id"))
         )
 
-        # -------------------------
         # BALL RECOVERY (receiver gains from opponent)
-        # -------------------------
         ball_recovery_qs = (
             events.filter(
                 Q(receiver__isnull=False) &
@@ -61,10 +52,7 @@ def get_pass_data_view(request, match_id, return_context=False):
             .annotate(total_recovery=Count("id"))
         )
 
-
-        # -------------------------
         # MERGE ALL STATS
-        # -------------------------
         player_stats = {}
 
         # Passes
@@ -99,11 +87,6 @@ def get_pass_data_view(request, match_id, return_context=False):
             else:
                 player_stats[name]["ball_recovery"] = p["total_recovery"]
 
-
-
-
-
-
         # Pass matrix
         pass_matrix_qs = team_events.filter(
             receiver__isnull=False,
@@ -130,8 +113,6 @@ def get_pass_data_view(request, match_id, return_context=False):
                 "matrix": matrix
             }
         }
-
-
 
     # Ball recovery (overall)
     ball_recovery = (
@@ -172,9 +153,7 @@ def get_pass_data_view(request, match_id, return_context=False):
                 team_aerial_stats.setdefault(name, {"won": 0, "lost": 0})
                 team_aerial_stats[name]["won"] += 1
 
-            # ----------------------------
             # CASE 2: Opponent duel
-            # ----------------------------
             elif receiver_team and actor_team != receiver_team:
 
                 # Receiver WON (only if belongs to this team)

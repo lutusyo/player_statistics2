@@ -50,6 +50,14 @@ def player_detail(request, player_id):
     ).select_related('match')
     assists_qs = apply_match_filters(assists_qs)
 
+    pre_assists_qs = AttemptToGoal.objects.filter(
+        pre_assist_by=player,
+        outcome='On Target Goal',
+        is_own_goal=False
+    ).select_related('match')
+    pre_assists_qs = apply_match_filters(pre_assists_qs)
+
+
     defensive_qs = PlayerDefensiveStats.objects.filter(player=player).select_related('match')
     defensive_qs = apply_match_filters(defensive_qs)
 
@@ -71,6 +79,7 @@ def player_detail(request, player_id):
     lineup_match_ids = set(lineup_qs.values_list('match_id', flat=True))
     goals_match_ids = set(goals_qs.values_list('match_id', flat=True))
     assists_match_ids = set(assists_qs.values_list('match_id', flat=True))
+    pre_assists_match_ids = set(pre_assists_qs.values_list('match_id', flat=True))
     defensive_match_ids = set(defensive_qs.values_list('match_id', flat=True))
     subs_in_match_ids = set(subs_in_qs.values_list('match_id', flat=True))
     subs_out_match_ids = set(subs_out_qs.values_list('match_id', flat=True))
@@ -102,6 +111,7 @@ def player_detail(request, player_id):
         'sub_out': 0,
         'goals': 0,
         'assists': 0,
+        'pre_assists': 0,
         'tackles_won': 0,
         'tackles_lost': 0,
         'yellow_cards': 0,
@@ -147,6 +157,10 @@ def player_detail(request, player_id):
         comp = a.match.competition.type if a.match.competition else 'Unknown'
         stats_dict[comp]['assists'] += 1
 
+    for a in pre_assists_qs:
+        comp = a.match.competition.type if a.match.competition else 'Unknown'
+        stats_dict[comp]['pre_assists'] += 1
+
     # Defensive stats
     for d in defensive_qs:
         comp = d.match.competition.type if d.match.competition else 'Unknown'
@@ -160,7 +174,7 @@ def player_detail(request, player_id):
     player_stats = []
     totals = dict.fromkeys([
         'appearances', 'minutes', 'starts', 'sub_in', 'sub_out',
-        'goals', 'assists', 'tackles_won', 'tackles_lost',
+        'goals', 'assists', 'pre_assists', 'tackles_won', 'tackles_lost',
         'yellow_cards', 'red_cards'
     ], 0)
 
@@ -201,6 +215,10 @@ def player_detail(request, player_id):
     for a in assists_qs:
         assists_by_match[a.match_id] += 1
 
+    pre_assists_by_match = defaultdict(int)
+    for a in pre_assists_qs:
+        pre_assists_by_match[a.match_id] +=1
+
     # --- Fetch corresponding results for matches ---
     result_map = {}
     match_tuples = [(m.home_team_id, m.away_team_id, m.date) for m in matches]
@@ -237,6 +255,7 @@ def player_detail(request, player_id):
                 'minutes_played': lineup.minutes_played if lineup else 0,
                 'goals': goals_by_match.get(match.id, 0),
                 'assists': assists_by_match.get(match.id, 0),
+                'pre_assists': pre_assists_by_match.get(match.id, 0),
                 'total_shots': shots_by_match.get(match.id, 0),
                 'total_passes': passes_by_match.get(match.id, 0),
                 'competition_type': match.competition.type if match.competition else "Unknown",

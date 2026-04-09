@@ -305,6 +305,7 @@
                             <th>Mins</th>
                             <th>Goals</th>
                             <th>Assists</th>
+                            <th>Pre Assists</th>
                             <th>Starts</th>
                             <th>Sub In</th>
                             <th>Sub Out</th>
@@ -317,25 +318,28 @@
                     <tbody>
                         {% if player_stats %}
                             {% for stat in player_stats %}
-                            <tr>
-                                <td>{{ stat.competition }}</td>
-                                <td>{{ stat.appearances }}</td>
-                                <td>{{ stat.minutes }}</td>
+                                <tr>
+                                    <td>{{ stat.competition }}</td>
+                                    <td>{{ stat.appearances }}</td>
+                                    <td>{{ stat.minutes }}</td>
 
-                                <td>
-                                    <a href="{% url 'players_app:player_category_clips' player.id 'goals' %}">{{ stat.goals }}</a>
-                                </td>
+                                    <td>
+                                        <a href="{% url 'players_app:player_category_clips' player.id 'goals' %}">
+                                            {{ stat.goals }}
+                                        </a>
+                                    </td>
 
-                                <td>{{ stat.goals }}</td>
-                                <td>{{ stat.assists }}</td>
-                                <td>{{ stat.starts }}</td>
-                                <td>{{ stat.sub_in }}</td>
-                                <td>{{ stat.sub_out }}</td>
-                                <td>{{ stat.tackles_won }}</td>
-                                <td>{{ stat.tackles_lost }}</td>
-                                <td>{{ stat.yellow_cards }}</td>
-                                <td>{{ stat.red_cards }}</td>
-                            </tr>
+                                    <td>{{ stat.assists }}</td>
+                                    <td>{{ stat.pre_assists }}</td>
+
+                                    <td>{{ stat.starts }}</td>
+                                    <td>{{ stat.sub_in }}</td>
+                                    <td>{{ stat.sub_out }}</td>
+                                    <td>{{ stat.tackles_won }}</td>
+                                    <td>{{ stat.tackles_lost }}</td>
+                                    <td>{{ stat.yellow_cards }}</td>
+                                    <td>{{ stat.red_cards }}</td>
+                                </tr>
                             {% endfor %}
                         {% else %}
                             <tr><td colspan="12">No stats available.</td></tr>
@@ -347,6 +351,7 @@
                             <td>{{ totals.minutes }}</td>
                             <td>{{ totals.goals }}</td>
                             <td>{{ totals.assists }}</td>
+                            <td>{{ totals.pre_assists }}</td>  <!-- ✅ add this -->
                             <td>{{ totals.starts }}</td>
                             <td>{{ totals.sub_in }}</td>
                             <td>{{ totals.sub_out }}</td>
@@ -371,6 +376,7 @@
                         <th>Minutes Played</th>
                         <th>Goals</th>
                         <th>Assists</th>
+                        <th>Pre Assists</th>
                         <th>Shots</th>     
                         <th>Passes</th>
                         <th>Clips</th>    
@@ -397,6 +403,7 @@
                         <td>{{ item.minutes_played }}</td>
                         <td>{{ item.goals }}</td>
                         <td>{{ item.assists }}</td>
+                        <td>{{ item.pre_assists }}</td>
                         <td>{{ item.total_shots }}</td>    
                         <td>{{ item.total_passes }}</td>
                         <td>

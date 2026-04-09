@@ -139,7 +139,9 @@ def attempt_to_goal_dashboard(request, match_id, return_context=False):
 
     # Filter by categories
     home_shots_on_target = home_attempts.filter(outcome__in=[OutcomeChoices.ON_TARGET_GOAL, OutcomeChoices.ON_TARGET_SAVED])
+
     home_shots_off_target = home_attempts.filter(outcome=OutcomeChoices.OFF_TARGET)
+    
     home_blocked_shots = home_attempts.filter(outcome=OutcomeChoices.BLOCKED)
     home_player_errors = home_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR).exclude(body_part=BodyPartChoices.OTHER)
     home_unsuccessful_crosses = home_attempts.filter(outcome=OutcomeChoices.PLAYER_ERROR, body_part=BodyPartChoices.OTHER, delivery_type=DeliveryTypeChoices.CROSS).select_related("assist_by", "player")
