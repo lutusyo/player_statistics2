@@ -27,28 +27,52 @@ def player_match_clips(request, player_id, match_id):
     }
     return render(request, 'players_app/player_match_clips.html', context)
 
+
+
+
 def player_category_clips(request, player_id, category):
     player = get_object_or_404(Player, id=player_id)
 
-    attempts = AttemptToGoal.objects.filter(player=player).order_by('match__date', 'minute')
+    attempts = AttemptToGoal.objects.filter(
+        player=player
+    ).order_by('match__date', 'minute')
 
+    clips = AttemptToGoal.objects.none()
+
+    # ======================
+    # GOALS
+    # ======================
     if category == 'goals':
         clips = attempts.filter(outcome='On Target Goal')
 
+    # ======================
+    # SHOTS ON TARGET
+    # ======================
     elif category == 'shots_on_target':
         clips = attempts.filter(
             outcome__in=['On Target Saved', 'On Target Goal']
         )
 
+    # ======================
+    # SHOTS OFF TARGET
+    # ======================
     elif category == 'shots_off_target':
         clips = attempts.filter(outcome='Off Target')
 
+    # ======================
+    # ASSISTS (IMPORTANT FIX)
+    # ======================
+    elif category == 'assists':
+        clips = AttemptToGoal.objects.filter(
+            assist_by=player,
+            outcome='On Target Goal'   # ONLY GOALS
+        ).order_by('match__date', 'minute')
+
     else:
-        clips = attempts.none()
+        clips = AttemptToGoal.objects.none()
 
-    clips = attempts  # keep ALL clips (with or without video)
-
-    first_clip = attempts.filter(
+    # first video clip
+    first_clip = clips.filter(
         video_clip__isnull=False
     ).exclude(video_clip='').first()
 
