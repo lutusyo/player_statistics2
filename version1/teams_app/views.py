@@ -18,6 +18,7 @@ def team_squad_view(request, pk):
 
 
     players = Player.objects.filter(team=team, is_active=True, status='SIGNED').select_related('team')
+    trial_players = Player.objects.filter(team=team, is_active=True, status='TRIAL').select_related('team')
 
     grouped_players = defaultdict(list)
     for player in players:
@@ -28,6 +29,7 @@ def team_squad_view(request, pk):
     context = {
         'team_selected': team,
         'grouped_players': grouped_players,
+        'trial_players': trial_players,
         'position_order': position_order,
         'active_tab': 'squad',
         'team': team,
