@@ -34,7 +34,7 @@ def export_team_players_to_excel_view(request, team_id):
         cell.fill = header_fill
         cell.alignment = center_align
 
-    players = Player.objects.filter(team=team).select_related("age_group")
+    players = Player.objects.filter(team=team, status='SIGNED', is_active=True).select_related("age_group")
 
     for player in players:
         latest_measurement = player.current_measurement

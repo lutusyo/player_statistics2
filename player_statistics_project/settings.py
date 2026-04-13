@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'version1.perfomance_rating_app', 'version1.training_app', 'version1.sheets_generator_app',
 
     #loaned_players
-    'version1.loans_app',
+    #'version1.loans_app',
 
     # Third party
      'rest_framework',
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     ##version2
      'version2.tagging_app_v2',
      'version2.reports_app_v2',
+     'version2.loans_app_v2',
 
     # version3
     'version3.tagging_app_v3',

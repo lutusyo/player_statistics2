@@ -27,7 +27,7 @@ urlpatterns = [
 
     #############################
     path('tagging_v2/', include('version2.tagging_app_v2.urls')), #tagging_app_v2
-    path('loans_app/', include('version1.loans_app.urls')), # loaned players
+   # path('loans_app_v2/', include('version2.loans_app_v2.urls')), # loaned players
 
 ]
 

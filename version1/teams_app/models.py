@@ -2,6 +2,55 @@
 from django.db import models
 from datetime import date
 
+class Country(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+
+
+class Region(models.Model):
+    name = models.CharField(max_length=50)
+    country = models.ForeignKey(
+        Country,
+        on_delete=models.CASCADE,
+        related_name="regions",
+        null=True,   # ✅ only if you expect temporary empty values
+        blank=True
+    )
+
+    class Meta:
+        unique_together = ("name", "country")
+
+    def __str__(self):
+        return f"{self.name} ({self.country.name})" if self.country else self.name
+
+
+
+
+class Venue(models.Model):
+    name = models.CharField(max_length=100)
+
+    region = models.ForeignKey(
+        Region,
+        on_delete=models.SET_NULL,   # ⚠️ better than CASCADE for safety
+        null=True,
+        blank=True,
+        related_name="venues"
+    )
+
+    def __str__(self):
+        return f"{self.name} ({self.region.name})" if self.region else self.name
+
+    @property
+    def country(self):
+        return self.region.country if self.region else None     
+
+
+
+
 class AgeGroup(models.Model):
     code = models.CharField(max_length=10, unique=True)  # e.g., U20
     name = models.CharField(max_length=50)  # e.g., Under 20
@@ -9,7 +58,8 @@ class AgeGroup(models.Model):
     def __str__(self):
         return self.name
 
-class Team(models.Model): 
+
+class Team(models.Model):
     TEAM_TYPE_CHOICES = [
         ('OUR_TEAM', 'Our Team'),
         ('OPPONENT', 'Opponent Team'),
@@ -17,9 +67,16 @@ class Team(models.Model):
 
     name = models.CharField(max_length=100)
     short_name = models.CharField(max_length=50, blank=True)
+
     age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)
+
     team_type = models.CharField(max_length=20, choices=TEAM_TYPE_CHOICES, default='OUR_TEAM')
+
     logo = models.ImageField(upload_to='team_logos/', blank=True, null=True)
+
+    # NEW STRUCTURE (IMPORTANT)
+    country = models.ForeignKey("Country", on_delete=models.SET_NULL, null=True, blank=True)
+    region = models.ForeignKey("Region", on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         constraints = [
@@ -30,6 +87,15 @@ class Team(models.Model):
         if self.age_group:
             return f"{self.name} ({self.age_group.name})"
         return self.name
+
+
+
+
+
+
+
+
+
 
 class StaffMember(models.Model):
     ROLE_CHOICES = [

@@ -2,6 +2,23 @@
 
 from django.db import models
 from datetime import date
+from version1.teams_app.models import Team
+
+
+ROLE_CHOICES = [
+    ("GK", "Goalkeeper"),
+    ("CB", "Center Back"),
+    ("FB", "Full Back"),
+    ("WB", "Wing Back"),
+    ("DM", "Defensive Midfielder"),
+    ("CM", "Central Midfielder"),
+    ("AM", "Attacking Midfielder"),
+    ("WM", "Wide Midfielder"),
+    ("W", "Winger"),
+    ("ST", "Striker"),
+]
+
+
 
 # LOANED PLAYER
 class LoanedPlayer(models.Model):
@@ -16,6 +33,7 @@ class LoanedPlayer(models.Model):
     full_name = models.CharField(max_length=100)
     date_of_birth = models.DateField()
     position = models.CharField(max_length=30)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, blank=True)
     preferred_foot = models.CharField(max_length=10, choices=FOOT_CHOICES)
     jersey_number = models.PositiveIntegerField(null=True, blank=True)
     photo = models.ImageField(upload_to="loaned_players/photos/", null=True, blank=True)
@@ -24,7 +42,15 @@ class LoanedPlayer(models.Model):
     weight_kg = models.PositiveIntegerField(null=True, blank=True)
 
     # Loan info
-    loan_club = models.CharField(max_length=100)
+    
+
+    loan_club = models.ForeignKey(Team,
+    on_delete=models.SET_NULL,
+    null=True,
+    blank=True,
+    related_name="loaned_players"
+)
+
     loan_club_region = models.CharField(max_length=100, help_text="Region where the loan club is located")
     loan_club_country = models.CharField(max_length=100, help_text="Country where the loan club is located")
     loan_start_date = models.DateField()
@@ -94,8 +120,10 @@ class LoanDailyEntry(models.Model):
         max_length=50, choices=COMPETITION_NAME_CHOICES, null=True, blank=True
     )
 
-    home_team = models.CharField(max_length=100, null=True, blank=True)
-    away_team = models.CharField(max_length=100, null=True, blank=True)
+
+    home_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name="loan_home_matches")
+
+    away_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True,related_name="loan_away_matches")
 
     home_score = models.PositiveIntegerField(null=True, blank=True)
     away_score = models.PositiveIntegerField(null=True, blank=True)
