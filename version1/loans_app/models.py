@@ -1,7 +1,9 @@
 # loans_app/models.py
+
 from django.db import models
 from datetime import date
 
+# LOANED PLAYER
 class LoanedPlayer(models.Model):
 
     FOOT_CHOICES = [
@@ -33,64 +35,88 @@ class LoanedPlayer(models.Model):
 
     def age(self):
         today = date.today()
-        return today.year - self.date_of_birth.year - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
+        return today.year - self.date_of_birth.year - (
+            (today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day)
+        )
 
     def __str__(self):
         return f"{self.full_name} → {self.loan_club} ({self.loan_club_region})"
 
 
-
-# loans_app/models.py
-
-from django.db import models
-
+# DAILY ENTRY
 class LoanDailyEntry(models.Model):
 
+    # -------- TYPES --------
     DAY_TYPE_CHOICES = [
         ("training", "Training"),
         ("match", "Match"),
     ]
 
-    MATCH_TYPE_CHOICES = [
+    COMPETITION_TYPE_CHOICES = [
         ("league", "League"),
         ("cup", "Cup"),
         ("friendly", "Friendly"),
         ("international", "International"),
+        ('Tournament', 'Tournament'),
     ]
 
-    player = models.ForeignKey(
-        "loans_app.LoanedPlayer",
-        on_delete=models.CASCADE,
-        related_name="daily_entries"
-    )
+    COMPETITION_NAME_CHOICES = [
+        ('NBC Premier League', 'NBC Premier League'),
+        ("first_league", "First League"),
+        ('NMB Mapinduzi Cup', 'NMB Mapinduzi Cup'),
+        ("CRDB Federation Cup", "CRDB Federation Cup"),
+        ('CAF Confederation Cup', 'CAF Confederation Cup'),
+        ('International Friendly', 'International Friendly'),
+        ('Local Friendly', 'Local Friendly'),
+    ]
 
+
+    TEAM_SIDE_CHOICES = [
+        ("home", "Home"),
+        ("away", "Away"),
+    ]
+
+    # -------- RELATION --------
+    player = models.ForeignKey("loans_app.LoanedPlayer", on_delete=models.CASCADE, related_name="daily_entries")
+
+    # -------- GENERAL --------
     date = models.DateField()
     day_type = models.CharField(max_length=10, choices=DAY_TYPE_CHOICES)
 
-    # =========================
-    # TRAINING
-    # =========================
+    # -------- TRAINING --------
     training_minutes = models.PositiveIntegerField(null=True, blank=True)
 
-    # =========================
-    # MATCH
-    # =========================
-    match_type = models.CharField(max_length=20, choices=MATCH_TYPE_CHOICES, null=True, blank=True)
-    opponent = models.CharField(max_length=100, null=True, blank=True)
-    result = models.CharField(max_length=20, null=True, blank=True)
+    # -------- MATCH INFO --------
+    competition_type = models.CharField(
+        max_length=20, choices=COMPETITION_TYPE_CHOICES, null=True, blank=True
+    )
+    competition_name = models.CharField(
+        max_length=50, choices=COMPETITION_NAME_CHOICES, null=True, blank=True
+    )
 
+    home_team = models.CharField(max_length=100, null=True, blank=True)
+    away_team = models.CharField(max_length=100, null=True, blank=True)
+
+    home_score = models.PositiveIntegerField(null=True, blank=True)
+    away_score = models.PositiveIntegerField(null=True, blank=True)
+
+    team_side = models.CharField(
+        max_length=10, choices=TEAM_SIDE_CHOICES, null=True, blank=True
+    )
+
+    # -------- PLAYER PARTICIPATION --------
     appearance = models.BooleanField(default=False)
     started = models.BooleanField(default=False)
 
     minutes_played = models.PositiveIntegerField(null=True, blank=True)
 
-    # 🔹 UPDATED
     sub_in = models.BooleanField(default=False)
     sub_in_minute = models.PositiveIntegerField(null=True, blank=True)
 
     sub_out = models.BooleanField(default=False)
     sub_out_minute = models.PositiveIntegerField(null=True, blank=True)
 
+    # -------- PERFORMANCE --------
     goals = models.PositiveIntegerField(default=0)
     assists = models.PositiveIntegerField(default=0)
     pre_assists = models.PositiveIntegerField(default=0)
@@ -102,9 +128,35 @@ class LoanDailyEntry(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # -------- META --------
     class Meta:
         unique_together = ("player", "date")
         ordering = ["-date"]
+
+    # -------- LOGIC --------
+    def save(self, *args, **kwargs):
+
+        # 🔹 Reset stats if no appearance
+        if not self.appearance:
+            self.started = False
+            self.minutes_played = 0
+
+            self.sub_in = False
+            self.sub_in_minute = None
+
+            self.sub_out = False
+            self.sub_out_minute = None
+
+            self.goals = 0
+            self.assists = 0
+            self.pre_assists = 0
+
+            self.yellow_cards = 0
+            self.red_cards = 0
+
+            self.clean_sheet = False
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.player.full_name} | {self.date} | {self.day_type}"

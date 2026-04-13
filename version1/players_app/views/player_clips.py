@@ -39,23 +39,17 @@ def player_category_clips(request, player_id, category):
 
     clips = AttemptToGoal.objects.none()
 
-    # ======================
     # GOALS
-    # ======================
     if category == 'goals':
         clips = attempts.filter(outcome='On Target Goal')
 
-    # ======================
     # SHOTS ON TARGET
-    # ======================
     elif category == 'shots_on_target':
         clips = attempts.filter(
             outcome__in=['On Target Saved', 'On Target Goal']
         )
 
-    # ======================
     # SHOTS OFF TARGET
-    # ======================
     elif category == 'shots_off_target':
         clips = attempts.filter(outcome='Off Target')
 
