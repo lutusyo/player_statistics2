@@ -19,16 +19,6 @@
             text-align: center;
         }
 
-        .chart-container {
-            width: 80%;
-            margin: 30px auto;
-        }
-
-        .radar-container {
-            width: 50%;
-            margin: 30px auto;
-        }
-
         table {
             border-collapse: collapse;
             width: 100%;
@@ -45,69 +35,109 @@
             background: black;
             color: white;
         }
+
+        .chart-container {
+            width: 70%;
+            height: 280px;
+            margin: 20px auto;
+        }
+
+        .radar-container {
+            width: 40%;
+            height: 280px;
+            margin: 20px auto;
+        }
     </style>
 </head>
 <body>
 
-<!-- 🔍 FILTERS -->
-<div class="filters">
-    <form method="get">
-        <label>From:</label>
-        <input type="date" name="start_date" value="{{ start_date }}">
+<div style="display: flex;">
 
-        <label>To:</label>
-        <input type="date" name="end_date" value="{{ end_date }}">
+    <!-- 🧭 SIDEBAR -->
+    <div style="width: 20%; border-right: 1px solid #ccc; padding: 10px;">
+        <h3>Team Players</h3>
 
-        <label>Compare with:</label>
-        <select name="compare">
-            <option value="">None</option>
-            {% for p in players %}
-                <option value="{{ p.id }}"
-                    {% if p.id == player.id %}disabled{% endif %}>
-                    {{ p.player_name }}
-                </option>
+        <ul style="list-style: none; padding: 0;">
+            {% for p in team_players %}
+                <li style="margin-bottom: 8px;">
+                    <a href="{% url 'player_detail' p.id %}?start_date={{ start_date }}&end_date={{ end_date }}&compare={{ request.GET.compare }}"
+                       style="
+                           text-decoration: none;
+                           color: {% if p.id == player.id %}white{% else %}black{% endif %};
+                           background: {% if p.id == player.id %}black{% else %}transparent{% endif %};
+                           padding: 5px;
+                           display: block;
+                       ">
+                        {{ p.player_name }}
+                    </a>
+                </li>
             {% endfor %}
-        </select>
+        </ul>
+    </div>
 
-        <button type="submit">Apply</button>
-    </form>
-</div>
+    <!-- 📊 MAIN CONTENT -->
+    <div style="width: 80%; padding: 20px;">
 
-<!-- 👤 PLAYER INFO -->
-<h1>{{ player.player_name }}</h1>
+        <!-- 🔍 FILTERS -->
+        <div class="filters">
+            <form method="get">
+                <label>From:</label>
+                <input type="date" name="start_date" value="{{ start_date }}">
 
-<p><strong>Join Date:</strong> {{ player.join_date }}</p>
-<p><strong>Core Character:</strong> {{ player.core_character }}</p>
-<p><strong>Age Group:</strong> {{ player.age_group }}</p>
+                <label>To:</label>
+                <input type="date" name="end_date" value="{{ end_date }}">
 
-<!-- 📅 PERIOD INFO -->
-{% if start_date or end_date %}
-    <p style="text-align:center;">
-        Showing data from 
-        <strong>{{ start_date|default:"Beginning" }}</strong> 
-        to 
-        <strong>{{ end_date|default:"Now" }}</strong>
-    </p>
-{% else %}
-    <p style="text-align:center;"><strong>All-time performance</strong></p>
-{% endif %}
+                <label>Compare with:</label>
+                <select name="compare">
+                    <option value="">None</option>
+                    {% for p in players %}
+                        <option value="{{ p.id }}"
+                            {% if p.id == player.id %}disabled{% endif %}>
+                            {{ p.player_name }}
+                        </option>
+                    {% endfor %}
+                </select>
 
-<p style="text-align:center;">
-    <strong>Total Assessments:</strong> {{ assessments|length }}
-</p>
+                <button type="submit">Apply</button>
+            </form>
+        </div>
 
-<hr>
+        <!-- 👤 PLAYER INFO -->
+        <p><strong>Join Date:</strong> {{ player.join_date }}</p>
+        <p><strong>Core Character:</strong> {{ player.core_character }}</p>
+        <p><strong>Age Group:</strong> {{ player.age_group }}</p>
 
-<!-- 📈 LINE CHART -->
-<h2>Performance Trend</h2>
-<div class="chart-container">
-    <canvas id="trendChart"></canvas>
-</div>
+        <!-- 📅 PERIOD INFO -->
+        {% if start_date or end_date %}
+            <p style="text-align:center;">
+                Showing data from 
+                <strong>{{ start_date|default:"Beginning" }}</strong> 
+                to 
+                <strong>{{ end_date|default:"Now" }}</strong>
+            </p>
+        {% else %}
+            <p style="text-align:center;"><strong>All-time performance</strong></p>
+        {% endif %}
 
-<!-- 🧠 RADAR CHART -->
-<h2>Skill Profile</h2>
-<div class="radar-container">
-    <canvas id="radarChart"></canvas>
+        <p style="text-align:center;">
+            <strong>Total Assessments:</strong> {{ assessments|length }}
+        </p>
+
+        <hr>
+
+        <!-- 📈 LINE CHART -->
+        <h2>Performance Trend</h2>
+        <div class="chart-container">
+            <canvas id="trendChart"></canvas>
+        </div>
+
+        <!-- 🧠 RADAR CHART -->
+        <h2>Skill Profile</h2>
+        <div class="radar-container">
+            <canvas id="radarChart"></canvas>
+        </div>
+
+    </div>
 </div>
 
 <script>
@@ -128,16 +158,23 @@ new Chart(document.getElementById('trendChart'), {
                 label: '{{ compare_player.player_name }}',
                 data: {{ compare_data|safe }},
                 borderWidth: 3,
-                borderDash: [5,5]
+                borderDash: [6,4],
+                tension: 0.3
             }
             {% endif %}
         ]
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
-            legend: {
-                position: 'top'
+            legend: { position: 'top' },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.raw.toFixed(1) + '%';
+                    }
+                }
             }
         },
         scales: {
@@ -145,7 +182,10 @@ new Chart(document.getElementById('trendChart'), {
                 min: {{ y_min }},
                 max: {{ y_max }},
                 ticks: {
-                    stepSize: 5
+                    stepSize: 5,
+                    callback: function(value) {
+                        return value + '%';
+                    }
                 }
             }
         }
@@ -157,17 +197,37 @@ new Chart(document.getElementById('radarChart'), {
     type: 'radar',
     data: {
         labels: ['Cognitive', 'Personality', 'Neuro', 'Education'],
-        datasets: [{
-            label: '{{ player.player_name }}',
-            data: {{ radar|safe }},
-            borderWidth: 2
-        }]
+        datasets: [
+            {
+                label: '{{ player.player_name }}',
+                data: {{ radar|safe }},
+                borderWidth: 2
+            },
+            {% if compare_player %}
+            {
+                label: '{{ compare_player.player_name }}',
+                data: {{ compare_radar|safe }},
+                borderWidth: 2
+            }
+            {% endif %}
+        ]
     },
     options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'top' }
+        },
         scales: {
             r: {
                 min: 0,
-                max: 100
+                max: 100,
+                ticks: {
+                    stepSize: 20,
+                    callback: function(value) {
+                        return value + '%';
+                    }
+                }
             }
         }
     }
