@@ -10,6 +10,14 @@ import json
 
 
 
+from django.db.models import Avg
+from datetime import datetime
+
+from datetime import timedelta
+from dateutil.relativedelta import relativedelta  # install if needed
+
+
+
 
 
 
@@ -47,22 +55,53 @@ def parse_int(value):
 
 
 
-from django.db.models import Avg
-from datetime import datetime
-
 def home(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
+    period = request.GET.get('period')  # 👈 NEW
 
-    assessments = Assessment.objects.all()
+    assessments = Assessment.objects.all().order_by('start_date')
 
-    # 🎯 Apply date filtering
-    if start_date:
-        assessments = assessments.filter(start_date__gte=start_date)
+    # -----------------------------------
+    # ✅ PERIOD FILTER (PRIORITY)
+    # -----------------------------------
+    if period:
+        try:
+            period = int(period)
 
-    if end_date:
-        assessments = assessments.filter(end_date__lte=end_date)
+            first_assessment = assessments.first()
 
+            if first_assessment and first_assessment.start_date:
+                start = first_assessment.start_date
+
+                # 🔥 1 psychology month = 2 real months
+                end = start + relativedelta(months=period * 2)
+
+                assessments = assessments.filter(
+                    start_date__gte=start,
+                    end_date__lte=end
+                )
+
+                # override for UI display
+                start_date = start
+                end_date = end
+
+        except:
+            pass
+
+    # -----------------------------------
+    # ✅ NORMAL DATE FILTER
+    # -----------------------------------
+    else:
+        if start_date:
+            assessments = assessments.filter(start_date__gte=start_date)
+
+        if end_date:
+            assessments = assessments.filter(end_date__lte=end_date)
+
+    # -----------------------------------
+    # 📊 STATS
+    # -----------------------------------
     total_players = Player.objects.count()
     total_assessments = assessments.count()
     age_groups = AgeGroup.objects.all()
@@ -75,6 +114,11 @@ def home(request):
         avg_overall=Avg('overall'),
     )
 
+    # ✅ CONVERT TO %
+    for key in overall_stats:
+        if overall_stats[key] is not None:
+            overall_stats[key] = overall_stats[key] * 100
+
     context = {
         'total_players': total_players,
         'total_assessments': total_assessments,
@@ -82,7 +126,7 @@ def home(request):
         'overall_stats': overall_stats,
         'start_date': start_date,
         'end_date': end_date,
+        'period': str(period) if period else "",  # 👈 IMPORTANT
     }
-
 
     return render(request, 'psychology_app_v2/psychology_home.html', context)

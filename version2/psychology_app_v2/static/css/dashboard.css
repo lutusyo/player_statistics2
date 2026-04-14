@@ -1,0 +1,323 @@
+/* 🌍 GLOBAL */
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f5f7fa;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+h1, h2, h3 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* 📦 CARD STYLE */
+.card {
+    background: white;
+    padding: 15px;
+    margin: 15px auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    width: 90%;
+}
+
+/* 🔍 FILTERS */
+.filters {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.filters input,
+.filters select,
+.filters button {
+    padding: 6px 10px;
+    margin: 5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.filters button {
+    background: #2c3e50;
+    color: white;
+    cursor: pointer;
+}
+
+.filters button:hover {
+    background: #1a252f;
+}
+
+/* 📊 TABLE */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+th {
+    background: #2c3e50;
+    color: white;
+    padding: 10px;
+    font-size: 14px;
+}
+
+td {
+    padding: 8px;
+    font-size: 13px;
+}
+
+/* 🎯 ZEBRA STRIPES */
+tbody tr:nth-child(even) {
+    background: #f9fbfd;
+}
+
+/* 🖱️ HOVER EFFECT */
+tbody tr:hover {
+    background: #eef3f8;
+}
+
+/* 👤 PLAYER HEADER ROW */
+.player-row {
+    background: #dfe6ee !important;
+    font-weight: bold;
+}
+
+/* 🔗 LINKS */
+a {
+    text-decoration: none;
+    color: #2980b9;
+    font-weight: 500;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* 📊 SIDEBAR */
+.sidebar {
+    width: 20%;
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    height: fit-content;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.sidebar h3 {
+    text-align: left;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar li {
+    margin-bottom: 8px;
+}
+
+.sidebar a {
+    display: block;
+    padding: 6px;
+    border-radius: 6px;
+}
+
+.sidebar a.active {
+    background: #2c3e50;
+    color: white;
+}
+
+/* 📊 MAIN CONTENT */
+.main {
+    width: 80%;
+    padding: 20px;
+}
+
+/* 📈 CHARTS */
+.chart-container {
+    width: 70%;
+    height: 280px;
+    margin: 20px auto;
+}
+
+.radar-container {
+    width: 40%;
+    height: 280px;
+    margin: 20px auto;
+}
+
+/* 📊 DASHBOARD STATS */
+.stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.stat-box {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    width: 150px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.stat-box h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.stat-box p {
+    font-size: 14px;
+    color: gray;
+}
+
+/* 📊 PERCENTAGE STYLE */
+.percent {
+    font-weight: bold;
+    color: #27ae60;
+}
+
+/* 🔴 LOW VALUES */
+.low {
+    color: #e74c3c;
+}
+
+/* 🟡 MEDIUM */
+.medium {
+    color: #f39c12;
+}
+
+.dashboard-container {
+    padding: 20px;
+    max-width: 1100px;
+    margin: auto;
+}
+
+/* HEADER */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filter-bar {
+    display: flex;
+    gap: 10px;
+    align-items: end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+}
+
+.btn-filter {
+    padding: 6px 12px;
+    background: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+/* KPI */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.kpi-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.kpi-card h3 {
+    font-size: 14px;
+    color: #666;
+}
+
+.kpi-card p {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.kpi-card.highlight {
+    background: black;
+    color: white;
+}
+
+/* DATE INFO */
+.date-info {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #555;
+}
+
+/* PERFORMANCE */
+.performance-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.performance-card {
+    background: #f8f9fa;
+    padding: 12px;
+    text-align: center;
+    border-radius: 6px;
+}
+
+.performance-card p {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* TEAMS */
+.teams-section {
+    margin-top: 30px;
+}
+
+.teams-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.team-card {
+    background: white;
+    padding: 10px;
+    text-align: center;
+    border-radius: 6px;
+    text-decoration: none;
+    color: black;
+    border: 1px solid #ddd;
+    transition: 0.2s;
+}
+
+.team-card:hover {
+    background: black;
+    color: white;
+}
+
+/* FOOTER */
+.dashboard-footer {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.btn-primary {
+    padding: 10px 20px;
+    background: black;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+}

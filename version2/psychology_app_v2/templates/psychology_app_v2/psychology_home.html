@@ -1,62 +1,116 @@
-<h1> Dashboard</h1>
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 
+<div class="dashboard-container">
 
-<form method="get">
-    <label>From:</label>
-    <input type="date" name="start_date" value="{{ start_date }}">
+    <!-- 🔷 HEADER -->
+    <div class="dashboard-header">
+        <h1>📊 Dashboard</h1>
 
-    <label>To:</label>
-    <input type="date" name="end_date" value="{{ end_date }}">
-
-    <button type="submit">Filter</button>
-</form>
-
-
-
-<p>Total Players: {{ total_players }}</p>
-<p>Total Assessments: {{ total_assessments }}</p>
+        <form method="get" class="filter-bar">
 
 
 
+            <div class="filter-group">
+                <label>Quick Period</label>
+                <select name="period">
+                    <option value="">-- Select --</option>
+                    <option value="1" {% if period == "1" %}selected{% endif %}>1 Month</option>
+                    <option value="2" {% if period == "2" %}selected{% endif %}>2 Months</option>
+                    <option value="3" {% if period == "3" %}selected{% endif %}>3 Months</option>
+                    <option value="6" {% if period == "6" %}selected{% endif %}>6 Months</option>
+                </select>
+            </div>
 
 
 
-<h2>Overall Performance</h2>
+            <!--<div class="filter-group">
+                <label>From</label>
+                <input type="date" name="start_date" value="{{ start_date }}">
+            </div>
 
-{% if start_date or end_date %}
-    <p>
-        Showing data from 
-        <strong>{{ start_date|default:"Beginning" }}</strong>
-        to 
-        <strong>{{ end_date|default:"Now" }}</strong>
-    </p>
-{% else %}
-    <p><strong>Showing ALL TIME data</strong></p>
-{% endif %}
+            <div class="filter-group">
+                <label>To</label>
+                <input type="date" name="end_date" value="{{ end_date }}">
+            </div>-->
 
+            <button type="submit" class="btn-filter">Apply</button>
+        </form>
+    </div>
 
+    <!-- 🔷 KPI CARDS -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <h3>Total Players</h3>
+            <p>{{ total_players }}</p>
+        </div>
 
-<ul>
-    <li>Cognitive: {{ overall_stats.avg_cognitive|floatformat:1 }}</li>
-    <li>Personality: {{ overall_stats.avg_personality|floatformat:1 }}</li>
-    <li>Neuro: {{ overall_stats.avg_neuro|floatformat:1 }}</li>
-    <li>Education: {{ overall_stats.avg_education|floatformat:1 }}</li>
-    <li>Overall: {{ overall_stats.avg_overall|floatformat:1 }}</li>
-</ul>
+        <div class="kpi-card">
+            <h3>Total Assessments</h3>
+            <p>{{ total_assessments }}</p>
+        </div>
 
-<hr>
+        <div class="kpi-card highlight">
+            <h3>Avg Overall</h3>
+            <p>{{ overall_stats.avg_overall|floatformat:1 }}%</p>
+        </div>
+    </div>
 
-<h2>Teams (Age Groups)</h2>
-<ul>
-    {% for group in age_groups %}
-        <li>
-            <a href="{% url 'player_list' %}?age_group={{ group.id }}">
-                {{ group.name }}
-            </a>
-        </li>
-    {% endfor %}
-</ul>
+    <!-- 🔷 DATE INFO -->
+    <div class="date-info">
+        {% if start_date or end_date %}
+            Showing data from 
+            <strong>{{ start_date|default:"Beginning" }}</strong>
+            to 
+            <strong>{{ end_date|default:"Now" }}</strong>
+        {% else %}
+            <strong>Showing ALL TIME data</strong>
+        {% endif %}
+    </div>
 
-<hr>
+    <!-- 🔷 PERFORMANCE GRID -->
+    <div class="performance-grid">
 
-<a href="{% url 'player_list' %}">➡ View All Players</a>
+        <div class="performance-card">
+            <h3>Cognitive</h3>
+            <p>{{ overall_stats.avg_cognitive|floatformat:1 }}%</p>
+        </div>
+
+        <div class="performance-card">
+            <h3>Personality</h3>
+            <p>{{ overall_stats.avg_personality|floatformat:1 }}%</p>
+        </div>
+
+        <div class="performance-card">
+            <h3>Neuro</h3>
+            <p>{{ overall_stats.avg_neuro|floatformat:1 }}%</p>
+        </div>
+
+        <div class="performance-card">
+            <h3>Education</h3>
+            <p>{{ overall_stats.avg_education|floatformat:1 }}%</p>
+        </div>
+
+    </div>
+
+    <!-- 🔷 AGE GROUPS -->
+    <div class="teams-section">
+        <h2>👥 Teams (Age Groups)</h2>
+
+        <div class="teams-grid">
+            {% for group in age_groups %}
+                <a href="{% url 'player_list' %}?age_group={{ group.id }}" class="team-card">
+                    {{ group.name }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 🔷 ACTION -->
+    <div class="dashboard-footer">
+        <a href="{% url 'player_list' %}" class="btn-primary">
+            ➡ View All Players
+        </a>
+    </div>
+
+</div>
