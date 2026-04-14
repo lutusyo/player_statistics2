@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Loaned Players</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f9;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        th {
+            background: #111;
+            color: #fff;
+        }
+
+        tr:hover {
+            background: #f1f1f1;
+        }
+
+        a {
+            text-decoration: none;
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Loaned Players</h1>
+
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Position</th>
+        <th>Club</th>
+        <th>Age</th>
+    </tr>
+
+    {% for player in players %}
+    <tr>
+        <td>
+            <a href="{% url 'loans_app_v2:loan_player_detail' player.id %}">
+                {{ player.full_name }}
+            </a>
+        </td>
+        <td>{{ player.position }}</td>
+        <td>{{ player.loan_club }}</td>
+        <td>{{ player.age }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="4">No players found.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>

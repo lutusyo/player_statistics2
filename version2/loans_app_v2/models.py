@@ -80,6 +80,7 @@ class LoanedPlayer(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+
     # AGE
     def age(self):
         today = date.today()
@@ -89,6 +90,10 @@ class LoanedPlayer(models.Model):
 
     def __str__(self):
         return f"{self.player.full_name} → {self.loan_club}"
+
+    @property
+    def full_name(self):
+        return self.player.full_name
 
 class LoanDailyEntry(models.Model):
 
