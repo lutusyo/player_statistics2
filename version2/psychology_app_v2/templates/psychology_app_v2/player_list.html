@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Players Data</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            text-align: center;
+        }
+        th {
+            background: black;
+            color: white;
+        }
+        .player-row {
+            background: #f2f2f2;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+
+<h2>Player Dashboard</h2>
+
+<form method="get">
+    <label>Select Age Group:</label>
+    <select name="age_group" onchange="this.form.submit()">
+        <option value="">All</option>
+        {% for group in age_groups %}
+            <option value="{{ group.id }}"
+                {% if group.id|stringformat:"s" == selected_age_group %}
+                    selected
+                {% endif %}
+            >
+                {{ group.name }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
+
+<br>
+
+
+
+<h2>Players Data Table</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Player Name</th>
+            <th>Join Date</th>
+            <th>Core Character</th>
+            <th>Age Group</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Task</th>
+            <th>IQ</th>
+            <th>Cognitive %</th>
+            <th>Personality %</th>
+            <th>Neuro %</th>
+            <th>Education %</th>
+            <th>Overall</th>
+        </tr>
+    </thead>
+    <tbody>
+
+    {% for player in players %}
+        {% for assessment in player.assessments.all %}
+        <tr>
+            {% if forloop.first %}
+                <td>{{ player.id_no }}</td>
+                <td>
+                    <a href="{% url 'player_detail' player.id %}">
+                        {{ player.player_name }}
+                    </a>
+                </td>
+                <td>{{ player.join_date }}</td>
+                <td>{{ player.core_character }}</td>
+                <td>{{ player.age_group }}</td>
+            {% else %}
+                <td></td><td></td><td></td><td></td><td></td>
+            {% endif %}
+
+            <td>{{ assessment.start_date }}</td>
+            <td>{{ assessment.end_date }}</td>
+            <td>{{ assessment.task }}</td>
+            <td>{{ assessment.iq_range }}</td>
+            <td>{{ assessment.cognitive_percent }}</td>
+            <td>{{ assessment.personality_percent }}</td>
+            <td>{{ assessment.neuro_psychology_percent }}</td>
+            <td>{{ assessment.education_percent }}</td>
+            <td>{{ assessment.overall }}</td>
+        </tr>
+        {% endfor %}
+    {% endfor %}
+
+    </tbody>
+</table>
+
+</body>
+</html>

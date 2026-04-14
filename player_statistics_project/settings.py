@@ -51,6 +51,7 @@ INSTALLED_APPS = [
      'version2.tagging_app_v2',
      'version2.reports_app_v2',
      'version2.loans_app_v2',
+     'version2.psychology_app_v2',
 
     # version3
     'version3.tagging_app_v3',

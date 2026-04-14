@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ player.player_name }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .filters {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .chart-container {
+            width: 80%;
+            margin: 30px auto;
+        }
+
+        .radar-container {
+            width: 50%;
+            margin: 30px auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            text-align: center;
+        }
+
+        th {
+            background: black;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 🔍 FILTERS -->
+<div class="filters">
+    <form method="get">
+        <label>From:</label>
+        <input type="date" name="start_date" value="{{ start_date }}">
+
+        <label>To:</label>
+        <input type="date" name="end_date" value="{{ end_date }}">
+
+        <label>Compare with:</label>
+        <select name="compare">
+            <option value="">None</option>
+            {% for p in players %}
+                <option value="{{ p.id }}"
+                    {% if p.id == player.id %}disabled{% endif %}>
+                    {{ p.player_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Apply</button>
+    </form>
+</div>
+
+<!-- 👤 PLAYER INFO -->
+<h1>{{ player.player_name }}</h1>
+
+<p><strong>Join Date:</strong> {{ player.join_date }}</p>
+<p><strong>Core Character:</strong> {{ player.core_character }}</p>
+<p><strong>Age Group:</strong> {{ player.age_group }}</p>
+
+<!-- 📅 PERIOD INFO -->
+{% if start_date or end_date %}
+    <p style="text-align:center;">
+        Showing data from 
+        <strong>{{ start_date|default:"Beginning" }}</strong> 
+        to 
+        <strong>{{ end_date|default:"Now" }}</strong>
+    </p>
+{% else %}
+    <p style="text-align:center;"><strong>All-time performance</strong></p>
+{% endif %}
+
+<p style="text-align:center;">
+    <strong>Total Assessments:</strong> {{ assessments|length }}
+</p>
+
+<hr>
+
+<!-- 📈 LINE CHART -->
+<h2>Performance Trend</h2>
+<div class="chart-container">
+    <canvas id="trendChart"></canvas>
+</div>
+
+<!-- 🧠 RADAR CHART -->
+<h2>Skill Profile</h2>
+<div class="radar-container">
+    <canvas id="radarChart"></canvas>
+</div>
+
+<script>
+// 📈 LINE CHART
+new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+        labels: {{ dates|safe }},
+        datasets: [
+            {
+                label: '{{ player.player_name }}',
+                data: {{ overall|safe }},
+                borderWidth: 3,
+                tension: 0.3
+            },
+            {% if compare_player %}
+            {
+                label: '{{ compare_player.player_name }}',
+                data: {{ compare_data|safe }},
+                borderWidth: 3,
+                borderDash: [5,5]
+            }
+            {% endif %}
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top'
+            }
+        },
+        scales: {
+            y: {
+                min: {{ y_min }},
+                max: {{ y_max }},
+                ticks: {
+                    stepSize: 5
+                }
+            }
+        }
+    }
+});
+
+// 🧠 RADAR CHART
+new Chart(document.getElementById('radarChart'), {
+    type: 'radar',
+    data: {
+        labels: ['Cognitive', 'Personality', 'Neuro', 'Education'],
+        datasets: [{
+            label: '{{ player.player_name }}',
+            data: {{ radar|safe }},
+            borderWidth: 2
+        }]
+    },
+    options: {
+        scales: {
+            r: {
+                min: 0,
+                max: 100
+            }
+        }
+    }
+});
+</script>
+
+<hr>
+
+<!-- 📊 TABLE -->
+<h2>Assessment History</h2>
+
+<table>
+    <tr>
+        <th>Start</th>
+        <th>End</th>
+        <th>Task</th>
+        <th>IQ</th>
+        <th>Cognitive</th>
+        <th>Personality</th>
+        <th>Neuro</th>
+        <th>Education</th>
+        <th>Overall</th>
+    </tr>
+
+    {% for a in assessments %}
+    <tr>
+        <td>{{ a.start_date }}</td>
+        <td>{{ a.end_date }}</td>
+        <td>{{ a.task }}</td>
+        <td>{{ a.iq_range }}</td>
+        <td>{{ a.cognitive_percent }}</td>
+        <td>{{ a.personality_percent }}</td>
+        <td>{{ a.neuro_psychology_percent }}</td>
+        <td>{{ a.education_percent }}</td>
+        <td>{{ a.overall }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br>
+<div style="text-align:center;">
+    <a href="{% url 'player_list' %}">⬅ Back to Players</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+<h1> Dashboard</h1>
+
+
+<form method="get">
+    <label>From:</label>
+    <input type="date" name="start_date" value="{{ start_date }}">
+
+    <label>To:</label>
+    <input type="date" name="end_date" value="{{ end_date }}">
+
+    <button type="submit">Filter</button>
+</form>
+
+
+
+<p>Total Players: {{ total_players }}</p>
+<p>Total Assessments: {{ total_assessments }}</p>
+
+
+
+
+
+
+<h2>Overall Performance</h2>
+
+{% if start_date or end_date %}
+    <p>
+        Showing data from 
+        <strong>{{ start_date|default:"Beginning" }}</strong>
+        to 
+        <strong>{{ end_date|default:"Now" }}</strong>
+    </p>
+{% else %}
+    <p><strong>Showing ALL TIME data</strong></p>
+{% endif %}
+
+
+
+<ul>
+    <li>Cognitive: {{ overall_stats.avg_cognitive|floatformat:1 }}</li>
+    <li>Personality: {{ overall_stats.avg_personality|floatformat:1 }}</li>
+    <li>Neuro: {{ overall_stats.avg_neuro|floatformat:1 }}</li>
+    <li>Education: {{ overall_stats.avg_education|floatformat:1 }}</li>
+    <li>Overall: {{ overall_stats.avg_overall|floatformat:1 }}</li>
+</ul>
+
+<hr>
+
+<h2>Teams (Age Groups)</h2>
+<ul>
+    {% for group in age_groups %}
+        <li>
+            <a href="{% url 'player_list' %}?age_group={{ group.id }}">
+                {{ group.name }}
+            </a>
+        </li>
+    {% endfor %}
+</ul>
+
+<hr>
+
+<a href="{% url 'player_list' %}">➡ View All Players</a>
