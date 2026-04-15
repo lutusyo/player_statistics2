@@ -5,9 +5,7 @@
     <title>{{ player.player_name }}</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-
-<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
-
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 </head>
 <body>
 
@@ -20,7 +18,7 @@
         <ul style="list-style: none; padding: 0;">
             {% for p in team_players %}
                 <li style="margin-bottom: 8px;">
-                    <a href="{% url 'player_detail' p.id %}?start_date={{ start_date }}&end_date={{ end_date }}&compare={{ request.GET.compare }}"
+                    <a href="{% url 'player_detail' p.id %}?start_date={{ start_date }}&end_date={{ end_date }}&compare={{ compare_player.id|default:'' }}&period={{ period }}&metric={{ metric }}"
                        style="
                            text-decoration: none;
                            color: {% if p.id == player.id %}white{% else %}black{% endif %};
@@ -40,7 +38,7 @@
 
         <!-- 🔍 FILTERS -->
         <div class="filters">
-            <form method="get">
+            <form method="get" id="filterForm">
 
                 <!-- 🔥 QUICK PERIOD -->
                 <label>Quick Period:</label>
@@ -51,13 +49,6 @@
                     <option value="3" {% if period == "3" %}selected{% endif %}>3 Months</option>
                     <option value="6" {% if period == "6" %}selected{% endif %}>6 Months</option>
                 </select>
-
-                <!-- 📅 DATE FILTER 
-                <label>From:</label>
-                <input type="date" name="start_date" value="{{ start_date }}" {% if period %}disabled{% endif %}> 
-
-                <label>To:</label>
-                <input type="date" name="end_date" value="{{ end_date }}" {% if period %}disabled{% endif %}>-->
 
                 <!-- 🆚 COMPARE -->
                 <label>Compare with:</label>
@@ -72,7 +63,24 @@
                     {% endfor %}
                 </select>
 
-                <button type="submit">Apply</button>
+
+
+
+                <label>Metric:</label>
+                <select name="metric">
+                    <option value="overall" {% if metric == "overall" %}selected{% endif %}>Overall</option>
+                    <option value="cognitive" {% if metric == "cognitive" %}selected{% endif %}>Cognitive</option>
+                    <option value="personality" {% if metric == "personality" %}selected{% endif %}>Personality</option>
+                    <option value="neuro" {% if metric == "neuro" %}selected{% endif %}>Neuropsychology</option>
+                    <option value="education" {% if metric == "education" %}selected{% endif %}>Education</option>
+                </select>
+
+
+
+
+                <!-- Disabled button (not needed anymore) -->
+                <button type="submit" disabled style="opacity:0.5;">Auto Apply</button>
+
             </form>
         </div>
 
@@ -100,7 +108,7 @@
         <hr>
 
         <!-- 📈 LINE CHART -->
-        <h2>Performance Trend</h2>
+        <h2>Performance Trend ({{ metric|title }})</h2>
         <div class="chart-container">
             <canvas id="trendChart"></canvas>
         </div>
@@ -109,6 +117,12 @@
         <h2>Skill Profile</h2>
         <div class="radar-container">
             <canvas id="radarChart"></canvas>
+        </div>
+
+        <!-- 📊 BAR CHART -->
+        <h2>Comparison Summary ({{ metric|title }})</h2>
+        <div class="chart-container">
+            <canvas id="barChart"></canvas>
         </div>
 
     </div>
@@ -122,14 +136,14 @@ new Chart(document.getElementById('trendChart'), {
         labels: {{ dates|safe }},
         datasets: [
             {
-                label: '{{ player.player_name }}',
-                data: {{ overall|safe }},
+                label: '{{ player.player_name }} ({{ metric|title }})',
+                data: {{ values|safe }},
                 borderWidth: 3,
                 tension: 0.3
             },
             {% if compare_player %}
             {
-                label: '{{ compare_player.player_name }}',
+                label: '{{ compare_player.player_name }} ({{ metric|title }})',
                 data: {{ compare_data|safe }},
                 borderWidth: 3,
                 borderDash: [6,4],
@@ -205,6 +219,52 @@ new Chart(document.getElementById('radarChart'), {
             }
         }
     }
+});
+
+// 📊 BAR CHART
+new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ bar_labels|safe }},
+        datasets: [{
+            label: '{{ metric|title }} Average (%)',
+            data: {{ bar_values|safe }},
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                min: 0,
+                max: 100,
+                ticks: {
+                    callback: function(value) {
+                        return value + '%';
+                    }
+                }
+            }
+        }
+    }
+});
+
+// ⚡ AUTO SUBMIT (FIXED)
+const form = document.getElementById('filterForm');
+
+document.querySelector('select[name="period"]').addEventListener('change', function() {
+    form.submit();
+});
+
+document.querySelector('select[name="compare"]').addEventListener('change', function() {
+    form.submit();
+});
+
+document.querySelector('select[name="metric"]').addEventListener('change', function() {
+    form.submit();
 });
 </script>
 

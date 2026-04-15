@@ -5,11 +5,60 @@
     <title>Players Data</title>
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 
+    <style>
+        /* 🎨 Table styling improvements */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        thead {
+            background-color: #222;
+            color: white;
+        }
+
+        /* 👇 Alternating player blocks */
+        .player-group-even {
+            background-color: #f9f9f9;
+        }
+
+        .player-group-odd {
+            background-color: #eaf3ff;
+        }
+
+        /* 👇 Add spacing between players */
+        .player-separator td {
+            border-top: 3px solid #000;
+        }
+
+        /* 🔙 Back button */
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 15px;
+            padding: 8px 15px;
+            background-color: black;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .back-btn:hover {
+            background-color: #333;
+        }
+    </style>
 </head>
+
 <body>
 
+<!-- 🔙 BACK BUTTON -->
+<a href="{% url 'psychology_dashboard' %}" class="back-btn">⬅  Home</a>
 
-<h2>Player Dashboard</h2>
 
 <form method="get">
     <label>Select Age Group:</label>
@@ -28,8 +77,6 @@
 </form>
 
 <br>
-
-
 
 <h2>Players Data Table</h2>
 
@@ -54,35 +101,46 @@
     </thead>
     <tbody>
 
-    {% for player in players %}
-        {% for assessment in player.assessments.all %}
-        <tr>
-            {% if forloop.first %}
-                <td>{{ player.id_no }}</td>
-                <td>
-                    <a href="{% url 'player_detail' player.id %}">
-                        {{ player.player_name }}
-                    </a>
-                </td>
-                <td>{{ player.join_date }}</td>
-                <td>{{ player.core_character }}</td>
-                <td>{{ player.age_group }}</td>
-            {% else %}
-                <td></td><td></td><td></td><td></td><td></td>
-            {% endif %}
+        {% for player in players %}
 
-            <td>{{ assessment.start_date }}</td>
-            <td>{{ assessment.end_date }}</td>
-            <td>{{ assessment.task }}</td>
-            <td>{{ assessment.iq_range }}</td>
-            <td>{{ assessment.cognitive_percent }}</td>
-            <td>{{ assessment.personality_percent }}</td>
-            <td>{{ assessment.neuro_psychology_percent }}</td>
-            <td>{{ assessment.education_percent }}</td>
-            <td>{{ assessment.overall }}</td>
-        </tr>
+            {% for assessment in player.assessments.all %}
+            <tr class="
+                {% if forloop.parentloop.counter0|divisibleby:2 %}
+                    player-group-even
+                {% else %}
+                    player-group-odd
+                {% endif %}
+                {% if forloop.first %}player-separator{% endif %}
+            ">
+
+                {% if forloop.first %}
+                    <td>{{ player.id_no }}</td>
+                    <td>
+                        <a href="{% url 'player_detail' player.id %}">
+                            {{ player.player_name }}
+                        </a>
+                    </td>
+                    <td>{{ player.join_date }}</td>
+                    <td>{{ player.core_character }}</td>
+                    <td>{{ player.age_group }}</td>
+                {% else %}
+                    <td></td><td></td><td></td><td></td><td></td>
+                {% endif %}
+
+                <td>{{ assessment.start_date }}</td>
+                <td>{{ assessment.end_date }}</td>
+                <td>{{ assessment.task }}</td>
+                <td>{{ assessment.iq_range }}</td>
+                <td>{{ assessment.cognitive_percent }}</td>
+                <td>{{ assessment.personality_percent }}</td>
+                <td>{{ assessment.neuro_psychology_percent }}</td>
+                <td>{{ assessment.education_percent }}</td>
+                <td>{{ assessment.overall }}</td>
+
+            </tr>
+            {% endfor %}
+
         {% endfor %}
-    {% endfor %}
 
     </tbody>
 </table>
