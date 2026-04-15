@@ -66,9 +66,15 @@ def player_category_clips(request, player_id, category):
         clips = AttemptToGoal.objects.none()
 
     # first video clip
+    # first video clip
     first_clip = clips.filter(
         video_clip__isnull=False
     ).exclude(video_clip='').first()
+
+    # ✅ ADD THIS LINE (FILTER ONLY CLIPS WITH VIDEO)
+    clips = clips.filter(
+        video_clip__isnull=False
+    ).exclude(video_clip='')
 
     context = {
         'player': player,
@@ -76,7 +82,7 @@ def player_category_clips(request, player_id, category):
         'category': category,
         'first_clip': first_clip,
     }
-
+    
     return render(request, 'players_app/player_category_clips.html', context)
 
 
