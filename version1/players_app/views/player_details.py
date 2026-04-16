@@ -14,6 +14,8 @@ from version1.reports_app.models import Result
 @login_required
 def player_detail(request, player_id):
     player = get_object_or_404(Player, id=player_id)
+    is_goalkeeper = player.position and player.position.lower() == 'goalkeeper'
+
     if not player.is_active:
         raise Http404("This player is inactive")
 
@@ -38,25 +40,13 @@ def player_detail(request, player_id):
     lineup_qs = MatchLineup.objects.filter(player=player).select_related('match')
     lineup_qs = apply_match_filters(lineup_qs)
 
-    goals_qs = AttemptToGoal.objects.filter(
-        player=player,
-        outcome='On Target Goal',
-        is_own_goal=False
-    ).select_related('match')
+    goals_qs = AttemptToGoal.objects.filter( player=player, outcome='On Target Goal', is_own_goal=False).select_related('match')
     goals_qs = apply_match_filters(goals_qs)
 
-    assists_qs = AttemptToGoal.objects.filter(
-        assist_by=player,
-        outcome='On Target Goal',
-        is_own_goal=False
-    ).select_related('match')
+    assists_qs = AttemptToGoal.objects.filter(assist_by=player, outcome='On Target Goal', is_own_goal=False).select_related('match')
     assists_qs = apply_match_filters(assists_qs)
 
-    pre_assists_qs = AttemptToGoal.objects.filter(
-        pre_assist_by=player,
-        outcome='On Target Goal',
-        is_own_goal=False
-    ).select_related('match')
+    pre_assists_qs = AttemptToGoal.objects.filter(pre_assist_by=player, outcome='On Target Goal', is_own_goal=False).select_related('match')
     pre_assists_qs = apply_match_filters(pre_assists_qs)
 
 
@@ -65,6 +55,16 @@ def player_detail(request, player_id):
 
     attempts_qs = AttemptToGoal.objects.filter(player=player).select_related('match')
     attempts_qs = apply_match_filters(attempts_qs)
+
+   
+   
+   
+    opponent_goals_qs = AttemptToGoal.objects.filter(outcome='On Target Goal').exclude(team=player.team)
+    opponent_goals_qs = apply_match_filters(opponent_goals_qs)
+
+
+
+
 
     passes_qs = PassEvent.objects.filter(from_player=player).select_related('match')
     passes_qs = apply_match_filters(passes_qs)
@@ -106,19 +106,35 @@ def player_detail(request, player_id):
 
     # Stats dictionary by competition
     stats_dict = defaultdict(lambda: {
-        'appearances': 0,
-        'minutes': 0,
-        'starts': 0,
-        'sub_in': 0,
-        'sub_out': 0,
-        'goals': 0,
-        'assists': 0,
-        'pre_assists': 0,
-        'tackles_won': 0,
-        'tackles_lost': 0,
-        'yellow_cards': 0,
-        'red_cards': 0
+    'appearances': 0,
+    'minutes': 0,
+    'starts': 0,
+    'sub_in': 0,
+    'sub_out': 0,
+
+    # outfield
+    'goals': 0,
+    'assists': 0,
+    'pre_assists': 0,
+    'tackles_won': 0,
+    'tackles_lost': 0,
+    'yellow_cards': 0,
+    'red_cards': 0,
+
+    # ✅ goalkeeper stats
+    'clean_sheets': 0,
+    'matches_conceded': 0,
+    'goals_conceded': 0,
     })
+
+
+    goals_conceded_by_match = defaultdict(int)
+
+
+    for g in opponent_goals_qs:
+        goals_conceded_by_match[g.match_id] += 1
+
+
 
     for match in matches:
         comp = match.competition.type if match.competition else 'Unknown'
@@ -149,6 +165,22 @@ def player_detail(request, player_id):
             stats['sub_in'] += subs_in_by_match.get(match.id, 0)
             stats['sub_out'] += subs_out_by_match.get(match.id, 0)
 
+
+
+        # ✅ GOALKEEPER LOGIC
+        if is_goalkeeper:
+            played = match.id in lineup_match_ids and mp_for_match > 0
+
+            if played:
+                conceded = goals_conceded_by_match.get(match.id, 0)
+
+                stats['goals_conceded'] += conceded
+
+                if conceded == 0:
+                    stats['clean_sheets'] += 1
+                else:
+                    stats['matches_conceded'] += 1
+
     # Goals
     for g in goals_qs:
         comp = g.match.competition.type if g.match.competition else 'Unknown'
@@ -174,11 +206,18 @@ def player_detail(request, player_id):
 
     # Compile final stats
     player_stats = []
+
+
+
+
     totals = dict.fromkeys([
-        'appearances', 'minutes', 'starts', 'sub_in', 'sub_out',
-        'goals', 'assists', 'pre_assists', 'tackles_won', 'tackles_lost',
-        'yellow_cards', 'red_cards'
+    'appearances', 'minutes', 'starts', 'sub_in', 'sub_out',
+    'goals', 'assists', 'pre_assists', 'tackles_won', 'tackles_lost',
+    'yellow_cards', 'red_cards',
+    # ✅ GK
+    'clean_sheets', 'matches_conceded', 'goals_conceded'
     ], 0)
+
 
     if selected_competition != 'all':
         comp = selected_competition
@@ -232,14 +271,16 @@ def player_detail(request, player_id):
     for r in results_qs:
         result_map[(r.home_team_id, r.away_team_id, r.date)] = r
 
+
     # Matches played list
-    matches_played = []
+    matches_by_competition = defaultdict(list)
+
     for match in matches:
         lineup = MatchLineup.objects.filter(match=match, player=player).first()
         played = lineup or match.id in goals_match_ids or match.id in assists_match_ids or match.id in defensive_match_ids
 
         if played:
-            # Find opponent team
+            # opponent
             if match.home_team and match.home_team.team_type == 'OPPONENT':
                 opponent = match.home_team
             elif match.away_team and match.away_team.team_type == 'OPPONENT':
@@ -247,11 +288,13 @@ def player_detail(request, player_id):
             else:
                 opponent = None
 
-            # Get result from Result table
+            # result
             result_obj = result_map.get((match.home_team_id, match.away_team_id, match.date))
             result_display = f"{result_obj.home_score} - {result_obj.away_score}" if result_obj else "-"
 
-            matches_played.append({
+            comp = match.competition.type if match.competition else "Unknown"
+
+            matches_by_competition[comp].append({
                 'match': match,
                 'opponent': opponent.name if opponent else "Unknown",
                 'minutes_played': lineup.minutes_played if lineup else 0,
@@ -260,8 +303,9 @@ def player_detail(request, player_id):
                 'pre_assists': pre_assists_by_match.get(match.id, 0),
                 'total_shots': shots_by_match.get(match.id, 0),
                 'total_passes': passes_by_match.get(match.id, 0),
-                'competition_type': match.competition.type if match.competition else "Unknown",
+                'competition_type': comp,
                 'result': result_display,
+                'goals_conceded': goals_conceded_by_match.get(match.id, 0) if is_goalkeeper else None,
             })
 
 
@@ -274,12 +318,20 @@ def player_detail(request, player_id):
 
     return render(request, 'players_app/player_detail.html', {
         'player': player,
+
+        'is_goalkeeper': is_goalkeeper,
+
         'related_players': related_players,
         'seasons': seasons,
         'competitions': competitions,
         'selected_season': selected_season,
         'selected_competition': selected_competition,
-        'matches_played': matches_played,
+
+
+        'matches_by_competition': dict(matches_by_competition),
+
+
+        
         'player_stats': player_stats,
         'totals': totals,
         'tab': tab,

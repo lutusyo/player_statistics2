@@ -314,165 +314,210 @@
             </div>
 
             <div class="stats-table-container">
-                <table class="stats-table">
-                    <thead>
-                        <tr>
-                            <th>Competition</th>
-                            <th>Apps</th>
-                            <th>Mins</th>
-                            <th>Goals</th>
-                            <th>Assists</th>
-                            <th>Pre Assists</th>
-                            <th>Starts</th>
-                            <th>Sub In</th>
-                            <th>Sub Out</th>
-                            <th>Tackles Won</th>
-                            <th>Tackles Lost</th>
-                            <th>Yellow</th>
-                            <th>Red</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% if player_stats %}
-                            {% for stat in player_stats %}
+
+                
+                {% if is_goalkeeper %}
+
+                    <div class="stats-table-container">
+                        <table class="stats-table">
+                            <thead>
                                 <tr>
-                                    <td>{{ stat.competition }}</td>
-                                    <td>{{ stat.appearances }}</td>
-                                    <td>{{ stat.minutes }}</td>
-
-                                    <td>
-                                        <a href="{% url 'players_app:player_category_clips' player.id 'goals' %}">
-                                            {{ stat.goals }}
-                                        </a>
-                                    </td>
-
-                                    <td>{{ stat.assists }}</td>
-                                    <td>{{ stat.pre_assists }}</td>
-
-                                    <td>{{ stat.starts }}</td>
-                                    <td>{{ stat.sub_in }}</td>
-                                    <td>{{ stat.sub_out }}</td>
-                                    <td>{{ stat.tackles_won }}</td>
-                                    <td>{{ stat.tackles_lost }}</td>
-                                    <td>{{ stat.yellow_cards }}</td>
-                                    <td>{{ stat.red_cards }}</td>
+                                    <th>Competition</th>
+                                    <th>Apps</th>
+                                    <th>Mins</th>
+                                    <th>Clean Sheets</th>
+                                    <th>Goals Conceded</th>
+                                    <th>Matches Conceded</th>
+                                    <th>Starts</th>
+                                    <th>Sub In</th>
+                                    <th>Sub Out</th>
                                 </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr><td colspan="12">No stats available.</td></tr>
-                        {% endif %}
+                            </thead>
+                            <tbody>
+                                {% if player_stats %}
+                                    {% for stat in player_stats %}
+                                        <tr>
+                                            <td>{{ stat.competition }}</td>
+                                            <td>{{ stat.appearances }}</td>
+                                            <td>{{ stat.minutes }}</td>
+                                            <td>{{ stat.clean_sheets }}</td>
+                                            <td>{{ stat.goals_conceded }}</td>
+                                            <td>{{ stat.matches_conceded }}</td>
+                                            <td>{{ stat.starts }}</td>
+                                            <td>{{ stat.sub_in }}</td>
+                                            <td>{{ stat.sub_out }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr><td colspan="9">No stats available.</td></tr>
+                                {% endif %}
 
-                        <tr style="font-weight: bold; background-color: #d9edf7;">
-                            <td>Total</td>
-                            <td>{{ totals.appearances }}</td>
-                            <td>{{ totals.minutes }}</td>
-                            <td>{{ totals.goals }}</td>
-                            <td>{{ totals.assists }}</td>
-                            <td>{{ totals.pre_assists }}</td>  <!-- ✅ add this -->
-                            <td>{{ totals.starts }}</td>
-                            <td>{{ totals.sub_in }}</td>
-                            <td>{{ totals.sub_out }}</td>
-                            <td>{{ totals.tackles_won }}</td>
-                            <td>{{ totals.tackles_lost }}</td>
-                            <td>{{ totals.yellow_cards }}</td>
-                            <td>{{ totals.red_cards }}</td>
-                        </tr>
+                                <!-- TOTAL -->
+                                <tr style="font-weight: bold; background-color: #d9edf7;">
+                                    <td>Total</td>
+                                    <td>{{ totals.appearances }}</td>
+                                    <td>{{ totals.minutes }}</td>
+                                    <td>{{ totals.clean_sheets }}</td>
+                                    <td>{{ totals.goals_conceded }}</td>
+                                    <td>{{ totals.matches_conceded }}</td>
+                                    <td>{{ totals.starts }}</td>
+                                    <td>{{ totals.sub_in }}</td>
+                                    <td>{{ totals.sub_out }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+       
+
+                {% else %}
+
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Competition</th>
+                                <th>Apps</th>
+                                <th>Mins</th>
+                                <th>Goals</th>
+                                <th>Assists</th>
+                                <th>Pre Assists</th>
+                                <th>Starts</th>
+                                <th>Sub In</th>
+                                <th>Sub Out</th>
+                                <th>Tackles Won</th>
+                                <th>Tackles Lost</th>
+                                <th>Yellow</th>
+                                <th>Red</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if player_stats %}
+                                {% for stat in player_stats %}
+                                    <tr>
+                                        <td>{{ stat.competition }}</td>
+                                        <td>{{ stat.appearances }}</td>
+                                        <td>{{ stat.minutes }}</td>
+
+                                        <td>
+                                            <a href="{% url 'players_app:player_category_clips' player.id 'goals' %}">
+                                                {{ stat.goals }}
+                                            </a>
+                                        </td>
+
+                                        <td>{{ stat.assists }}</td>
+                                        <td>{{ stat.pre_assists }}</td>
+
+                                        <td>{{ stat.starts }}</td>
+                                        <td>{{ stat.sub_in }}</td>
+                                        <td>{{ stat.sub_out }}</td>
+                                        <td>{{ stat.tackles_won }}</td>
+                                        <td>{{ stat.tackles_lost }}</td>
+                                        <td>{{ stat.yellow_cards }}</td>
+                                        <td>{{ stat.red_cards }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="12">No stats available.</td></tr>
+                            {% endif %}
+
+                            <tr style="font-weight: bold; background-color: #d9edf7;">
+                                <td>Total</td>
+                                <td>{{ totals.appearances }}</td>
+                                <td>{{ totals.minutes }}</td>
+                                <td>{{ totals.goals }}</td>
+                                <td>{{ totals.assists }}</td>
+                                <td>{{ totals.pre_assists }}</td>  <!-- ✅ add this -->
+                                <td>{{ totals.starts }}</td>
+                                <td>{{ totals.sub_in }}</td>
+                                <td>{{ totals.sub_out }}</td>
+                                <td>{{ totals.tackles_won }}</td>
+                                <td>{{ totals.tackles_lost }}</td>
+                                <td>{{ totals.yellow_cards }}</td>
+                                <td>{{ totals.red_cards }}</td>
+                            </tr>
 
 
 
-                        <tr style="background-color: #f9fafb;">
-                            <td colspan="13" style="text-align: center; padding: 12px;">
-                                <a href="{% url 'players_app:player_category_clips' player.id 'goals' %}" class="clip-link">
-                                    🎥 View Goal Clips
-                                </a>
-                                &nbsp;&nbsp;|&nbsp;&nbsp;
-                                <a href="{% url 'players_app:player_category_clips' player.id 'assists' %}" class="clip-link">
-                                    🎥 View Assist Clips
-                                </a>
-                            </td>
-                        </tr>
+                            <tr style="background-color: #f9fafb;">
+                                <td colspan="13" style="text-align: center; padding: 12px;">
+                                    <a href="{% url 'players_app:player_category_clips' player.id 'goals' %}" class="clip-link">
+                                        🎥 View Goal Clips
+                                    </a>
+                                    &nbsp;&nbsp;|&nbsp;&nbsp;
+                                    <a href="{% url 'players_app:player_category_clips' player.id 'assists' %}" class="clip-link">
+                                        🎥 View Assist Clips
+                                    </a>
+                                </td>
+                            </tr>
 
-                        
+                            
 
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+
+                {% endif %}
+
             </div>
 
             <h3>Matches Played</h3>
-            <div class="stats-table-container">
-            <table class="stats-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Opponent</th>
-                        <th>Competition</th>
-                        <th>Result</th>
-                        <th>Goals</th>
-                        <th>Assists</th>
-                        <th>Pre Assists</th>
-                        <th>Sub In</th>
-                        <th>Sub Out</th>
-                        <th>Minutes Played</th>
-                        <th>Shots</th>     
-                        <th>Passes</th>
-                        <th>Clips</th>    
-                    </tr>
-                </thead>
 
-                <tbody>
-                    {% for item in matches_played %}
-                    <tr>
-                        <td>
-                            <a href="{% url 'gps_app:player_gps_overview' player.id %}">
-                                {{ item.match.date }}
-                            </a>
-                        </td>
-                        <td>{{ item.opponent }}</td>
-                        <td>
-                            {% if item.match.competition %}
-                                {{ item.competition_type }}
-                            {% else %}
-                                Unknown
-                            {% endif %}
-                        </td>
-                        <td>{{ item.result }}</td>
-                        <td>{{ item.goals }}</td>
-                        <td>{{ item.assists }}</td>
-                        <td>{{ item.pre_assists }}</td>
+            {% for comp, matches in matches_by_competition.items %}
 
+                <h4 style="margin-top:20px;">{{ comp }}</h4>
 
-                        <td>
-                            {% if item.sub_in_minute %}
-                                {{ item.sub_in_minute }}'
-                            {% endif %}
-                        </td>
+                <div class="stats-table-container">
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Opponent</th>
+                                <th>Result</th>
+                                <th>Goals</th>
+                                <th>Assists</th>
+                                <th>Pre Assists</th>
+                                <th>Minutes</th>
+                                <th>Shots</th>
+                                <th>Passes</th>
 
-                        <td>
-                            {% if item.sub_out_minute %}
-                                {{ item.sub_out_minute }}'
-                            {% endif %}
-                        </td>
+                                {% if is_goalkeeper %}
+                                    <th>Goals Conceded</th>
+                                {% endif %}
 
+                                <th>Clips</th>
+                            </tr>
+                        </thead>
 
+                        <tbody>
+                            {% for item in matches %}
+                            <tr>
+                                <td>{{ item.match.date }}</td>
+                                <td>{{ item.opponent }}</td>
+                                <td>{{ item.result }}</td>
+                                <td>{{ item.goals }}</td>
+                                <td>{{ item.assists }}</td>
+                                <td>{{ item.pre_assists }}</td>
+                                <td>{{ item.minutes_played }}</td>
+                                <td>{{ item.total_shots }}</td>
+                                <td>{{ item.total_passes }}</td>
 
-                        <td>{{ item.minutes_played }}</td>
-                        <td>{{ item.total_shots }}</td>    
-                        <td>{{ item.total_passes }}</td>
-                        <td>
-                            <a href="{% url 'players_app:player_match_clips' player.id item.match.id %}">
-                                View Clips
-                            </a>
-                        </td>   
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="9">No matches played yet.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+                                {% if is_goalkeeper %}
+                                    <td>{{ item.goals_conceded }}</td>
+                                {% endif %}
 
-            </table>
-            </div>
+                                <td>
+                                    <a href="{% url 'players_app:player_match_clips' player.id item.match.id %}">
+                                        View Clips
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            {% empty %}
+                <p>No matches available.</p>
+            {% endfor %}
+
 
         </div>
 
