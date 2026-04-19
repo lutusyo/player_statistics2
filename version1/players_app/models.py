@@ -31,6 +31,7 @@ MEDICAL_TEST_CHOICES = [
 PLAYER_STATUS_CHOICES = [
     ('SIGNED', 'Signed'),
     ('TRIAL', 'Trial'),
+    ('LOANED', 'Loaned'),
 ]
 
 

@@ -99,11 +99,49 @@
         </div>
     </div>
 
+
+
+    <!-- LOANED PLAYERS -->
+    <div id="loanedPlayers" style="display:none;">
+        <h2 class="position-title">Loaned Players</h2>
+
+        <div class="players-grid">
+            {% for player in loaned_players %}
+                <a href="{% url 'players_app:player_detail' player.id %}" class="player-card">
+                    <div class="player-photo-box">
+                        <img src="{{ player.photo.url }}" alt="{{ player.name }}">
+                    </div>
+                    <div class="player-info-box">
+                        <div class="name-number">
+                            <span class="player-name">{{ player.name }}</span>
+                            <span class="player-number">{{ player.jersey_number }}</span>
+                        </div>
+                        <div class="nationality">
+                            <img src="{% static 'players_app/images/tanzania-flag.png' %}">
+                            <span>Tanzania</span>
+                        </div>
+                    </div>
+                </a>
+            {% empty %}
+                <p style="text-align:center; color:#888;">No loaned players available.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+
+
+
+
+
     <!-- 🔽 SMALL SWITCH (moved down here) -->
+
     <div class="toggle-buttons">
         <button onclick="showList('signed')" id="signedBtn" class="active">Signed</button>
         <button onclick="showList('trial')" id="trialBtn">Trial</button>
+        <button onclick="showList('loaned')" id="loanedBtn">Loaned</button>
     </div>
+
+
 
 </div>
 
@@ -133,24 +171,34 @@
 function showList(type) {
     const signed = document.getElementById("signedPlayers");
     const trial = document.getElementById("trialPlayers");
+    const loaned = document.getElementById("loanedPlayers");
 
     const signedBtn = document.getElementById("signedBtn");
     const trialBtn = document.getElementById("trialBtn");
+    const loanedBtn = document.getElementById("loanedBtn");
 
+    // Hide all
+    signed.style.display = "none";
+    trial.style.display = "none";
+    loaned.style.display = "none";
+
+    signedBtn.classList.remove("active");
+    trialBtn.classList.remove("active");
+    loanedBtn.classList.remove("active");
+
+    // Show selected
     if (type === 'trial') {
-        signed.style.display = "none";
         trial.style.display = "block";
-
         trialBtn.classList.add("active");
-        signedBtn.classList.remove("active");
+
+    } else if (type === 'loaned') {
+        loaned.style.display = "block";
+        loanedBtn.classList.add("active");
+
     } else {
         signed.style.display = "block";
-        trial.style.display = "none";
-
         signedBtn.classList.add("active");
-        trialBtn.classList.remove("active");
     }
 }
 </script>
-
 {% endblock %}
