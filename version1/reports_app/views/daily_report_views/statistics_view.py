@@ -18,9 +18,13 @@ from version1.tagging_app.models import AttemptToGoal
 from version1.teams_app.models import Team
 from version1.reports_app.models import PlayerTrainingMinutes
 
+from version1.matches_app.models import CompetitionType
+
+
+
 
 # ====================== REPORT HELPER ======================
-def get_statistics_report(filter_type="all", team=None, start_date=None, end_date=None):
+def get_statistics_report(filter_type="all", team=None, start_date=None, end_date=None, competition=None):
     today = now().date()
 
     # Determine start date based on filter_type if no explicit start_date provided
@@ -36,6 +40,10 @@ def get_statistics_report(filter_type="all", team=None, start_date=None, end_dat
         match_filter &= Q(match__date__gte=start_date)
     if end_date:
         match_filter &= Q(match__date__lte=end_date)
+
+    # Match competition filter
+    if competition:
+        match_filter &= Q(match__competition__type=competition)
 
     report = []
 
@@ -102,6 +110,8 @@ def statistics_list_view(request, team_id):
     team = get_object_or_404(Team, id=team_id)
     filter_type = request.GET.get("filter", "all")
 
+    competition = request.GET.get("competition")
+
 
 
 
@@ -124,7 +134,8 @@ def statistics_list_view(request, team_id):
         filter_type=filter_type,
         team=team,
         start_date=start_date,
-        end_date=end_date
+        end_date=end_date,
+        competition=competition
     )
 
     context = {
@@ -133,7 +144,12 @@ def statistics_list_view(request, team_id):
         "team": team,
         "start_date": start_date_str,
         "end_date": end_date_str,
+        "competition": competition,
+        
     }
+
+    context["competition_choices"] = CompetitionType.choices
+    
     return render(request, "reports_app/daily_report_templates/9statistics/statistics_list.html", context)
 
 
@@ -141,6 +157,8 @@ def statistics_list_view(request, team_id):
 @login_required
 def statistics_export_excel(request, team_id):
     team = get_object_or_404(Team, id=team_id)
+
+    competition = request.GET.get("competition")
     
 
     filter_type = request.GET.get("filter", "all")
@@ -161,7 +179,8 @@ def statistics_export_excel(request, team_id):
         filter_type=filter_type,
         team=team,
         start_date=start_date,
-        end_date=end_date
+        end_date=end_date,
+        competition=competition
     )
 
     df = pd.DataFrame([{
@@ -195,6 +214,8 @@ def statistics_export_excel(request, team_id):
 @login_required
 def statistics_export_pdf(request, team_id):
     team = get_object_or_404(Team, id=team_id)
+
+    competition = request.GET.get("competition")
     
     filter_type = request.GET.get("filter", "all")
 
@@ -214,7 +235,8 @@ def statistics_export_pdf(request, team_id):
         filter_type=filter_type,
         team=team,
         start_date=start_date,
-        end_date=end_date
+        end_date=end_date,
+        competition=competition
     )
 
     buffer = BytesIO()

@@ -22,17 +22,11 @@ def match_detail(request, match_id):
     team = get_object_or_404(Team, id=our_team_id)
 
     # ⭐ SAME LOGIC AS RESULTS VIEW
-    match.home_lineup_exists = MatchLineup.objects.filter(
-        match=match,
-        team=match.home_team
-    ).exists()
+    match.home_lineup_exists = MatchLineup.objects.filter(match=match, team=match.home_team).exists()
 
-    match.away_lineup_exists = MatchLineup.objects.filter(
-        match=match,
-        team=match.away_team).exists()
+    match.away_lineup_exists = MatchLineup.objects.filter(match=match, team=match.away_team).exists()
 
-    match.has_gps_data = GPSRecord.objects.filter(
-        match=match).exists()
+    match.has_gps_data = GPSRecord.objects.filter(match=match).exists()
 
 
     context = {

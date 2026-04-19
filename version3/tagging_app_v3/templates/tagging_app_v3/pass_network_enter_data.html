@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+
+<div class="row">
+
+<!-- HOME -->
+<div class="col-md-3">
+    <h6 class="text-center">{{ match.home_team.name }}</h6>
+    <div class="players-grid">
+        {% for lineup in home_lineups %}
+        <div class="player" data-id="{{ lineup.id }}" data-team="{{ lineup.team.id }}">
+            <div class="player-box">
+                <span class="jersey">{{ lineup.player.jersey_number }}</span>
+                <span class="name">{{ lineup.player.name }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ACTION CENTER -->
+<div class="col-md-6">
+
+    <div class="players-grid action-grid">
+        {% for value,label in ball_actions %}
+        <div class="action-btn" data-action="{{ value }}">
+            <div class="player-box">
+                <span class="jersey">{{ value|slice:":1"|upper }}</span>
+                <span class="name">{{ label }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="alert alert-info mt-3 text-center" id="status">
+        Select Actor
+    </div>
+
+</div>
+
+<!-- AWAY -->
+<div class="col-md-3">
+    <h6 class="text-center">{{ match.away_team.name }}</h6>
+    <div class="players-grid">
+        {% for lineup in away_lineups %}
+        <div class="player" data-id="{{ lineup.id }}" data-team="{{ lineup.team.id }}">
+            <div class="player-box">
+                <span class="jersey">{{ lineup.player.jersey_number }}</span>
+                <span class="name">{{ lineup.player.name }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+</div>
+
+<form id="hidden-form">{% csrf_token %}</form>
+</div>
+
+<!-- FOUL MODAL -->
+<div class="modal fade" id="foulModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <button class="btn btn-secondary foul-choice" data-value="NO_CARD">No Card</button>
+        <button class="btn btn-warning foul-choice" data-value="YELLOW_CARD">Yellow</button>
+        <button class="btn btn-danger foul-choice" data-value="RED_CARD">Red</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.players-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(70px,1fr));
+    gap:6px;
+}
+.player,.action-btn{
+    cursor:pointer;
+    border:1px solid #ddd;
+    border-radius:6px;
+    padding:6px;
+    text-align:center;
+}
+.actor{border:2px solid green;background:#e9f7ef;}
+.receiver{border:2px solid blue;background:#e7f1ff;}
+.action-btn.active{border:2px solid blue;}
+.player-box{display:flex;flex-direction:column;}
+.name{font-size:0.75rem;}
+</style>
+
+<script>
+let step="actor";
+
+let data={
+    actor:null,
+    receiver:null,
+    action:null,
+    foul_outcome:null
+};
+
+const status=document.getElementById("status");
+
+/* PLAYER CLICK */
+document.querySelectorAll(".player").forEach(p=>{
+    p.addEventListener("click",()=>{
+
+        if(step==="actor"){
+            clearPlayers();
+            data.actor=p.dataset.id;
+            p.classList.add("actor");
+            step="action";
+            status.innerText="Select Action or Receiver";
+            return;
+        }
+
+        if(step==="action"){
+            // quick pass
+            data.action="GROUND_PASS";
+            data.receiver=p.dataset.id;
+            saveEvent();
+            return;
+        }
+
+        if(step==="receiver"){
+            data.receiver=p.dataset.id;
+
+            if(data.action==="FOUL"){
+                new bootstrap.Modal(document.getElementById('foulModal')).show();
+                return;
+            }
+
+            saveEvent();
+        }
+
+    });
+});
+
+/* ACTION CLICK */
+document.querySelectorAll(".action-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+        if(step!=="action") return;
+
+        clearActions();
+        btn.classList.add("active");
+
+        data.action=btn.dataset.action;
+        step="receiver";
+        status.innerText="Select Receiver";
+    });
+});
+
+/* FOUL */
+document.querySelectorAll(".foul-choice").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+        data.foul_outcome=btn.dataset.value;
+        bootstrap.Modal.getInstance(document.getElementById('foulModal')).hide();
+        saveEvent();
+    });
+});
+
+/* SAVE */
+function saveEvent(){
+
+    const fd=new FormData();
+    fd.append("actor",data.actor);
+    fd.append("receiver",data.receiver);
+    fd.append("event_type","ball_action");   // 🔥 IMPORTANT
+    fd.append("action_type",data.action);
+    fd.append("foul_outcome",data.foul_outcome||"");
+
+    fd.append("csrfmiddlewaretoken",
+        document.querySelector("[name=csrfmiddlewaretoken]").value
+    );
+
+    fetch("",{
+        method:"POST",
+        headers:{"X-Requested-With":"XMLHttpRequest"},
+        body:fd
+    })
+    .then(r=>r.json())
+    .then(res=>{
+        if(res.success){
+            nextActor();
+        }else{
+            alert(res.error);
+        }
+    });
+}
+
+/* FLOW */
+function nextActor(){
+    clearPlayers();
+    clearActions();
+
+    const p=document.querySelector(`.player[data-id="${data.receiver}"]`);
+    if(p) p.classList.add("actor");
+
+    data.actor=data.receiver;
+    data.receiver=null;
+    data.action=null;
+    data.foul_outcome=null;
+
+    step="action";
+    status.innerText="Select Action or Receiver";
+}
+
+/* HELPERS */
+function clearPlayers(){
+    document.querySelectorAll(".player").forEach(p=>p.classList.remove("actor","receiver"));
+}
+function clearActions(){
+    document.querySelectorAll(".action-btn").forEach(b=>b.classList.remove("active"));
+}
+</script>
+
+{% endblock %}

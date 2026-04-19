@@ -1,5 +1,12 @@
 from django.db import models
 
+class MatchPeriod(models.TextChoices):
+    FIRST_HALF = "1H", "First Half"
+    SECOND_HALF = "2H", "Second Half"
+    EXTRA_TIME_FIRST = "ET1", "Extra Time 1st Half"
+    EXTRA_TIME_SECOND = "ET2", "Extra Time 2nd Half"
+    PENALTIES = "PEN", "Penalty Shootout"
+
 # GENERAL EVENT TYPES
 class EventType(models.TextChoices):
     PASS = "pass", "Pass"
