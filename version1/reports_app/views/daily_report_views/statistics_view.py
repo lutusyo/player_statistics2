@@ -149,7 +149,7 @@ def statistics_list_view(request, team_id):
     }
 
     context["competition_choices"] = CompetitionType.choices
-    
+
     return render(request, "reports_app/daily_report_templates/9statistics/statistics_list.html", context)
 
 
@@ -184,8 +184,18 @@ def statistics_export_excel(request, team_id):
     )
 
     df = pd.DataFrame([{
-        "Name": r["player"].name,
+        "Full Name": r["player"].full_name,
+        "Jersey No": r["player"].jersey_number,
         "Position": r["position"],
+        "Specific Position": r["player"].specific_position,
+        "Preferred Foot": r["player"].foot_preference,
+
+        "Height (cm)": r["player"].current_measurement.height if r["player"].current_measurement else "",
+        "Weight (kg)": r["player"].current_measurement.weight if r["player"].current_measurement else "",
+
+        "Date of Birth": r["player"].birthdate,
+        "Age": r["player"].age_using_birthdate,
+
         "Training Minutes": r["training_minutes"],
         "Game Minutes": r["game_minutes"],
         "Appearances": r["appearances"],
@@ -243,13 +253,41 @@ def statistics_export_pdf(request, team_id):
     doc = SimpleDocTemplate(buffer, pagesize=A4)
     styles = getSampleStyleSheet()
 
-    data = [["Name", "Pos", "Train", "Game", "Apps", "Starts", "In", "Out", "Goals", "Ast", "Note"]]
+    
+    data = [[
+    "Name", "No", "Pos", "Spec Pos", "Foot",
+    "Ht", "Wt", "DOB", "Age",
+    "Train", "Game", "Apps", "Starts", "In", "Out", "Goals", "Ast"
+    ]]
+
     for r in report:
+        player = r["player"]
+        m = player.current_measurement
+
         data.append([
-            r["player"].name, r["position"], r["training_minutes"], r["game_minutes"],
-            r["appearances"], r["starts"], r["sub_in"], r["sub_out"],
-            r["goals"], r["assists"], r["note"]
+            player.full_name,
+            player.jersey_number,
+            r["position"],
+            player.specific_position,
+            player.foot_preference,
+
+            m.height if m else "",
+            m.weight if m else "",
+
+            player.birthdate,
+            player.age_using_birthdate,
+
+            r["training_minutes"],
+            r["game_minutes"],
+            r["appearances"],
+            r["starts"],
+            r["sub_in"],
+            r["sub_out"],
+            r["goals"],
+            r["assists"],
         ])
+
+
 
     table = Table(data)
     table.setStyle(TableStyle([
