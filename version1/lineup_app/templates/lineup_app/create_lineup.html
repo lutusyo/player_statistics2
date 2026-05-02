@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+
 <style>
 .player-card {
     border: 1px solid #ccc;
@@ -14,12 +15,36 @@
     transition: background-color 0.2s;
 }
 .player-card.selected { background-color: #4CAF50; color: white; }
-.player-card img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; margin-right: 12px; }
-#players-list { display: flex; flex-direction: column; max-height: 500px; overflow-y: auto; }
-.player-card p { margin: 0; font-size: 14px; font-weight: 500; }
+.player-card img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+#players-list {
+    display: flex;
+    flex-direction: column;
+    max-height: 500px;
+    overflow-y: auto;
+}
+.player-card p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+}
 
-.step-container { max-width: 1200px; margin: auto; display: flex; gap: 20px; }
-.buttons { margin-top: 20px; display: flex; justify-content: flex-end; }
+.step-container {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    gap: 20px;
+}
+.buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
 
 #pitch {
     width: 600px;
@@ -30,7 +55,8 @@
     position: relative;
 }
 .pitch-player {
-    width: 50px; height: 50px;
+    width: 50px;
+    height: 50px;
     position: absolute;
     cursor: grab;
     border-radius: 50%;
@@ -42,13 +68,19 @@
     color: white;
     font-weight: bold;
 }
+.hidden {
+    display: none;
+}
 </style>
 
+<!-- TEAM SWITCH -->
 
 <div style="margin-bottom: 10px;">
     <a href="{% url 'lineup_app:create_lineup' match.id match.home_team.id %}" class="btn btn-primary">Home Team Lineup</a>
     <a href="{% url 'lineup_app:create_lineup' match.id match.away_team.id %}" class="btn btn-secondary">Away Team Lineup</a>
 </div>
+
+<!-- FORMATION -->
 
 <div>
     <select id="formation-select">
@@ -60,32 +92,69 @@
 </div>
 
 <div id="lineup-container" class="step-container hidden">
-    <!-- PLAYER LIST -->
-    <div id="player-list-panel">
-        <div id="players-list">
+
+<!-- PLAYER PANEL -->
+<div id="player-list-panel">
+
+    <!-- SWITCH BUTTONS -->
+    <div style="margin-bottom:10px;">
+        <button id="show-team-btn">Team Players</button>
+
+        {% if is_our_team %}
+            <button id="show-other-btn">Other Academy Players</button>
+        {% endif %}
+
+    </div>
+
+    <div id="players-list">
+
+        <!-- TEAM PLAYERS -->
+        <div id="team-players">
             {% for player in players %}
-            <div class="player-card" data-id="{{ player.id }}" data-name="{{ player.name }}" data-photo="{{ player.photo.url }}">
-                <img src="{{ player.photo.url }}" alt="{{ player.name }}">
+            <div class="player-card"
+                 data-id="{{ player.id }}"
+                 data-name="{{ player.name }}"
+                 data-photo="{{ player.photo.url }}">
+                <img src="{{ player.photo.url }}">
                 <p>{{ player.name }}</p>
             </div>
             {% endfor %}
         </div>
-        <div>
-            <small>Selected starters: <span id="starters-count">0</span>/11</small>
+
+        <!-- OTHER PLAYERS -->
+        <div id="other-players" style="display:none;">
+            {% for player in other_players %}
+            <div class="player-card"
+                 data-id="{{ player.id }}"
+                 data-name="{{ player.name }}"
+                 data-photo="{{ player.photo.url }}">
+                <img src="{{ player.photo.url }}">
+                <p>{{ player.name }} ({{ player.team.name }})</p>
+            </div>
+            {% endfor %}
         </div>
-        <div>
-            <small>Selected substitutes: <span id="bench-count">0</span></small>
-        </div>
+
     </div>
 
-    <!-- PITCH -->
-    <div id="pitch-panel">
-        <div id="pitch"></div>
-        <div class="buttons">
-            <button id="save-btn">Save Lineup</button>
-            <span class="spinner" id="loading-spinner">⏳ Saving...</span>
-        </div>
+    <div>
+        <small>Selected starters: <span id="starters-count">0</span>/11</small>
     </div>
+    <div>
+        <small>Selected substitutes: <span id="bench-count">0</span></small>
+    </div>
+
+</div>
+
+<!-- PITCH PANEL -->
+<div id="pitch-panel">
+    <div id="pitch"></div>
+    <div class="buttons">
+        <button id="save-btn">Save Lineup</button>
+        <span class="spinner" id="loading-spinner" style="display:none;">⏳ Saving...</span>
+    </div>
+</div>
+```
+
 </div>
 
 <script>
@@ -94,10 +163,11 @@ let selectedFormation = null;
 let starters = [];
 let bench = [];
 
-const formationSelect = document.getElementById('formation-select');
-formationSelect.addEventListener('change', () => {
-    selectedFormation = formationSelect.value;
-    if(selectedFormation) {
+// FORMATION SELECT
+document.getElementById('formation-select').addEventListener('change', () => {
+    selectedFormation = document.getElementById('formation-select').value;
+
+    if (selectedFormation) {
         document.getElementById('lineup-container').classList.remove('hidden');
         setupPitch();
     } else {
@@ -105,103 +175,141 @@ formationSelect.addEventListener('change', () => {
     }
 });
 
-// --- PLAYER SELECTION ---
-document.querySelectorAll('.player-card').forEach(card => {
-    card.addEventListener('click', () => {
-        const id = card.dataset.id;
-        if(starters.includes(id)) {
-            starters = starters.filter(pid=>pid!==id);
-            card.classList.remove('selected');
-        } else if(bench.includes(id)) {
-            bench = bench.filter(pid=>pid!==id);
-            card.classList.remove('selected');
-        } else if(starters.length < 11) {
-            starters.push(id);
-            card.classList.add('selected');
-        } else {
-            bench.push(id);
-            card.classList.add('selected');
-        }
-        updateCounts();
-        setupPitch();
-    });
+// PLAYER CLICK (GLOBAL HANDLER ✅)
+document.addEventListener('click', function(e) {
+    const card = e.target.closest('.player-card');
+    if (!card) return;
+
+    const id = card.dataset.id;
+
+    if (starters.includes(id)) {
+        starters = starters.filter(pid => pid !== id);
+        card.classList.remove('selected');
+    } else if (bench.includes(id)) {
+        bench = bench.filter(pid => pid !== id);
+        card.classList.remove('selected');
+    } else if (starters.length < 11) {
+        starters.push(id);
+        card.classList.add('selected');
+    } else {
+        bench.push(id);
+        card.classList.add('selected');
+    }
+
+    updateCounts();
+    setupPitch();
 });
 
+// SWITCH LISTS
+document.getElementById('show-team-btn').addEventListener('click', () => {
+    document.getElementById('team-players').style.display = 'block';
+    document.getElementById('other-players').style.display = 'none';
+});
+
+const otherBtn = document.getElementById('show-other-btn');
+
+if (otherBtn) {
+    otherBtn.addEventListener('click', () => {
+        document.getElementById('team-players').style.display = 'none';
+        document.getElementById('other-players').style.display = 'block';
+    });
+}
+
+// COUNTS
 function updateCounts() {
     document.getElementById('starters-count').innerText = starters.length;
     document.getElementById('bench-count').innerText = bench.length;
 }
 
-// --- SETUP PITCH ---
+// PITCH SETUP
 function setupPitch() {
     const pitch = document.getElementById('pitch');
     pitch.innerHTML = "";
-    if(!selectedFormation) return;
+
+    if (!selectedFormation) return;
+
     const formationMapping = FORMATION_POSITION_COORDS[selectedFormation];
-    if(!formationMapping) return;
+    if (!formationMapping) return;
 
     starters.forEach((id, idx) => {
         const card = document.querySelector(`.player-card[data-id="${id}"]`);
-        if(!card) return;
+        if (!card) return;
+
         const name = card.dataset.name;
         const photo = card.dataset.photo;
+
         const posKey = Object.keys(formationMapping)[idx] || "Pos";
         const posCoords = formationMapping[posKey];
 
         const div = document.createElement('div');
         div.classList.add('pitch-player');
         div.dataset.playerId = id;
+
         div.style.top = (posCoords?.top || 0) + "%";
         div.style.left = (posCoords?.left || 0) + "%";
         div.style.backgroundImage = `url(${photo})`;
+
         div.title = name;
         div.innerText = posKey;
+
         div.draggable = true;
         div.addEventListener('dragstart', dragStart);
         div.addEventListener('dragend', dragEnd);
+
         pitch.appendChild(div);
     });
 }
 
-// --- DRAG & DROP ---
+// DRAG
 let draggedPlayer = null;
-function dragStart(e){ draggedPlayer = e.target; }
-function dragEnd(e){
+
+function dragStart(e) {
+    draggedPlayer = e.target;
+}
+
+function dragEnd(e) {
     const rect = e.target.parentElement.getBoundingClientRect();
     const x = ((e.pageX - rect.left) / rect.width) * 100;
     const y = ((e.pageY - rect.top) / rect.height) * 100;
+
     e.target.style.left = x + "%";
     e.target.style.top = y + "%";
 }
 
-// --- SAVE LINEUP ---
-document.getElementById('save-btn').addEventListener('click',(e)=>{
+// SAVE
+document.getElementById('save-btn').addEventListener('click', (e) => {
     e.preventDefault();
-    document.getElementById('loading-spinner').style.display='inline';
+
+    document.getElementById('loading-spinner').style.display = 'inline';
 
     const formData = new FormData();
-    formData.append('match_id','{{ match.id }}');
+    formData.append('match_id', '{{ match.id }}');
     formData.append('formation', selectedFormation);
-    starters.forEach(id=> formData.append('starters[]', id));
-    bench.forEach(id=> formData.append('bench[]', id));
+
+    starters.forEach(id => formData.append('starters[]', id));
+    bench.forEach(id => formData.append('bench[]', id));
 
     fetch("{% url 'lineup_app:create_lineup' match.id team.id %}", {
         method: "POST",
         body: formData,
-        headers:{'X-CSRFToken':'{{ csrf_token }}'}
-    }).then(res=>res.json())
-    .then(data=>{
-        document.getElementById('loading-spinner').style.display='none';
-        if(data.success){ 
-            alert("Lineup saved!"); 
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('loading-spinner').style.display = 'none';
+
+        if (data.success) {
+            alert("Lineup saved!");
             window.location.href = "{% url 'lineup_app:substitution_panel' match.id %}";
-        } else { 
-            alert("Error: "+(data.error||"Unknown error")); 
+        } else {
+            alert("Error: " + (data.error || "Unknown error"));
         }
-    }).catch(err=>{
-        document.getElementById('loading-spinner').style.display='none';
+    })
+    .catch(() => {
+        document.getElementById('loading-spinner').style.display = 'none';
         alert("Error saving lineup");
     });
 });
 </script>
+
 {% endblock %}

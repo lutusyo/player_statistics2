@@ -9,13 +9,17 @@ from version1.teams_app.models import Team
 from version1.lineup_app.models import MatchLineup, Formation, POSITION_COORDS
 import json
 
-
 def create_lineup_view(request, match_id, team_id):
     match = get_object_or_404(Match, id=match_id)
     team = get_object_or_404(Team, id=team_id)
 
-    # Players for selected team only
-    players_qs = Player.objects.filter(team=team).order_by('name')
+    is_our_team = team.team_type == 'OUR_TEAM'
+
+    players_qs = Player.objects.filter(team=team).order_by('name') # Players for selected team only
+
+    other_players = Player.objects.filter(team__team_type='OUR_TEAM'
+    ).exclude(team=team).select_related('team').order_by('name')
+
 
     if request.method == "POST":
         starters = request.POST.getlist('starters[]')
@@ -32,25 +36,13 @@ def create_lineup_view(request, match_id, team_id):
 
         with transaction.atomic():
             # 🔥 Clear ONLY previous starting XI
-            MatchLineup.objects.filter(
-                match=match,
-                team=team,
-                is_starting=True
-            ).delete()
+            MatchLineup.objects.filter(match=match, team=team, is_starting=True).delete()
 
             # 🔥 Create starting XI (ORDER DRIVES POSITION)
             for order, pid in enumerate(starters, start=1):
-                player = get_object_or_404(Player, id=pid, team=team)
+                player = get_object_or_404(Player, id=pid)
 
-                MatchLineup.objects.create(
-                    match=match,
-                    team=team,
-                    player=player,
-                    formation=formation,
-                    is_starting=True,
-                    order=order,
-                    time_in=0
-                )
+                MatchLineup.objects.create(match=match, team=team, player=player, formation=formation, is_starting=True, order=order, time_in=0)
                 # ✅ position auto-assigned in model.save()
 
             # Set match start time once
@@ -63,10 +55,14 @@ def create_lineup_view(request, match_id, team_id):
     # ---------- GET REQUEST ----------
     formation_coords_json = json.dumps(POSITION_COORDS)
 
-    return render(request, 'lineup_app/create_lineup.html', {
+    context = {
         'match': match,
         'team': team,
+        'is_our_team': is_our_team,
         'players': players_qs,
+        'other_players': other_players,
         'formations': dict(Formation.choices),
         'formation_coords_json': formation_coords_json,
-    })
+    }
+
+    return render(request, 'lineup_app/create_lineup.html', context)

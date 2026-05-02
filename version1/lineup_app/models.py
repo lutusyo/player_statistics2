@@ -126,13 +126,7 @@ class MatchLineup(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
     team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True)
     is_starting = models.BooleanField(default=False)
-    position = models.CharField(
-        max_length=5,
-        choices=PositionChoices.choices,
-        default=PositionChoices.SUB,
-        blank=True,
-        null=True
-    )
+    position = models.CharField(max_length=5, choices=PositionChoices.choices, default=PositionChoices.SUB, blank=True,null=True)
     pod_number = models.CharField(max_length=20, null=True, blank=True)
     time_in = models.PositiveSmallIntegerField(null=True, blank=True)
     time_out = models.PositiveSmallIntegerField(null=True, blank=True)
