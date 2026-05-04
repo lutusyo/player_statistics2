@@ -13,7 +13,7 @@ class AttemptToGoalAdmin(admin.ModelAdmin):
     search_fields = ('player__name',)
     readonly_fields = ('video_preview',)
     fields = (
-        'match', 'team', 'player',
+        'match', 'period', 'team', 'player',
         'minute', 'second',
         'delivery_type', 'outcome',
         'body_part', 'location_tag',

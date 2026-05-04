@@ -37,6 +37,18 @@
 </style>
 
 
+<form method="get" style="margin-bottom:10px;">
+  <select name="period" id="period-select" onchange="this.form.submit()">
+    {% for value, label in periods %}
+      <option value="{{ value }}" {% if value == selected_period %}selected{% endif %}>
+        {{ label }}
+      </option>
+    {% endfor %}
+  </select>
+
+  <input type="hidden" name="team_id" value="{{ active_team.id }}">
+</form>
+
 <form method="get">
   <select name="team_id" onchange="this.form.submit()">
     <option value="{{ match.home_team.id }}" {% if active_team.id == match.home_team.id %}selected{% endif %}>
@@ -104,6 +116,8 @@ let interval = null;
 let isPaused = false;
 let selectedPlayer = null, selectedOutcome = null, selectedBodyPart = null, selectedLocation = null, selectedDeliveryType = null, selectedAssistPlayer = null, selectedPreAssistPlayer = null;
 const matchId = {{ match.id }};
+
+const selectedPeriod = document.getElementById('period-select').value;
 
 function formatTime(sec) {
   const m = String(Math.floor(sec / 60)).padStart(2, '0');
@@ -277,6 +291,9 @@ function saveAttempt(outcome, playerId, bodyPart, locationTag, deliveryType, ass
     delivery_type: deliveryType,
     assist_by_id: assistPlayerId,
     pre_assist_by_id: preAssistPlayerId,
+
+    period: selectedPeriod,  // ✅ ADD THIS
+
     minute: Math.floor(timer / 60),
     second: timer % 60,
     timestamp: new Date().toISOString(),

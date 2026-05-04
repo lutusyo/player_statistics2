@@ -66,3 +66,5 @@ def create_lineup_view(request, match_id, team_id):
     }
 
     return render(request, 'lineup_app/create_lineup.html', context)
+
+

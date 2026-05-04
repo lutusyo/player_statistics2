@@ -8,6 +8,9 @@ import json
 from version1.lineup_app.models import Match, MatchLineup, Substitution
 from version1.players_app.models import Player
 
+from django.views.decorators.http import require_POST
+
+from version1.teams_app.models import Team
 
 # Helper to serialize MatchLineup row for JSON
 def _serialize_lineup(lineup):
@@ -220,7 +223,18 @@ def substitution_panel(request, match_id):
     home_bench = get_bench(match.home_team, home_lineup_ids)
     away_bench = get_bench(match.away_team, away_lineup_ids)
 
+
+
     substitutions = Substitution.objects.filter(match=match).select_related("player_out", "player_in")
+    unused_subs = MatchLineup.objects.filter(
+    match=match,
+    is_starting=False,
+    time_in__isnull=True
+)
+
+
+
+
 
     if request.method == "POST":
         player_out_id = request.POST.get("player_out")
@@ -280,5 +294,34 @@ def substitution_panel(request, match_id):
             "away_currently_on_pitch": away_on_pitch,
             "away_bench": away_bench,
             "substitutions": substitutions,
+            "unused_subs": unused_subs,  
         },
     )
+
+
+
+
+@require_POST
+@transaction.atomic
+def add_unused_sub(request, match_id):
+    player_id = request.POST.get("player_id")
+    team_id = request.POST.get("team_id")
+
+    match = get_object_or_404(Match, id=match_id)
+    player = get_object_or_404(Player, id=player_id)
+    team = get_object_or_404(Team, id=team_id)
+
+    MatchLineup.objects.get_or_create(
+        match=match,
+        team=team,
+        player=player,
+        defaults={
+            "is_starting": False,
+            "time_in": None,
+            "time_out": None,
+        }
+    )
+
+    messages.success(request, f"{player.name} added as unused substitute")
+
+    return redirect("lineup_app:substitution_panel", match_id=match.id)    

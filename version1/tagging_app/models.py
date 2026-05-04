@@ -4,6 +4,15 @@ from version1.players_app.models import Player
 from version1.matches_app.models import Match
 from version1.teams_app.models import Team
 
+
+class PeriodChoices(models.TextChoices):
+    FIRST_HALF = '1H', 'First Half'
+    SECOND_HALF = '2H', 'Second Half'
+    EXTRA_FIRST_HALF = 'ET1', 'Extra Time First Half'
+    EXTRA_SECOND_HALF = 'ET2', 'Extra Time Second Half'
+    PENALTIES = 'P', 'Penalty shootout'
+
+
 class DeliveryTypeChoices(models.TextChoices):
     PASS = 'Pass', 'Pass'
     CROSS = 'Cross', 'Cross'
@@ -49,6 +58,9 @@ class BodyPartChoices(models.TextChoices):
 
 class AttemptToGoal(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    period = models.CharField(max_length=5, choices=PeriodChoices.choices, default=PeriodChoices.FIRST_HALF)
+
+
     team = models.ForeignKey(Team, on_delete=models.CASCADE)  # Team making the attempt
     player = models.ForeignKey(Player, on_delete=models.SET_NULL, null=True, blank=True, related_name='attempts')
     minute = models.PositiveIntegerField(default=0)

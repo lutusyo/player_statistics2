@@ -4,6 +4,8 @@ from version1.lineup_app.views.match_lineup_view_with_uwanja import pitch_lineup
 from version1.lineup_app.views import time
 from version1.lineup_app.views import lineup_view
 
+from version1.lineup_app.views.substitution_panel import add_unused_sub
+
 from . import views
 
 from version1.lineup_app.views.substitution_panel import (
@@ -43,6 +45,14 @@ urlpatterns = [
 
     path('match/<int:match_id>/substitutions/', views.substitution_panel.substitution_panel, name='substitution_panel'),
     path('match/<int:match_id>/record-sub/', views.substitution_panel.substitution_panel, name='record_substitution'),
+
+
+
+
+
+    path("match/<int:match_id>/add-unused-sub/", add_unused_sub, name="add_unused_sub"),
+
+
 
 ]
 

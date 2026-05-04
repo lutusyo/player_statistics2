@@ -38,6 +38,8 @@ from version1.tagging_app.utils.pass_network_utils import get_pass_network_conte
 def enter_attempt_to_goal(request, match_id):
     match = get_object_or_404(Match, id=match_id)
 
+    period = request.GET.get('period', 'First Half')
+
     # Determine which team is active
     selected_team_id = request.GET.get("team_id")
 
@@ -81,6 +83,9 @@ def enter_attempt_to_goal(request, match_id):
 
     context = {
         "match": match,
+
+        "period":period,
+
         "players": players,
         "delivery_types": DeliveryTypeChoices.choices,
         "outcomes": OutcomeChoices.choices,
@@ -122,6 +127,9 @@ def save_attempt_to_goal(request):
             match=match,
             player=player,
             team=team,
+
+            period=data.get("period"),
+
             outcome=data["outcome"],
             delivery_type=data["delivery_type"],
             body_part = data.get("body_part"),

@@ -15,8 +15,6 @@ def team_squad_view(request, pk):
     if not team:
         return render(request, '404.html', status=404)
 
-
-
     players = Player.objects.filter(team=team, is_active=True, status='SIGNED').select_related('team')
     trial_players = Player.objects.filter(team=team, is_active=True, status='TRIAL').select_related('team')
     loaned_players = Player.objects.filter(team=team, is_active=True, status='LOANED').select_related('team')
@@ -70,8 +68,6 @@ def team_statistics(request, pk):
         'team_selected': team,
         'active_tab': 'statistics'
     })
-
-
 
 def staff_list(request):
     staff_members = StaffMember.objects.all().order_by('age_group', 'role')

@@ -4,38 +4,13 @@ from version1.teams_app.models import AgeGroup, Team
 from django import forms
 from datetime import date
 
-# Season choices
-SEASON_CHOICES = [
-    ("2022/2023", "2022/2023"),
-    ("2023/2024", "2023/2024"),
-    ("2024/2025", "2024/2025"),
-    ("2025/2026", "2025/2026"),
-    ("2026/2027", "2026/2027"),
-]
+
+SEASON_CHOICES = [("2022/2023", "2022/2023"), ("2023/2024", "2023/2024"), ("2024/2025", "2024/2025"), ("2025/2026", "2025/2026"), ("2026/2027", "2026/2027"),] # Season choices
 
 # Competition choices
-COMPETITION_CHOICES = [
-    ('Local Friendly', 'Local Friendly'),
-    ('International Friendly', 'International Friendly'),
-    ('NBC Youth League', 'NBC Youth League'),
-]
-
-# Medical test Choices
-MEDICAL_TEST_CHOICES = [
-    ('DONE', 'DONE'),
-    ('NOT DONE', 'NOT DONE'),
-]
-
-
-
-PLAYER_STATUS_CHOICES = [
-    ('SIGNED', 'Signed'),
-    ('TRIAL', 'Trial'),
-    ('LOANED', 'Loaned'),
-]
-
-
-
+COMPETITION_CHOICES = [('Local Friendly', 'Local Friendly'),('International Friendly', 'International Friendly'), ('NBC Youth League', 'NBC Youth League'),]
+MEDICAL_TEST_CHOICES = [('DONE', 'DONE'), ('NOT DONE', 'NOT DONE'),] # Medical test Choices
+PLAYER_STATUS_CHOICES = [('SIGNED', 'Signed'), ('TRIAL', 'Trial'), ('LOANED', 'Loaned'),]
 
 # Specific position choices
 SPECIFIC_POSITION_CHOICES = [
@@ -68,7 +43,6 @@ class Player(models.Model):
     second_name = models.CharField(max_length=50, default='Second_name')
     surname = models.CharField(max_length=50, default='surname')
 
-
     jina_maarufu = models.CharField(max_length=50, default='nickname', null=True, blank=True)
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='players')
     birthdate = models.DateField(null=True, blank=True)
@@ -81,13 +55,10 @@ class Player(models.Model):
     passport_number = models.CharField(max_length=20, null=True, blank=True)
     medical_test = models.CharField(max_length=10, choices=MEDICAL_TEST_CHOICES, default='NOT DONE')
     joined_year = models.PositiveIntegerField(null=True, blank=True)
-    position = models.CharField(
-        max_length=50,
+    position = models.CharField(max_length=50,
         choices=[
-            ('Forward', 'Forward'),
-            ('Winger', 'Winger'),
-            ('Midfielder', 'Midfielder'),
-            ('Defender', 'Defender'),
+            ('Forward', 'Forward'), ('Winger', 'Winger'),
+            ('Midfielder', 'Midfielder'), ('Defender', 'Defender'),
             ('Goalkeeper', 'Goalkeeper'),       
         ]
     )
@@ -95,17 +66,13 @@ class Player(models.Model):
     foot_preference = models.CharField(max_length=5, choices=[('Left', 'Left'), ('Right', 'Right')], default='Right')
     jersey_number = models.PositiveIntegerField(default=0)
     former_club = models.CharField(max_length=50, default="Null")
-    photo = models.ImageField(
-        upload_to='player_photos/',
-        default='files_to_be_imported/default_image.png'
-    )
+    photo = models.ImageField(upload_to='player_photos/', default='files_to_be_imported/default_image.png')
     age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)
     player_phone = models.CharField(max_length=20, null=True, blank=True)
     parent_phone =models.CharField(max_length=20, null=True, blank=True)
 
     status =models.CharField(max_length=10, choices=PLAYER_STATUS_CHOICES,default='SIGNED')
     is_active = models.BooleanField(default=True)
-    
     
     def __str__(self):
         return f"{self.full_name} - {self.age_group} - {self.team}"
@@ -168,11 +135,7 @@ class PlayerCareerStage(models.Model):
         ('national', 'National Team'),
     ]
 
-    player = models.ForeignKey(
-        Player,
-        on_delete=models.CASCADE,
-        related_name='career_stages'
-    )
+    player = models.ForeignKey( Player, on_delete=models.CASCADE, related_name='career_stages')
 
     stage_type = models.CharField(max_length=20, choices=STAGE_CHOICES)
     team_name = models.CharField(max_length=100)
