@@ -15,6 +15,17 @@
 
 <div class="columns">
 
+
+
+
+
+
+
+
+
+
+
+
     <!-- HOME -->
     <div class="team-box">
         <div class="team-name">{{ match.home_team.name }}</div>
@@ -73,7 +84,45 @@
             </tr>
             {% endfor %}
         </table>
+
+
+        <div class="separator"></div>
+
+        <div class="section-title">NOT CALLED UP</div>
+
+        <table>
+            {% for row in home_not_called %}
+            <tr>
+                <td>
+                    {% if row.player.photo %}
+                        <img src="{{ row.player.photo.url }}" class="player-photo">
+                    {% endif %}
+                </td>
+                <td>{{ row.player.full_name }}</td>
+                <td>{{ row.player.jersey_number }}</td>
+                <td>{{ row.player.age }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No players</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+
     </div>
+
+
+
+
+
+
+
+
+
+
+
+
 
     <!-- AWAY -->
     <div class="team-box">
@@ -133,6 +182,34 @@
             </tr>
             {% endfor %}
         </table>
+
+
+
+        <div class="separator"></div>
+
+        <div class="section-title">NOT CALLED UP</div>
+
+        <table>
+            {% for row in away_not_called %}
+            <tr>
+                <td>
+                    {% if row.player.photo %}
+                        <img src="{{ row.player.photo.url }}" class="player-photo">
+                    {% endif %}
+                </td>
+                <td>{{ row.player.full_name }}</td>
+                <td>{{ row.player.jersey_number }}</td>
+                <td>{{ row.player.age }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No players</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+
+
     </div>
 
 </div>

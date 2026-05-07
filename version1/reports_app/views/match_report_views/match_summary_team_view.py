@@ -44,12 +44,38 @@ def match_lineup_report(request, match_id, return_context=False):
     away_starting = annotate_subs(away_starting_qs)
     away_subs = annotate_subs(away_subs_qs)
 
+
+
+
+    home_not_called = MatchLineup.objects.filter(
+    match=match,
+    team=match.home_team,
+    is_starting=False,
+    is_unused_sub=False,
+    time_in__isnull=True,
+    time_out__isnull=True)
+
+    away_not_called = MatchLineup.objects.filter(match=match, team=match.away_team,is_starting=False, time_in__isnull=True, time_out__isnull=True, is_unused_sub=False)
+
+
+
+
+
+
     context = {
+
         "match": match,
         "home_starting": home_starting,
         "home_subs": home_subs,
         "away_starting": away_starting,
         "away_subs": away_subs,
+
+    
+        "home_not_called": home_not_called,
+        "away_not_called": away_not_called,
+
+
+
     }
 
     if return_context:

@@ -317,6 +317,7 @@ def add_unused_sub(request, match_id):
         player=player,
         defaults={
             "is_starting": False,
+            "is_unused_sub": True,   # 🔥 ADD THIS
             "time_in": None,
             "time_out": None,
         }

@@ -67,9 +67,17 @@ class Match(models.Model):
     season = models.CharField(max_length=20, choices=SeasonChoices.choices)
     competition = models.ForeignKey(Competition, on_delete=models.SET_NULL, null=True, blank=True)
     age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)
-    
+
+
+    # Match number
+    match_no = models.PositiveIntegerField(null=True, blank=True, default=None, help_text="Match number in competition")
+
     # Optional group/phase (e.g., Group A, Quarterfinals)
-    group = models.CharField(max_length=50, blank=True, null=True, help_text="Optional group/phase for competition")
+    group = models.CharField( max_length=50, blank=True, null=True, default=None, help_text="Optional group/phase for competition")
+
+    # Round/stage
+    round = models.CharField(max_length=50, blank=True, null=True, default=None,help_text="Competition round or stage")
+    
 
     opponent_yellow_cards = models.PositiveIntegerField(default=0)
     opponent_red_cards = models.PositiveIntegerField(default=0)
