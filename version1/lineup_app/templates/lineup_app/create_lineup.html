@@ -116,7 +116,7 @@
                  data-name="{{ player.name }}"
                  data-photo="{{ player.photo.url }}">
                 <img src="{{ player.photo.url }}">
-                <p>{{ player.name }}</p>
+                <p>{{ player.name }} {{ player.surname }}</p>
             </div>
             {% endfor %}
         </div>
@@ -129,7 +129,7 @@
                  data-name="{{ player.name }}"
                  data-photo="{{ player.photo.url }}">
                 <img src="{{ player.photo.url }}">
-                <p>{{ player.name }} ({{ player.team.name }})</p>
+                <p>{{ player.name }} {{ player.surname }} ({{ player.team.name }})</p>
             </div>
             {% endfor %}
         </div>
