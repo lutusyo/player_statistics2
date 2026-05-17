@@ -24,33 +24,43 @@ def get_pass_data_view(request, match_id, return_context=False):
         total_passes = team_events.filter(receiver__isnull=False, actor__team=F("receiver__team")).count()
 
         # TOTAL PASSES (same team)
-        passes_qs = (team_events.filter(
-                receiver__isnull=False,
-                actor__team=F("receiver__team")
-            )
+        passes_qs = (team_events.filter(receiver__isnull=False,actor__team=F("receiver__team"))
             .values("actor__player__name")
             .annotate(total_passes=Count("id"))
         )
 
         # BALL LOST (actor loses)
-        ball_lost_qs = (team_events.filter(
-                Q(receiver__isnull=True) |
-                ~Q(actor__team=F("receiver__team"))
-            )
+        ball_lost_qs = (team_events.filter(Q(receiver__isnull=True) | ~Q(actor__team=F("receiver__team")))
             .values("actor__player__name")
             .annotate(total_lost=Count("id"))
         )
 
         # BALL RECOVERY (receiver gains from opponent)
         ball_recovery_qs = (
-            events.filter(
-                Q(receiver__isnull=False) &
-                ~Q(actor__team=F("receiver__team")) &
-                Q(receiver__team=team)
-            )
+            events.filter(Q(receiver__isnull=False) & ~Q(actor__team=F("receiver__team")) & Q(receiver__team=team))
             .values("receiver__player__name")
             .annotate(total_recovery=Count("id"))
         )
+
+
+
+
+        # TOTAL PASSES
+        total_passes = team_events.filter(action_type__in=["LOW_BALL", "HIGH_BALL"]).count()
+
+        # COMPLETED PASSES
+        completed_passes = team_events.filter(action_type__in=["LOW_BALL", "HIGH_BALL"],
+            receiver__isnull=False, actor__team=F("receiver__team")
+        ).count()
+
+        # PASS ACCURACY
+        pass_accuracy = round(
+            (completed_passes / total_passes) * 100, 2
+        ) if total_passes > 0 else 0
+
+
+
+
 
         # MERGE ALL STATS
         player_stats = {}
@@ -107,6 +117,13 @@ def get_pass_data_view(request, match_id, return_context=False):
                 matrix[actor][receiver] = count
 
         team_stats[team.name] = {
+
+
+            "total_passes": total_passes,
+            "completed_passes": completed_passes,
+            "pass_accuracy": pass_accuracy,
+
+
             "player_stats": player_stats,
             "pass_matrix": {
                 "players": players,

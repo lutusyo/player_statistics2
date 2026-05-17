@@ -3,6 +3,10 @@ from version1.tagging_app.models import AttemptToGoal, PassEvent
 from version1.defensive_app.models import PlayerDefensiveStats
 from version1.gps_app.models import GPSRecord
 
+from django.db.models import F
+from version2.tagging_app_v2.models import PassEvent_v2
+from version2.tagging_app_v2.models import PassEvent_v2
+
 def safe_pct(a, b):
     return round((a / b) * 100, 1) if b else 0
 
@@ -48,25 +52,43 @@ def get_match_summary(match, home_team, away_team):
         bucket["corners"] = attempts.filter(team=team, delivery_type='Corner').count()
 
     # ---------------- PASSES ----------------
-    def get_pass_stats(team, opponent):
-        team_passes = PassEvent.objects.filter(match=match, from_team=team)
-        opponent_passes = PassEvent.objects.filter(match=match).exclude(from_team=team)
+# ---------------- PASSES (V2) ----------------
 
+
+
+
+    def get_pass_stats(team):
+
+        # ALL PASSES MADE BY TEAM
+        team_passes = PassEvent_v2.objects.filter(
+            match=match,
+            actor__team=team,
+            action_type__in=["LOW_BALL", "HIGH_BALL"]
+        )
+
+        # TOTAL PASSES
         total_passes = team_passes.count()
 
-        # Ball lost = passes that went to opponent team
-        ball_lost = team_passes.filter(to_team=opponent).count()
+        # COMPLETED PASSES
+        pass_completed = team_passes.filter(
+            receiver__isnull=False,
+            actor__team=F("receiver__team")
+        ).count()
 
-        # Pass completed = total passes - ball lost
-        pass_completed = total_passes - ball_lost
-
-        # Ball recovered: opponent passes that go to your team
-        ball_recovered = opponent_passes.filter(to_team=team).count()
+        # BALL RECOVERED
+        ball_recovered = PassEvent_v2.objects.filter(
+            match=match,
+            receiver__team=team
+        ).exclude(
+            actor__team=F("receiver__team")
+        ).count()
 
         return total_passes, pass_completed, ball_recovered
 
-    home["total_passes"], home["pass_completed"], home["ball_recovered"] = get_pass_stats(home_team, away_team)
-    away["total_passes"], away["pass_completed"], away["ball_recovered"] = get_pass_stats(away_team, home_team)
+
+    home["total_passes"], home["pass_completed"], home["ball_recovered"] = get_pass_stats(home_team)
+
+    away["total_passes"], away["pass_completed"], away["ball_recovered"] = get_pass_stats(away_team)
 
     # ---------------- POSSESSION ----------------
     total_completed = home["pass_completed"] + away["pass_completed"]

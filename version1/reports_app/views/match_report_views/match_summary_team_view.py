@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from version1.matches_app.models import Match
 from version1.lineup_app.models import MatchLineup, Substitution
 
+from version1.players_app.models import Player
+
 
 def match_lineup_report(request, match_id, return_context=False):
     match = get_object_or_404(Match, id=match_id)
@@ -47,19 +49,32 @@ def match_lineup_report(request, match_id, return_context=False):
 
 
 
-    home_not_called = MatchLineup.objects.filter(
-    match=match,
-    team=match.home_team,
-    is_starting=False,
-    is_unused_sub=False,
-    time_in__isnull=True,
-    time_out__isnull=True)
-
-    away_not_called = MatchLineup.objects.filter(match=match, team=match.away_team,is_starting=False, time_in__isnull=True, time_out__isnull=True, is_unused_sub=False)
 
 
 
+    home_called_ids = MatchLineup.objects.filter(
+        match=match,
+        team=match.home_team
+    ).values_list("player_id", flat=True)
 
+    home_not_called = Player.objects.filter(
+        team=match.home_team
+    ).exclude(id__in=home_called_ids)
+
+
+
+    away_called_ids = MatchLineup.objects.filter(
+        match=match,
+        team=match.away_team
+    ).values_list("player_id", flat=True)
+
+    away_not_called = Player.objects.filter(
+        team=match.away_team
+    ).exclude(id__in=away_called_ids)
+
+
+
+ 
 
 
     context = {

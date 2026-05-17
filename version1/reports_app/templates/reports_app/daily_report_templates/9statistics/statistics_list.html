@@ -142,6 +142,7 @@
               <th>Out</th>
               <th>Goals</th>
               <th>Ast</th>
+              <th>Pre Ast</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -159,6 +160,7 @@
               <td>{{ r.sub_out }}</td>
               <td>{{ r.goals }}</td>
               <td>{{ r.assists }}</td>
+              <td>{{ r.pre_assists }}</td>
 
               <td>
                 <a href="{% url 'reports_app:individual_statistics' player_id=r.player.id %}?filter={{ filter_type }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if competition %}&competition={{ competition }}{% endif %}"

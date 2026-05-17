@@ -8,7 +8,6 @@ from version1.matches_app.models import Match
 class PassEvent_v2(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name="pass_events_v2")
 
-    # Player who performs the action
     actor = models.ForeignKey(MatchLineup, on_delete=models.CASCADE, related_name="pass_events_as_actor")
     target = models.ForeignKey(MatchLineup, null=True, blank=True, on_delete=models.SET_NULL, related_name="pass_events_as_target")
     receiver = models.ForeignKey(MatchLineup, null=True, blank=True, on_delete=models.SET_NULL, related_name="pass_events_as_receiver")
@@ -23,13 +22,12 @@ class PassEvent_v2(models.Model):
     def is_successful(self):
         """
         Successful if the receiver exists and
-        receiver team is the same as actor team
+        receiver team is the same as actor team 
         """
         if not self.receiver:
             return False
 
         return self.actor.team == self.receiver.team
-
 
     def __str__(self):
         actor = self.actor.player.name

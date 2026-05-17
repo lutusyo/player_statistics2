@@ -20,9 +20,6 @@ from version1.reports_app.models import PlayerTrainingMinutes
 
 from version1.matches_app.models import CompetitionType
 
-
-
-
 # ====================== REPORT HELPER ======================
 def get_statistics_report(filter_type="all", team=None, start_date=None, end_date=None, competition=None):
     today = now().date()
@@ -204,6 +201,7 @@ def statistics_export_excel(request, team_id):
         "Sub Out": r["sub_out"],
         "Goals": r["goals"],
         "Assists": r["assists"],
+        "Pre Assist": r["pre_assists"],
         "Note": r["note"],
     } for r in report])
 
@@ -257,7 +255,7 @@ def statistics_export_pdf(request, team_id):
     data = [[
     "Name", "No", "Pos", "Spec Pos", "Foot",
     "Ht", "Wt", "DOB", "Age",
-    "Train", "Game", "Apps", "Starts", "In", "Out", "Goals", "Ast"
+    "Train", "Game", "Apps", "Starts", "In", "Out", "Goals", "Ast", "Pre Ast"
     ]]
 
     for r in report:
@@ -285,6 +283,7 @@ def statistics_export_pdf(request, team_id):
             r["sub_out"],
             r["goals"],
             r["assists"],
+            r["pre_assists"],
         ])
 
 
