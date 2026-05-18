@@ -12,69 +12,84 @@ from version1.tagging_app.utils.attempt_to_goal_utils import get_match_full_cont
 
 @login_required
 def fixtures_view(request, team):
-    # Get AgeGroup and our teams
+
+    # Age group + teams
     age_group = AgeGroup.objects.get(code=team)
     our_teams = Team.objects.filter(age_group=age_group)
 
-    # Competition filter from GET
+    # Competition filter
     competition_selected = request.GET.get("competition", "all")
 
-    upcoming_matches = Match.objects.filter(date__gte=date.today())
+    # ONLY upcoming matches for this age group
+    upcoming_matches = Match.objects.filter(
+        Q(home_team__in=our_teams) |
+        Q(away_team__in=our_teams),
+        date__gte=date.today()
+    )
 
+    # Competition filtering
     if competition_selected != "all":
-        try:
-            competition_id = int(competition_selected)
-            upcoming_matches = upcoming_matches.filter(competition_id=competition_id)
-        except ValueError:
-            # If invalid competition ID, return empty queryset
-            upcoming_matches = Match.objects.none()
+        upcoming_matches = upcoming_matches.filter(
+            competition_id=competition_selected
+        )
 
-    # Prefetch related fields
+    # Related objects
     upcoming_matches = upcoming_matches.select_related(
-        "competition", "home_team", "away_team", "venue"
-    ).order_by("date")
+        "competition",
+        "home_team",
+        "away_team",
+        "venue"
+    ).order_by("date", "time")
 
-    # Process each match
+    # Match processing
     for match in upcoming_matches:
-        # Get match goals
+
         match.home_goals, match.away_goals = get_match_goals(match)
 
-        # Determine "our team" for this match
-        our_team_obj = None
-        if match.home_team in our_teams:
-            our_team_obj = match.home_team
-        elif match.away_team in our_teams:
-            our_team_obj = match.away_team
+        # Detect our team
+        our_team_obj = (
+            match.home_team
+            if match.home_team in our_teams
+            else match.away_team
+        )
 
-        if our_team_obj:
-            match.our_team_id = our_team_obj.id
-            match.has_lineup = MatchLineup.objects.filter(
-                match=match, team=our_team_obj
-            ).exists()
+        match.our_team_id = our_team_obj.id
 
-            # Get detailed context for FULL REPORT
-            context_data = get_match_full_context(match.id, our_team_obj.id)
-            match.our_team_goals = context_data["our_team"]["aggregate"]["attempts"]["total_goals"]
-            match.opponent_goals = context_data["opponent_team"]["aggregate"]["attempts"]["total_goals"]
-        else:
-            # No team belongs to our age group
-            match.our_team_id = None
-            match.has_lineup = False
-            match.our_team_goals = None
-            match.opponent_goals = None
+        match.has_lineup = MatchLineup.objects.filter(
+            match=match,
+            team=our_team_obj
+        ).exists()
 
-    # Competition dropdown options
+        context_data = get_match_full_context(
+            match.id,
+            our_team_obj.id
+        )
+
+        match.our_team_goals = context_data[
+            "our_team"
+        ]["aggregate"]["attempts"]["total_goals"]
+
+        match.opponent_goals = context_data[
+            "opponent_team"
+        ]["aggregate"]["attempts"]["total_goals"]
+
+    # Competition choices
     competition_choices = Competition.objects.all()
 
     context = {
         "team": team,
+        "team_selected": team,
         "upcoming_matches": upcoming_matches,
-        "competition_selected": competition_selected,  # string, matches GET param
+        "competition_selected": competition_selected,
         "competition_choices": competition_choices,
         "active_tab": "fixtures",
     }
 
-    return render(request, "matches_app/fixtures.html", context)
+    return render(
+        request,
+        "matches_app/fixtures.html",
+        context
+    )
 
 
 # Optional: your fixtures_by_competition view (if needed)

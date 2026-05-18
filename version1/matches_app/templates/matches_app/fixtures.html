@@ -4,23 +4,35 @@
 
 {% block title %}{{ team }} Fixtures{% endblock %}
 
-{% block extra_head %}
-<link rel="stylesheet" href="{% static 'matches_app/css/fixture_style.css' %}">
-{% endblock %}
+
 
 {% block match_content %}
 
 
 
-<select name="competition" onchange="this.form.submit()">
-    <option value="all" {% if competition_selected == 'all' %}selected{% endif %}>All Competitions</option>
-    {% for comp in competition_choices %}
-        <option value="{{ comp.id }}" {% if comp.id|stringformat:"s" == competition_selected %}selected{% endif %}>
-            {{ comp.name }}
-        </option>
-    {% endfor %}
-</select>
+<form method="get" class="filter-form">
 
+    <label>Competition:</label>
+
+    <select name="competition" onchange="this.form.submit()">
+
+        <option value="all"
+            {% if competition_selected == 'all' %}selected{% endif %}>
+            All Competitions
+        </option>
+
+        {% for comp in competition_choices %}
+            <option value="{{ comp.id }}"
+                {% if comp.id|stringformat:'s' == competition_selected %}
+                    selected
+                {% endif %}>
+                {{ comp.name }}
+            </option>
+        {% endfor %}
+
+    </select>
+
+</form>
 
 
 
@@ -45,7 +57,7 @@
 
                         <div class="fixture-header">
                             <div class="fixture-date">
-                                {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
+                                {{ match.date|date:"D M d" }} - {{ match.time|time:"H:i" }}
                             </div>
                             <div class="fixture-venue">{{ match.venue }}</div>
                             <div class="fixture-type">{{ match.get_competition_type_display }}</div>

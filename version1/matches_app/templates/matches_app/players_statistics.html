@@ -4,7 +4,6 @@
 {% block title %}Match Statistics{% endblock %}
 
 {% block match_content %}
-<link rel="stylesheet" href="{% static 'matches_app/css/players_statistics.css' %}">
 
 <div class="filter-container">
     <form method="get" class="filter-form">
@@ -17,17 +16,19 @@
 
         <select name="competition" onchange="this.form.submit()">
             <option value="">Competition</option>
-            {% for key, label in competitions.items %}
-                <option value="{{ key }}" {% if selected_competition == key %}selected{% endif %}>{{ label }}</option>
+            {% for value, label in competitions %}
+                <option value="{{ value }}" {% if selected_competition == value %}selected{% endif %}>
+                    {{ label }}
+                </option>
             {% endfor %}
         </select>
 
-        <select name="age_group" onchange="this.form.submit()">
+        <!--<select name="age_group" onchange="this.form.submit()">
             <option value="">Age Group</option>
             {% for group in age_groups %}
                 <option value="{{ group.code }}" {% if selected_age_group == group.code %}selected{% endif %}>{{ group.name }}</option>
             {% endfor %}
-        </select>
+        </select>-->
     </form>
 </div>
 
@@ -50,7 +51,7 @@
         <tbody>
             {% for item in player_data %}
             <tr>
-                <td>{{ item.player.name }}</td>
+                <td>{{ item.player.name }} {{ item.player.second_name }} {{ item.player.surname }}</td>
                 <td>{{ item.local_ap }}</td>
                 <td>{{ item.local_gl }}</td>
 

@@ -1,0 +1,345 @@
+/* =====================================================
+   BASE LAYOUT
+===================================================== */
+
+.matches-background {
+    min-height: 100vh;
+    background:
+        linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
+        url("../images/U20-squad.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.compact-content {
+    max-width: 1150px;
+    margin: 15px auto;
+    background: rgba(255,255,255,0.96);
+    padding: 18px;
+    border-radius: 10px;
+}
+
+
+/* =====================================================
+   TABS
+===================================================== */
+
+.compact-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    background: #fff;
+    padding: 8px;
+    border-bottom: 2px solid #0033A0;
+}
+
+.compact-tabs a {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0033A0;
+    background: #f2f2f2;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.compact-tabs a:hover {
+    background: #e6e6e6;
+}
+
+.compact-tabs a.active {
+    background: #FFD700;
+    color: #0033A0;
+}
+
+
+/* =====================================================
+   FILTERS
+===================================================== */
+
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.filter-form label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.filter-form select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+
+/* =====================================================
+   COMMON MATCH CONTAINER
+===================================================== */
+
+.fixture-container,
+.results-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f9f9f9;
+}
+
+
+/* =====================================================
+   TITLES
+===================================================== */
+
+.team-fixtures-title,
+.team-results-title,
+.stats-heading {
+    text-align: center;
+    margin: 30px 0;
+    font-weight: 700;
+    color: #222;
+}
+
+
+/* =====================================================
+   MATCH CARDS
+===================================================== */
+
+.fixture-card,
+.results-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 25px;
+    padding: 20px;
+    transition: 0.2s ease;
+}
+
+.fixture-card {
+    border-top: 4px solid #3255c0;
+}
+
+.results-card {
+    border-top: 4px solid #c00000;
+}
+
+.fixture-card:hover,
+.results-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+
+/* =====================================================
+   CARD HEADERS
+===================================================== */
+
+.fixture-header,
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.fixture-date,
+.results-date {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.fixture-venue,
+.results-venue {
+    font-size: 14px;
+    color: #777;
+}
+
+.fixture-type,
+.results-type {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #444;
+    color: white;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   MATCH BODY
+===================================================== */
+
+.fixture-body,
+.results-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+
+/* =====================================================
+   TEAM BLOCK
+===================================================== */
+
+.team {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.team img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+}
+
+.team div {
+    font-size: 14px;
+    font-weight: 600;
+    color: #222;
+}
+
+
+/* =====================================================
+   SCORE
+===================================================== */
+
+.vs {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111;
+    margin: 0 20px;
+    text-align: center;
+}
+
+
+/* =====================================================
+   RESULTS EXTRA
+===================================================== */
+
+.competition-logo {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+}
+
+.detail-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+
+/* =====================================================
+   STATS TABLE
+===================================================== */
+
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.stats-table th,
+.stats-table td {
+    border: 1px solid #ccc;
+    padding: 8px 10px;
+    text-align: center;
+}
+
+.stats-table thead {
+    background: #0c1d36;
+    color: white;
+}
+
+.stats-table tbody tr:nth-child(even) {
+    background: #f2f2f2;
+}
+
+
+/* =====================================================
+   LEAGUE TABLE
+===================================================== */
+
+.league-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.league-table th {
+    background: #0033A0;
+    color: white;
+    padding: 6px;
+}
+
+.league-table td {
+    padding: 6px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.team-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.team-cell img {
+    width: 22px;
+    height: 22px;
+}
+
+
+/* =====================================================
+   EMPTY STATES
+===================================================== */
+
+.no-data,
+.no-matches {
+    text-align: center;
+    padding: 15px;
+    font-weight: 600;
+    color: #777;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 600px) {
+
+    .fixture-header,
+    .results-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .fixture-body,
+    .results-body {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .vs {
+        margin: 10px 0;
+    }
+
+    .compact-tabs {
+        flex-wrap: wrap;
+    }
+}
