@@ -35,7 +35,7 @@
         <!-- DATE LINK -->
         <div class="results-date">
             <a href="{% url 'matches_app:match_detail' match.id %}" class="detail-link">
-                {{ match.date|date:"D M d" }} - {{ match.match_time|time:"H:i" }}
+                {{ match.date|date:"D M d" }} - {{ match.time|time:"H:i" }}
             </a>
         </div>
 
@@ -53,7 +53,7 @@
         <!-- FULL REPORT ICON -->
         <div class="card-actions">
             <a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}" class="report-icon">
-                <i class="fas fa-search"></i>
+                <i class="fas fa-search"> Details</i>
             </a>
         </div>
 

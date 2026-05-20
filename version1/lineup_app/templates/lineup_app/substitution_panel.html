@@ -121,28 +121,62 @@ button:hover {
                 <label>Player Out</label>
                 <select name="player_out" required>
                     {% for p in home_currently_on_pitch %}
-                        <option value="{{ p.id }}">{{ p.player.name }}</option>
+                        <option value="{{ p.id }}">{{ p.player.name }} {{ p.player.surname }}</option>
                     {% endfor %}
                     {% for p in away_currently_on_pitch %}
-                        <option value="{{ p.id }}">{{ p.player.name }}</option>
+                        <option value="{{ p.id }}">{{ p.player.name }} {{ p.player.surname }}</option>
                     {% endfor %}
                 </select>
             </div>
 
+
             <div class="form-section">
                 <label>Player In</label>
+
                 <select name="player_in" required>
 
-                    <optgroup label="{{ match.home_team.name }}">
+                    <!-- HOME TEAM -->
+                    <optgroup label="{{ match.home_team.name }} Players">
+
                         {% for p in home_bench %}
-                            <option value="{{ p.id }}">{{ p.name }}</option>
+                            <option value="{{ p.id }}">
+                                {{ p.name }} {{ p.surname }}
+                            </option>
                         {% endfor %}
+
                     </optgroup>
 
-                    <optgroup label="{{ match.away_team.name }}">
-                        {% for p in away_bench %}
-                            <option value="{{ p.id }}">{{ p.name }}</option>
+                    <!-- HOME OTHER ACADEMY -->
+                    <optgroup label="Other Academy Players">
+
+                        {% for p in home_other_players %}
+                            <option value="{{ p.id }}">
+                                {{ p.name }} {{ p.surname }}  ({{ p.team.name }} - {{ p.age_group.name }} )
+                            </option>
                         {% endfor %}
+
+                    </optgroup>
+
+                    <!-- AWAY TEAM -->
+                    <optgroup label="{{ match.away_team.name }} Players">
+
+                        {% for p in away_bench %}
+                            <option value="{{ p.id }}">
+                                {{ p.name }} {{ p.surname }} ({{ p.team.name }} {{ p.age_group.name }})
+                            </option>
+                        {% endfor %}
+
+                    </optgroup>
+
+                    <!-- AWAY OTHER ACADEMY -->
+                    <optgroup label="Other Academy Players">
+
+                        {% for p in away_other_players %}
+                            <option value="{{ p.id }}">
+                                {{ p.name }} {{ p.surname }} ({{ p.team.name }})
+                            </option>
+                        {% endfor %}
+
                     </optgroup>
 
                 </select>
@@ -186,7 +220,7 @@ button:hover {
                     <optgroup label="{{ match.home_team.name }}">
                         {% for p in home_bench %}
                             {% if not p.is_lineup %}
-                                <option value="{{ p.id }}">{{ p.name }}</option>
+                                <option value="{{ p.id }}">{{ p.name }} {{ p.surname }}</option>
                             {% endif %}
                         {% endfor %}
                     </optgroup>
@@ -194,7 +228,7 @@ button:hover {
                     <optgroup label="{{ match.away_team.name }}">
                         {% for p in away_bench %}
                             {% if not p.is_lineup %}
-                                <option value="{{ p.id }}">{{ p.name }}</option>
+                                <option value="{{ p.id }}">{{ p.name }} {{ p.surname }}</option>
                             {% endif %}
                         {% endfor %}
                     </optgroup>
@@ -217,7 +251,7 @@ button:hover {
         <h3>Did Not Play</h3>
         <ul class="list">
             {% for p in unused_subs %}
-                <li>{{ p.player.name }}</li>
+                <li>{{ p.player.name }} {{ p.player.surname }}</li>
             {% empty %}
                 <li>No unused subs</li>
             {% endfor %}

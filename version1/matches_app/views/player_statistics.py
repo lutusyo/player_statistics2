@@ -66,21 +66,11 @@ def player_statistics_view(request, team):
     # STATS FUNCTION
     # ======================
     def get_stats(player, competition_type):
-        matches = base_matches.filter(
-            competition__type=competition_type
-        )
+        matches = base_matches.filter(competition__type=competition_type)
         
+        appearances = MatchLineup.objects.filter(player=player, match__in=matches).count()
 
-        appearances = MatchLineup.objects.filter(
-            player=player,
-            match__in=matches
-        ).count()
-
-        goals = AttemptToGoal.objects.filter(
-            player=player,
-            match__in=matches,
-            outcome='On Target Goal'
-        ).count()
+        goals = AttemptToGoal.objects.filter(player=player, match__in=matches, outcome='On Target Goal').count()
 
         return {
             'appearances': appearances,

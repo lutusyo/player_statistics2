@@ -4,12 +4,9 @@ from django.views.decorators.http import require_http_methods, require_POST
 from django.db import transaction
 from django.contrib import messages
 import json
-
 from version1.lineup_app.models import Match, MatchLineup, Substitution
 from version1.players_app.models import Player
-
 from django.views.decorators.http import require_POST
-
 from version1.teams_app.models import Team
 
 # Helper to serialize MatchLineup row for JSON
@@ -189,15 +186,14 @@ def api_finalize_match(request, match_id):
 def substitution_panel(request, match_id):
     match = get_object_or_404(Match, id=match_id)
 
-    home_on_pitch = MatchLineup.objects.filter(
-        match=match, team=match.home_team, time_in__isnull=False, time_out__isnull=True
-    )
-    away_on_pitch = MatchLineup.objects.filter(
-        match=match, team=match.away_team, time_in__isnull=False, time_out__isnull=True
-    )
+    home_on_pitch = MatchLineup.objects.filter(match=match, team=match.home_team, time_in__isnull=False, time_out__isnull=True)
+    away_on_pitch = MatchLineup.objects.filter(match=match, team=match.away_team, time_in__isnull=False, time_out__isnull=True)
 
     home_lineup_ids = MatchLineup.objects.filter(match=match, team=match.home_team).values_list("player_id", flat=True)
     away_lineup_ids = MatchLineup.objects.filter(match=match, team=match.away_team).values_list("player_id", flat=True)
+
+    home_other_players = Player.objects.filter(team__team_type='OUR_TEAM').exclude(team=match.home_team).select_related('team').order_by('name')
+    away_other_players = Player.objects.filter(team__team_type='OUR_TEAM').exclude(team=match.away_team).select_related('team').order_by('name')
 
     def get_bench(team, lineup_ids):
         bench_lineup = MatchLineup.objects.filter(match=match, team=team, is_starting=False)
@@ -223,17 +219,8 @@ def substitution_panel(request, match_id):
     home_bench = get_bench(match.home_team, home_lineup_ids)
     away_bench = get_bench(match.away_team, away_lineup_ids)
 
-
-
     substitutions = Substitution.objects.filter(match=match).select_related("player_out", "player_in")
-    unused_subs = MatchLineup.objects.filter(
-    match=match,
-    is_starting=False,
-    time_in__isnull=True
-)
-
-
-
+    unused_subs = MatchLineup.objects.filter(match=match, is_starting=False, time_in__isnull=True)
 
 
     if request.method == "POST":
@@ -253,13 +240,24 @@ def substitution_panel(request, match_id):
             with transaction.atomic():
                 player_out = get_object_or_404(MatchLineup, id=player_out_id)
 
-                if MatchLineup.objects.filter(match=match, player_id=player_in_id).exists():
-                    player_in = MatchLineup.objects.get(match=match, player_id=player_in_id)
+                if MatchLineup.objects.filter(
+                    match=match,
+                    player_id=player_in_id,
+                    team=player_out.team
+                ).exists():
+
+                    player_in = MatchLineup.objects.get(
+                        match=match,
+                        player_id=player_in_id,
+                        team=player_out.team
+                    )
+
                 else:
                     player_obj = get_object_or_404(Player, id=player_in_id)
+
                     player_in = MatchLineup.objects.create(
                         match=match,
-                        team=player_obj.team,
+                        team=player_out.team,
                         player=player_obj,
                         is_starting=False,
                         time_in=None,
@@ -268,6 +266,7 @@ def substitution_panel(request, match_id):
 
                 player_out.time_out = minute
                 player_in.time_in = minute
+
                 player_out.save()
                 player_in.save()
 
@@ -282,21 +281,24 @@ def substitution_panel(request, match_id):
                 request,
                 f"Substitution recorded: {player_out.player.name} → {player_in.player.name}",
             )
+
             return redirect("lineup_app:substitution_panel", match_id=match.id)
 
-    return render(
-        request,
-        "lineup_app/substitution_panel.html",
-        {
-            "match": match,
-            "home_currently_on_pitch": home_on_pitch,
-            "home_bench": home_bench,
-            "away_currently_on_pitch": away_on_pitch,
-            "away_bench": away_bench,
-            "substitutions": substitutions,
-            "unused_subs": unused_subs,  
-        },
-    )
+    # ✅ OUTSIDE POST BLOCK
+    context = {
+        "match": match,
+        "home_currently_on_pitch": home_on_pitch,
+        "home_bench": home_bench,
+        "away_currently_on_pitch": away_on_pitch,
+        "away_bench": away_bench,
+        "substitutions": substitutions,
+        "unused_subs": unused_subs,
+
+        "home_other_players": home_other_players,
+        "away_other_players": away_other_players,
+    }
+
+    return render(request, "lineup_app/substitution_panel.html", context)
 
 
 
