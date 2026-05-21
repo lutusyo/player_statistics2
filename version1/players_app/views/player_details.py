@@ -10,6 +10,9 @@ from version1.tagging_app.models import AttemptToGoal, PassEvent, GoalkeeperDist
 from version1.lineup_app.models import MatchLineup, Substitution
 from version1.teams_app.models import Team
 from version1.reports_app.models import Result
+from version1.gps_app.models import GPSRecord
+
+
 
 @login_required
 def player_detail(request, player_id):
@@ -19,11 +22,9 @@ def player_detail(request, player_id):
     if not player.is_active:
         raise Http404("This player is inactive")
 
-
+    # only players from the same team
     related_players = Player.objects.filter(
-        team=player.team,  # only players from the same team
-        is_active=True
-    ).exclude(id=player_id).order_by('jersey_number')
+        team=player.team,  is_active=True ).exclude(id=player_id).order_by('jersey_number')
 
     selected_season = request.GET.get('season', 'all')
     selected_competition = request.GET.get('competition', 'all')
@@ -55,15 +56,9 @@ def player_detail(request, player_id):
 
     attempts_qs = AttemptToGoal.objects.filter(player=player).select_related('match')
     attempts_qs = apply_match_filters(attempts_qs)
-
-   
-   
-   
+      
     opponent_goals_qs = AttemptToGoal.objects.filter(outcome='On Target Goal').exclude(team=player.team)
     opponent_goals_qs = apply_match_filters(opponent_goals_qs)
-
-
-
 
 
     passes_qs = PassEvent.objects.filter(from_player=player).select_related('match')
@@ -71,6 +66,15 @@ def player_detail(request, player_id):
 
     gk_dist_qs = GoalkeeperDistributionEvent.objects.filter(goalkeeper=player).select_related('match')
     gk_dist_qs = apply_match_filters(gk_dist_qs)
+
+
+    # GPS data
+    gps_qs = GPSRecord.objects.filter(player=player, period_name="Session").select_related('match')
+    gps_qs = apply_match_filters(gps_qs)
+
+    
+
+    
 
     subs_in_qs = Substitution.objects.filter(player_in__player=player).select_related('match', 'player_in__match')
     subs_out_qs = Substitution.objects.filter(player_out__player=player).select_related('match', 'player_out__match')
@@ -88,8 +92,8 @@ def player_detail(request, player_id):
     all_match_ids = lineup_match_ids | goals_match_ids | defensive_match_ids | assists_match_ids | subs_in_match_ids | subs_out_match_ids
 
     matches = Match.objects.filter(id__in=all_match_ids).select_related(
-        'home_team', 'away_team', 'competition', 'venue'
-    )
+        'home_team', 'away_team', 'competition', 'venue')
+
 
     # Preprocess lineups and substitutions
     lineups_by_match = defaultdict(list)
@@ -121,10 +125,14 @@ def player_detail(request, player_id):
     'yellow_cards': 0,
     'red_cards': 0,
 
-    # ✅ goalkeeper stats
+    # goalkeeper stats
     'clean_sheets': 0,
     'matches_conceded': 0,
     'goals_conceded': 0,
+
+    #GPS
+    'total_distance': 0,
+
     })
 
 
@@ -204,6 +212,16 @@ def player_detail(request, player_id):
         s['yellow_cards'] += getattr(d, 'yellow_card', 0) or 0
         s['red_cards'] += getattr(d, 'red_card', 0) or 0
 
+
+
+    # GPS distance stats
+    for gps in gps_qs:
+        comp = gps.match.competition.type if gps.match.competition else 'unknown'
+
+        stats_dict[comp]['total_distance'] += (gps.distance or 0)
+
+
+
     # Compile final stats
     player_stats = []
 
@@ -214,8 +232,10 @@ def player_detail(request, player_id):
     'appearances', 'minutes', 'starts', 'sub_in', 'sub_out',
     'goals', 'assists', 'pre_assists', 'tackles_won', 'tackles_lost',
     'yellow_cards', 'red_cards',
-    # ✅ GK
-    'clean_sheets', 'matches_conceded', 'goals_conceded'
+    # GK
+    'clean_sheets', 'matches_conceded', 'goals_conceded',
+    # GPS
+    'total_distance'
     ], 0)
 
 
@@ -259,6 +279,14 @@ def player_detail(request, player_id):
     pre_assists_by_match = defaultdict(int)
     for a in pre_assists_qs:
         pre_assists_by_match[a.match_id] +=1
+
+    # GPS per match
+    distance_by_match = defaultdict(float)
+
+    for gps in gps_qs:
+        distance_by_match[gps.match_id] += (gps.distance or 0)
+
+
 
     # --- Fetch corresponding results for matches ---
     result_map = {}
@@ -306,6 +334,8 @@ def player_detail(request, player_id):
                 'competition_type': comp,
                 'result': result_display,
                 'goals_conceded': goals_conceded_by_match.get(match.id, 0) if is_goalkeeper else None,
+
+                'total_distance': round(distance_by_match.get(match.id, 0), 2),
             })
 
 
@@ -316,9 +346,8 @@ def player_detail(request, player_id):
     last_three_measurements = player.last_three_measurements
     bmi = player.bmi
 
-    return render(request, 'players_app/player_detail.html', {
+    context = {
         'player': player,
-
         'is_goalkeeper': is_goalkeeper,
 
         'related_players': related_players,
@@ -327,10 +356,7 @@ def player_detail(request, player_id):
         'selected_season': selected_season,
         'selected_competition': selected_competition,
 
-
         'matches_by_competition': dict(matches_by_competition),
-
-
         
         'player_stats': player_stats,
         'totals': totals,
@@ -342,4 +368,6 @@ def player_detail(request, player_id):
         'last_three_measurements': last_three_measurements,
         'bmi': bmi,
         "age_using_birthdate": player.age_using_birthdate,
-    })
+    }
+
+    return render(request, 'players_app/player_detail.html', context)

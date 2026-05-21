@@ -211,14 +211,12 @@
     cursor: pointer;
 }
 
-
 </style>
 
 <div class="player-detail-wrapper">
 
     <div class="player-sidebar">
         <h3>All ({{ player.age_group }}) players</h3>
-
 
         <div class="player-sidebar">
             <h3>Team Players</h3>
@@ -237,9 +235,7 @@
 
     <div class="player-profile-container">
 
-        <a href="{% url 'teams_app:team_squad' player.team.id %}" class="back-button">
-            ← Back to Squad
-        </a>
+        <a href="{% url 'teams_app:team_squad' player.team.id %}" class="back-button">←  Squad</a>
 
         <h2 class="player-full-name">{{ player.full_name }}</h2>
 
@@ -387,6 +383,7 @@
                                 <th>Tackles Lost</th>
                                 <th>Yellow</th>
                                 <th>Red</th>
+                                <th>Distance</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -396,16 +393,9 @@
                                         <td>{{ stat.competition }}</td>
                                         <td>{{ stat.appearances }}</td>
                                         <td>{{ stat.minutes }}</td>
-
-                                        <td>
-                                            <a href="{% url 'players_app:player_category_clips' player.id 'goals' %}">
-                                                {{ stat.goals }}
-                                            </a>
-                                        </td>
-
+                                        <td>{{ stat.goals }}</td>
                                         <td>{{ stat.assists }}</td>
                                         <td>{{ stat.pre_assists }}</td>
-
                                         <td>{{ stat.starts }}</td>
                                         <td>{{ stat.sub_in }}</td>
                                         <td>{{ stat.sub_out }}</td>
@@ -413,6 +403,7 @@
                                         <td>{{ stat.tackles_lost }}</td>
                                         <td>{{ stat.yellow_cards }}</td>
                                         <td>{{ stat.red_cards }}</td>
+                                        <td>{{ ststs.total_distance|floatformat:0 }}</td>
                                     </tr>
                                 {% endfor %}
                             {% else %}
@@ -433,6 +424,7 @@
                                 <td>{{ totals.tackles_lost }}</td>
                                 <td>{{ totals.yellow_cards }}</td>
                                 <td>{{ totals.red_cards }}</td>
+                                <td>{{ totals.total_distance|floatformat:0 }}</td>
                             </tr>
 
 
@@ -475,6 +467,7 @@
                                 <th>Assists</th>
                                 <th>Pre Assists</th>
                                 <th>Minutes</th>
+                                <th>Distance (m)</th>
                                 <th>Shots</th>
                                 <th>Passes</th>
 
@@ -496,6 +489,7 @@
                                 <td>{{ item.assists }}</td>
                                 <td>{{ item.pre_assists }}</td>
                                 <td>{{ item.minutes_played }}</td>
+                                <td>{{ item.total_distance|floatformat:0 }}</td>
                                 <td>{{ item.total_shots }}</td>
                                 <td>{{ item.total_passes }}</td>
 

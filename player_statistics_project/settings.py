@@ -47,11 +47,12 @@ INSTALLED_APPS = [
     # Third party
      'rest_framework',
 
+
     ##version2
-     'version2.tagging_app_v2',
-     'version2.reports_app_v2',
-     'version2.loans_app_v2',
-     'version2.psychology_app_v2',
+     'version2.tagging_app_v2', 'version2.reports_app_v2', 'version2.matches_app_v2',
+     'version2.loans_app_v2', 'version2.psychology_app_v2', 'version2.medical_app_v2',
+     'version2.gps_app_v2',
+
 
     # version3
     'version3.tagging_app_v3',
