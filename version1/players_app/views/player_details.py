@@ -216,7 +216,7 @@ def player_detail(request, player_id):
 
     # GPS distance stats
     for gps in gps_qs:
-        comp = gps.match.competition.type if gps.match.competition else 'unknown'
+        comp = gps.match.competition.type if gps.match.competition else 'Unknown'
 
         stats_dict[comp]['total_distance'] += (gps.distance or 0)
 
