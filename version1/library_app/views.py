@@ -91,7 +91,7 @@ import os
 import imageio_ffmpeg
 
 os.environ["IMAGEIO_FFMPEG_EXE"] = imageio_ffmpeg.get_ffmpeg_exe()
-from moviepy import VideoFileClip, concatenate_videoclips
+from moviepy.editor import VideoFileClip, concatenate_videoclips
 
 def create_reel(highlight):
 
@@ -103,11 +103,25 @@ def create_reel(highlight):
 
             path = hc.clip.video_clip.path
 
+
+
             if os.path.exists(path):
 
-                clip = VideoFileClip(path)
+                print("VIDEO PATH:", path)
+                print("FILE SIZE:", os.path.getsize(path))
 
-                video_clips.append(clip)
+                try:
+
+                    clip = VideoFileClip(path)
+
+                    print("SUCCESSFULLY LOADED")
+
+                    video_clips.append(clip)
+
+                except Exception as e:
+
+                    print("FAILED TO LOAD VIDEO")
+                    print(str(e))
 
     if not video_clips:
         return None
