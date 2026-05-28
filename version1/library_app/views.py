@@ -91,7 +91,9 @@ import os
 import imageio_ffmpeg
 
 os.environ["IMAGEIO_FFMPEG_EXE"] = imageio_ffmpeg.get_ffmpeg_exe()
+
 from moviepy.editor import VideoFileClip, concatenate_videoclips
+
 
 def create_reel(highlight):
 
@@ -102,8 +104,6 @@ def create_reel(highlight):
         if hc.clip.video_clip:
 
             path = hc.clip.video_clip.path
-
-
 
             if os.path.exists(path):
 
@@ -117,6 +117,10 @@ def create_reel(highlight):
                     print("SUCCESSFULLY LOADED")
 
                     video_clips.append(clip)
+
+                    # TEMPORARY:
+                    # process only ONE clip to avoid timeout
+                    break
 
                 except Exception as e:
 
@@ -142,8 +146,18 @@ def create_reel(highlight):
 
     final_video.write_videofile(
         output_path,
-        codec='libx264'
+        codec='libx264',
+        audio_codec='aac',
+        preset='ultrafast',
+        threads=1,
+        fps=24
     )
+
+    # IMPORTANT: free memory
+    for clip in video_clips:
+        clip.close()
+
+    final_video.close()
 
     return output_path
 
