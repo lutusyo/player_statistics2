@@ -5,6 +5,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from version1.accounts_app import views 
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('version1.accounts_app.urls')),
@@ -24,24 +27,19 @@ urlpatterns = [
     path('performance_rating_app/', include('version1.perfomance_rating_app.urls')),
     path('training/', include('version1.training_app.urls')),
     path("sheets/", include("version1.sheets_generator_app.urls")), #sheets generator
+    path('library/', include('version1.library_app.urls')),
 
     #############################
+    # Version2
     path('tagging_v2/', include('version2.tagging_app_v2.urls')), #tagging_app_v2
     path('loans_app_v2/', include('version2.loans_app_v2.urls')), # loaned players
     path('psychology_app_v2/', include('version2.psychology_app_v2.urls')), # psychology app
 
 
-    # v3
+    # version3
     path("tagging_app_v3/", include("version3.tagging_app_v3.urls")),
 
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-
-
-
 
 
 

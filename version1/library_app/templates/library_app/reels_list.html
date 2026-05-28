@@ -1,0 +1,22 @@
+<h1>Generated Reels</h1>
+
+{% for r in reels %}
+
+<div>
+
+    <h3>{{ r.title }}</h3>
+
+    {% if r.video_file %}
+
+        <video width="400" controls>
+            <source
+                src="{{ r.video_file.url }}"
+                type="video/mp4"
+            >
+        </video>
+
+    {% endif %}
+
+</div>
+
+{% endfor %}

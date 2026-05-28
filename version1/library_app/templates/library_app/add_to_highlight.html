@@ -1,0 +1,49 @@
+<h2>Add Clip To Highlight</h2>
+
+<h3>Select Existing Highlight</h3>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <select name="highlight_id">
+        {% for h in highlights %}
+            <option value="{{ h.id }}">
+                {{ h.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">
+        Add
+    </button>
+</form>
+
+<hr>
+
+<h3>Create New Highlight</h3>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <input
+        type="hidden"
+        name="action"
+        value="create"
+    >
+
+    <input
+        type="text"
+        name="new_name"
+        placeholder="Highlight name"
+    >
+
+    <button type="submit">
+        Create & Add
+    </button>
+</form>
+
+<br>
+
+<button onclick="history.back()">
+    Cancel
+</button>

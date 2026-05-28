@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'version1.gps_app', 'version1.teams_app.apps.TeamsAppConfig', 'version1.announcements_app',  'version1.reports_app',
     'version1.tagging_app', 'version1.goalkeeping_app', 'version1.defensive_app', 'version1.lineup_app',
     'version1.perfomance_rating_app', 'version1.training_app', 'version1.sheets_generator_app',
+    'version1.library_app',
 
     #loaned_players
     #'version1.loans_app',
@@ -148,9 +149,7 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# STATIC FILES
-STATIC_URL = '/static_player_statistics2/'
-STATIC_ROOT = '/home/afcportal/public_html/static_player_statistics2'
+
 
 STATICFILES_DIRS = [
 
@@ -178,12 +177,45 @@ STATICFILES_DIRS = [
     #version3
 ]
 
-# MEDIA FILES
-MEDIA_URL = '/media_player_statistics2/'
-MEDIA_ROOT = '/home/afcportal/public_html/media_player_statistics2'
+import os
 
-#MEDIA_URL = '/media/'
-#MEDIA_ROOT = BASE_DIR / 'media'
+# =========================
+# LOCAL VS PRODUCTION
+# =========================
+
+IS_PRODUCTION = os.name != 'nt'
+# Windows = local
+# Linux = production server
+
+
+# =========================
+# STATIC FILES
+# =========================
+
+if IS_PRODUCTION:
+
+    STATIC_URL = '/static_player_statistics2/'
+    STATIC_ROOT = '/home/afcportal/public_html/static_player_statistics2'
+
+else:
+
+    STATIC_URL = '/static/'
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+
+# =========================
+# MEDIA FILES
+# =========================
+
+if IS_PRODUCTION:
+
+    MEDIA_URL = '/media_player_statistics2/'
+    MEDIA_ROOT = '/home/afcportal/public_html/media_player_statistics2'
+
+else:
+
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_REDIRECT_URL = 'home'  # redirect after login
 LOGOUT_REDIRECT_URL = 'home'

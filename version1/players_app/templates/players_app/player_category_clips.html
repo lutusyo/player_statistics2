@@ -106,9 +106,13 @@
                 <img src="{{ c.thumbnail.url }}" class="thumb">
             {% endif %}
 
+
             <div class="clip-info">
                 <p><strong>{{ c.match }}</strong></p>
                 <p>{{ c.minute }}'</p>
+
+                <a href="{% url 'library_app:add_to_highlight' c.id %}">Add to Highlight </a>
+
 
                 {% if not c.video_clip %}
                     <p style="color:red; font-size:12px;">No video</p>

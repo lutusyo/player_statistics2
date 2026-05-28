@@ -1,0 +1,67 @@
+<h1>Generate Reel</h1>
+
+<h2>{{ highlight.name }}</h2>
+
+<a href="{% url 'library_app:highlights_list' %}">
+    ← Back to Highlights
+</a>
+
+<hr>
+
+<h3>Selected Clips</h3>
+
+{% for hc in clips %}
+
+<div style="
+    border:1px solid #ccc;
+    padding:15px;
+    margin-bottom:20px;
+">
+
+    <p>
+        <strong>Match:</strong>
+        {{ hc.clip.match }}
+    </p>
+
+    <p>
+        <strong>Minute:</strong>
+        {{ hc.clip.minute }}'
+    </p>
+
+    {% if hc.clip.video_clip %}
+
+        <video width="400" controls>
+            <source
+                src="{{ hc.clip.video_clip.url }}"
+                type="video/mp4"
+            >
+        </video>
+
+    {% else %}
+
+        <p style="color:red;">
+            No video available
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% empty %}
+
+<p>No clips selected.</p>
+
+{% endfor %}
+
+<hr>
+
+<a href="{% url 'library_app:generate_reel_action' highlight.id %}"
+   style="
+        background:#28a745;
+        color:white;
+        padding:12px 20px;
+        text-decoration:none;
+        border-radius:6px;
+   ">
+    Generate Final Reel
+</a>

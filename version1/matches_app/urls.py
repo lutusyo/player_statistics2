@@ -6,14 +6,12 @@ from version1.matches_app.views import  (
 )
 
 from version1.lineup_app.views import lineup_bila_uwanja, match_lineup_view_with_uwanja, substitution_panel
-
 from version1.lineup_app.views.substitution_panel import (
     substitution_panel,
     api_get_lists,
     api_finalize_substitution,
     api_undo_substitution,
 )
-
 from version1.matches_app.views import table_view
 
 app_name = 'matches_app'

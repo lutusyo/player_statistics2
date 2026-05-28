@@ -1,0 +1,50 @@
+<h1>{{ highlight.name }}</h1>
+
+<a href="{% url 'library_app:highlights_list' %}">
+    ← Back to Highlights
+</a>
+
+<hr>
+
+{% for hc in clips %}
+
+<div style="
+    border:1px solid #ccc;
+    padding:15px;
+    margin-bottom:20px;
+">
+
+    <p>
+        <strong>Match:</strong>
+        {{ hc.clip.match }}
+    </p>
+
+    <p>
+        <strong>Minute:</strong>
+        {{ hc.clip.minute }}'
+    </p>
+
+    {% if hc.clip.video_clip %}
+
+        <video width="500" controls>
+            <source
+                src="{{ hc.clip.video_clip.url }}"
+                type="video/mp4"
+            >
+        </video>
+
+    {% else %}
+
+        <p style="color:red;">
+            No video available
+        </p>
+
+    {% endif %}
+
+</div>
+
+{% empty %}
+
+<p>No clips in this highlight.</p>
+
+{% endfor %}

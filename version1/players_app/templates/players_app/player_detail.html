@@ -235,7 +235,7 @@
 
     <div class="player-profile-container">
 
-        <a href="{% url 'teams_app:team_squad' player.team.id %}" class="back-button">←  Squad</a>
+        <a href="{% url 'teams_app:team_squad' player.team.id %}" class="back-button">←  {{ player.age_group }} Squad </a>
 
         <h2 class="player-full-name">{{ player.full_name }}</h2>
 
