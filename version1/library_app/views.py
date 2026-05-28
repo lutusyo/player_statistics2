@@ -2,6 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from version1.tagging_app.models import AttemptToGoal
 from .models import Highlight, HighlightClip, Reel
+import os
+import imageio_ffmpeg
+
+
 
 
 def add_to_highlight(request, clip_id):
@@ -82,8 +86,12 @@ def generate_reel(request, highlight_id):
 
 
 
-from moviepy import VideoFileClip, concatenate_videoclips
+
 import os
+import imageio_ffmpeg
+
+os.environ["IMAGEIO_FFMPEG_EXE"] = imageio_ffmpeg.get_ffmpeg_exe()
+from moviepy import VideoFileClip, concatenate_videoclips
 
 def create_reel(highlight):
 
