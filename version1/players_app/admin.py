@@ -1,3 +1,4 @@
+#players_app/admin.py
 from django.contrib import admin
 
 from version1.players_app.models import Player, PlayerCareerStage, PlayerMeasurement

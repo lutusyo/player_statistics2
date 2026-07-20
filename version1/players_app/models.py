@@ -4,7 +4,6 @@ from version1.teams_app.models import AgeGroup, Team
 from django import forms
 from datetime import date
 
-
 SEASON_CHOICES = [("2022/2023", "2022/2023"), ("2023/2024", "2023/2024"), ("2024/2025", "2024/2025"), ("2025/2026", "2025/2026"), ("2026/2027", "2026/2027"),] # Season choices
 
 # Competition choices
@@ -71,9 +70,11 @@ class Player(models.Model):
     player_phone = models.CharField(max_length=20, null=True, blank=True)
     parent_phone =models.CharField(max_length=20, null=True, blank=True)
 
-    status =models.CharField(max_length=10, choices=PLAYER_STATUS_CHOICES,default='SIGNED')
+    status = models.CharField(max_length=10, choices=PLAYER_STATUS_CHOICES,default='SIGNED')
+    
     is_active = models.BooleanField(default=True)
     
+
     def __str__(self):
         return f"{self.full_name} - {self.age_group} - {self.team}"
 

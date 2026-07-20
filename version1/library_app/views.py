@@ -84,15 +84,12 @@ def generate_reel(request, highlight_id):
 
 
 
-
-
-
 import os
 import imageio_ffmpeg
 
 os.environ["IMAGEIO_FFMPEG_EXE"] = imageio_ffmpeg.get_ffmpeg_exe()
 
-from moviepy.editor import VideoFileClip, concatenate_videoclips
+from moviepy import VideoFileClip, concatenate_videoclips
 
 
 def create_reel(highlight):

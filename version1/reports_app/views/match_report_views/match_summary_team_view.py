@@ -4,7 +4,6 @@ from version1.lineup_app.models import MatchLineup, Substitution
 
 from version1.players_app.models import Player
 
-
 def match_lineup_report(request, match_id, return_context=False):
     match = get_object_or_404(Match, id=match_id)
 
@@ -46,36 +45,15 @@ def match_lineup_report(request, match_id, return_context=False):
     away_starting = annotate_subs(away_starting_qs)
     away_subs = annotate_subs(away_subs_qs)
 
-
-
-
-
-
-
     home_called_ids = MatchLineup.objects.filter(
-        match=match,
-        team=match.home_team
-    ).values_list("player_id", flat=True)
+        match=match,team=match.home_team).values_list("player_id", flat=True)
 
-    home_not_called = Player.objects.filter(
-        team=match.home_team
-    ).exclude(id__in=home_called_ids)
-
-
+    home_not_called = Player.objects.filter(team=match.home_team).exclude(id__in=home_called_ids)
 
     away_called_ids = MatchLineup.objects.filter(
-        match=match,
-        team=match.away_team
-    ).values_list("player_id", flat=True)
+        match=match,team=match.away_team).values_list("player_id", flat=True)
 
-    away_not_called = Player.objects.filter(
-        team=match.away_team
-    ).exclude(id__in=away_called_ids)
-
-
-
- 
-
+    away_not_called = Player.objects.filter(team=match.away_team).exclude(id__in=away_called_ids)
 
     context = {
 
@@ -85,11 +63,8 @@ def match_lineup_report(request, match_id, return_context=False):
         "away_starting": away_starting,
         "away_subs": away_subs,
 
-    
         "home_not_called": home_not_called,
         "away_not_called": away_not_called,
-
-
 
     }
 
@@ -97,4 +72,3 @@ def match_lineup_report(request, match_id, return_context=False):
         return context
 
     return render(request, "reports_app/match_report_templates/2_match_summary_team/match_summary_team.html", context)
-

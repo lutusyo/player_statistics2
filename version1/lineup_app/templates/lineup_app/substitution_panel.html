@@ -220,7 +220,7 @@ button:hover {
                     <optgroup label="{{ match.home_team.name }}">
                         {% for p in home_bench %}
                             {% if not p.is_lineup %}
-                                <option value="{{ p.id }}">{{ p.name }} {{ p.surname }}</option>
+                                <option value="{{ p.id }}">{{ p.name }} {{ p.second_name }} {{ p.surname }}</option>
                             {% endif %}
                         {% endfor %}
                     </optgroup>
@@ -228,7 +228,7 @@ button:hover {
                     <optgroup label="{{ match.away_team.name }}">
                         {% for p in away_bench %}
                             {% if not p.is_lineup %}
-                                <option value="{{ p.id }}">{{ p.name }} {{ p.surname }}</option>
+                                <option value="{{ p.id }}">{{ p.name }} {{ p.second_name }} {{ p.surname }}</option>
                             {% endif %}
                         {% endfor %}
                     </optgroup>

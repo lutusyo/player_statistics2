@@ -3,65 +3,22 @@
 {% load player_extras %}
 
 {% block title %}{{ team_selected }} Players{% endblock %}
-
 {% block team_content %}
 
-<link rel="stylesheet" href="{% static 'players_app/css/player.css' %}">
-
-<style>
-/* Small subtle toggle */
-.toggle-buttons {
-    margin-top: 20px;
-    text-align: center;
-}
-
-.toggle-buttons button {
-    font-size: 12px;
-    padding: 5px 10px;
-    border: none;
-    background: transparent;
-    color: #777;
-    cursor: pointer;
-    border-bottom: 1px solid transparent;
-    transition: 0.2s;
-}
-
-.toggle-buttons button:hover {
-    color: #333;
-}
-
-.toggle-buttons button.active {
-    color: #000;
-    border-bottom: 1px solid #000;
-}
-
-/* Library Button */
-.library-btn {
-    display: inline-block;
-    margin-bottom: 20px;
-    padding: 10px 18px;
-    background: #1e40af;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: 0.2s;
-}
-
-.library-btn:hover {
-    background: #16338a;
-}
-</style>
+<link rel="stylesheet" href="{% static 'teams_app/css/squad.css' %}">
 
 <div class="page-container">
 
     <!-- MAIN CONTENT -->
     <div class="main-content">
 
-        <!-- LIBRARY BUTTON -->
-        <a href="{% url 'library_app:library_home' %}" class="library-btn">
-            🎬 Library
-        </a>
+        <!-- LIBRARY BUTTON 
+        <a href="{% url 'library_app:library_home' %}" class="library-btn">🎬 Library</a>-->
+
+        <div class="view-toggle">
+            <button id="gridViewBtn" class="active" onclick="setView('grid')">⬜ Grid</button>
+            <button id="listViewBtn" onclick="setView('list')"> ☰ List</button>
+        </div>
 
         <!-- SIGNED PLAYERS -->
         <div id="signedPlayers">
@@ -70,7 +27,7 @@
                     {% if players_in_position %}
                         <h2 class="position-title">{{ position }}s</h2>
 
-                        <div class="players-grid">
+                        <div class="players-grid player-container">
                             {% for player in players_in_position %}
                                 <a href="{% url 'players_app:player_detail' player.id %}" class="player-card">
                                     <div class="player-photo-box">
@@ -79,14 +36,30 @@
 
                                     <div class="player-info-box">
                                         <div class="name-number">
-                                            <span class="player-name">{{ player.name }}</span>
-                                            <span class="player-number">{{ player.jersey_number }}</span>
+                                            <div class="player-details">
+
+                                                <span class="player-name">
+                                                    {{ player.name }}
+                                                    {{ player.second_name }}
+                                                    {{ player.surname }}
+                                                </span>
+
+                                                <span class="player-position">
+                                                    {{ player.position }}
+                                                </span>
+
+                                            </div>
+
+                                            <span class="player-number">
+                                                {{ player.jersey_number }}
+                                            </span>
                                         </div>
 
                                         <div class="nationality">
                                             <img src="{% static 'players_app/images/tanzania-flag.png' %}">
-                                            <span>Tanzania</span>
+                                            <span>{{ player.nationality }}</span>
                                         </div>
+
                                     </div>
                                 </a>
                             {% endfor %}
@@ -100,7 +73,7 @@
         <div id="trialPlayers" style="display:none;">
             <h2 class="position-title">Trial Players</h2>
 
-            <div class="players-grid">
+            <div class="players-grid player-container">
                 {% for player in trial_players %}
                     <a href="{% url 'players_app:player_detail' player.id %}" class="player-card">
                         <div class="player-photo-box">
@@ -108,21 +81,36 @@
                         </div>
 
                         <div class="player-info-box">
+
                             <div class="name-number">
-                                <span class="player-name">{{ player.name }}</span>
-                                <span class="player-number">{{ player.jersey_number }}</span>
+                                <div class="player-details">
+
+                                    <span class="player-name">
+                                        {{ player.name }}
+                                        {{ player.second_name }}
+                                        {{ player.surname }}
+                                    </span>
+
+                                    <span class="player-position">
+                                        {{ player.position }}
+                                    </span>
+
+                                </div>
+
+                                <span class="player-number">
+                                    {{ player.jersey_number }}
+                                </span>
                             </div>
 
                             <div class="nationality">
                                 <img src="{% static 'players_app/images/tanzania-flag.png' %}">
-                                <span>Tanzania</span>
+                                <span>{{ player.nationality }}</span>
                             </div>
+
                         </div>
                     </a>
                 {% empty %}
-                    <p style="text-align:center; color:#888;">
-                        No trial players available.
-                    </p>
+                    <p style="text-align:center; color:#888;">No trial players available.</p>
                 {% endfor %}
             </div>
         </div>
@@ -131,7 +119,7 @@
         <div id="loanedPlayers" style="display:none;">
             <h2 class="position-title">Loaned Players</h2>
 
-            <div class="players-grid">
+            <div class="players-grid player-container">
                 {% for player in loaned_players %}
                     <a href="{% url 'players_app:player_detail' player.id %}" class="player-card">
                         <div class="player-photo-box">
@@ -140,13 +128,28 @@
 
                         <div class="player-info-box">
                             <div class="name-number">
-                                <span class="player-name">{{ player.name }}</span>
-                                <span class="player-number">{{ player.jersey_number }}</span>
+                                <div class="player-details">
+
+                                    <span class="player-name">
+                                        {{ player.name }}
+                                        {{ player.second_name }}
+                                        {{ player.surname }}
+                                    </span>
+
+                                    <span class="player-position">
+                                        {{ player.position }}
+                                    </span>
+
+                                </div>
+
+                                <span class="player-number">
+                                    {{ player.jersey_number }}
+                                </span>
                             </div>
 
                             <div class="nationality">
                                 <img src="{% static 'players_app/images/tanzania-flag.png' %}">
-                                <span>Tanzania</span>
+                                <span>{{ player.nationality }}</span>
                             </div>
                         </div>
                     </a>
@@ -160,43 +163,20 @@
 
         <!-- SMALL SWITCH -->
         <div class="toggle-buttons">
-            <button onclick="showList('signed')" id="signedBtn" class="active">
-                Signed
-            </button>
-
-            <button onclick="showList('trial')" id="trialBtn">
-                Trial
-            </button>
-
-            <button onclick="showList('loaned')" id="loanedBtn">
-                Loaned
-            </button>
+            <button onclick="showList('signed')" id="signedBtn" class="active">Signed</button>
+            <button onclick="showList('trial')" id="trialBtn">Trial</button>
+            <button onclick="showList('loaned')" id="loanedBtn">Loaned</button>
         </div>
-
     </div>
 
     <!-- SIDEBAR -->
     <div class="sidebar">
+        <a href="{% url 'players_app:export_team_players' team.id %}" class="btn btn-success">📥 Export List of Players</a>
 
-        <a href="{% url 'players_app:export_team_players' team.id %}" class="btn btn-success">
-            📥 Export List of Players
-        </a>
-
-        <h3>Latest News</h3>
-
+        <!--<h3>Latest News</h3>-->
         <ul>
-            <li><a href="#">Coach announces new squad</a></li>
-
-            <li>
-                <a href="{% url 'reports_app:reports_dashboard' team.id %}" class="btn btn-outline-primary">
-                    View Team Reports
-                </a>
-            </li>
-
-            <li><a href="#">Upcoming tournament details</a></li>
-            <li><a href="#">Top 5 U17 Players this month</a></li>
+            <li><a href="{% url 'reports_app:reports_dashboard' team.id %}" class="btn btn-outline-primary">View Team Reports</a></li>
         </ul>
-
     </div>
 
 </div>
@@ -238,6 +218,39 @@ function showList(type) {
         signedBtn.classList.add("active");
     }
 }
+
+function setView(view){
+
+    const containers=document.querySelectorAll('.player-container');
+    containers.forEach(container=>{
+
+        container.classList.remove('grid','list');
+        container.classList.add(view);
+
+    });
+
+    document.getElementById("gridViewBtn").classList.remove("active");
+    document.getElementById("listViewBtn").classList.remove("active");
+
+    if(view==="grid"){
+        document.getElementById("gridViewBtn").classList.add("active");
+    }else{
+        document.getElementById("listViewBtn").classList.add("active");
+    }
+
+    // Save preference
+    localStorage.setItem("playerView",view);
+}
+
+
+// Load saved view
+window.addEventListener("DOMContentLoaded",()=>{
+
+    const view=localStorage.getItem("playerView") || "grid";
+
+    setView(view);
+
+});
 </script>
 
 {% endblock %}

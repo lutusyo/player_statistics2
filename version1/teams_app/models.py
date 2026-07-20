@@ -35,6 +35,7 @@ class AgeGroup(models.Model):
 
     def __str__(self):
         return self.name
+    
 
 class Team(models.Model):
     TEAM_TYPE_CHOICES = [
@@ -42,11 +43,22 @@ class Team(models.Model):
         ('OPPONENT', 'Opponent Team'),
     ]
 
+    TEAM_CATEGORY_CHOICES = [
+        ('CLUB', 'Club'),
+        ('NATIONAL', 'National Team'),
+        ('SCHOOL', 'School'),
+        ('UNIVERSITY', 'University'),
+        ('ACADEMY', 'Academy'),
+        ('SELECT', 'Select'),
+        ('OTHER', 'Other')
+    ]
+
     name = models.CharField(max_length=100)
     short_name = models.CharField(max_length=50, blank=True)
 
     age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)
     team_type = models.CharField(max_length=20, choices=TEAM_TYPE_CHOICES, default='OUR_TEAM')
+    team_category = models.CharField(max_length=20, choices=TEAM_CATEGORY_CHOICES, default='CLUB')
     logo = models.ImageField(upload_to='team_logos/', blank=True, null=True)
 
     # NEW STRUCTURE (IMPORTANT)

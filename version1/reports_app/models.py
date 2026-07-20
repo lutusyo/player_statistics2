@@ -192,16 +192,30 @@ class Result(models.Model):
 
     def __str__(self):
         return f"{self.home_team} {self.home_score} - {self.away_score} {self.away_team} ({self.date})"
+    
 
+class TrainingSessionType(models.TextChoices):
+    TEAM = "TEAM", "Team Training"
+    GYM = "GYM", "Gym Session"
+    INDIVIDUAL = "INDIVIDUAL", "Individual Training"
 
 
 class TrainingMinutes(models.Model):
     date = models.DateField(default=timezone.now)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='training_minutes')
+    team = models.ForeignKey(
+        Team,
+        on_delete=models.CASCADE,
+        related_name='training_minutes'
+    )
+    session = models.CharField(
+        max_length=20,
+        choices=TrainingSessionType.choices,
+        default=TrainingSessionType.TEAM
+    )
     total_minutes = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f"{self.team.name} - {self.date} Training"
+        return f"{self.team.name} - {self.date} - {self.session}"
 
     def save(self, *args, **kwargs):
         creating = self.pk is None
@@ -210,7 +224,6 @@ class TrainingMinutes(models.Model):
         if creating:
             players = Player.objects.filter(team=self.team)
 
-
             for player in players:
                 PlayerTrainingMinutes.objects.get_or_create(
                     training_session=self,
@@ -218,9 +231,19 @@ class TrainingMinutes(models.Model):
                     defaults={"minutes": self.total_minutes}
                 )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["team", "date", "session"],
+                name="unique_training_session_per_team_date_session",
+            )
+        ]
+
+
 class PlayerTrainingMinutes(models.Model):
     training_session = models.ForeignKey(TrainingMinutes, on_delete=models.CASCADE, related_name='player_minutes')
     player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='training_minutes')
+    trained_with_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="trained_players",null=True,blank=True)
     minutes = models.PositiveIntegerField(default=0)
 
     class Meta:

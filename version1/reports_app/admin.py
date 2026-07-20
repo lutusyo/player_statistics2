@@ -87,15 +87,28 @@ class ResultAdmin(admin.ModelAdmin):
     }
 
 
+
+
 class PlayerTrainingMinutesInline(admin.TabularInline):
     model = PlayerTrainingMinutes
     extra = 0
-    autocomplete_fields = ['player']
+
+    fields = (
+        'player',
+        'trained_with_team',
+        'minutes',
+    )
+
+    autocomplete_fields = (
+        'player',
+        'trained_with_team',
+    )
 
 
 class TrainingAbsenceInline(admin.TabularInline):
     model = TrainingAbsence
     extra = 0
+    autocomplete_fields = ['player']
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == "player":
@@ -104,18 +117,84 @@ class TrainingAbsenceInline(admin.TabularInline):
                 training = TrainingMinutes.objects.get(id=obj_id)
                 kwargs["queryset"] = Player.objects.filter(team=training.team)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+@admin.register(TrainingAbsence)
+class TrainingAbsenceAdmin(admin.ModelAdmin):
+
+    list_display = (
+        'player',
+        'training_session',
+        'reason',
+    )
+
+    list_filter = (
+        'reason',
+        'training_session__team',
+        'training_session__session',
+        'training_session__date',
+    )
+
+    search_fields = (
+        'player__first_name',
+        'player__last_name',
+    )
 
 
 @admin.register(TrainingMinutes)
 class TrainingMinutesAdmin(admin.ModelAdmin):
-    list_display = ('date', 'team', 'total_minutes')
-    list_filter = ('team', 'date')
+    list_display = (
+        'date',
+        'team',
+        'session',
+        'total_minutes',
+    )
 
-    inlines = [PlayerTrainingMinutesInline, TrainingAbsenceInline]
+    list_filter = (
+        'team',
+        'session',
+        'date',
+    )
+
+    search_fields = (
+        'team__name',
+    )
+
+    ordering = (
+        '-date',
+        'team',
+        'session',
+    )
+
+    inlines = [
+        PlayerTrainingMinutesInline,
+        TrainingAbsenceInline,
+    ]
 
 
 @admin.register(PlayerTrainingMinutes)
 class PlayerTrainingMinutesAdmin(admin.ModelAdmin):
-    list_display = ('player', 'training_session', 'minutes')
-    list_filter = ('player__team', 'training_session__date')
-    search_fields = ('player__first_name', 'player__last_name')
+
+    list_display = (
+        'player',
+        'training_session',
+        'trained_with_team',
+        'minutes',
+    )
+
+    list_filter = (
+        'trained_with_team',
+        'training_session__team',
+        'training_session__session',
+        'training_session__date',
+    )
+
+    search_fields = (
+        'player__first_name',
+        'player__last_name',
+    )
+
+    autocomplete_fields = (
+        'player',
+        'training_session',
+        'trained_with_team',
+    )

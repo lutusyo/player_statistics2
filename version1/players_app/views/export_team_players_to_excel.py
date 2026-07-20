@@ -10,6 +10,7 @@ from version1.teams_app.models import Team
 
 
 def export_team_players_to_excel_view(request, team_id):
+    
     team = Team.objects.get(id=team_id)
 
     wb = Workbook()

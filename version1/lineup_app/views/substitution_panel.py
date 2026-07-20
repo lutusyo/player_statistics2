@@ -163,7 +163,6 @@ def api_undo_substitution(request, match_id):
 
     return JsonResponse({"success": True})
 
-
 @require_POST
 @transaction.atomic
 def api_finalize_match(request, match_id):
@@ -181,7 +180,6 @@ def api_finalize_match(request, match_id):
         lineup.save()
 
     return JsonResponse({"success": True})
-
 
 def substitution_panel(request, match_id):
     match = get_object_or_404(Match, id=match_id)
@@ -204,6 +202,8 @@ def substitution_panel(request, match_id):
             bench.append({
                 "id": l.id,
                 "name": l.player.name,
+                "second_name": l.player.second_name,
+                "surname": l.player.surname,
                 "position": l.position,
                 "is_lineup": True,
             })
@@ -211,6 +211,8 @@ def substitution_panel(request, match_id):
             bench.append({
                 "id": p.id,
                 "name": p.name,
+                "second_name": p.second_name,
+                "surname": p.surname,
                 "position": "SUB",
                 "is_lineup": False,
             })
@@ -221,7 +223,6 @@ def substitution_panel(request, match_id):
 
     substitutions = Substitution.objects.filter(match=match).select_related("player_out", "player_in")
     unused_subs = MatchLineup.objects.filter(match=match, is_starting=False, time_in__isnull=True)
-
 
     if request.method == "POST":
         player_out_id = request.POST.get("player_out")
