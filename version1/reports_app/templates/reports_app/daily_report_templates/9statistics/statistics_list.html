@@ -134,7 +134,13 @@
             <tr>
               <th>Name</th>
               <th>Pos</th>
-              <th>Train</th>
+
+              <th>Total</th>
+              <th>U17</th>
+              <th>U20</th>
+              <th>First</th>
+              <th>National</th>
+
               <th>Game</th>
               <th>Apps</th>
               <th>Starts</th>
@@ -152,7 +158,15 @@
             <tr>
               <td class="text-start ps-2">{{ r.player.name }}</td>
               <td>{{ r.position }}</td>
-              <td>{{ r.training_minutes }}</td>
+
+
+              <td>{{ r.training_total }}</td>
+              <td>{{ r.training_u17 }}</td>
+              <td>{{ r.training_u20 }}</td>
+              <td>{{ r.training_first }}</td>
+              <td>{{ r.training_national }}</td>
+
+
               <td>{{ r.game_minutes }}</td>
               <td>{{ r.appearances }}</td>
               <td>{{ r.starts }}</td>

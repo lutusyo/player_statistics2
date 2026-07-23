@@ -71,21 +71,49 @@ def get_statistics_report(filter_type="all", team=None, start_date=None, end_dat
             outcome='On Target Goal'
         ).filter(match_filter).count()
 
-        # Training minutes
-        training_minutes_qs = PlayerTrainingMinutes.objects.filter(
-            player=player, training_session__team=team
-        )
+        # Getting all Training records for the player
+        training_minutes_qs = PlayerTrainingMinutes.objects.filter(player=player)
+
         if start_date:
             training_minutes_qs = training_minutes_qs.filter(training_session__date__gte=start_date)
+
         if end_date:
             training_minutes_qs = training_minutes_qs.filter(training_session__date__lte=end_date)
 
-        training_minutes = training_minutes_qs.aggregate(total=Sum('minutes'))['total'] or 0
+        # Total minutes
+        training_total = training_minutes_qs.aggregate(
+            total=Sum("minutes"))["total"] or 0
+
+        # Minutes with each team
+        u17_minutes = training_minutes_qs.filter(
+            trained_with_team__team_category="CLUB",
+            trained_with_team__age_group__code="U17"
+        ).aggregate(total=Sum("minutes"))["total"] or 0
+
+        u20_minutes = training_minutes_qs.filter(
+            trained_with_team__team_category="CLUB",
+            trained_with_team__age_group__code="U20"
+        ).aggregate(total=Sum("minutes"))["total"] or 0
+
+        first_team_minutes = training_minutes_qs.filter(
+            trained_with_team__team_category="CLUB",
+            trained_with_team__age_group__code="Senior"
+        ).aggregate(total=Sum("minutes"))["total"] or 0
+
+        national_team_minutes = training_minutes_qs.filter(
+            trained_with_team__team_category="NATIONAL"
+        ).aggregate(total=Sum("minutes"))["total"] or 0
 
         report.append({
             "player": player,
             "position": player.position,
-            "training_minutes": training_minutes,
+
+            "training_total": training_total,
+            "training_u17": u17_minutes,
+            "training_u20": u20_minutes,
+            "training_first": first_team_minutes,
+            "training_national": national_team_minutes,
+
             "game_minutes": game_minutes,
             "appearances": appearances,
             "starts": starts,
@@ -93,13 +121,11 @@ def get_statistics_report(filter_type="all", team=None, start_date=None, end_dat
             "sub_out": sub_out,
             "goals": goals,
             "assists": assists,
-            "pre_assists": pre_assists,  # <-- new field
+            "pre_assists": pre_assists,
             "note": "",
         })
 
     return report
-
-
 
 # ====================== NORMAL VIEW ======================
 @login_required
@@ -108,9 +134,6 @@ def statistics_list_view(request, team_id):
     filter_type = request.GET.get("filter", "all")
 
     competition = request.GET.get("competition")
-
-
-
 
     filter_type = request.GET.get("filter", "all")
 
@@ -126,14 +149,7 @@ def statistics_list_view(request, team_id):
     elif filter_type == "month" and not start_date:
         start_date = now().date().replace(day=1)
 
-
-    report = get_statistics_report(
-        filter_type=filter_type,
-        team=team,
-        start_date=start_date,
-        end_date=end_date,
-        competition=competition
-    )
+    report = get_statistics_report(filter_type=filter_type,team=team,start_date=start_date,end_date=end_date,competition=competition)
 
     context = {
         "report": report,
@@ -141,14 +157,12 @@ def statistics_list_view(request, team_id):
         "team": team,
         "start_date": start_date_str,
         "end_date": end_date_str,
-        "competition": competition,
-        
+        "competition": competition,   
     }
 
     context["competition_choices"] = CompetitionType.choices
 
     return render(request, "reports_app/daily_report_templates/9statistics/statistics_list.html", context)
-
 
 # ====================== EXPORT TO EXCEL ======================
 @login_required
@@ -156,7 +170,6 @@ def statistics_export_excel(request, team_id):
     team = get_object_or_404(Team, id=team_id)
 
     competition = request.GET.get("competition")
-    
 
     filter_type = request.GET.get("filter", "all")
 
@@ -193,7 +206,14 @@ def statistics_export_excel(request, team_id):
         "Date of Birth": r["player"].birthdate,
         "Age": r["player"].age_using_birthdate,
 
-        "Training Minutes": r["training_minutes"],
+
+        "Training Total": r["training_total"],
+        "U17": r["training_u17"],
+        "U20": r["training_u20"],
+        "First Team": r["training_first"],
+        "National Team": r["training_national"],
+
+
         "Game Minutes": r["game_minutes"],
         "Appearances": r["appearances"],
         "Starts": r["starts"],
@@ -255,7 +275,16 @@ def statistics_export_pdf(request, team_id):
     data = [[
     "Name", "No", "Pos", "Spec Pos", "Foot",
     "Ht", "Wt", "DOB", "Age",
-    "Train", "Game", "Apps", "Starts", "In", "Out", "Goals", "Ast", "Pre Ast"
+
+
+    "Total",
+    "U17",
+    "U20",
+    "First",
+    "National",
+
+
+      "Game", "Apps", "Starts", "In", "Out", "Goals", "Ast", "Pre Ast"
     ]]
 
     for r in report:
@@ -275,7 +304,14 @@ def statistics_export_pdf(request, team_id):
             player.birthdate,
             player.age_using_birthdate,
 
-            r["training_minutes"],
+
+            r["training_total"],
+            r["training_u17"],
+            r["training_u20"],
+            r["training_first"],
+            r["training_national"],
+
+
             r["game_minutes"],
             r["appearances"],
             r["starts"],
