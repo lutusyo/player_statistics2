@@ -233,13 +233,14 @@ def statistics_export_excel(request, team_id):
         "Date of Birth": r["player"].birthdate,
         "Age": r["player"].age_using_birthdate,
 
-
         "Training Total": r["training_total"],
+        "U11": r["training_u11"],
+        "U13": r["training_u13"],
+        "U15": r["training_u15"],
         "U17": r["training_u17"],
         "U20": r["training_u20"],
         "First Team": r["training_first"],
         "National Team": r["training_national"],
-
 
         "Game Minutes": r["game_minutes"],
         "Appearances": r["appearances"],
@@ -299,24 +300,36 @@ def statistics_export_pdf(request, team_id):
     styles = getSampleStyleSheet()
 
     
+
+
     data = [[
     "Name", "No", "Pos", "Spec Pos", "Foot",
     "Ht", "Wt", "DOB", "Age",
-
-
     "Total",
+    "U11",
+    "U13",
+    "U15",
     "U17",
     "U20",
     "First",
     "National",
-
-
-      "Game", "Apps", "Starts", "In", "Out", "Goals", "Ast", "Pre Ast"
+    "Game",
+    "Apps",
+    "Starts",
+    "In",
+    "Out",
+    "Goals",
+    "Ast",
+    "Pre Ast",
+    "Note",
     ]]
 
+
+ 
     for r in report:
         player = r["player"]
         m = player.current_measurement
+
 
         data.append([
             player.full_name,
@@ -324,20 +337,19 @@ def statistics_export_pdf(request, team_id):
             r["position"],
             player.specific_position,
             player.foot_preference,
-
             m.height if m else "",
             m.weight if m else "",
-
             player.birthdate,
             player.age_using_birthdate,
 
-
             r["training_total"],
+            r["training_u11"],
+            r["training_u13"],
+            r["training_u15"],
             r["training_u17"],
             r["training_u20"],
             r["training_first"],
             r["training_national"],
-
 
             r["game_minutes"],
             r["appearances"],
@@ -347,6 +359,7 @@ def statistics_export_pdf(request, team_id):
             r["goals"],
             r["assists"],
             r["pre_assists"],
+            r["note"],
         ])
 
 
