@@ -135,20 +135,26 @@
               <th>Name</th>
               <th>Pos</th>
 
-              <th>Total</th>
-              <th>U17</th>
-              <th>U20</th>
-              <th>First</th>
-              <th>National</th>
 
-              <th>Game</th>
-              <th>Apps</th>
+
+              <th>Total min</th>
+              <th>Games</th>
               <th>Starts</th>
               <th>In</th>
               <th>Out</th>
               <th>Goals</th>
               <th>Ast</th>
               <th>Pre Ast</th>
+              
+
+              <th>Total min</th>
+              <th>U11</th>
+              <th>U13</th>
+              <th>U15</th>
+              <th>U17</th>
+              <th>U20</th>
+              <th>First</th>
+              <th>National</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -160,11 +166,6 @@
               <td>{{ r.position }}</td>
 
 
-              <td>{{ r.training_total }}</td>
-              <td>{{ r.training_u17 }}</td>
-              <td>{{ r.training_u20 }}</td>
-              <td>{{ r.training_first }}</td>
-              <td>{{ r.training_national }}</td>
 
 
               <td>{{ r.game_minutes }}</td>
@@ -176,12 +177,23 @@
               <td>{{ r.assists }}</td>
               <td>{{ r.pre_assists }}</td>
 
+
+
+              <td>{{ r.training_total }}</td>
+              <td>{{ r.training_u11 }}</td>
+              <td>{{ r.training_u13 }}</td>
+              <td>{{ r.training_u15 }}</td>
+              <td>{{ r.training_u17 }}</td>
+              <td>{{ r.training_u20 }}</td>
+              <td>{{ r.training_first }}</td>
+              <td>{{ r.training_national }}</td>
+
               <td>
                 <a href="{% url 'reports_app:individual_statistics' player_id=r.player.id %}?filter={{ filter_type }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if competition %}&competition={{ competition }}{% endif %}"
-                   class="btn btn-outline-primary btn-sm">
-                  View
-                </a>
-              </td>
+                   class="btn btn-outline-primary btn-sm">View</a>
+              </td>              
+
+
             </tr>
             {% empty %}
             <tr>
