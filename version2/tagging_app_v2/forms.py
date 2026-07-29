@@ -1,7 +1,7 @@
 # tagging_app_v2/forms.py
 from django import forms
 from version1.lineup_app.models import MatchLineup
-from version2.tagging_app_v2.constants import BALL_ACTION_CHOICES
+from core.constants import BALL_ACTION_CHOICES
 
 
 class PassEventV2Form(forms.Form):

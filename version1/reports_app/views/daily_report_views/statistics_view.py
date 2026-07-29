@@ -18,13 +18,9 @@ from version1.tagging_app.models import AttemptToGoal
 from version1.teams_app.models import Team
 from version1.reports_app.models import PlayerTrainingMinutes
 
-
 from version1.matches_app.models import CompetitionType
 
 from version1.reports_app.models import (PlayerTrainingMinutes,TrainingMinutes,)
-
-
-
 
 # ====================== REPORT HELPER ======================
 def get_statistics_report(filter_type="all", team=None, start_date=None, end_date=None, competition=None):

@@ -1,5 +1,5 @@
 from django.db import models
-from version2.tagging_app_v2.constants import BALL_ACTION_CHOICES, FOUL_OUTCOME
+from core.constants import BALL_ACTION_CHOICES, FOUL_OUTCOME
 from version1.lineup_app.models import MatchLineup
 from version1.matches_app.models import Match
 

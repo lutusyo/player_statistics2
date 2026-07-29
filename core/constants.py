@@ -1,4 +1,4 @@
-# tagging_app_v2/constants.py
+# core/constants.py
 
 BALL_ACTION_CHOICES = [
     ("LOW_BALL", "Low Ball"),
