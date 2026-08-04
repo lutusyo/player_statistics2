@@ -8,7 +8,7 @@ from openpyxl.drawing.image import Image as XLImage
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-from version1.reports_app.models import Scouting
+from version1.reports_app.models.previous_models import Scouting
 from version1.reports_app.forms import ReportFilterForm
 from version1.teams_app.models import Team
 

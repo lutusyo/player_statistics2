@@ -4,18 +4,11 @@ from version1.players_app.models import Player
 from version1.matches_app.models import Venue, CompetitionType, SeasonChoices
 from django.utils import timezone
 from django.conf import settings
+from apps.core.choices import ActivityChoices, AgreementChoices
+from version1.reports_app.models.weekly_report import WeeklyReport
 
 # Common choices
-class ActivityChoices(models.TextChoices):
-    MATCH = 'MATCH', 'Match'
-    TRAINING = 'TRAINING', 'Training'
-    GYME_SESSION = 'GYME SESSION', 'Gyme Session'
-    TEAM_VIDEO_SESSION = 'TEAM VIDEO SESSION', 'Team Video Session'
-    INDIVIDUAL_VIDEO_SESSION = 'INDIVIDUAL VIDEO SESSION', 'Individual Video Session'
 
-class AgreementChoices(models.TextChoices):
-    TRIAL = 'TRIAL', 'Trial'
-    SIGNING = 'SIGNING', 'Signing'
 
 class Medical(models.Model):
     name = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='medical_records')
@@ -57,18 +50,8 @@ class Scouting(models.Model):
     school_name = models.CharField(max_length=150, blank=True, null=True)
     education_level = models.CharField(max_length=100, blank=True, null=True)
     parent_or_coach_phone = models.CharField(max_length=20, blank=True, null=True)
-    guardian_name = models.CharField(
-        max_length=150,
-        blank=True,
-        null=True,
-        help_text="Name of guardian (if parent or coach)"
-    )
-    scouting_location = models.CharField(
-        max_length=150,
-        blank=True,
-        null=True,
-        help_text="Place where the player was scouted"
-    )
+    guardian_name = models.CharField(max_length=150,blank=True,null=True,help_text="Name of guardian (if parent or coach)")
+    scouting_location = models.CharField(max_length=150,blank=True,null=True,help_text="Place where the player was scouted")
 
     def __str__(self):
         return f"{self.name} - {self.agreement}"
@@ -149,11 +132,8 @@ class Result(models.Model):
     result = models.CharField(max_length=5, choices=RESULT_CHOICES, blank=True)
     
     # Whether our team is involved
-    our_team = models.ForeignKey(
-        Team, on_delete=models.CASCADE, related_name='our_results',
-        null=True, blank=True,
-        help_text="Select our team if this result involves us"
-    )
+    our_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='our_results',null=True, blank=True,
+        help_text="Select our team if this result involves us")
 
     # Optional column/notes
     notes = models.CharField(max_length=200, blank=True)
@@ -254,97 +234,10 @@ class TrainingAbsence(models.Model):
         PlayerTrainingMinutes.objects.update_or_create(training_session=self.training_session,player=self.player,defaults={"minutes": 0})
 
 ###################################################################################################
-### New structure proposed by New Technical director
-
-#Number 1
-class WeeklyReport(models.Model):
-
-    STATUS = (
-        ("Draft","Draft"),
-        ("Submitted","Submitted"),
-        ("Approved","Approved"),
-    )
-    team = models.ForeignKey(Team,on_delete=models.CASCADE)
-    season = models.CharField(max_length=20)
-    week = models.PositiveIntegerField()
-    coach = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    week_start = models.DateField()
-    week_end = models.DateField()
+### New structure proposed by New Technical director 16/07/2026
 
 
-    status = models.CharField(max_length=20,choices=STATUS,default="Draft")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = ("team", "season", "week")
 
 
-    def __str__(self):
-        return f"{self.team} Week {self.week}"
-    
-
-# Number 2
-class TableStanding(models.Model):
-    report = models.OneToOneField(WeeklyReport,on_delete=models.CASCADE,related_name="standing")
-    standing_image = models.ImageField(upload_to="reports/weekly/standings/")
-    notes = models.TextField(blank=True)
-
-    def __str__(self):
-        return f"{self.report.team} - Week {self.report.week}"
-    
-# Number 3
-### We use the previous result model 
 
 
-## Number 4
-class SquadStatus(models.Model):
-
-    report = models.OneToOneField(
-        WeeklyReport,
-        on_delete=models.CASCADE,
-        related_name="squad_status"
-    )
-
-    summary = models.TextField()
-
-    coach_comments = models.TextField(blank=True)
-
-# Number 5
-class MicrocycleEvaluation(models.Model):
-
-    report = models.OneToOneField(
-        WeeklyReport,
-        on_delete=models.CASCADE,
-        related_name="evaluation"
-    )
-    targeted_interventions = models.TextField(blank=True)
-    positives = models.TextField(blank=True)
-    negatives = models.TextField(blank=True)
-    learning_points = models.TextField(blank=True)
-    next_microcycle = models.TextField(blank=True)
-
-    player_performance_summary = models.TextField(blank=True)
-
-
-# Number 6
-class DiscussionPoint(models.Model):
-
-    report = models.ForeignKey(WeeklyReport,on_delete=models.CASCADE,related_name="discussion_points")
-    point = models.TextField()
-
-# Number 7
-class DecisionPoint(models.Model):
-
-    report = models.ForeignKey(WeeklyReport,on_delete=models.CASCADE,related_name="decision_points")
-    decision = models.TextField()
-    deadline = models.DateField(null=True, blank=True)
-
-class DecisionPoint(models.Model):
-
-    report = models.ForeignKey(WeeklyReport,on_delete=models.CASCADE,related_name="decision_points")
-    decision = models.TextField()
-    responsible = models.CharField(max_length=100,blank=True)
-    deadline = models.DateField(null=True,blank=True)
-
-    completed = models.BooleanField(default=False)

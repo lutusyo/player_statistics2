@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, FileResponse
 import zipfile
 
-from version1.reports_app.models import Mesocycle
+from version1.reports_app.models.previous_models import Mesocycle
 from version1.reports_app.forms import ReportFilterForm
 from version1.teams_app.models import Team
 

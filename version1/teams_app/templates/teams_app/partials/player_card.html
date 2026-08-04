@@ -1,0 +1,53 @@
+{% load static %}
+
+<a href="{% url 'players_app:player_detail' player.id %}" class="player-card">
+
+    <!-- Player -->
+    <div class="player-column">
+        <div class="player-photo-box">
+            {% if player.photo %}
+                <img src="{{ player.photo.url }}" alt="{{ player.name }}">
+            {% else %}
+                <img
+                    src="{% static 'players_app/images/default-player.png' %}"
+                    alt="Default player"
+                >
+            {% endif %}
+        </div>
+
+        <span class="player-name">
+            {{ player.name }}
+            {{ player.second_name }}
+            {{ player.surname }}
+        </span>
+    </div>
+
+    <!-- Nationality -->
+    <div class="nationality player-nationality">
+        <img
+            src="{% static 'players_app/images/tanzania-flag.png' %}"
+            alt="{{ player.nationality }}"
+        >
+        <span>{{ player.nationality }}</span>
+    </div>
+
+    <!-- Age -->
+    {% if show_age %}
+        <span class="player-age">
+            {{ player.age_using_birthdate|default:"-" }}{% if player.age_using_birthdate %}yrs{% endif %}
+        </span>
+    {% else %}
+        <span class="player-age">-</span>
+    {% endif %}
+
+    <!-- Position -->
+    <span class="player-position">
+        {{ player.position }}
+    </span>
+
+    <!-- Jersey Number -->
+    <span class="player-number">
+        {{ player.jersey_number }}
+    </span>
+
+</a>

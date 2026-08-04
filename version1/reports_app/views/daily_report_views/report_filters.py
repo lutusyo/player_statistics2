@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.utils import timezone
 from datetime import timedelta
 from version1.reports_app.forms import ReportFilterForm
-from version1.reports_app.models import (
+from version1.reports_app.models.previous_models import (
     Medical, Transition, Scouting, Performance,
     IndividualActionPlan, Mesocycle, FitnessPlan
 )

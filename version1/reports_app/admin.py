@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models
 from version1.players_app.models import Player
 
-from version1.reports_app.models import (
+from version1.reports_app.models.previous_models import (
     Medical,
     Transition,
     Scouting,
@@ -87,8 +87,6 @@ class ResultAdmin(admin.ModelAdmin):
     }
 
 
-
-
 class PlayerTrainingMinutesInline(admin.TabularInline):
     model = PlayerTrainingMinutes
     extra = 0
@@ -149,21 +147,9 @@ class TrainingMinutesAdmin(admin.ModelAdmin):
         'total_minutes',
     )
 
-    list_filter = (
-        'team',
-        'session',
-        'date',
-    )
-
-    search_fields = (
-        'team__name',
-    )
-
-    ordering = (
-        '-date',
-        'team',
-        'session',
-    )
+    list_filter = ('team','session','date',)
+    search_fields = ('team__name',)
+    ordering = ('-date','team','session',)
 
     inlines = [
         PlayerTrainingMinutesInline,
@@ -174,27 +160,143 @@ class TrainingMinutesAdmin(admin.ModelAdmin):
 @admin.register(PlayerTrainingMinutes)
 class PlayerTrainingMinutesAdmin(admin.ModelAdmin):
 
-    list_display = (
-        'player',
-        'training_session',
-        'trained_with_team',
-        'minutes',
-    )
+    list_display = ('player','training_session','trained_with_team','minutes',)
+    list_filter = ('trained_with_team','training_session__team','training_session__session','training_session__date',)
+    search_fields = ('player__first_name','player__last_name',)
+    autocomplete_fields = ('player','training_session','trained_with_team',)
 
-    list_filter = (
-        'trained_with_team',
-        'training_session__team',
-        'training_session__session',
-        'training_session__date',
-    )
 
-    search_fields = (
-        'player__first_name',
-        'player__last_name',
-    )
+    ##################################################################################################################
 
-    autocomplete_fields = (
-        'player',
-        'training_session',
-        'trained_with_team',
-    )
+    from django.contrib import admin
+
+from .models import (
+    WeeklyReport,
+    BeforeActionReview,
+    AfterActionReview,
+    SquadStatus,
+    DiscussionPoint,
+    DecisionPoint,
+)
+
+
+class BeforeActionReviewInline(admin.StackedInline):
+    model = BeforeActionReview
+    extra = 0
+    max_num = 1
+
+
+class AfterActionReviewInline(admin.StackedInline):
+    model = AfterActionReview
+    extra = 0
+    max_num = 1
+
+
+class SquadStatusInline(admin.StackedInline):
+    model = SquadStatus
+    extra = 0
+    max_num = 1
+
+
+class DiscussionPointInline(admin.TabularInline):
+    model = DiscussionPoint
+    extra = 1
+
+
+class DecisionPointInline(admin.TabularInline):
+    model = DecisionPoint
+    extra = 1
+
+
+@admin.register(WeeklyReport)
+class WeeklyReportAdmin(admin.ModelAdmin):
+
+    list_display = [
+        "team",
+        "season",
+        "week",
+        "coach",
+        "week_start",
+        "week_end",
+        "status",
+    ]
+
+    list_filter = [
+        "team",
+        "season",
+        "status",
+    ]
+
+    search_fields = [
+        "team__name",
+        "coach__username",
+        "title",
+    ]
+
+    readonly_fields = [
+        "created_at",
+        "updated_at",
+        "submitted_at",
+        "approved_at",
+    ]
+
+    inlines = [
+        BeforeActionReviewInline,
+        AfterActionReviewInline,
+        SquadStatusInline,
+        DiscussionPointInline,
+        DecisionPointInline,
+    ]
+
+
+@admin.register(BeforeActionReview)
+class BeforeActionReviewAdmin(admin.ModelAdmin):
+    list_display = [
+        "report",
+    ]
+
+
+@admin.register(AfterActionReview)
+class AfterActionReviewAdmin(admin.ModelAdmin):
+    list_display = [
+        "report",
+    ]
+
+
+@admin.register(SquadStatus)
+class SquadStatusAdmin(admin.ModelAdmin):
+    list_display = [
+        "report",
+        "available_players",
+      #  "injured_players",
+        "unavailable_players",
+    ]
+
+
+@admin.register(DiscussionPoint)
+class DiscussionPointAdmin(admin.ModelAdmin):
+    list_display = [
+        "report",
+        "category",
+        "point",
+        "order",
+    ]
+
+    list_filter = [
+        "category",
+    ]
+
+
+@admin.register(DecisionPoint)
+class DecisionPointAdmin(admin.ModelAdmin):
+    list_display = [
+        "report",
+        "decision",
+        "responsible",
+        "deadline",
+        "completed",
+    ]
+
+    list_filter = [
+        "completed",
+    ]

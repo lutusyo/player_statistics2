@@ -6,7 +6,7 @@ from django.utils import timezone
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-from version1.reports_app.models import Performance
+from version1.reports_app.models.previous_models import Performance
 from version1.reports_app.forms import ReportFilterForm
 from version1.teams_app.models import Team
 

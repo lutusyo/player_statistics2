@@ -1,7 +1,7 @@
 # tagging_app_v2/models.py
 from django.db import models
 
-from core.constants import BALL_ACTION_CHOICES, FOUL_OUTCOME
+from apps.core.constants import BALL_ACTION_CHOICES, FOUL_OUTCOME
 from version1.lineup_app.models import MatchLineup
 from version1.matches_app.models import Match
 

@@ -8,7 +8,6 @@ from version1.teams_app.models import Team
 
 def index(request):
     team = Team.objects.filter(age_group__code='U20', team_type='OUR_TEAM').first()
-
     return render(request, 'accounts_app/index.html', {'team': team})
 
 def home_view(request):

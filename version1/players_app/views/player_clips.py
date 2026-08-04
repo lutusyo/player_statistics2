@@ -9,7 +9,7 @@ from version1.defensive_app.models import PlayerDefensiveStats
 from version1.tagging_app.models import AttemptToGoal, PassEvent, GoalkeeperDistributionEvent
 from version1.lineup_app.models import MatchLineup, Substitution
 from version1.teams_app.models import Team
-from version1.reports_app.models import Result
+from version1.reports_app.models.previous_models import Result
 
 
 def player_match_clips(request, player_id, match_id):

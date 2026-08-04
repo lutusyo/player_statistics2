@@ -4,21 +4,7 @@ from version1.players_app.models import Player
 from django.utils import timezone
 from datetime import datetime, timedelta
 
-class SeasonChoices(models.TextChoices):
-    SEASON_2022_2023 = "2022-2023", "2022-2023"
-    SEASON_2023_2024 = "2023-2024", "2023-2024"
-    SEASON_2024_2025 = "2024-2025", "2024-2025"
-    SEASON_2025_2026 = "2025-2026", "2025-2026"
-
-class CompetitionType(models.TextChoices):
-    LOCAL_FRIENDLY = 'Local Friendly', 'Local Friendly'
-    INTERNATIONAL_FRIENDLY = 'International Friendly', 'International Friendly'
-    NBC_YOUTH_LEAGUE = 'NBC Youth League', 'NBC Youth League'
-    NBC_PREMIER_LEAGUE = 'NBC Premier League', 'NBC Premier League'
-    CAF_CONFEDERATION_CUP = 'CAF Confederation Cup', 'CAF Confederation Cup'
-    AZAM_INTERNATIONAL_TALENT_SHOWCASE = 'Azam International Talent Showcase', 'Azam International Talent Showcase'
-    NMB_MAPINDUZI_CUP = 'NMB Mapinduzi Cup', 'NMB Mapinduzi Cup'
-    TOURNAMENT = 'Tournament', 'Tournament'
+from apps.core.choices import CompetitionType, SeasonChoices
 
 class Country(models.Model):
     name = models.CharField(max_length=50, unique=True)

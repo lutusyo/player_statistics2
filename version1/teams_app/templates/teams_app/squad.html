@@ -3,254 +3,197 @@
 {% load player_extras %}
 
 {% block title %}{{ team_selected }} Players{% endblock %}
+
 {% block team_content %}
 
 <link rel="stylesheet" href="{% static 'teams_app/css/squad.css' %}">
 
-<div class="page-container">
+    <div class="page-container">
 
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
+        <main class="main-content">
 
-        <!-- LIBRARY BUTTON 
-        <a href="{% url 'library_app:library_home' %}" class="library-btn">🎬 Library</a>-->
-
-        <div class="view-toggle">
-            <button id="gridViewBtn" class="active" onclick="setView('grid')">⬜ Grid</button>
-            <button id="listViewBtn" onclick="setView('list')"> ☰ List</button>
-        </div>
-
-        <!-- SIGNED PLAYERS -->
-        <div id="signedPlayers">
-            {% for position in position_order %}
-                {% with players_in_position=grouped_players|get_item:position %}
-                    {% if players_in_position %}
-                        <h2 class="position-title">{{ position }}s</h2>
-
-                        <div class="players-grid player-container">
-                            {% for player in players_in_position %}
-                                <a href="{% url 'players_app:player_detail' player.id %}" class="player-card">
-                                    <div class="player-photo-box">
-                                        <img src="{{ player.photo.url }}" alt="{{ player.name }}">
-                                    </div>
-
-                                    <div class="player-info-box">
-                                        <div class="name-number">
-                                            <div class="player-details">
-
-                                                <span class="player-name">
-                                                    {{ player.name }}
-                                                    {{ player.second_name }}
-                                                    {{ player.surname }}
-                                                </span>
-
-                                                <span class="player-position">
-                                                    {{ player.position }}
-                                                </span>
-
-                                            </div>
-
-                                            <span class="player-number">
-                                                {{ player.jersey_number }}
-                                            </span>
-                                        </div>
-
-                                        <div class="nationality">
-                                            <img src="{% static 'players_app/images/tanzania-flag.png' %}">
-                                            <span>{{ player.nationality }}</span>
-                                        </div>
-
-                                    </div>
-                                </a>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                {% endwith %}
-            {% endfor %}
-        </div>
-
-        <!-- TRIAL PLAYERS -->
-        <div id="trialPlayers" style="display:none;">
-            <h2 class="position-title">Trial Players</h2>
-
-            <div class="players-grid player-container">
-                {% for player in trial_players %}
-                    <a href="{% url 'players_app:player_detail' player.id %}" class="player-card">
-                        <div class="player-photo-box">
-                            <img src="{{ player.photo.url }}" alt="{{ player.name }}">
-                        </div>
-
-                        <div class="player-info-box">
-
-                            <div class="name-number">
-                                <div class="player-details">
-
-                                    <span class="player-name">
-                                        {{ player.name }}
-                                        {{ player.second_name }}
-                                        {{ player.surname }}
-                                    </span>
-
-                                    <span class="player-position">
-                                        {{ player.position }}
-                                    </span>
-
-                                </div>
-
-                                <span class="player-number">
-                                    {{ player.jersey_number }}
-                                </span>
-                            </div>
-
-                            <div class="nationality">
-                                <img src="{% static 'players_app/images/tanzania-flag.png' %}">
-                                <span>{{ player.nationality }}</span>
-                            </div>
-
-                        </div>
-                    </a>
-                {% empty %}
-                    <p style="text-align:center; color:#888;">No trial players available.</p>
-                {% endfor %}
+            <!-- GRID / LIST VIEW -->
+            <div class="view-toggle">
+                <button id="gridViewBtn" class="active" onclick="setView('grid')">⬜ Grid</button>
+                <button id="listViewBtn" onclick="setView('list')">☰ List</button>
             </div>
-        </div>
 
-        <!-- LOANED PLAYERS -->
-        <div id="loanedPlayers" style="display:none;">
-            <h2 class="position-title">Loaned Players</h2>
+            <!-- SIGNED PLAYERS -->
+            <section id="signedPlayers">
 
-            <div class="players-grid player-container">
-                {% for player in loaned_players %}
-                    <a href="{% url 'players_app:player_detail' player.id %}" class="player-card">
-                        <div class="player-photo-box">
-                            <img src="{{ player.photo.url }}" alt="{{ player.name }}">
-                        </div>
+                {% for position in position_order %}
+                    {% with players=grouped_players|get_item:position %}
 
-                        <div class="player-info-box">
-                            <div class="name-number">
-                                <div class="player-details">
+                        {% if players %}
+                            <h2 class="position-title">
+                                {{ position }}s
+                            </h2>
 
-                                    <span class="player-name">
-                                        {{ player.name }}
-                                        {{ player.second_name }}
-                                        {{ player.surname }}
-                                    </span>
+                            <div class="players-grid player-container">
 
-                                    <span class="player-position">
-                                        {{ player.position }}
-                                    </span>
+                                {% for player in players %}
+                                    {% include "teams_app/partials/player_card.html" with show_age=True %}
+                                {% endfor %}
 
-                                </div>
-
-                                <span class="player-number">
-                                    {{ player.jersey_number }}
-                                </span>
                             </div>
+                        {% endif %}
 
-                            <div class="nationality">
-                                <img src="{% static 'players_app/images/tanzania-flag.png' %}">
-                                <span>{{ player.nationality }}</span>
-                            </div>
-                        </div>
-                    </a>
-                {% empty %}
-                    <p style="text-align:center; color:#888;">
-                        No loaned players available.
-                    </p>
+                    {% endwith %}
                 {% endfor %}
+
+            </section>
+
+            <!-- TRIAL PLAYERS -->
+            <section id="trialPlayers" style="display:none;">
+
+                <h2 class="position-title">
+                    Trial Players
+                </h2>
+
+                <div class="players-grid player-container">
+
+                    {% for player in trial_players %}
+                        {% include "teams_app/partials/player_card.html" with show_age=False %}
+
+                    {% empty %}
+                        <p class="empty-message">
+                            No trial players available.
+                        </p>
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+            <!-- LOANED PLAYERS -->
+            <section id="loanedPlayers" style="display:none;">
+
+                <h2 class="position-title">Loaned Players</h2>
+
+                <div class="players-grid player-container">
+
+                    {% for player in loaned_players %}
+                        {% include "teams_app/partials/player_card.html" with show_age=False %}
+
+                    {% empty %}
+                        <p class="empty-message">
+                            No loaned players available.
+                        </p>
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+            <!-- PLAYER STATUS -->
+            <div class="toggle-buttons">
+
+                <button id="signedBtn" class="active" onclick="showList('signed')">Signed</button>
+                <button id="trialBtn" onclick="showList('trial')">Trial</button>
+                <button id="loanedBtn" onclick="showList('loaned')">Loaned</button>
+
             </div>
-        </div>
 
-        <!-- SMALL SWITCH -->
-        <div class="toggle-buttons">
-            <button onclick="showList('signed')" id="signedBtn" class="active">Signed</button>
-            <button onclick="showList('trial')" id="trialBtn">Trial</button>
-            <button onclick="showList('loaned')" id="loanedBtn">Loaned</button>
-        </div>
+        </main>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <a
+                href="{% url 'players_app:export_team_players' team.id %}"
+                class="btn btn-success"
+            >
+                📥 Export List of Players
+            </a>
+
+            <ul>
+                <li>
+                    <a
+                        href="{% url 'reports_app:reports_dashboard' team.id %}"
+                        class="btn btn-outline-primary"
+                    >
+                        View Team Reports
+                    </a>
+                </li>
+            </ul>
+
+        </aside>
+
+
     </div>
-
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <a href="{% url 'players_app:export_team_players' team.id %}" class="btn btn-success">📥 Export List of Players</a>
-
-        <!--<h3>Latest News</h3>-->
-        <ul>
-            <li><a href="{% url 'reports_app:reports_dashboard' team.id %}" class="btn btn-outline-primary">View Team Reports</a></li>
-        </ul>
-    </div>
-
-</div>
 
 <script>
+
+const playerSections = {
+    signed: {
+        section: "signedPlayers",
+        button: "signedBtn"
+    },
+    trial: {
+        section: "trialPlayers",
+        button: "trialBtn"
+    },
+    loaned: {
+        section: "loanedPlayers",
+        button: "loanedBtn"
+    }
+};
+
+
 function showList(type) {
 
-    const signed = document.getElementById("signedPlayers");
-    const trial = document.getElementById("trialPlayers");
-    const loaned = document.getElementById("loanedPlayers");
+    Object.values(playerSections).forEach(item => {
 
-    const signedBtn = document.getElementById("signedBtn");
-    const trialBtn = document.getElementById("trialBtn");
-    const loanedBtn = document.getElementById("loanedBtn");
+        document.getElementById(item.section)
+            .style.display = "none";
 
-    // Hide all
-    signed.style.display = "none";
-    trial.style.display = "none";
-    loaned.style.display = "none";
-
-    signedBtn.classList.remove("active");
-    trialBtn.classList.remove("active");
-    loanedBtn.classList.remove("active");
-
-    // Show selected
-    if (type === 'trial') {
-
-        trial.style.display = "block";
-        trialBtn.classList.add("active");
-
-    } else if (type === 'loaned') {
-
-        loaned.style.display = "block";
-        loanedBtn.classList.add("active");
-
-    } else {
-
-        signed.style.display = "block";
-        signedBtn.classList.add("active");
-    }
-}
-
-function setView(view){
-
-    const containers=document.querySelectorAll('.player-container');
-    containers.forEach(container=>{
-
-        container.classList.remove('grid','list');
-        container.classList.add(view);
+        document.getElementById(item.button)
+            .classList.remove("active");
 
     });
 
-    document.getElementById("gridViewBtn").classList.remove("active");
-    document.getElementById("listViewBtn").classList.remove("active");
+    const selected = playerSections[type];
 
-    if(view==="grid"){
-        document.getElementById("gridViewBtn").classList.add("active");
-    }else{
-        document.getElementById("listViewBtn").classList.add("active");
-    }
+    document.getElementById(selected.section)
+        .style.display = "block";
 
-    // Save preference
-    localStorage.setItem("playerView",view);
+    document.getElementById(selected.button)
+        .classList.add("active");
 }
 
 
-// Load saved view
-window.addEventListener("DOMContentLoaded",()=>{
+function setView(view) {
 
-    const view=localStorage.getItem("playerView") || "grid";
+    document
+        .querySelectorAll(".player-container")
+        .forEach(container => {
 
-    setView(view);
+            container.classList.remove("grid", "list");
+            container.classList.add(view);
+
+        });
+
+    document
+        .getElementById("gridViewBtn")
+        .classList.toggle("active", view === "grid");
+
+    document
+        .getElementById("listViewBtn")
+        .classList.toggle("active", view === "list");
+
+    localStorage.setItem("playerView", view);
+}
+
+
+window.addEventListener("DOMContentLoaded", () => {
+
+    const savedView =
+        localStorage.getItem("playerView") || "grid";
+
+    setView(savedView);
 
 });
+
 </script>
 
 {% endblock %}

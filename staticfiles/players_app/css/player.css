@@ -1,3 +1,5 @@
+/* player.css */
+
 /* Layout container for the players page */
 .page-container {
     display: flex;
@@ -7,6 +9,111 @@
     max-width: 1200px;
     padding: 0 20px;
 }
+
+/* View Toggle */
+.view-toggle{
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:15px;
+    gap:8px;
+}
+
+.view-toggle button{
+    border:1px solid #ddd;
+    background:white;
+    padding:6px 12px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.view-toggle button.active{
+    background:#1e40af;
+    color:white;
+}
+
+
+/* ---------------- GRID ---------------- */
+
+.player-container.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:18px;
+}
+
+
+/* ---------------- LIST ---------------- */
+
+.player-container.list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.player-container.list .player-card{
+
+    display:flex;
+    align-items:center;
+
+    width:100%;
+
+    padding:10px;
+
+    border-radius:10px;
+
+    border:1px solid #ddd;
+
+    background:white;
+}
+
+.player-container.list .player-photo-box{
+
+    width:70px;
+    height:70px;
+
+    margin-right:15px;
+
+    flex-shrink:0;
+}
+
+.player-container.list .player-photo-box img{
+
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:50%;
+}
+
+.player-container.list .player-info-box{
+
+    flex:1;
+}
+
+.player-container.list .name-number{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.player-container.list .player-number{
+
+    font-size:18px;
+    font-weight:bold;
+}
+
+.player-container.list .nationality{
+
+    margin-top:6px;
+}
+
+
+
+
+
+
+
+
+
 
 /* Left main content (players grid and filter) */
 .main-content {
@@ -20,7 +127,7 @@
     font-size: 0.95em;
 }
 
-/* Sidebar on the right */
+/* Sidebar (used in both players page and player detail page) */
 .sidebar {
     flex: 1;
     min-width: 250px;
@@ -40,59 +147,100 @@
 .sidebar ul {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
-.sidebar ul li {
-    margin-bottom: 10px;
+/* Sidebar player list — updated for no spacing and inline items */
+.sidebar-player-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.sidebar ul li a {
+.sidebar-player-list li {
+    margin: 0;
+    padding: 2px 0;
+}
+
+.sidebar-player-list li a {
+    margin: 0;
+    padding: 4px 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     text-decoration: none;
     color: #333;
-    transition: color 0.2s;
+    transition: background-color 0.3s ease;
 }
 
+/* Player photo - circular, compact */
+.sidebar-player-photo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ccc;
+    flex-shrink: 0;
+    background-color: #eee;
+    background-image: url('/static/path/to/placeholder.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.sidebar-player-name {
+    font-size: 0.95em;
+    font-weight: 500;
+}
+
+/* Sidebar link hover effect */
 .sidebar ul li a:hover {
     color: #007BFF;
 }
 
-/* Adjust grid to ensure 3 cards per row when possible */
+/* Player List - SMALL CARDS    */
+
 .players-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); /* smaller cards */
+    gap: 12px;
 }
 
-/* Player Card Styles */
+.position-title {
+    margin-bottom: 0;
+}
+
+
 .player-card {
     display: block;
     border: 1px solid #ddd;
-    border-radius: 12px;
+    border-radius: 8px;
     background-color: #fff;
     text-decoration: none;
     color: inherit;
     transition: transform 0.2s, box-shadow 0.2s;
     overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
 .player-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
 .player-photo-box img {
     width: 100%;
-    height: auto;
+    height: 120px;   /* increased from 90px → shows more of player */
+    object-fit: cover;
+    object-position: top center; /* focus on head/top instead of neck */
     display: block;
     border-bottom: 1px solid #eee;
 }
 
 .player-info-box {
-    padding: 12px 15px;
+    padding: 4px 6px;   /* reduced padding */
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 2px; /* tighter spacing */
 }
 
 .name-number {
@@ -101,106 +249,147 @@
     align-items: center;
 }
 
-/* Player name styling: blue */
+/* Player name styling: smaller */
 .player-name {
-    font-weight: 700;
-    color: #007BFF; /* Bootstrap blue */
-    font-size: 1.1em;
+    font-weight: 600;
+    color: #007BFF;
+    font-size: 0.8em; /* slightly reduced */
 }
 
-/* Jersey number styling: bigger and black */
+/* Jersey number styling */
 .player-number {
-    font-weight: 900;
+    font-weight: 700;
     color: #000000;
-    font-size: 2em;
+    font-size: 1em; /* slightly reduced */
     line-height: 1;
 }
 
 .nationality {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.9em;
+    gap: 3px;
+    font-size: 0.7em; /* smaller nationality text */
     color: #666;
 }
 
 .nationality img {
-    width: 18px;
+    width: 12px; /* smaller flag */
     height: auto;
     border-radius: 2px;
 }
 
-/* ============================= */
-/* Responsive behavior on mobile */
-/* ============================= */
-@media (max-width: 768px) {
-    .page-container {
-        flex-direction: column;
-    }
+/* Player Profile Detail Page   */
 
-    .main-content {
-        order: 1;
-    }
-
-    .sidebar {
-        order: 2;
-        width: 100%;
-        max-width: 100%;
-        margin-top: 20px;
-    }
+.player-detail-wrapper {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
 }
 
-
-
-/* Player Profile New Styling */
 .player-profile-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 30px 20px;
+    flex: 3;
+    min-width: 0;
+}
+
+.player-photo-centered {
     text-align: center;
+    margin-bottom: 20px;
+    padding: 0 10px;
 }
 
 .player-photo-centered img {
-    max-width: 300px;
+    width: 100%;
+    max-width: 220px;
     height: auto;
-    margin-bottom: 30px;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto;
 }
 
-.player-attributes {
-    margin-top: 20px;
-}
-
-.info-row {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-}
-
-.info-block {
-    flex: 1 1 30%;
-    padding: 10px;
+.button-group {
     text-align: center;
+    margin: 20px 0;
 }
 
-.info-block h4 {
-    font-size: 14px;
-    color: #777;
-    margin-bottom: 5px;
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 0 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1em;
 }
 
+.blue-btn {
+    background: linear-gradient(90deg, #007BFF, #0056b3);
+    color: white;
+    border: none;
+}
+
+/* Grid for attributes */
+.player-attributes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Exactly 3 columns */
+    gap: 30px;
+    text-align: center;
+    max-width: 900px;
+    margin: 30px auto 40px;
+}
+
+.attribute-block .label {
+    font-weight: 600;
+    color: gray;
+    font-size: 0.9em;
+    text-transform: uppercase;
+}
+
+.attribute-block .value {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.blue-text {
+    color: #007BFF;
+}
+
+/* Responsive Fix               */
 
 @media (max-width: 768px) {
-    .info-row {
+    .page-container,
+    .player-detail-wrapper {
         flex-direction: column;
-        align-items: center;
     }
 
-    .info-block {
+    .sidebar,
+    .player-profile-container {
         width: 100%;
     }
-}
 
+    .sidebar {
+        max-width: 100%;
+        min-width: unset;
+        margin-top: 20px;
+    }
+
+    .players-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); /* even smaller on mobile */
+    }
+
+    .player-card {
+        margin-bottom: 12px;
+    }
+
+    .player-attributes-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 10px;
+    }
+
+    .player-photo-centered img {
+        max-width: 100%;
+    }
+}

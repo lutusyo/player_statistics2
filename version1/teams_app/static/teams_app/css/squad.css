@@ -1,591 +1,464 @@
-/* player.css */
+/* ========================================
+PLAYERS PAGE
+======================================== */
 
-/* Layout container for the players page */
-.page-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
-    margin: 30px auto;
-    max-width: 1200px;
-    padding: 0 20px;
+/* Main page layout */
+.page-container,
+.player-detail-wrapper {
+display: flex;
+flex-wrap: wrap;
+gap: 30px;
+max-width: 1200px;
+margin: 30px auto;
+padding: 0 20px;
 }
 
-/* View Toggle */
-.view-toggle{
-    display:flex;
-    justify-content:flex-end;
-    margin-bottom:15px;
-    gap:8px;
+/* Main content */
+.main-content,
+.player-profile-container {
+flex: 3;
+min-width: 0;
 }
 
-.view-toggle button{
-    border:1px solid #ddd;
-    background:white;
-    padding:6px 12px;
-    border-radius:6px;
-    cursor:pointer;
-}
-
-.view-toggle button.active{
-    background:#1e40af;
-    color:white;
-}
-
-
-/* ---------------- GRID ---------------- */
-
-.player-container.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-    gap:18px;
-}
-
-
-/* ---------------- LIST ---------------- */
-
-/* ---------------- LIST ---------------- */
-
-.player-container.list{
-    display:flex;
-    flex-direction:column;
-    gap:0;
-    background:#fff;
-    border:1px solid #e8e8e8;
-    border-radius:12px;
-    overflow:hidden;
-}
-
-/* Player row */
-.player-container.list .player-card{
-
-    display:grid;
-
-    grid-template-columns:
-        70px        /* Photo */
-        2fr         /* Name */
-        1.3fr       /* Nationality */
-        90px        /* Age */
-        150px       /* Position */
-        80px;       /* Jersey */
-
-    align-items:center;
-
-    padding:18px 20px;
-
-    width:100%;
-
-    text-decoration:none;
-
-    color:#1f2937;
-
-    background:#fff;
-
-    border:none;
-    border-bottom:1px solid #ececec;
-
-    border-radius:0;
-
-    box-shadow:none;
-
-    transition:background .2s ease;
-}
-
-.player-container.list .player-card:last-child{
-    border-bottom:none;
-}
-
-.player-container.list .player-card:hover{
-    background:#f8fafc;
-    transform:none;
-}
-
-/* Photo */
-
-.player-container.list .player-photo-box{
-
-    width:48px;
-    height:48px;
-
-    margin-right:0;
-}
-
-.player-container.list .player-photo-box img{
-
-    width:48px;
-    height:48px;
-
-    border-radius:50%;
-
-    object-fit:cover;
-
-    border:none;
-}
-
-/* Allow children to occupy grid columns */
-
-.player-container.list .player-info-box{
-    display:contents;
-}
-
-/* Name */
-
-.player-container.list .name-number{
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:flex-start;
-
-    gap:12px;
-}
-
-.player-container.list .player-name{
-
-    font-size:16px;
-
-    font-weight:600;
-
-    color:#0f172a;
-}
-
-/* Jersey Number */
-
-.player-container.list .player-number{
-
-    width:36px;
-    height:36px;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    border-radius:50%;
-
-    background:#0b1d6d;
-
-    color:#fff;
-
-    font-size:14px;
-
-    font-weight:700;
-}
-
-/* Nationality */
-
-.player-container.list .nationality{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:8px;
-
-    margin-top:0;
-
-    font-size:14px;
-
-    color:#475569;
-}
-
-.player-container.list .nationality img{
-
-    width:26px;
-    height:18px;
-
-    border-radius:2px;
-}
-
-/* Hide large image style used in Grid */
-
-.player-container.list .player-photo-box img{
-    height:48px;
-}
-
-.player-container.list{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-}
-
-.player-container.list .player-card{
-
-    display:flex;
-    align-items:center;
-
-    width:100%;
-
-    padding:10px;
-
-    border-radius:10px;
-
-    border:1px solid #ddd;
-
-    background:white;
-}
-
-.player-container.list .player-photo-box{
-
-    width:70px;
-    height:70px;
-
-    margin-right:15px;
-
-    flex-shrink:0;
-}
-
-.player-container.list .player-photo-box img{
-
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    border-radius:50%;
-}
-
-.player-container.list .player-info-box{
-
-    flex:1;
-}
-
-.player-container.list .name-number{
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-.player-container.list .player-number{
-
-    font-size:18px;
-    font-weight:bold;
-}
-
-.player-container.list .nationality{
-
-    margin-top:6px;
-}
-
-
-
-
-
-
-
-
-
-
-/* Left main content (players grid and filter) */
-.main-content {
-    flex: 3;
-    min-width: 0;
-}
-
-/* Filter form */
-.filter-form {
-    margin-bottom: 20px;
-    font-size: 0.95em;
-}
-
-/* Sidebar (used in both players page and player detail page) */
+/* Sidebar */
 .sidebar {
-    flex: 1;
-    min-width: 250px;
-    max-width: 300px;
-    background-color: #fafafa;
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+flex: 1;
+min-width: 250px;
+max-width: 300px;
+padding: 15px;
+background: #fafafa;
+border-radius: 12px;
+box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
+}
+
+.sidebar ul,
+.sidebar-player-list {
+margin: 0;
+padding: 0;
+list-style: none;
 }
 
 .sidebar h3 {
-    font-size: 1.2em;
-    margin-bottom: 15px;
-    color: #007BFF;
+margin-bottom: 15px;
+color: #007bff;
 }
 
-.sidebar ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-/* Sidebar player list — updated for no spacing and inline items */
-.sidebar-player-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.sidebar-player-list li {
-    margin: 0;
-    padding: 2px 0;
-}
-
+.sidebar ul li a,
 .sidebar-player-list li a {
-    margin: 0;
-    padding: 4px 6px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    color: #333;
-    transition: background-color 0.3s ease;
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 4px 6px;
+color: #333;
+text-decoration: none;
 }
 
-/* Player photo - circular, compact */
+.sidebar ul li a:hover {
+color: #007bff;
+}
+
+/* Sidebar player */
 .sidebar-player-photo {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 1px solid #ccc;
-    flex-shrink: 0;
-    background-color: #eee;
-    background-image: url('/static/path/to/placeholder.png');
-    background-size: cover;
-    background-position: center;
+width: 32px;
+height: 32px;
+flex-shrink: 0;
+object-fit: cover;
+border: 1px solid #ccc;
+border-radius: 50%;
 }
 
 .sidebar-player-name {
-    font-size: 0.95em;
-    font-weight: 500;
+font-size: .95em;
+font-weight: 500;
 }
 
-/* Sidebar link hover effect */
-.sidebar ul li a:hover {
-    color: #007BFF;
+/* ========================================
+VIEW BUTTONS
+======================================== */
+
+.view-toggle,
+.toggle-buttons {
+display: flex;
+gap: 8px;
 }
 
-/* Player List - SMALL CARDS    */
+.view-toggle {
+justify-content: flex-end;
+margin-bottom: 15px;
+}
 
-.players-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); /* smaller cards */
-    gap: 12px;
+.view-toggle button,
+.toggle-buttons button {
+padding: 6px 12px;
+border: 1px solid #ddd;
+border-radius: 6px;
+background: #fff;
+cursor: pointer;
+}
+
+.view-toggle button.active,
+.toggle-buttons button.active {
+color: #fff;
+background: #1e40af;
+}
+
+/* ========================================
+PLAYER GRID
+======================================== */
+
+.players-grid,
+.player-container.grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+gap: 18px;
 }
 
 .position-title {
-    margin-bottom: 0;
+margin-bottom: 8px;
 }
 
+/* ========================================
+PLAYER CARD
+======================================== */
 
 .player-card {
-    display: block;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #fff;
-    text-decoration: none;
-    color: inherit;
-    transition: transform 0.2s, box-shadow 0.2s;
-    overflow: hidden;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+display: flex;
+flex-direction: column;
+overflow: hidden;
+min-width: 0;
+color: #1f2937;
+text-decoration: none;
+background: #fff;
+border: 1px solid #ddd;
+border-radius: 10px;
+box-shadow: 0 1px 4px rgba(0, 0, 0, .05);
+transition: transform .2s, box-shadow .2s;
 }
 
 .player-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+transform: translateY(-3px);
+box-shadow: 0 4px 10px rgba(0, 0, 0, .12);
+}
+
+/* Player image */
+.player-photo-box {
+width: 100%;
 }
 
 .player-photo-box img {
-    width: 100%;
-    height: 120px;   /* increased from 90px → shows more of player */
-    object-fit: cover;
-    object-position: top center; /* focus on head/top instead of neck */
-    display: block;
-    border-bottom: 1px solid #eee;
+display: block;
+width: 100%;
+height: 180px;
+object-fit: cover;
+object-position: top center;
+border-bottom: 1px solid #eee;
+}
+
+/* All player information in a vertical line */
+.player-info-box,
+.player-details {
+display: flex;
+flex-direction: column;
+align-items: flex-start;
 }
 
 .player-info-box {
-    padding: 4px 6px;   /* reduced padding */
-    display: flex;
-    flex-direction: column;
-    gap: 2px; /* tighter spacing */
+gap: 7px;
+padding: 12px;
 }
 
+/* Remove horizontal layout */
 .name-number {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+gap: 5px;
+width: 100%;
 }
 
-/* Player name styling: smaller */
+/* Player details */
+.player-details {
+gap: 4px;
+width: 100%;
+}
+
 .player-name {
-    font-weight: 600;
-    color: #007BFF;
-    font-size: 0.8em; /* slightly reduced */
+color: #007bff;
+font-size: .95rem;
+font-weight: 700;
+line-height: 1.3;
 }
 
-/* Jersey number styling */
+.player-age,
+.player-position {
+color: #475569;
+font-size: .82rem;
+}
+
+/* Jersey number */
 .player-number {
-    font-weight: 700;
-    color: #000000;
-    font-size: 1em; /* slightly reduced */
-    line-height: 1;
+padding: 4px 9px;
+color: #fff;
+background: #0b1d6d;
+border-radius: 20px;
+font-size: .8rem;
+font-weight: 700;
 }
 
+/* Nationality */
 .nationality {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 0.7em; /* smaller nationality text */
-    color: #666;
+display: flex;
+align-items: center;
+gap: 6px;
+color: #666;
+font-size: .78rem;
 }
 
 .nationality img {
-    width: 12px; /* smaller flag */
-    height: auto;
-    border-radius: 2px;
+width: 20px;
+height: 14px;
+object-fit: cover;
+border-radius: 2px;
 }
 
-/* Player Profile Detail Page   */
 
-.player-detail-wrapper {
+/* ========================================
+   TABLE-STYLE LIST VIEW
+======================================== */
+
+.player-container.list {
     display: flex;
-    gap: 30px;
-    flex-wrap: wrap;
-    max-width: 1200px;
-    margin: 30px auto;
-    padding: 0 20px;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
 }
 
-.player-profile-container {
-    flex: 3;
+/* Each player is one table-like row */
+.player-container.list .player-card {
+    display: grid;
+    grid-template-columns:
+        minmax(250px, 2.5fr)
+        minmax(160px, 1.3fr)
+        90px
+        minmax(120px, 1fr)
+        70px;
+
+    align-items: center;
+    gap: 20px;
+
+    width: 100%;
+    padding: 18px 20px;
+
+    border: 0;
+    border-bottom: 1px solid #e5e7eb;
+    border-radius: 0;
+
+    box-shadow: none;
+}
+
+.player-container.list .player-card:last-child {
+    border-bottom: 0;
+}
+
+.player-container.list .player-card:hover {
+    background: #f8fafc;
+    transform: none;
+}
+
+/* Player name and photo */
+.player-container.list .player-column {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
     min-width: 0;
 }
 
-.player-photo-centered {
+.player-container.list .player-photo-box {
+    flex-shrink: 0;
+}
+
+.player-container.list .player-photo-box img {
+    width: 48px;
+    height: 48px;
+
+    display: block;
+
+    object-fit: cover;
+    border: 0;
+    border-radius: 50%;
+}
+
+/* Prevent long names from breaking the columns */
+.player-container.list .player-name {
+    overflow: hidden;
+
+    color: #1e293b;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Nationality */
+.player-container.list .player-nationality {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    font-size: 16px;
+}
+
+.player-container.list .player-nationality img {
+    width: 28px;
+    height: 19px;
+
+    object-fit: cover;
+}
+
+/* Age, position and jersey */
+.player-container.list .player-age,
+.player-container.list .player-position,
+.player-container.list .player-number {
+    font-size: 16px;
+    color: #334155;
+}
+
+/* Jersey number */
+.player-container.list .player-number {
+    font-weight: 700;
     text-align: center;
-    margin-bottom: 20px;
-    padding: 0 10px;
+}
+
+/* ========================================
+PLAYER DETAIL PAGE
+======================================== */
+
+.player-photo-centered {
+margin-bottom: 20px;
+padding: 0 10px;
+text-align: center;
 }
 
 .player-photo-centered img {
-    width: 100%;
-    max-width: 220px;
-    height: auto;
-    border-radius: 10px;
-    display: block;
-    margin: 0 auto;
+display: block;
+width: 100%;
+max-width: 220px;
+height: auto;
+margin: auto;
+border-radius: 10px;
 }
 
 .button-group {
-    text-align: center;
-    margin: 20px 0;
+margin: 20px 0;
+text-align: center;
 }
 
 .btn {
-    display: inline-block;
-    padding: 10px 20px;
-    margin: 0 10px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 1em;
+display: inline-block;
+margin: 0 10px;
+padding: 10px 20px;
+border-radius: 8px;
+font-size: 1em;
+font-weight: bold;
+text-decoration: none;
 }
 
 .blue-btn {
-    background: linear-gradient(90deg, #007BFF, #0056b3);
-    color: white;
-    border: none;
+color: #fff;
+border: 0;
+background: linear-gradient(90deg, #007bff, #0056b3);
 }
 
-/* Grid for attributes */
+/* Player attributes */
 .player-attributes-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* Exactly 3 columns */
-    gap: 30px;
-    text-align: center;
-    max-width: 900px;
-    margin: 30px auto 40px;
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 30px;
+max-width: 900px;
+margin: 30px auto 40px;
+text-align: center;
 }
 
 .attribute-block .label {
-    font-weight: 600;
-    color: gray;
-    font-size: 0.9em;
-    text-transform: uppercase;
+color: gray;
+font-size: .9em;
+font-weight: 600;
+text-transform: uppercase;
 }
 
 .attribute-block .value {
-    font-weight: bold;
-    font-size: 1.1em;
+font-size: 1.1em;
+font-weight: bold;
 }
 
 .blue-text {
-    color: #007BFF;
+color: #007bff;
 }
 
+/* ========================================
+OTHER
+======================================== */
 
-
-
-/* ===========================
-   LIST HEADER
-=========================== */
-
-.list-header{
-
-    display:grid;
-
-    grid-template-columns:
-        70px
-        2fr
-        1.3fr
-        90px
-        150px
-        80px;
-
-    align-items:center;
-
-    padding:16px 20px;
-
-    background:#ffffff;
-
-    font-weight:700;
-
-    color:#1e3a8a;
-
-    border-bottom:2px solid #e5e7eb;
+.filter-form {
+margin-bottom: 20px;
+font-size: .95em;
 }
 
+.empty-message {
+color: #888;
+text-align: center;
+}
 
-
-
-
-/* Responsive Fix               */
+/* ========================================
+MOBILE
+======================================== */
 
 @media (max-width: 768px) {
-    .page-container,
-    .player-detail-wrapper {
-        flex-direction: column;
-    }
 
-    .sidebar,
-    .player-profile-container {
-        width: 100%;
-    }
+```
+.page-container,
+.player-detail-wrapper {
+    flex-direction: column;
+}
 
-    .sidebar {
-        max-width: 100%;
-        min-width: unset;
-        margin-top: 20px;
-    }
+.sidebar,
+.player-profile-container {
+    width: 100%;
+    max-width: 100%;
+}
 
-    .players-grid {
-        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); /* even smaller on mobile */
-    }
+.players-grid,
+.player-container.grid {
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(145px, 1fr)
+    );
+}
 
-    .player-card {
-        margin-bottom: 12px;
-    }
+.player-photo-box img {
+    height: 160px;
+}
 
-    .player-attributes-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-        padding: 0 10px;
-    }
+.player-attributes-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 0 10px;
+}
 
-    .player-photo-centered img {
-        max-width: 100%;
-    }
+.player-container.list .player-photo-box {
+    width: 65px;
+}
+
+.player-container.list .player-photo-box img {
+    width: 55px;
+    height: 55px;
+}
+```
+
 }

@@ -7,7 +7,7 @@ from reportlab.pdfgen import canvas
 from .report_filters import filter_queryset_by_period
 from django.utils import timezone
 
-from version1.reports_app.models import (
+from version1.reports_app.models.previous_models import (
     Medical, Transition, Scouting, Performance,
     IndividualActionPlan, Mesocycle, FitnessPlan)
 from version1.teams_app.models import Team

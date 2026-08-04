@@ -6,7 +6,7 @@ from django.utils.dateparse import parse_date
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 
 from version1.teams_app.models import Team
-from version1.reports_app.models import Result, Medical, Transition, Scouting, Performance, IndividualActionPlan
+from version1.reports_app.models.previous_models import Result, Medical, Transition, Scouting, Performance, IndividualActionPlan
 from version1.reports_app.views.daily_report_views.statistics_view import get_statistics_report
 from version1.players_app.models import Player
 

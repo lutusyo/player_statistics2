@@ -2,7 +2,7 @@ import io
 import pandas as pd
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
-from version1.reports_app.models import FitnessPlan
+from version1.reports_app.models.previous_models import FitnessPlan
 from version1.reports_app.forms import ReportFilterForm
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas

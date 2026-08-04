@@ -9,10 +9,10 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.template.loader import render_to_string
 from weasyprint import HTML, CSS
-from version1.reports_app.models import Result
+from version1.reports_app.models.previous_models import Result
 from version1.reports_app.forms import ReportFilterForm
 from version1.teams_app.models import Team, StaffMember
-from version1.reports_app.models import TrainingMinutes
+from version1.reports_app.models.previous_models import TrainingMinutes
 
 from django.conf import settings
 import os
