@@ -7,11 +7,13 @@
         <div class="player-photo-box">
             {% if player.photo %}
                 <img src="{{ player.photo.url }}" alt="{{ player.name }}">
+                {{ player.full_name }}
             {% else %}
                 <img
                     src="{% static 'players_app/images/default-player.png' %}"
                     alt="Default player"
                 >
+                {{ player.full_name }}
             {% endif %}
         </div>
 
