@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <h2>Technical Report</h2>
+
+    <h4>{{ team.name }}</h4>
+
+    <p>
+        Period:
+        {{ start_date|default:"All dates" }}
+        -
+        {{ end_date|default:"All dates" }}
+    </p>
+
+    <div class="export-buttons">
+
+        <a href="{% url 'technical_report_excel' team.id %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&season={{ season }}"
+           class="btn btn-success">
+            Download Excel
+        </a>
+
+        <a href="{% url 'technical_report_pdf' team.id %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&season={{ season }}"
+           class="btn btn-danger">
+            Download PDF
+        </a>
+
+        <a href="{% url 'technical_report_ppt' team.id %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&season={{ season }}"
+           class="btn btn-primary">
+            Download PowerPoint
+        </a>
+
+    </div>
+
+    <hr>
+
+    <h3>Player Statistics</h3>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Player</th>
+                <th>Position</th>
+                <th>Training Minutes</th>
+                <th>Game Minutes</th>
+                <th>Apps</th>
+                <th>Goals</th>
+                <th>Assists</th>
+                <th>Pre-Assists</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for row in stats_report %}
+            <tr>
+                <td>
+                    {{ row.player.name }}
+                    {{ row.player.second_name }}
+                    {{ row.player.surname }}
+                </td>
+
+                <td>{{ row.position }}</td>
+                <td>{{ row.training_minutes|default:0 }}</td>
+                <td>{{ row.game_minutes|default:0 }}</td>
+                <td>{{ row.appearances|default:0 }}</td>
+                <td>{{ row.goals|default:0 }}</td>
+                <td>{{ row.assists|default:0 }}</td>
+                <td>{{ row.pre_assists|default:0 }}</td>
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="8">
+                    No statistics found for the selected period.
+                </td>
+            </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}

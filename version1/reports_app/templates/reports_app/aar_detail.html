@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}AAR{% endblock %}
+{% block content %}
+
+<style>
+.aar{max-width:1100px;margin:30px auto;padding:20px}.head{background:#123c2d;color:#fff;padding:25px;text-align:center;border-radius:10px}.buttons{display:flex;gap:10px;margin:20px 0}.btn{padding:10px 16px;color:#fff;text-decoration:none;border:0;border-radius:6px;cursor:pointer}.pdf{background:#c62828}.ppt{background:#e65100}.print{background:#1565c0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:15px}.card{padding:18px;background:#fff;border-left:5px solid #123c2d;box-shadow:0 2px 8px #bbb}.card p{white-space:pre-line;line-height:1.6}@media print{.buttons{display:none}.card{box-shadow:none}}
+</style>
+
+<div class="aar">
+<div class="head">
+<h1>AFTER ACTION REVIEW</h1>
+<p>{{ report.team }} | Week {{ report.week }}</p>
+</div>
+
+<div class="buttons">
+<a class="btn pdf" href="{% url 'reports_app:aar_pdf' report.id %}">Download PDF</a>
+<a class="btn ppt" href="{% url 'reports_app:aar_ppt' report.id %}">Download PPT</a>
+<button class="btn print" onclick="print()">Print</button>
+</div>
+
+<div class="grid">
+{% for title, content in sections %}
+<div class="card">
+<h3>{{ title }}</h3>
+<p>{{ content }}</p>
+</div>
+{% endfor %}
+
+
+</div>
+</div>
+
+{% endblock %}

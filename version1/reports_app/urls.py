@@ -24,11 +24,73 @@ from version1.reports_app.views.match_report_views.full_match_report_views impor
 from version1.reports_app.views.match_report_views import match_summary_team_view
 from version1.reports_app.views.daily_report_views import technical_report_views
 
+from version1.reports_app.views import aar_report_view
+
+
+
+
+
+from django.urls import path
+
+from version1.reports_app.views.daily_report_views.technical_report_views import (
+    technical_report_page,
+    download_technical_report_excel,
+    download_technical_report_pdf,
+    download_technical_report_ppt,
+)
+
+
+
+
 app_name = 'reports_app'
 
 urlpatterns = [
 
-    path("technical-report/<int:team_id>/", technical_report_views.download_technical_report, name="download_technical_report"),
+
+
+
+
+
+    #path("technical-report/<int:team_id>/", technical_report_views.download_technical_report_excel, name="download_technical_report"),
+
+
+
+
+
+
+
+    path(
+        "technical-report/<int:team_id>/",
+        technical_report_page,
+        name="technical_report_page",
+    ),
+
+    path(
+        "technical-report/<int:team_id>/excel/",
+        download_technical_report_excel,
+        name="technical_report_excel",
+    ),
+
+    path(
+        "technical-report/<int:team_id>/pdf/",
+        download_technical_report_pdf,
+        name="technical_report_pdf",
+    ),
+
+    path(
+        "technical-report/<int:team_id>/ppt/",
+        download_technical_report_ppt,
+        name="technical_report_ppt",
+    ),
+
+
+
+
+
+
+
+
+
     # Medical
     path('medical/<int:team_id>/', medical_views.medical_reports, name='medical_reports'),
     path('medical/<int:team_id>/export/excel/', medical_views.export_medical_excel, name='export_medical_excel'),
@@ -105,5 +167,17 @@ urlpatterns = [
     # Full report
     path('match/<int:match_id>/<int:our_team_id>/full-report/',full_match_report_views.full_match_report_view,name='full_match_report'),
     path('match/<int:match_id>/download-pdf/', download_full_report_pdf,name='download_full_report_pdf'),
+
+
+
+
+
+
+
+
+    path("aar/<int:report_id>/", aar_report_view.after_action_review_detail, name="aar_detail"),
+    path("aar/<int:report_id>/pdf/", aar_report_view.download_aar_pdf, name="aar_pdf"),
+    path("aar/<int:report_id>/ppt/", aar_report_view.download_aar_ppt, name="aar_ppt"),
 ]
+
 

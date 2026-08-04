@@ -22,6 +22,12 @@ from version1.matches_app.models import CompetitionType
 
 from version1.reports_app.models.previous_models import (PlayerTrainingMinutes,TrainingMinutes,)
 
+from version1.reports_app.models.weekly_report import WeeklyReport
+
+
+
+
+
 # ====================== REPORT HELPER ======================
 def get_statistics_report(filter_type="all", team=None, start_date=None, end_date=None, competition=None):
     today = now().date()
@@ -154,6 +160,13 @@ def get_statistics_report(filter_type="all", team=None, start_date=None, end_dat
 @login_required
 def statistics_list_view(request, team_id):
     team = get_object_or_404(Team, id=team_id)
+
+
+    report = WeeklyReport.objects.filter(
+    team_id=team_id
+    ).order_by("-id").first()
+
+
     filter_type = request.GET.get("filter", "all")
 
     competition = request.GET.get("competition")
@@ -180,7 +193,8 @@ def statistics_list_view(request, team_id):
         "team": team,
         "start_date": start_date_str,
         "end_date": end_date_str,
-        "competition": competition,   
+        "competition": competition,
+         "report": report,   
     }
 
     context["competition_choices"] = CompetitionType.choices
