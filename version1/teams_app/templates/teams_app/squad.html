@@ -1,201 +1,231 @@
+```html
 {% extends "teams_app/team_base.html" %}
 {% load static %}
 {% load player_extras %}
 
 {% block title %}{{ team_selected }} Players{% endblock %}
 
+{% block team_extra_css %}
+<style>
+    .players-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 15px;
+        line-height: 1.15;
+    }
+
+    .players-table th {
+        background: #f2f4f7;
+        color: #222;
+        border-bottom: 2px solid #bfc5cc;
+        padding: 7px 8px;
+        text-align: left;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .players-table td {
+        border-bottom: 1px solid #e1e5e9;
+        padding: 2px 8px;
+        height: 43px;
+        vertical-align: middle;
+        color: #0757a6;
+    }
+
+    /* Number column */
+    .players-table .row-number {
+        width: 35px;
+        text-align: center;
+        color: #555;
+        font-weight: 600;
+    }
+
+    /* Photo */
+    .players-table .photo-column {
+        width: 42px;
+        padding: 2px 4px;
+        text-align: center;
+    }
+
+    .players-table .player-photo {
+        width: 36px;
+        height: 36px;
+        object-fit: cover;
+        display: block;
+        margin: auto;
+        border-radius: 2px;
+    }
+
+    /* Player name */
+    .players-table .player-name {
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .players-table .player-name a {
+        color: #0757a6;
+        text-decoration: none;
+    }
+
+    .players-table .player-name a:hover {
+        color: #003d73;
+        text-decoration: underline;
+    }
+
+    /* Age */
+    .players-table .age {
+        width: 50px;
+        text-align: center;
+    }
+
+    /* Position */
+    .players-table .position,
+    .players-table .specific-position {
+        white-space: nowrap;
+    }
+
+    /* Jersey number */
+    .players-table .jersey-number {
+        width: 55px;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    /* Position group */
+    .players-table .position-group td {
+        background: #f7f8fa;
+        color: #333;
+        border-bottom: 1px solid #cdd2d8;
+        padding: 5px 8px;
+        height: 27px;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    /* Player row hover */
+    .players-table tbody tr.player-row:hover {
+        background: #f3f8fd;
+    }
+
+    /* Top links */
+    .player-actions {
+        text-align: right;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+
+    .player-actions a {
+        color: #0757a6;
+        text-decoration: none;
+        margin: 0 3px;
+    }
+
+    .player-actions a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
 {% block team_content %}
 
-<link rel="stylesheet" href="{% static 'teams_app/css/squad.css' %}">
+<h2 style="margin: 0 0 10px 0;">
+    {{ team_selected }} Players
+</h2>
 
-    <div class="page-container">
+<div class="player-actions">
+    <a href="#" onclick="showPlayers('signed'); return false;">Signed Players</a> |
+    <a href="#" onclick="showPlayers('trial'); return false;">Trial Players</a> |
+    <a href="#" onclick="showPlayers('loaned'); return false;">Loaned Players</a> |
+    <a href="{% url 'players_app:export_team_players' team.id %}">Export List</a> |
+    <a href="{% url 'reports_app:reports_dashboard' team.id %}">Team Reports</a>
+</div>
 
-        <main class="main-content">
+<table class="players-table">
 
-            <!-- GRID / LIST VIEW -->
-            <div class="view-toggle">
-                <button id="gridViewBtn" class="active" onclick="setView('grid')">⬜ Grid</button>
-                <button id="listViewBtn" onclick="setView('list')">☰ List</button>
-            </div>
+    <thead>
+        <tr>
+            <th class="row-number">#</th>
+            <th class="photo-column">Photo</th>
+            <th>Name</th>
+            <th class="age">Age</th>
+            <th>Nationality</th>
+            <th>Position</th>
+            <th>Specific Position</th>
+            <th class="jersey-number">Jersey No.</th>
+        </tr>
+    </thead>
 
-            <!-- SIGNED PLAYERS -->
-            <section id="signedPlayers">
+    <!-- SIGNED PLAYERS -->
+    <tbody id="signedPlayers">
 
-                {% for position in position_order %}
-                    {% with players=grouped_players|get_item:position %}
+        {% for position in position_order %}
+            {% with players=grouped_players|get_item:position %}
 
-                        {% if players %}
-                            <h2 class="position-title">
-                                {{ position }}s
-                            </h2>
+                {% if players %}
 
-                            <div class="players-grid player-container">
+                    <tr class="position-group">
+                        <td colspan="8">
+                            {{ position }}s
+                        </td>
+                    </tr>
 
-                                {% for player in players %}
-                                    {% include "teams_app/partials/player_card.html" with show_age=True %}
-                                {% endfor %}
-
-                            </div>
-                        {% endif %}
-
-                    {% endwith %}
-                {% endfor %}
-
-            </section>
-
-            <!-- TRIAL PLAYERS -->
-            <section id="trialPlayers" style="display:none;">
-
-                <h2 class="position-title">
-                    Trial Players
-                </h2>
-
-                <div class="players-grid player-container">
-
-                    {% for player in trial_players %}
-                        {% include "teams_app/partials/player_card.html" with show_age=False %}
-
-                    {% empty %}
-                        <p class="empty-message">
-                            No trial players available.
-                        </p>
+                    {% for player in players %}
+                        {% include "teams_app/partials/player_card.html" with player=player show_age=True row_number=forloop.counter %}
                     {% endfor %}
 
-                </div>
+                {% endif %}
 
-            </section>
+            {% endwith %}
+        {% empty %}
 
-            <!-- LOANED PLAYERS -->
-            <section id="loanedPlayers" style="display:none;">
+            <tr>
+                <td colspan="8">No signed players are available.</td>
+            </tr>
 
-                <h2 class="position-title">Loaned Players</h2>
+        {% endfor %}
 
-                <div class="players-grid player-container">
+    </tbody>
 
-                    {% for player in loaned_players %}
-                        {% include "teams_app/partials/player_card.html" with show_age=False %}
+    <!-- TRIAL PLAYERS -->
+    <tbody id="trialPlayers" style="display:none;">
 
-                    {% empty %}
-                        <p class="empty-message">
-                            No loaned players available.
-                        </p>
-                    {% endfor %}
+        {% for player in trial_players %}
+            {% include "teams_app/partials/player_card.html" with player=player show_age=False row_number=forloop.counter %}
+        {% empty %}
 
-                </div>
+            <tr>
+                <td colspan="8">No trial players are available.</td>
+            </tr>
+        {% endfor %}
 
-            </section>
+    </tbody>
 
-            <!-- PLAYER STATUS -->
-            <div class="toggle-buttons">
+    <!-- LOANED PLAYERS -->
+    <tbody id="loanedPlayers" style="display:none;">
 
-                <button id="signedBtn" class="active" onclick="showList('signed')">Signed</button>
-                <button id="trialBtn" onclick="showList('trial')">Trial</button>
-                <button id="loanedBtn" onclick="showList('loaned')">Loaned</button>
+        {% for player in loaned_players %}
+            {% include "teams_app/partials/player_card.html" with player=player show_age=False row_number=forloop.counter %}
+        {% empty %}
 
-            </div>
+            <tr>
+                <td colspan="8">No loaned players are available.</td>
+            </tr>
+        {% endfor %}
 
-        </main>
+    </tbody>
 
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-
-            <a
-                href="{% url 'players_app:export_team_players' team.id %}"
-                class="btn btn-success"
-            >
-                📥 Export List of Players
-            </a>
-
-            <ul>
-                <li>
-                    <a
-                        href="{% url 'reports_app:reports_dashboard' team.id %}"
-                        class="btn btn-outline-primary"
-                    >
-                        View Team Reports
-                    </a>
-                    
-
-                </li>
-            </ul>
-
-        </aside>
-
-
-    </div>
+</table>
 
 <script>
+function showPlayers(type) {
+    document.getElementById("signedPlayers").style.display = "none";
+    document.getElementById("trialPlayers").style.display = "none";
+    document.getElementById("loanedPlayers").style.display = "none";
 
-const playerSections = {
-    signed: {
-        section: "signedPlayers",
-        button: "signedBtn"
-    },
-    trial: {
-        section: "trialPlayers",
-        button: "trialBtn"
-    },
-    loaned: {
-        section: "loanedPlayers",
-        button: "loanedBtn"
-    }
-};
-
-
-function showList(type) {
-
-    Object.values(playerSections).forEach(item => {
-
-        document.getElementById(item.section)
-            .style.display = "none";
-
-        document.getElementById(item.button)
-            .classList.remove("active");
-
-    });
-
-    const selected = playerSections[type];
-
-    document.getElementById(selected.section)
-        .style.display = "block";
-
-    document.getElementById(selected.button)
-        .classList.add("active");
+    document.getElementById(type + "Players").style.display = "table-row-group";
 }
-
-
-function setView(view) {
-
-    document
-        .querySelectorAll(".player-container")
-        .forEach(container => {
-
-            container.classList.remove("grid", "list");
-            container.classList.add(view);
-
-        });
-
-    document
-        .getElementById("gridViewBtn")
-        .classList.toggle("active", view === "grid");
-
-    document
-        .getElementById("listViewBtn")
-        .classList.toggle("active", view === "list");
-
-    localStorage.setItem("playerView", view);
-}
-
-
-window.addEventListener("DOMContentLoaded", () => {
-
-    const savedView =
-        localStorage.getItem("playerView") || "grid";
-
-    setView(savedView);
-
-});
-
 </script>
 
 {% endblock %}
+```

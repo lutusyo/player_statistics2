@@ -27,4 +27,72 @@ class CompetitionType(models.TextChoices):
     NMB_MAPINDUZI_CUP = 'NMB Mapinduzi Cup', 'NMB Mapinduzi Cup'
     TOURNAMENT = 'Tournament', 'Tournament'
 
+# For medical_data app
+class VisitType(models.TextChoices):
+    REGULAR_CHECKUP = "regular_checkup", "Regular checkup"
+    NEW_INJURY = "new_injury", "New injury"
+
+class MainComplaint(models.TextChoices):
+    KNEE_PAIN = "knee_pain", "Knee pain"
+    ANKLE_PAIN = "ankle_pain", "Ankle pain"
+    GROIN_PAIN = "groin_pain", "Groin pain"
+    HAMSTRING_PAIN = "hamstring_pain", "Hamstring pain"
+    QUADRICEPS_PAIN = "quadriceps_pain", "Quadriceps pain"
+    BACK_PAIN = "back_pain", "Back pain"
+    NECK_PAIN = "neck_pain", "Neck pain"
+    FINGER_PAIN = "finger_pain", "Finger pain"
+    HEEL_PAIN = "heel_pain", "Heel pain"
+    POST_OPERATIVE = "post_operative", "Post-operative"
+    OTHER = "other", "Other"
+
+class BodySide(models.TextChoices):
+    LEFT = "left", "Left"
+    RIGHT = "right", "Right"
+    BOTH = "both", "Both"
+    NOT_APPLICABLE = "not_applicable", "Not applicable"
+
+class TrainingStatus(models.TextChoices):
+    FULL_TRAINING = "full_training", "Full training"
+    MODIFIED_TRAINING = "modified_training", "Modified training"
+    REHABILITATION = "rehabilitation", "Individual rehabilitation"
+    DID_NOT_TRAIN = "did_not_train", "Did not train"
+
+class InjuryMechanism(models.TextChoices):
+    DIRECT_CONTACT = "direct_contact", "Direct contact"
+    INDIRECT_CONTACT = "indirect_contact", "Indirect contact"
+    MEDICAL_RELATED = "medical_related", "Medical related"
+
+class InjuryStatus(models.TextChoices):
+    NEW = "new", "New"
+    ONGOING = "ongoing", "Ongoing"
+    RECOVERED = "recovered", "Recovered"
+    RECURRENT = "recurrent", "Recurrent"
+
+class AvailabilityStatus(models.TextChoices):
+    AVAILABLE = "available", "Available"
+    RESTRICTED = "restricted", "Available with restrictions"
+    NOT_AVAILABLE = "not_available", "Not available"
+    REASSESSMENT = "reassessment", "Awaiting reassessment"
+
+
+class AttachmentType(models.TextChoices):
+
+    MRI = ("mri","MRI")
+    XRAY = ("xray","X-Ray")
+    ULTRASOUND = ("ultrasound","Ultrasound")
+    IMAGE = ("image","Image")
+    VIDEO = ("video","Video")
+    REPORT = ("report","Medical Report")
+    OTHER = ("other","Other")
+
+class Follow_upStatus(models.TextChoices):
+    PENDING = "pending", "Pending"
+    COMPLETED = "completed", "Completed"
+    CANCELLED = "cancelled", "Cancelled"
+    MISSED = "missed", "Missed"
+
+
+# ---------xxx medical_data pp xxx----------------  #
+
+
     

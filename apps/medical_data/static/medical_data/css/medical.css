@@ -1,0 +1,80 @@
+.detail-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-item small {
+    display: block;
+    color: #6c757d;
+    margin-bottom: 4px;
+}
+
+.detail-item strong {
+    display: block;
+}
+
+.medical-section {
+    margin-bottom: 24px;
+}
+
+.medical-section:last-child {
+    margin-bottom: 0;
+}
+
+.medical-section h6 {
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.medical-section p {
+    margin-bottom: 0;
+    white-space: normal;
+}
+
+.attachment-item {
+    padding: 14px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.attachment-item:last-child {
+    border-bottom: 0;
+}
+
+.follow-up-item {
+    padding: 16px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.follow-up-item:last-child {
+    border-bottom: 0;
+}
+
+.status-card {
+    padding: 16px;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.status-card small {
+    color: #6c757d;
+}
+
+.card-header h5 {
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+
+    .detail-item {
+        margin-bottom: 10px;
+    }
+
+    .attachment-item {
+        display: block !important;
+    }
+
+    .attachment-item .btn {
+        margin-top: 10px;
+    }
+
+}

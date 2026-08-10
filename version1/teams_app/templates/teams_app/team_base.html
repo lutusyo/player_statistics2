@@ -2,11 +2,11 @@
 {% load static %}
 
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'teams_app/css/team_tabs.css' %}">
+    {% block team_extra_css %}
+    {% endblock %}
 {% endblock %}
 
 {% block content %}
-
 
     <div class="tab-content">
         {% block team_content %}{% endblock %}

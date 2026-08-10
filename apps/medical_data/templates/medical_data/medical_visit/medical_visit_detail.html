@@ -1,0 +1,475 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Medical Visit - {{ medical_visit.player }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'medical_data/css/medical.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Medical Visit</h2>
+            <div class="text-muted">
+                {{ medical_visit.date }} · {{ medical_visit.team }}
+            </div>
+        </div>
+
+        <div>
+            <a href="{% url 'medical_data:medical_visit_update' medical_visit.pk %}"
+               class="btn btn-warning">
+                Edit
+            </a>
+
+            <a href="{% url 'medical_data:medical_visit_list' %}"
+               class="btn btn-secondary">
+                Back
+            </a>
+        </div>
+    </div>
+
+
+    <!-- PLAYER SUMMARY -->
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-8">
+                    <h3 class="mb-1">{{ medical_visit.player }}</h3>
+
+                    <div class="text-muted">
+                        Team: {{ medical_visit.team }}
+                    </div>
+                </div>
+
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+
+                    <span class="badge bg-primary me-1">
+                        {{ medical_visit.get_visit_type_display }}
+                    </span>
+
+                    <span class="badge bg-warning text-dark me-1">
+                        {{ medical_visit.get_injury_status_display }}
+                    </span>
+
+                    <span class="badge bg-success">
+                        {{ medical_visit.get_availability_status_display }}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="row">
+
+        <!-- LEFT COLUMN -->
+
+        <div class="col-lg-8">
+
+
+            <!-- VISIT INFORMATION -->
+
+            <div class="card shadow-sm mb-4">
+
+                <div class="card-header">
+                    <h5 class="mb-0">Visit Information</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-md-4 detail-item">
+                            <small>Date</small>
+                            <strong>{{ medical_visit.date }}</strong>
+                        </div>
+
+                        <div class="col-md-4 detail-item">
+                            <small>Complaint</small>
+                            <strong>
+                                {{ medical_visit.get_main_complaint_display }}
+                            </strong>
+                        </div>
+
+                        <div class="col-md-4 detail-item">
+                            <small>Body Side</small>
+                            <strong>
+                                {{ medical_visit.get_body_side_display }}
+                            </strong>
+                        </div>
+
+                        <div class="col-md-4 detail-item">
+                            <small>Injury Status</small>
+                            <strong>
+                                {{ medical_visit.get_injury_status_display }}
+                            </strong>
+                        </div>
+
+                        <div class="col-md-4 detail-item">
+                            <small>Mechanism</small>
+                            <strong>
+                                {{ medical_visit.get_mechanism_of_injury_display|default:"-" }}
+                            </strong>
+                        </div>
+
+                        <div class="col-md-4 detail-item">
+                            <small>Training Status</small>
+                            <strong>
+                                {{ medical_visit.get_training_session_status_display }}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ASSESSMENT -->
+
+            <div class="card shadow-sm mb-4">
+
+                <div class="card-header">
+                    <h5 class="mb-0">Medical Assessment</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="medical-section">
+                        <h6>History of Injury</h6>
+                        <p>
+                            {{ medical_visit.history_of_injury|default:"No history recorded."|linebreaksbr }}
+                        </p>
+                    </div>
+
+                    <div class="medical-section">
+                        <h6>Physical Examination</h6>
+                        <p>
+                            {{ medical_visit.physical_examination|default:"No physical examination recorded."|linebreaksbr }}
+                        </p>
+                    </div>
+
+                    <div class="medical-section">
+                        <h6>Working Diagnosis</h6>
+                        <p>
+                            {{ medical_visit.working_diagnosis|default:"No working diagnosis recorded."|linebreaksbr }}
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TREATMENT -->
+
+            <div class="card shadow-sm mb-4">
+
+                <div class="card-header">
+                    <h5 class="mb-0">Treatment & Recommendations</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="medical-section">
+                        <h6>Therapy</h6>
+                        <p>
+                            {{ medical_visit.therapy|default:"No therapy recorded."|linebreaksbr }}
+                        </p>
+                    </div>
+
+                    <div class="medical-section">
+                        <h6>Recommendations</h6>
+                        <p>
+                            {{ medical_visit.recommendations|default:"No recommendations recorded."|linebreaksbr }}
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ATTACHMENTS -->
+
+            <div class="card shadow-sm mb-4">
+
+                <div class="card-header d-flex justify-content-between align-items-center">
+
+                    <h5 class="mb-0">Attachments</h5>
+
+                    <a href="{% url 'medical_data:medical_attachment_create' medical_visit.pk %}"
+                       class="btn btn-sm btn-primary">
+                        + Upload Attachment
+                    </a>
+
+                </div>
+
+                <div class="card-body">
+
+                    {% for attachment in medical_visit.attachments.all %}
+
+                        <div class="attachment-item d-flex justify-content-between align-items-center">
+
+                            <div>
+
+                                <strong>
+                                    {{ attachment.description|default:"Medical Attachment" }}
+                                </strong>
+
+                                <div class="small text-muted">
+                                    {{ attachment.file.name }}
+                                </div>
+
+                                <div class="small text-muted">
+                                    {{ attachment.uploaded_at|date:"d M Y H:i" }}
+                                </div>
+
+                            </div>
+
+                            <div>
+
+                                <a href="{{ attachment.file.url }}"
+                                   target="_blank"
+                                   class="btn btn-sm btn-outline-primary">
+                                    Open
+                                </a>
+
+                                <a href="{% url 'medical_data:medical_attachment_delete' attachment.pk %}"
+                                   class="btn btn-sm btn-outline-danger">
+                                    Delete
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    {% empty %}
+
+                        <div class="text-muted">
+                            No attachments have been uploaded.
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+            <!-- FOLLOW UPS -->
+
+            <div class="card shadow-sm mb-4">
+
+                <div class="card-header d-flex justify-content-between align-items-center">
+
+                    <h5 class="mb-0">Follow-ups</h5>
+
+                    <a href="{% url 'medical_data:medical_follow_up_create' medical_visit.pk %}"
+                       class="btn btn-sm btn-primary">
+                        + Add Follow-up
+                    </a>
+
+                </div>
+
+                <div class="card-body">
+
+                    {% for follow_up in medical_visit.follow_ups.all %}
+
+                        <div class="follow-up-item">
+
+                            <div class="d-flex justify-content-between">
+
+                                <div>
+
+                                    <strong>
+                                        {{ follow_up.review_date|date:"d M Y" }}
+                                    </strong>
+
+                                    {% if follow_up.completed %}
+                                        <span class="badge bg-success ms-2">
+                                            Completed
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark ms-2">
+                                            Pending
+                                        </span>
+                                    {% endif %}
+
+                                </div>
+
+                                <a href="{% url 'medical_data:medical_follow_up_delete' follow_up.pk %}"
+                                   class="btn btn-sm btn-outline-danger">
+                                    Delete
+                                </a>
+
+                            </div>
+
+                            <p class="mt-2 mb-1">
+                                {{ follow_up.notes|default:"No notes."|linebreaksbr }}
+                            </p>
+
+                            {% if follow_up.doctor %}
+                                <small class="text-muted">
+                                    Doctor: {{ follow_up.doctor }}
+                                </small>
+                            {% endif %}
+
+                        </div>
+
+                    {% empty %}
+
+                        <div class="text-muted">
+                            No follow-ups recorded.
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RIGHT COLUMN -->
+
+        <div class="col-lg-4">
+
+
+            <!-- AVAILABILITY -->
+
+            <div class="card shadow-sm mb-4">
+
+                <div class="card-header">
+                    <h5 class="mb-0">Player Status</h5>
+                </div>
+
+                <div class="card-body text-center">
+
+                    <div class="status-card mb-3">
+
+                        <small>Availability</small>
+
+                        <h4 class="mt-2">
+                            {{ medical_visit.get_availability_status_display }}
+                        </h4>
+
+                    </div>
+
+                    <div class="status-card mb-3">
+
+                        <small>Training</small>
+
+                        <h5 class="mt-2">
+                            {{ medical_visit.get_training_session_status_display }}
+                        </h5>
+
+                    </div>
+
+                    <div class="status-card">
+
+                        <small>Injury Status</small>
+
+                        <h5 class="mt-2">
+                            {{ medical_visit.get_injury_status_display }}
+                        </h5>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- DATES -->
+
+            <div class="card shadow-sm mb-4">
+
+                <div class="card-header">
+                    <h5 class="mb-0">Important Dates</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            Next Review
+                        </small>
+
+                        <div>
+                            <strong>
+                                {{ medical_visit.next_review_date|date:"d M Y"|default:"Not scheduled" }}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div>
+                        <small class="text-muted">
+                            Expected Return
+                        </small>
+
+                        <div>
+                            <strong>
+                                {{ medical_visit.expected_return_date|date:"d M Y"|default:"Not scheduled" }}
+                            </strong>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- RECORD INFORMATION -->
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+                    <h5 class="mb-0">Record Information</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            Created By
+                        </small>
+
+                        <div>
+                            {{ medical_visit.created_by|default:"-" }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <small class="text-muted">
+                            Last Updated
+                        </small>
+
+                        <div>
+                            {{ medical_visit.updated_at|date:"d M Y H:i" }}
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

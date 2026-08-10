@@ -1,0 +1,91 @@
+from django.contrib import messages
+from django.db.models import Prefetch
+from django.shortcuts import get_object_or_404, redirect, render
+
+from apps.medical_data.forms.medical_filter_form import (MedicalFilterForm,)
+from apps.medical_data.forms.medical_visit_form import MedicalVisitForm
+from apps.medical_data.models.medical_visit import (MedicalVisit,)
+
+from django.http import JsonResponse
+from version1.players_app.models import Player
+
+def medical_visit_list(request):
+    queryset = (MedicalVisit.objects.select_related("team","player","created_by",).prefetch_related("attachments","follow_ups",))
+    form = MedicalFilterForm(request.GET or None)
+
+    if form.is_valid():
+
+        if form.cleaned_data["start_date"]:
+            queryset = queryset.filter(date__gte=form.cleaned_data["start_date"])
+
+        if form.cleaned_data["end_date"]:
+            queryset = queryset.filter(date__lte=form.cleaned_data["end_date"])
+
+        if form.cleaned_data["team"]:
+            queryset = queryset.filter(team=form.cleaned_data["team"])
+
+        if form.cleaned_data["player"]:
+            queryset = queryset.filter(player=form.cleaned_data["player"])
+
+        if form.cleaned_data["visit_type"]:
+            queryset = queryset.filter(visit_type=form.cleaned_data["visit_type"])
+
+        if form.cleaned_data["main_complaint"]:
+            queryset = queryset.filter(main_complaint=form.cleaned_data["main_complaint"])
+
+        if form.cleaned_data["availability_status"]:
+            queryset = queryset.filter(availability_status=form.cleaned_data["availability_status"])
+
+    context = {"page_title": "Medical Records",
+        "medical_visits": queryset,
+        "filter_form": form,}
+    return render(request,"medical_data/medical_visit/medical_visit_list.html",context,)
+
+def medical_visit_create(request):
+    form = MedicalVisitForm(request.POST or None, request.FILES or None,)
+
+    if form.is_valid():
+        visit = form.save(commit=False)
+        visit.created_by = request.user
+        visit.save()
+
+        messages.success(request,"Medical record saved successfully.",)
+        return redirect( "medical_data:medical_visit_detail",visit.pk,)
+
+    return render(request,"medical_data/medical_visit/medical_visit_form.html",
+        {"form": form,"page_title": "New Medical Visit",},)
+
+def medical_visit_detail(request,pk,):
+    visit = (MedicalVisit.objects.select_related("player","team","created_by",)
+        .prefetch_related("attachments","follow_ups",)
+        .get(pk=pk))
+    
+    context = {"medical_visit": visit,}
+    return render(request,"medical_data/medical_visit/medical_visit_detail.html",context,)
+
+def medical_visit_delete(request,pk,):
+    visit = get_object_or_404(MedicalVisit,pk=pk,)
+
+    if request.method == "POST":
+        visit.delete()
+        messages.success(request,"Medical visit deleted.",)
+        return redirect("medical_data:medical_visit_list")
+    
+    context = {"medical_visit": visit,}
+    return render(request,"medical_data/medical_visit/medical_visit_delete.html",context,)
+
+def medical_visit_update(request, pk):
+    medical_visit = get_object_or_404(MedicalVisit,pk=pk,)
+    form = MedicalVisitForm(request.POST or None,request.FILES or None,instance=medical_visit,)
+
+    if form.is_valid():
+        form.save()
+
+        messages.success(request,"Medical visit updated successfully.")
+        return redirect("medical_data:medical_visit_detail",pk=medical_visit.pk,)
+
+    context = {
+        "page_title": "Edit Medical Visit",
+        "form": form,
+        "medical_visit": medical_visit,}
+    return render(request,"medical_data/medical_visit/medical_visit_form.html",context,)

@@ -1,55 +1,51 @@
-{% load static %}
+<tr class="player-row">
 
-<a href="{% url 'players_app:player_detail' player.id %}" class="player-card">
+    <td class="row-number">
+        {{ row_number }}
+    </td>
 
-    <!-- Player -->
-    <div class="player-column">
-        <div class="player-photo-box">
-            {% if player.photo %}
-                <img src="{{ player.photo.url }}" alt="{{ player.name }}">
-                {{ player.full_name }}
-            {% else %}
-                <img
-                    src="{% static 'players_app/images/default-player.png' %}"
-                    alt="Default player"
-                >
-                {{ player.full_name }}
-            {% endif %}
-        </div>
+    <td class="photo-column">
+        {% if player.photo %}
+            <img
+                src="{{ player.photo.url }}"
+                alt="{{ player.full_name }}"
+                class="player-photo">
+        {% else %}
+            <img
+                src="{% static 'players_app/images/default-player.png' %}"
+                alt="Default player"
+                class="player-photo">
+        {% endif %}
+    </td>
 
-        <span class="player-name">
-            {{ player.name }}
-            {{ player.second_name }}
-            {{ player.surname }}
-        </span>
-    </div>
+    <td class="player-name">
+        <a href="{% url 'players_app:player_detail' player.id %}">
+            {{ player.full_name }}
+        </a>
+    </td>
 
-    <!-- Nationality -->
-    <div class="nationality player-nationality">
-        <img
-            src="{% static 'players_app/images/tanzania-flag.png' %}"
-            alt="{{ player.nationality }}"
-        >
-        <span>{{ player.nationality }}</span>
-    </div>
+    <td class="age">
+        {% if show_age %}
+            {{ player.age_using_birthdate|default:"-" }}
+        {% else %}
+            -
+        {% endif %}
+    </td>
 
-    <!-- Age -->
-    {% if show_age %}
-        <span class="player-age">
-            {{ player.age_using_birthdate|default:"-" }}{% if player.age_using_birthdate %}yrs{% endif %}
-        </span>
-    {% else %}
-        <span class="player-age">-</span>
-    {% endif %}
+    <td>
+        {{ player.nationality }}
+    </td>
 
-    <!-- Position -->
-    <span class="player-position">
+    <td class="position">
         {{ player.position }}
-    </span>
+    </td>
 
-    <!-- Jersey Number -->
-    <span class="player-number">
+    <td class="specific-position">
+        {{ player.specific_position|default:"-" }}
+    </td>
+
+    <td class="jersey-number">
         {{ player.jersey_number }}
-    </span>
+    </td>
 
-</a>
+</tr>

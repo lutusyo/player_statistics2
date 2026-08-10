@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Medical Records{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+
+        <h2 class="mb-4">Medical Records<a href="{% url 'medical_data:medical_visit_create' %}" class="btn btn-primary float-end">New Medical Visit</a></h2>
+
+        <form method="get">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">{{ filter_form.start_date }}</div>
+                        <div class="col-md-2">{{ filter_form.end_date }}</div>
+                        <div class="col-md-2">{{ filter_form.team }}</div>
+                        <div class="col-md-2">{{ filter_form.player }}</div>
+                        <div class="col-md-2">{{ filter_form.visit_type }}</div>
+                        <div class="col-md-2"><button class="btn btn-primary w-100">Search</button></div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Player</th>
+                    <th>Team</th>
+                    <th>Complaint</th>
+                    <th>Availability</th>
+                    <th width="170">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for visit in medical_visits %}
+                    <tr>
+                        <td>{{ visit.date }}</td>
+                        <td>{{ visit.player }}</td>
+                        <td>{{ visit.team }}</td>
+                        <td>{{ visit.get_main_complaint_display }}</td>
+                        <td><span class="badge bg-success">{{ visit.get_availability_status_display }}</span></td>
+                        <td>
+                            <a class="btn btn-sm btn-info" href="{% url 'medical_data:medical_visit_detail' visit.pk %}">View</a>
+                            <a class="btn btn-sm btn-warning" href="{% url 'medical_data:medical_visit_update' visit.pk %}">Edit</a>
+                            <a class="btn btn-sm btn-danger" href="{% url 'medical_data:medical_visit_delete' visit.pk %}">Delete</a>
+                        </td>
+                    </tr>
+
+                {% empty %}
+                    <tr><td colspan="6">No medical records found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

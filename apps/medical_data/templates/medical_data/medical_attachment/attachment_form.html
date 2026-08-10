@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Attachment{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+            <h4 class="mb-0">Upload Medical Attachment</h4>
+        </div>
+
+        <div class="card-body">
+
+            <p class="text-muted">
+                Medical Visit:
+                <strong>
+                    {{ medical_visit.player }}
+                </strong>
+                · {{ medical_visit.date }}
+            </p>
+
+            <form method="post" enctype="multipart/form-data">
+
+                {% csrf_token %}
+
+                {% for field in form %}
+
+                    <div class="mb-3">
+
+                        {{ field.label_tag }}
+
+                        {{ field }}
+
+                        {% if field.errors %}
+                            <div class="text-danger small">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                {% endfor %}
+
+                <button type="submit" class="btn btn-primary">
+                    Upload
+                </button>
+
+                <a href="{% url 'medical_data:medical_visit_detail' medical_visit.pk %}"
+                   class="btn btn-secondary">
+                    Cancel
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

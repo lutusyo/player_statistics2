@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'medical_data/css/medical.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+
+        <div class="page-header mb-4">
+            <h2>{{ page_title }}</h2>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <!-- LEFT -->
+                <div class="col-lg-6">
+                    <div class="card shadow-sm mb-4">
+
+                        <div class="card-header bg-primary text-white">
+                            Player Information
+                        </div>
+
+                        <div class="card-body">
+                            <div class="mb-3">
+                                {{ form.date.label_tag }}
+                                {{ form.date }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.team.label_tag }}
+                                {{ form.team }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.player.label_tag }}
+                                {{ form.player }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.visit_type.label_tag }}
+                                {{ form.visit_type }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-danger text-white">
+                            Injury Information
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                {{ form.main_complaint.label_tag }}
+                                {{ form.main_complaint }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.body_side.label_tag }}
+                                {{ form.body_side }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.injury_status.label_tag }}
+                                {{ form.injury_status }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.mechanism_of_injury.label_tag }}
+                                {{ form.mechanism_of_injury }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.history_of_injury.label_tag }}
+                                {{ form.history_of_injury }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT -->
+
+                <div class="col-lg-6">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-success text-white">
+                            Assessment
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                {{ form.physical_examination.label_tag }}
+                                {{ form.physical_examination }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.working_diagnosis.label_tag }}
+                                {{ form.working_diagnosis }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-warning">
+                            Treatment & Availability
+                        </div>
+
+                        <div class="card-body">
+                            <div class="mb-3">
+                                {{ form.therapy.label_tag }}
+                                {{ form.therapy }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.training_session_status.label_tag }}
+                                {{ form.training_session_status }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.availability_status.label_tag }}
+                                {{ form.availability_status }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.recommendations.label_tag }}
+                                {{ form.recommendations }}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form.next_review_date.label_tag }}
+                                    {{ form.next_review_date }}
+                                </div>
+
+                                <div class="col-md-6">
+                                    {{ form.expected_return_date.label_tag }}
+                                    {{ form.expected_return_date }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-success">Save Medical Visit</button>
+                <a href="{% url 'medical_data:medical_visit_list' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+
+{% endblock %}
+
+
+    {% block extra_js %}
+    <script src="{% static 'medical_data/js/medical_form.js' %}"></script>
+    {% endblock %}

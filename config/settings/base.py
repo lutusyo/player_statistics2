@@ -55,7 +55,10 @@ INSTALLED_APPS = [
      'version2.tagging_app_v2', 'version2.reports_app_v2', 'version2.matches_app_v2',
      'version2.loans_app_v2', 'version2.psychology_app_v2', 'version2.medical_app_v2',
      'version2.gps_app_v2',
+
+     #apps
      'apps.gym_data',
+     'apps.medical_data',
 
 
     # version3

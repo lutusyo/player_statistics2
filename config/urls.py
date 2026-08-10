@@ -38,6 +38,7 @@ urlpatterns = [
 
     # version3
     path("tagging_app_v3/", include("version3.tagging_app_v3.urls")),
+    path("medical_data/", include("apps.medical_data.urls")),
 
 ]
 
