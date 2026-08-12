@@ -10,6 +10,7 @@ from version1.reports_app.models.previous_models import Result, Medical, Transit
 from version1.reports_app.views.daily_report_views.statistics_view import get_statistics_report
 from version1.players_app.models import Player
 
+
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import getSampleStyleSheet
@@ -20,7 +21,6 @@ from reportlab.lib.pagesizes import A4, landscape
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.enum.text import PP_ALIGN
-
 
 def get_full_name(player):
     """Return the full player name as: First + Second + Surname"""
@@ -77,8 +77,7 @@ def write_sheet(ws, headers, rows, sum_columns=None):
                     max_length = cell_length
         ws.column_dimensions[column].width = min(max_length + 5, 50)  # max width 50
 
-
-def download_technical_report(request, team_id):
+def download_technical_report_excel(request, team_id):
     team = get_object_or_404(Team, id=team_id)
     season = request.GET.get("season", "")
 
@@ -181,34 +180,47 @@ def download_technical_report(request, team_id):
     )
 
 
+# ================ STATISTICS ================
 
-def technical_report_page(request, team_id):
-    team = get_object_or_404(Team, id=team_id)
+    ws = wb.create_sheet("Statistics")
+    stats_report = get_statistics_report(filter_type=request.GET.get("filter", "all"),team=team,start_date=start_date,end_date=end_date)
 
-    start_date_str = request.GET.get("start_date")
-    end_date_str = request.GET.get("end_date")
-    season = request.GET.get("season", "")
+    headers = [
+    "NAME","POS","TRAINING TOTAL","U11","U13","U15","U17","U20","FIRST TEAM","NATIONAL TEAM",
+    "GAME MINS","APPS","STARTS","SUB IN","SUB OUT","GOALS","ASSISTS","PRE-ASSISTS","NOTE",
+    ]
 
-    start_date = parse_date(start_date_str) if start_date_str else None
-    end_date = parse_date(end_date_str) if end_date_str else None
+    stats_rows = []
 
-    stats_report = get_statistics_report(
-        filter_type=request.GET.get("filter", "all"),
-        team=team,
-        start_date=start_date,
-        end_date=end_date,
+    for r in stats_report:
+        player = r.get("player")
+
+        stats_rows.append([
+            get_full_name(player),
+            str(r.get("position", "")),
+
+            # Training data
+            r.get("training_total", 0),r.get("training_u11", 0),r.get("training_u13", 0),r.get("training_u15", 0),r.get("training_u17", 0),r.get("training_u20", 0),
+            r.get("training_first", 0),r.get("training_national", 0),
+
+            # Match statistics
+            r.get("game_minutes", 0),r.get("appearances", 0),
+            r.get("starts", 0),r.get("sub_in", 0),r.get("sub_out", 0),r.get("goals", 0),r.get("assists", 0),r.get("pre_assists", 0),r.get("note", ""),
+        ])
+
+        #  totals
+        sum_cols = [1,2,3,4,5,6,7,8, 9, 10,11]
+
+    write_sheet(ws,headers,stats_rows,sum_columns=sum_cols)
+
+
+    # ================ DOWNLOAD ================
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+    filename = f"Technical_Report_{team.age_group.code}_{season or 'ALL'}.xlsx"
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    
+    wb.save(response)
+    return response
 
-    context = {
-        "team": team,
-        "season": season,
-        "start_date": start_date,
-        "end_date": end_date,
-        "stats_report": stats_report,
-    }
-
-    return render(
-        request,
-        "reports_app/technical_report.html",
-        context,
-    )

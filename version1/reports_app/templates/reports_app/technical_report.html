@@ -19,18 +19,15 @@
 
         <a href="{% url 'technical_report_excel' team.id %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&season={{ season }}"
            class="btn btn-success">
-            Download Excel
-        </a>
+            Download Excel</a>
 
-        <a href="{% url 'technical_report_pdf' team.id %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&season={{ season }}"
+        <a href="{% url 'technical_report_pdf2' team.id %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&season={{ season }}"
            class="btn btn-danger">
-            Download PDF
-        </a>
+            Download PDF</a>
 
         <a href="{% url 'technical_report_ppt' team.id %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}&season={{ season }}"
            class="btn btn-primary">
-            Download PowerPoint
-        </a>
+            Download PowerPoint</a>
 
     </div>
 

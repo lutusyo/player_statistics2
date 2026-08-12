@@ -1,12 +1,9 @@
 # reports_app/urls.py
 from django.urls import path
 
-from version1.reports_app.views.daily_report_views import ( 
-    fitness_views, iap_views, medical_views,
-    mesocycle_views, performance_views,
-    report_exports, result_views,
-    scouting_views,
-    statistics_view,
+from version1.reports_app.views.daily_report_views import ( fitness_views, iap_views, medical_views,
+    mesocycle_views, performance_views, report_exports, result_views,
+    scouting_views, statistics_view,
     individual_statistics_view,
     team_reports_view,
     transition_views,
@@ -14,81 +11,29 @@ from version1.reports_app.views.daily_report_views import (
 
 from version1.reports_app.views.match_report_views import ( 
     goalkeeping_view, 
-    set_plays_views, 
-    in_possession_views, 
-    post_match_summary_views, 
-    full_match_report_views,
+    set_plays_views, in_possession_views, 
+    post_match_summary_views, full_match_report_views,
     summary_key_statistics_views,)
 
 from version1.reports_app.views.match_report_views.full_match_report_views import full_match_report_view, download_full_report_pdf
 from version1.reports_app.views.match_report_views import match_summary_team_view
 from version1.reports_app.views.daily_report_views import technical_report_views
-
 from version1.reports_app.views import aar_report_view
 
-
-
-
-
-from django.urls import path
-
-from version1.reports_app.views.daily_report_views.technical_report_views import (
-    technical_report_page,
-    download_technical_report_excel,
-    download_technical_report_pdf,
-    download_technical_report_ppt,
-)
-
-
-
+from version1.reports_app.views.daily_report_views.technical_report_views import (technical_report_page,)
+from version1.reports_app.views2.download_technical_report_pdf import download_technical_report_pdf
+from version1.reports_app.views2.download_technical_report_ppt import download_technical_report_ppt
+from version1.reports_app.views2.download_technical_report_excel import download_technical_report_excel
 
 app_name = 'reports_app'
 
 urlpatterns = [
 
-
-
-
-
-
     #path("technical-report/<int:team_id>/", technical_report_views.download_technical_report_excel, name="download_technical_report"),
-
-
-
-
-
-
-
-    path(
-        "technical-report/<int:team_id>/",
-        technical_report_page,
-        name="technical_report_page",
-    ),
-
-    path(
-        "technical-report/<int:team_id>/excel/",
-        download_technical_report_excel,
-        name="technical_report_excel",
-    ),
-
-    path(
-        "technical-report/<int:team_id>/pdf/",
-        download_technical_report_pdf,
-        name="technical_report_pdf",
-    ),
-
-    path(
-        "technical-report/<int:team_id>/ppt/",
-        download_technical_report_ppt,
-        name="technical_report_ppt",
-    ),
-
-
-
-
-
-
-
+    path("technical-report/<int:team_id>/", technical_report_page, name="technical_report_page",),
+    path("technical-report/<int:team_id>/excel/",download_technical_report_excel,name="technical_report_excel2",),
+    path("technical-report/<int:team_id>/pdf/",download_technical_report_pdf,name="technical_report_pdf2",),
+    path("technical-report/<int:team_id>/ppt/",download_technical_report_ppt,name="technical_report_ppt2",),
 
 
     # Medical
@@ -163,16 +108,11 @@ urlpatterns = [
 
     path("match/<int:match_id>/goalkeeping/", goalkeeping_view.goalkeeping_view,name="goalkeeping_report"),
     path('match/<int:match_id>/setplays/', set_plays_views.setplays_dashboard, name='setplays_dashboard'),
+
     # 9. physical data
     # Full report
     path('match/<int:match_id>/<int:our_team_id>/full-report/',full_match_report_views.full_match_report_view,name='full_match_report'),
     path('match/<int:match_id>/download-pdf/', download_full_report_pdf,name='download_full_report_pdf'),
-
-
-
-
-
-
 
 
     path("aar/<int:report_id>/", aar_report_view.after_action_review_detail, name="aar_detail"),

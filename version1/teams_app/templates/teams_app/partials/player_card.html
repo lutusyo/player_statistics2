@@ -1,9 +1,6 @@
 <tr class="player-row">
 
-    <td class="row-number">
-        {{ row_number }}
-    </td>
-
+    <td class="row-number">{{ row_number }}</td>
     <td class="photo-column">
         {% if player.photo %}
             <img
@@ -17,13 +14,7 @@
                 class="player-photo">
         {% endif %}
     </td>
-
-    <td class="player-name">
-        <a href="{% url 'players_app:player_detail' player.id %}">
-            {{ player.full_name }}
-        </a>
-    </td>
-
+    <td class="player-name"><a href="{% url 'players_app:player_detail' player.id %}">{{ player.full_name }}</a></td>
     <td class="age">
         {% if show_age %}
             {{ player.age_using_birthdate|default:"-" }}
@@ -31,21 +22,11 @@
             -
         {% endif %}
     </td>
-
-    <td>
-        {{ player.nationality }}
-    </td>
-
-    <td class="position">
-        {{ player.position }}
-    </td>
-
-    <td class="specific-position">
-        {{ player.specific_position|default:"-" }}
-    </td>
-
-    <td class="jersey-number">
-        {{ player.jersey_number }}
-    </td>
+    <td>{{ player.current_measurement.height }}</td>
+    <td>{{ player.current_measurement.weight }}</td>
+    <td>{{ player.nationality }}</td>
+    <td class="position">{{ player.position }}</td>
+    <td class="specific-position">{{ player.specific_position|default:"-" }}</td>
+    <td class="jersey-number">{{ player.jersey_number }}</td>
 
 </tr>
