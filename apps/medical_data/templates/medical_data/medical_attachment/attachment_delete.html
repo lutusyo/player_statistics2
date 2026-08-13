@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Upload Attachment{% endblock %}
+{% block title %}Delete Attachment{% endblock %}
 
 {% block content %}
 
@@ -9,7 +9,7 @@
     <div class="card shadow-sm">
 
         <div class="card-header">
-            <h4 class="mb-0">Upload Medical Attachment</h4>
+            <h4 class="mb-0">Delete Medical Attachment</h4>
         </div>
 
         <div class="card-body">
@@ -44,14 +44,9 @@
 
                 {% endfor %}
 
-                <button type="submit" class="btn btn-primary">
-                    Upload
-                </button>
-
+                <button type="submit" class="btn btn-primary">confirm delete</button>
                 <a href="{% url 'medical_data:medical_visit_detail' medical_visit.pk %}"
-                   class="btn btn-secondary">
-                    Cancel
-                </a>
+                   class="btn btn-secondary">Cancel</a>
 
             </form>
 
