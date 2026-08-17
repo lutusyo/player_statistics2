@@ -9,37 +9,136 @@ from apps.medical_data.models.medical_visit import (MedicalVisit,)
 from django.http import JsonResponse
 from version1.players_app.models import Player
 
+from django.core.paginator import Paginator
+from django.db.models import Count, Q
+from django.utils import timezone
+
 def medical_visit_list(request):
-    queryset = (MedicalVisit.objects.select_related("team","player","created_by",).prefetch_related("attachments","follow_ups",))
+
+    queryset = (
+        MedicalVisit.objects
+        .select_related("team", "player", "created_by")
+        .prefetch_related("attachments", "follow_ups")
+    )
+
     form = MedicalFilterForm(request.GET or None)
 
     if form.is_valid():
 
-        if form.cleaned_data["start_date"]:
-            queryset = queryset.filter(date__gte=form.cleaned_data["start_date"])
+        start_date = form.cleaned_data.get("start_date")
+        end_date = form.cleaned_data.get("end_date")
+        team = form.cleaned_data.get("team")
+        player = form.cleaned_data.get("player")
+        visit_type = form.cleaned_data.get("visit_type")
+        main_complaint = form.cleaned_data.get("main_complaint")
+        availability_status = form.cleaned_data.get("availability_status")
 
-        if form.cleaned_data["end_date"]:
-            queryset = queryset.filter(date__lte=form.cleaned_data["end_date"])
+        if start_date:
+            queryset = queryset.filter(date__gte=start_date)
 
-        if form.cleaned_data["team"]:
-            queryset = queryset.filter(team=form.cleaned_data["team"])
+        if end_date:
+            queryset = queryset.filter(date__lte=end_date)
 
-        if form.cleaned_data["player"]:
-            queryset = queryset.filter(player=form.cleaned_data["player"])
+        if team:
+            queryset = queryset.filter(team=team)
 
-        if form.cleaned_data["visit_type"]:
-            queryset = queryset.filter(visit_type=form.cleaned_data["visit_type"])
+        if player:
+            queryset = queryset.filter(player=player)
 
-        if form.cleaned_data["main_complaint"]:
-            queryset = queryset.filter(main_complaint=form.cleaned_data["main_complaint"])
+        if visit_type:
+            queryset = queryset.filter(
+                visit_type=visit_type
+            )
 
-        if form.cleaned_data["availability_status"]:
-            queryset = queryset.filter(availability_status=form.cleaned_data["availability_status"])
+        if main_complaint:
+            queryset = queryset.filter(
+                main_complaint=main_complaint
+            )
 
-    context = {"page_title": "Medical Records",
-        "medical_visits": queryset,
-        "filter_form": form,}
-    return render(request,"medical_data/medical_visit/medical_visit_list.html",context,)
+        if availability_status:
+            queryset = queryset.filter(
+                availability_status=availability_status
+            )
+
+    # -----------------------------
+    # STATISTICS
+    # -----------------------------
+
+    total_records = queryset.count()
+
+    new_injuries = queryset.filter(
+        visit_type="new_injury"
+    ).count()
+
+    regular_checkups = queryset.filter(
+        visit_type="regular_checkup"
+    ).count()
+
+    unavailable = queryset.filter(
+        availability_status="unavailable"
+    ).count()
+
+    restricted = queryset.filter(
+        availability_status="restricted"
+    ).count()
+
+    available = queryset.filter(
+        availability_status="available"
+    ).count()
+
+    # -----------------------------
+    # PAGINATION
+    # -----------------------------
+
+
+
+
+
+
+    paginator = Paginator(queryset, 20)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    query_string = request.GET.copy()
+
+    if "page" in query_string:
+        query_string.pop("page")
+
+    query_string = query_string.urlencode()
+
+
+    context = {
+        "page_title": "Medical Records",
+        "medical_visits": page_obj,
+        "page_obj": page_obj,
+        "filter_form": form,
+        "total_records": total_records,
+        "new_injuries": new_injuries,
+        "regular_checkups": regular_checkups,
+        "available": available,
+        "restricted": restricted,
+        "unavailable": unavailable,
+        "query_string": query_string,
+    }
+    return render(request, "medical_data/medical_visit/medical_visit_list.html", context,)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def medical_visit_create(request):
     form = MedicalVisitForm(request.POST or None, request.FILES or None,)

@@ -91,16 +91,8 @@ class PlayerTrainingMinutesInline(admin.TabularInline):
     model = PlayerTrainingMinutes
     extra = 0
 
-    fields = (
-        'player',
-        'trained_with_team',
-        'minutes',
-    )
-
-    autocomplete_fields = (
-        'player',
-        'trained_with_team',
-    )
+    fields = ('player','trained_with_team','minutes',)
+    autocomplete_fields = ('player','trained_with_team',)
 
 
 class TrainingAbsenceInline(admin.TabularInline):

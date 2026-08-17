@@ -31,7 +31,7 @@ def export_team_players_to_excel_view(request, team_id):
 
     ws.append(headers)
     for cell in ws[1]:
-        cell.font = header_font
+        cell.font = header_font 
         cell.fill = header_fill
         cell.alignment = center_align
 

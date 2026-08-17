@@ -1,0 +1,481 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Medical Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{% static 'medical_data/css/medical.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <!-- HEADER -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="mb-1">Medical Dashboard</h2>
+
+            <p class="text-muted mb-0">
+                Academy medical overview
+            </p>
+        </div>
+
+        <div>
+
+            <a href="{% url 'medical_data:medical_visit_create' %}"
+               class="btn btn-primary">
+                + New Medical Visit
+            </a>
+
+            <a href="{% url 'medical_data:medical_visit_list' %}"
+               class="btn btn-outline-secondary">
+                Medical Records
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUMMARY CARDS -->
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-xl-2 col-md-4 col-6">
+
+            <div class="dashboard-stat-card">
+
+                <small>Total Records</small>
+
+                <h3>
+                    {{ total_records }}
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-xl-2 col-md-4 col-6">
+
+            <div class="dashboard-stat-card danger">
+
+                <small>New Injuries</small>
+
+                <h3>
+                    {{ new_injuries }}
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-xl-2 col-md-4 col-6">
+
+            <div class="dashboard-stat-card primary">
+
+                <small>Checkups</small>
+
+                <h3>
+                    {{ regular_checkups }}
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-xl-2 col-md-4 col-6">
+
+            <div class="dashboard-stat-card success">
+
+                <small>Available</small>
+
+                <h3>
+                    {{ available_players }}
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-xl-2 col-md-4 col-6">
+
+            <div class="dashboard-stat-card warning">
+
+                <small>Restricted</small>
+
+                <h3>
+                    {{ restricted_players }}
+                </h3>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-xl-2 col-md-4 col-6">
+
+            <div class="dashboard-stat-card danger">
+
+                <small>Unavailable</small>
+
+                <h3>
+                    {{ unavailable_players }}
+                </h3>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CHARTS -->
+
+    <div class="row g-4 mb-4">
+
+
+        <!-- INJURIES BY COMPLAINT -->
+
+        <div class="col-lg-6">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-header">
+
+                    <h5 class="mb-0">
+                        Injuries by Main Complaint
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="dashboard-chart">
+                        <canvas id="complaintChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INJURIES BY TEAM -->
+        <div class="col-lg-6">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-header">
+
+                    <h5 class="mb-0">
+                        Injuries by Team
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="dashboard-chart">
+                        <canvas id="teamChart"></canvas>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DAILY VISITS -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+
+            <h5 class="mb-0">
+                Medical Visits - Last 30 Days
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="dashboard-chart-large">
+                <canvas id="dailyChart"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+
+        <!-- OVERDUE FOLLOW UPS -->
+
+        <div class="col-lg-6">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header d-flex justify-content-between">
+
+                    <h5 class="mb-0">
+                        Overdue Follow-ups
+                    </h5>
+
+                    <span class="badge bg-danger">
+                        {{ overdue_followups|length }}
+                    </span>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    {% for follow_up in overdue_followups %}
+
+                        <div class="dashboard-list-item">
+
+                            <div>
+
+                                <strong>
+                                    {{ follow_up.visit.player }}
+                                </strong>
+
+                                <div class="small text-muted">
+                                    {{ follow_up.visit.team }}
+                                </div>
+
+                            </div>
+
+                            <div class="text-end">
+
+                                <span class="badge bg-danger">
+                                    {{ follow_up.review_date|date:"d M Y" }}
+                                </span>
+
+                                <div class="mt-1">
+
+                                    <a href="{% url 'medical_data:medical_visit_detail' follow_up.visit.pk %}"
+                                       class="small">
+                                        View
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% empty %}
+
+                        <div class="p-4 text-muted text-center">
+                            No overdue follow-ups.
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- UPCOMING FOLLOW UPS -->
+
+        <div class="col-lg-6">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header d-flex justify-content-between">
+
+                    <h5 class="mb-0">
+                        Upcoming Follow-ups
+                    </h5>
+
+                    <span class="badge bg-primary">
+                        {{ pending_followups|length }}
+                    </span>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    {% for follow_up in pending_followups %}
+
+                        <div class="dashboard-list-item">
+
+                            <div>
+
+                                <strong>
+                                    {{ follow_up.visit.player }}
+                                </strong>
+
+                                <div class="small text-muted">
+                                    {{ follow_up.visit.team }}
+                                </div>
+
+                            </div>
+
+                            <div class="text-end">
+
+                                <span class="badge bg-primary">
+                                    {{ follow_up.review_date|date:"d M Y" }}
+                                </span>
+
+                                <div class="mt-1">
+
+                                    <a href="{% url 'medical_data:medical_visit_detail' follow_up.visit.pk %}"
+                                       class="small">
+                                        View
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    {% empty %}
+
+                        <div class="p-4 text-muted text-center">
+                            No upcoming follow-ups.
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- EXPECTED RETURNS -->
+
+        <div class="col-lg-12">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header">
+
+                    <h5 class="mb-0">
+                        Upcoming Expected Returns
+                    </h5>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover mb-0">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th>Player</th>
+
+                                    <th>Team</th>
+
+                                    <th>Diagnosis</th>
+
+                                    <th>Expected Return</th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                            {% for visit in upcoming_returns %}
+
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            {{ visit.player }}
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        {{ visit.team }}
+                                    </td>
+
+                                    <td>
+                                        {{ visit.working_diagnosis|truncatechars:60|default:"-" }}
+                                    </td>
+
+                                    <td>
+
+                                        <span class="badge bg-success">
+
+                                            {{ visit.expected_return_date|date:"d M Y" }}
+
+                                        </span>
+
+                                    </td>
+
+                                </tr>
+
+                            {% empty %}
+
+                                <tr>
+
+                                    <td colspan="4"
+                                        class="text-center text-muted py-4">
+
+                                        No upcoming expected returns.
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const complaintLabels = {{ complaint_labels|safe }};
+    const complaintValues = {{ complaint_values|safe }};
+
+    const teamLabels = {{ team_labels|safe }};
+    const teamValues = {{ team_values|safe }};
+
+    const dateLabels = {{ date_labels|safe }};
+    const dateValues = {{ date_values|safe }};
+</script>
+
+<script src="{% static 'medical_data/js/medical_dashboard.js' %}"></script>
+
+{% endblock %}

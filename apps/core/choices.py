@@ -16,6 +16,7 @@ class SeasonChoices(models.TextChoices):
     SEASON_2023_2024 = "2023-2024", "2023-2024"
     SEASON_2024_2025 = "2024-2025", "2024-2025"
     SEASON_2025_2026 = "2025-2026", "2025-2026"
+    SEASON_2026_2027 = "2026-2027", "2026-2027"
 
 class CompetitionType(models.TextChoices):
     LOCAL_FRIENDLY = 'Local Friendly', 'Local Friendly'
