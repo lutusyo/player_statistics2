@@ -52,7 +52,7 @@ def get_statistics_report(filter_type="all", team=None, start_date=None, end_dat
 
     report = []
 
-    players = Player.objects.filter(is_active=True, team=team)
+    players = Player.objects.filter(is_active=True,status="SIGNED", team=team)
 
     for player in players:
         lineups = MatchLineup.objects.filter(player=player).filter(match_filter)

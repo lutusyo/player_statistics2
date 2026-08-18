@@ -17,7 +17,8 @@ class PlayerMeasurementInline(admin.TabularInline):
 # Player Admin
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
-    list_display = ("name", "jersey_number", "team", "current_bmi")
+    list_display = ("name", "jersey_number", "team", "current_bmi", "status",)
+    list_filter = ("team","position","status",)
     search_fields = ("name",)
     inlines = [PlayerCareerStageInline, PlayerMeasurementInline]
 
