@@ -7,20 +7,54 @@
 
 {% block match_content %}
 
-<form method="get" class="filter-form">
-    <label>Competition:</label>
-    <select name="competition" onchange="this.form.submit()">
-        <option value="all" {% if competition_selected == "all" %}selected{% endif %}>
-            All Competitions
-        </option>
-        {% for comp in competition_choices %}
-        <option value="{{ comp.id }}"
-            {% if comp.id|stringformat:"s" == competition_selected %}selected{% endif %}>
-            {{ comp.name }}
-        </option>
-        {% endfor %}
-    </select>
+
+<form method="get" class="results-filter-form">
+
+    <div class="filter-group">
+        <label>Competition:</label>
+        <select name="competition" onchange="this.form.submit()">
+            <option value="all" {% if competition_selected == "all" %}selected{% endif %}>
+                All Competitions
+            </option>
+            {% for comp in competition_choices %}
+            <option value="{{ comp.id }}"
+                {% if comp.id|stringformat:"s" == competition_selected %}selected{% endif %}>
+                {{ comp.name }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+
+    <div class="filter-group">
+        <label for="date_from">From</label>
+
+        <input
+            type="date"
+            name="date_from"
+            id="date_from"
+            value="{{ date_from|default:'' }}"
+        >
+    </div>
+
+
+    <div class="filter-group">
+        <label for="date_to">To</label>
+
+        <input
+            type="date"
+            name="date_to"
+            id="date_to"
+            value="{{ date_to|default:'' }}"
+        >
+    </div>
+
+    <button type="submit">Filter</button>
+    <a href="{% url 'matches_app:team_results' team %}">Clear</a>
+
 </form>
+
+
 
 <div class="results-container">
 
@@ -85,6 +119,24 @@
     </div>
 
 </div>
+
+
+
+    <div class="export-buttons">
+
+        <a href="{% url 'matches_app:results_export_excel' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">
+            Export Excel
+        </a>
+
+        <a href="{% url 'matches_app:results_export_pdf' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">
+            Export PDF
+        </a>
+
+        <a href="{% url 'matches_app:results_export_ppt' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">
+            Export PowerPoint
+        </a>
+
+    </div>
 
 {% endfor %}
 {% else %}

@@ -2,7 +2,7 @@ from . import views
 from django.urls import path
 from version1.matches_app.views import  ( 
     career_stage, fixture_view, get_match_goals, 
-    match_detail, player_statistics, result_view, table_view, team_dashboard, 
+    match_detail, player_statistics, result_view, table_view, team_dashboard, result_exports
 )
 
 from version1.lineup_app.views import lineup_bila_uwanja, match_lineup_view_with_uwanja, substitution_panel
@@ -63,6 +63,10 @@ urlpatterns = [
 
     # Team-specific table
     path('<str:code>/table/', table_view.table_view, name='team_table'),
+
+    path("results/<str:team>/export/excel/",result_exports.results_export_excel, name="results_export_excel",),
+    path("results/<str:team>/export/pdf/",result_exports.results_export_pdf,name="results_export_pdf",),
+    path("results/<str:team>/export/ppt/",result_exports.results_export_ppt,name="results_export_ppt",),
 
 
 ]
