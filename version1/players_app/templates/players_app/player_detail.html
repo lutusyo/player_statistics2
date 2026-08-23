@@ -237,18 +237,13 @@
 
         <a href="{% url 'teams_app:team_squad' player.team.id %}" class="back-button">←  {{ player.age_group }} Squad </a>
 
-        <h2 class="player-full-name">{{ player.full_name }}</h2>
+        
 
         <div class="player-photo-centered">
+            
             <img src="{{ player.photo.url }}" alt="{{ player.full_name }}">
-        </div>
+            <h2 class="player-full-name">{{ player.full_name }}</h2>
 
-        <div class="toggle-buttons">
-            <button id="profileBtn">Profile</button>
-            <button id="statsBtn">Stats</button>
-        </div>
-
-        <div id="profileSection" class="section">
 
             <div class="player-attributes-grid">
                 <div class="attribute-block"><p class="label">Position</p><p class="value blue-text">{{ player.position }}</p></div>
@@ -288,6 +283,15 @@
                 {% endfor %}
             </ul>
             {% endif %}
+
+        </div>
+
+        <div class="toggle-buttons">
+            <button id="profileBtn">Profile</button>
+            <button id="statsBtn">Stats</button>
+        </div>
+
+        <div id="profileSection" class="section">
 
             {% include "matches_app/player_timeline.html" %}
 

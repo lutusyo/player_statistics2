@@ -76,7 +76,7 @@ class Player(models.Model):
     
 
     def __str__(self):
-        return f"{self.full_name} - {self.age_group} - {self.team}"
+        return f"{self.full_name}" # - {self.age_group} - {self.team}"
 
     @property
     def full_name(self):
