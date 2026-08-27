@@ -15,12 +15,7 @@ from django.utils import timezone
 
 def medical_visit_list(request):
 
-    queryset = (
-        MedicalVisit.objects
-        .select_related("team", "player", "created_by")
-        .prefetch_related("attachments", "follow_ups")
-    )
-
+    queryset = (MedicalVisit.objects.select_related("team", "player", "created_by").prefetch_related("attachments", "follow_ups"))
     form = MedicalFilterForm(request.GET or None)
 
     if form.is_valid():
@@ -46,55 +41,23 @@ def medical_visit_list(request):
             queryset = queryset.filter(player=player)
 
         if visit_type:
-            queryset = queryset.filter(
-                visit_type=visit_type
-            )
+            queryset = queryset.filter(visit_type=visit_type)
 
         if main_complaint:
-            queryset = queryset.filter(
-                main_complaint=main_complaint
-            )
+            queryset = queryset.filter(main_complaint=main_complaint)
 
         if availability_status:
-            queryset = queryset.filter(
-                availability_status=availability_status
-            )
+            queryset = queryset.filter(availability_status=availability_status)
 
-    # -----------------------------
     # STATISTICS
-    # -----------------------------
-
     total_records = queryset.count()
+    new_injuries = queryset.filter(visit_type="new_injury").count()
+    regular_checkups = queryset.filter(visit_type="regular_checkup").count()
+    not_available = queryset.filter(availability_status="not_available").count()
+    restricted = queryset.filter(availability_status="restricted").count()
+    available = queryset.filter(availability_status="available").count()
 
-    new_injuries = queryset.filter(
-        visit_type="new_injury"
-    ).count()
-
-    regular_checkups = queryset.filter(
-        visit_type="regular_checkup"
-    ).count()
-
-    unavailable = queryset.filter(
-        availability_status="unavailable"
-    ).count()
-
-    restricted = queryset.filter(
-        availability_status="restricted"
-    ).count()
-
-    available = queryset.filter(
-        availability_status="available"
-    ).count()
-
-    # -----------------------------
     # PAGINATION
-    # -----------------------------
-
-
-
-
-
-
     paginator = Paginator(queryset, 20)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -106,7 +69,6 @@ def medical_visit_list(request):
 
     query_string = query_string.urlencode()
 
-
     context = {
         "page_title": "Medical Records",
         "medical_visits": page_obj,
@@ -117,7 +79,7 @@ def medical_visit_list(request):
         "regular_checkups": regular_checkups,
         "available": available,
         "restricted": restricted,
-        "unavailable": unavailable,
+        "not_available": not_available,
         "query_string": query_string,
     }
     return render(request, "medical_data/medical_visit/medical_visit_list.html", context,)

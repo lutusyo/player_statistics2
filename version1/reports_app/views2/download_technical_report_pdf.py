@@ -47,7 +47,7 @@ def download_technical_report_pdf(request, team_id):
 
     response = HttpResponse(content_type="application/pdf")
     response["Content-Disposition"] = (
-        f'attachment; filename="Technical_Report_'
+        f'inline; filename="Technical_Report_'
         f'{team.age_group.code}_{season or "ALL"}.pdf"'
     )
 
@@ -101,11 +101,11 @@ def download_technical_report_pdf(request, team_id):
     story.append(Paragraph(f"TECHNICAL REPORT - {team.name}", styles["Title"]))
 
     data = [
-        ["PLAYER", "POS", "MATCH DATA", "", "", "", "", "", "", "", "",
-         "TRAINING DATA", "", "", "", "", "", "", ""],
+        ["PLAYER", "POS", "MATCH DATA", "", "", "", "", "", "", "",
+        "TRAINING DATA", "", "", "", "", "", "", ""],
         ["Player", "Pos", "Game Mins", "Apps", "Starts", "Sub In", "Sub Out",
-         "Goals", "Assists", "Pre-Assists", "Note", "Training Total",
-         "U11", "U13", "U15", "U17", "U20", "First Team", "National Team"]
+        "Goals", "Assists", "Pre-Assists", "Training Total",
+        "U11", "U13", "U15", "U17", "U20", "First Team", "National Team"]
     ]
 
     for r in stats:
@@ -115,7 +115,7 @@ def download_technical_report_pdf(request, team_id):
             r.get("game_minutes", 0), r.get("appearances", 0),
             r.get("starts", 0), r.get("sub_in", 0), r.get("sub_out", 0),
             r.get("goals", 0), r.get("assists", 0), r.get("pre_assists", 0),
-            r.get("note", ""), r.get("training_total", 0),
+            r.get("training_total", 0),
             r.get("training_u11", 0), r.get("training_u13", 0),
             r.get("training_u15", 0), r.get("training_u17", 0),
             r.get("training_u20", 0), r.get("training_first", 0),
@@ -123,23 +123,31 @@ def download_technical_report_pdf(request, team_id):
         ])
 
     table = Table(data, colWidths=[
-        28*mm,15*mm,17*mm,12*mm,13*mm,13*mm,14*mm,
-        12*mm,16*mm,18*mm,27*mm,19*mm,12*mm,12*mm,
-        12*mm,12*mm,12*mm,17*mm,19*mm
+        28*mm, 15*mm, 17*mm, 12*mm, 13*mm, 13*mm, 14*mm,
+        12*mm, 16*mm, 18*mm, 19*mm, 12*mm, 12*mm,
+        12*mm, 12*mm, 12*mm, 17*mm, 19*mm
     ], repeatRows=2)
 
     table.setStyle(TableStyle([
-        ("SPAN",(0,0),(0,1)), ("SPAN",(1,0),(1,1)),
-        ("SPAN",(2,0),(10,0)), ("SPAN",(11,0),(18,0)),
-        ("BACKGROUND",(0,0),(1,1),colors.HexColor("#0070C0")),
-        ("BACKGROUND",(2,0),(10,1),colors.HexColor("#1F4E78")),
-        ("BACKGROUND",(11,0),(18,1),colors.HexColor("#548235")),
-        ("TEXTCOLOR",(0,0),(-1,1),colors.white),
-        ("FONTNAME",(0,0),(-1,1),"Helvetica-Bold"),
-        ("FONTSIZE",(0,0),(-1,-1),6.5),
-        ("ALIGN",(0,0),(-1,-1),"CENTER"),
-        ("VALIGN",(0,0),(-1,-1),"MIDDLE"),
-        ("GRID",(0,0),(-1,-1),.4,colors.grey),
+        ("SPAN", (0,0), (0,1)),
+        ("SPAN", (1,0), (1,1)),
+
+        # MATCH DATA now ends at column 9
+        ("SPAN", (2,0), (9,0)),
+
+        # TRAINING DATA now starts at column 10
+        ("SPAN", (10,0), (17,0)),
+
+        ("BACKGROUND", (0,0), (1,1), colors.HexColor("#0070C0")),
+        ("BACKGROUND", (2,0), (9,1), colors.HexColor("#1F4E78")),
+        ("BACKGROUND", (10,0), (17,1), colors.HexColor("#548235")),
+
+        ("TEXTCOLOR", (0,0), (-1,1), colors.white),
+        ("FONTNAME", (0,0), (-1,1), "Helvetica-Bold"),
+        ("FONTSIZE", (0,0), (-1,-1), 6.5),
+        ("ALIGN", (0,0), (-1,-1), "CENTER"),
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("GRID", (0,0), (-1,-1), .4, colors.grey),
     ]))
 
     story.append(table)

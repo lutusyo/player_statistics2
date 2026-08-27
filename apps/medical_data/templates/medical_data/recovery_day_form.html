@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Recovery Day{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h2> Day {{ day.day_number }} Recovery Program</h2>
+        <p class="text-muted">
+
+            {{ day.recovery_plan.visit.player }}
+
+            ·
+
+            {{ day.date|date:"d F Y" }}
+        </p>
+
+    </div>
+
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">
+                        Focus Point
+                    </label>
+
+                    {{ form.focus_point }}
+
+                    {{ form.focus_point.errors }}
+
+                    <div class="form-text">
+
+                        Example:
+                        Mobility, Strength,
+                        Conditioning, Running,
+                        Ball Work, Recovery.
+
+                    </div>
+
+                </div>
+
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Activities / Program
+                    </label>
+
+                    {{ form.activities }}
+
+                    {{ form.activities.errors }}
+
+                    <div class="form-text">
+
+                        Write clear instructions for
+                        the special coach.
+
+                    </div>
+
+                </div>
+
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Save Program</button>
+                    <a href="{% url 'medical_data:recovery_plan_detail' day.recovery_plan.pk %}"
+                        class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

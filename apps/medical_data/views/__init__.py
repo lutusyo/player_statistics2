@@ -5,3 +5,5 @@ from apps.medical_data.views.ajax_views import *
 
 from apps.medical_data.views.attachment_views import *
 from apps.medical_data.views.follow_up_views import *
+from apps.medical_data.views.medical_report_views import *
+from apps.medical_data.views.medical_recovery_views import *

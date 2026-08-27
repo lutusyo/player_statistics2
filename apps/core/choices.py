@@ -44,6 +44,7 @@ class MainComplaint(models.TextChoices):
     FINGER_PAIN = "finger_pain", "Finger pain"
     HEEL_PAIN = "heel_pain", "Heel pain"
     POST_OPERATIVE = "post_operative", "Post-operative"
+    HIP_PAIN = "hip_pain", "Hip-pain"
     OTHER = "other", "Other"
 
 class BodySide(models.TextChoices):

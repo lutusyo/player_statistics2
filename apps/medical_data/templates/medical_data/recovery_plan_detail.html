@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+{% block title %}Recovery Plan{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2>Recovery Plan </h2>
+
+            <p class="text-muted mb-0">
+
+                {{ plan.visit.player }}
+
+                ·
+
+                {{ plan.visit.team }}
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <a
+                href="{% url 'medical_data:medical_visit_detail' plan.visit.pk %}"
+                class="btn btn-outline-secondary">
+
+                Medical Visit
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+<div class="d-flex gap-2 mb-4">
+
+    {% if plan.status == "active" or plan.status == "extended" %}
+
+        <a
+            href="{% url 'medical_data:recovery_plan_extend' plan.pk %}"
+            class="btn btn-warning">
+
+            Extend Recovery
+
+        </a>
+
+        <a
+            href="{% url 'medical_data:recovery_plan_complete' plan.pk %}"
+            class="btn btn-success">
+
+            Player Recovered
+
+        </a>
+
+        <a
+            href="{% url 'medical_data:recovery_plan_cancel' plan.pk %}"
+            class="btn btn-outline-danger">
+
+            Cancel Plan
+
+        </a>
+
+    {% endif %}
+
+</div>
+
+
+
+
+
+
+    <!-- PLAN SUMMARY -->
+
+    <div class="row g-3 mb-4">
+
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+                        Start Date
+                    </small>
+
+                    <h5 class="mt-2">
+                        {{ plan.start_date|date:"d M Y" }}
+                    </h5>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+                        Planned Recovery
+                    </small>
+
+                    <h5 class="mt-2">
+                        {{ plan.planned_days }} days
+                    </h5>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+                        Expected Return
+                    </small>
+
+                    <h5 class="mt-2">
+                        {{ plan.expected_end_date|date:"d M Y" }}
+                    </h5>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm">
+
+                <div class="card-body">
+
+                    <small class="text-muted">
+                        Status
+                    </small>
+
+                    <h5 class="mt-2">
+                        {{ plan.get_status_display }}
+                    </h5>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- TODAY -->
+
+    {% if today_program %}
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header">
+
+            <strong>
+                Today's Recovery Program
+            </strong>
+
+        </div>
+
+        <div class="card-body">
+
+            <h5>
+                Day {{ today_program.day_number }}
+            </h5>
+
+            <p class="text-muted">
+                {{ today_program.date|date:"d F Y" }}
+            </p>
+
+
+            <div class="mb-3">
+
+                <strong>
+                    Focus Point
+                </strong>
+
+                <p class="mt-1">
+                    {{ today_program.focus_point|default:"Not set yet." }}
+                </p>
+
+            </div>
+
+
+            <div class="mb-3">
+
+                <strong>
+                    Activities
+                </strong>
+
+                <p class="mt-1"
+                   style="white-space: pre-line;">
+
+                    {{ today_program.activities|default:"No activities added yet." }}
+
+                </p>
+
+            </div>
+
+
+            <div class="d-flex gap-2">
+
+                <a
+                    href="{% url 'medical_data:recovery_day_update' today_program.pk %}"
+                    class="btn btn-primary">
+
+                    Edit Today's Program
+
+                </a>
+
+
+                {% if today_program.status == "planned" %}
+
+                    <form
+                        method="post"
+                        action="{% url 'medical_data:recovery_day_complete' today_program.pk %}">
+
+                        {% csrf_token %}
+
+                        <button
+                            class="btn btn-success"
+                            type="submit">
+
+                            Mark Completed
+
+                        </button>
+
+                    </form>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- DAILY PROGRAM -->
+
+    <div class="card shadow-sm">
+
+        <div class="card-header">
+
+            <strong>
+                Daily Recovery Program
+            </strong>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+
+                    <tr>
+                        <th>Day</th>
+                        <th>Date</th>
+                        <th>Focus Point</th>
+                        <th>
+                            Activities
+                        </th>
+                        <th>
+                            Status
+                        </th>
+                        <th>Action</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% for day in plan.daily_programs.all %}
+
+                    <tr>
+                        <td>
+                            <strong>{{ day.day_number }}</strong>
+                        </td>
+                        <td>
+                            {{ day.date|date:"d M Y" }}
+                        </td>
+                        <td>
+
+                            {{ day.focus_point|default:"-" }}
+
+                        </td>
+                        <td>
+
+                            {{ day.activities|truncatechars:100|default:"-" }}
+
+                        </td>
+
+
+                        <td>
+
+                            {% if day.status == "completed" %}
+
+                                <span class="badge bg-success">
+                                    Completed
+                                </span>
+
+                            {% elif day.status == "cancelled" %}
+
+                                <span class="badge bg-secondary">
+                                    Cancelled
+                                </span>
+
+                            {% elif day.status == "skipped" %}
+
+                                <span class="badge bg-warning text-dark">
+                                    Skipped
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-primary">
+                                    Planned
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            <a
+                                href="{% url 'medical_data:recovery_day_update' day.pk %}"
+                                class="btn btn-sm btn-outline-primary">
+
+                                Edit
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

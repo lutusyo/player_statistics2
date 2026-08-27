@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Cancel Recovery Plan{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <h3>Cancel Recovery Plan</h3>
+
+            <p>
+                Are you sure you want to cancel the recovery plan
+                for <strong>{{ plan.visit.player }}</strong>?
+            </p>
+
+            <div class="alert alert-danger">
+
+                All remaining planned recovery days will be
+                marked as cancelled.
+
+            </div>
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="btn btn-danger">
+
+                    Cancel Recovery Plan
+
+                </button>
+
+                <a
+                    href="{% url 'medical_data:recovery_plan_detail' plan.pk %}"
+                    class="btn btn-outline-secondary">
+
+                    Go Back
+
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

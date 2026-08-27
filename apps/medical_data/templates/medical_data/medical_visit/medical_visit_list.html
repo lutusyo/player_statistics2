@@ -54,7 +54,7 @@
         <div class="col-xl-2 col-md-4 col-6">
             <div class="medical-stat-card unavailable">
                 <small>Unavailable</small>
-                <h3>{{ unavailable }}</h3>
+                <h3>{{ not_available }}</h3>
             </div>
         </div>
     </div>
@@ -175,25 +175,13 @@
             <nav>
                 <ul class="pagination justify-content-center mb-0">
                     {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode|cut:'page='|cut:'&page=' }}{% endif %}">First</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                    </li>
+                        <li class="page-item"><a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode|cut:'page='|cut:'&page=' }}{% endif %}">First</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
                     {% endif %}
-
-                    <li class="page-item active">
-                        <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-                    </li>
-
+                    <li class="page-item active"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
                     {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
-                    </li>
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a></li>
                     {% endif %}
                 </ul>
             </nav>

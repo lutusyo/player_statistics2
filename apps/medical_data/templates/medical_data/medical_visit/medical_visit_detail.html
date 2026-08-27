@@ -472,4 +472,31 @@
 
 </div>
 
+
+
+
+{% if medical_visit.recovery_plan %}
+
+    <a
+        href="{% url 'medical_data:recovery_plan_detail' medical_visit.recovery_plan.pk %}"
+        class="btn btn-success">
+
+        View Recovery Plan
+
+    </a>
+
+{% else %}
+
+    <a
+        href="{% url 'medical_data:recovery_plan_create' medical_visit.pk %}"
+        class="btn btn-primary">
+
+        + Create Recovery Plan
+
+    </a>
+
+{% endif %}
+
+
+
 {% endblock %}

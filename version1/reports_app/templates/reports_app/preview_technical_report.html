@@ -1,0 +1,472 @@
+{% extends "reports_app/reports_base.html" %}
+
+{% block reports_content %}
+
+<style>
+    /* ================================
+       NORMAL SCREEN STYLING
+       ================================ */
+
+    .report-page {
+        min-height: 100vh;
+        padding: 40px;
+    }
+
+    /* COVER */
+    .cover-page {
+        min-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .cover-logo {
+        max-width: 180px;
+        max-height: 180px;
+        object-fit: contain;
+        margin-bottom: 35px;
+    }
+
+    .cover-title {
+        font-size: 42px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        margin-bottom: 15px;
+    }
+
+    .cover-team {
+        font-size: 32px;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    .cover-period {
+        font-size: 18px;
+        color: #666;
+    }
+
+    .report-section-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 25px;
+    }
+
+    /* ================================
+       PRINT / PDF
+       ================================ */
+
+    @media print {
+
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .report-page {
+            min-height: auto;
+            height: 267mm;
+
+            break-after: page;
+            page-break-after: always;
+
+            padding: 0;
+        }
+
+        .report-page:last-child {
+            break-after: auto;
+            page-break-after: auto;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+
+        /* COVER PAGE */
+        .cover-page {
+            height: 267mm;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            text-align: center;
+        }
+
+        .cover-logo {
+            max-width: 160px;
+            max-height: 160px;
+            margin-bottom: 30px;
+        }
+
+        .cover-title {
+            font-size: 36px;
+        }
+
+        .cover-team {
+            font-size: 28px;
+        }
+
+        .cover-period {
+            font-size: 16px;
+        }
+
+        /* Prevent cards from creating unwanted borders/shadows */
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .card-header {
+            background: none !important;
+            border: none !important;
+        }
+
+        /* Tables */
+        table {
+            width: 100% !important;
+            font-size: 9px;
+        }
+
+        th,
+        td {
+            padding: 4px !important;
+        }
+
+        /* Don't split rows */
+        tr {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+    }
+</style>
+
+
+<div class="container-fluid">
+
+  <!-- =====================================
+      PAGE 1 - COVER PAGE
+      ===================================== -->
+  <section class="report-page cover-page">
+
+      <!-- TEAM LOGO -->
+      {% if team.logo %}
+          <img
+              src="{{ team.logo.url }}"
+              alt="{{ team.name }} Logo"
+              class="cover-logo"
+          >
+      {% endif %}
+
+      <!-- REPORT TITLE -->
+      <h1 class="cover-title">
+          TECHNICAL REPORT
+      </h1>
+
+      <!-- AGE GROUP -->
+      {% if team.age_group %}
+          <h2 class="cover-team">
+              {{ team.age_group.code }}
+          </h2>
+
+          <p class="cover-age-name">
+              {{ team.age_group.name }}
+          </p>
+      {% else %}
+          <h2 class="cover-team">
+              {{ team.name }}
+          </h2>
+      {% endif %}
+
+      <!-- TEAM NAME -->
+      <h3 class="cover-club">
+          {{ team.name }}
+      </h3>
+
+      <!-- PERIOD -->
+      <p class="cover-period">
+          Period:
+          <strong>
+              {{ start|default:"All" }}
+              -
+              {{ end|default:"All" }}
+          </strong>
+      </p>
+
+
+      <!-- BUTTONS - SCREEN ONLY -->
+      <div class="no-print mt-5">
+
+          <a
+              href="javascript:history.back()"
+              class="btn btn-secondary me-2"
+          >
+              ← Back
+          </a>
+
+          <a
+              href="{% url 'reports_app:technical_report_pdf2' team.id %}?start_date={{ start }}&end_date={{ end }}&season={{ season }}"
+              class="btn btn-danger"
+          >
+              📄 Download PDF
+          </a>
+
+      </div>
+
+  </section>
+
+
+    <!-- =====================================
+         PAGE 2 - MATCH RESULTS
+         ===================================== -->
+    <section class="report-page">
+
+        <h2 class="report-section-title">
+            Match Results
+        </h2>
+
+        <div class="card">
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-striped">
+
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Competition</th>
+                                <th>Home</th>
+                                <th>Score</th>
+                                <th>Away</th>
+                                <th>Result</th>
+                                <th>Goal Scorers</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for r in results %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ r.date }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.competition_type }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.home_team.name }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.home_score }}
+                                        -
+                                        {{ r.away_score }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.away_team.name }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.result }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.goal_scorers }}
+                                    </td>
+
+                                </tr>
+
+                            {% empty %}
+
+                                <tr>
+                                    <td colspan="7" class="text-center">
+                                        No match results found.
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================
+         PAGE 3 - PLAYER STATISTICS
+         ===================================== -->
+    <section class="report-page">
+
+        <h2 class="report-section-title">
+            Player Statistics
+        </h2>
+
+        <div class="card">
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table table-bordered">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Player</th>
+                                <th>Pos</th>
+                                <th>Game Mins</th>
+                                <th>Apps</th>
+                                <th>Starts</th>
+                                <th>Sub In</th>
+                                <th>Sub Out</th>
+                                <th>Goals</th>
+                                <th>Assists</th>
+                                <th>Pre-Assists</th>
+
+                                <th>Training Total</th>
+                                <th>U11</th>
+                                <th>U13</th>
+                                <th>U15</th>
+                                <th>U17</th>
+                                <th>U20</th>
+                                <th>First Team</th>
+                                <th>National Team</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for r in stats %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ r.player.name }}
+                                        {{ r.player.second_name }}
+                                        {{ r.player.surname }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.position }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.game_minutes }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.appearances }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.starts }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.sub_in }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.sub_out }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.goals }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.assists }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.pre_assists }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.training_total }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.training_u11 }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.training_u13 }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.training_u15 }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.training_u17 }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.training_u20 }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.training_first }}
+                                    </td>
+
+                                    <td>
+                                        {{ r.training_national }}
+                                    </td>
+
+                                </tr>
+
+                            {% empty %}
+
+                                <tr>
+
+                                    <td
+                                        colspan="18"
+                                        class="text-center"
+                                    >
+                                        No player statistics found.
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

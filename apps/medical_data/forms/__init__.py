@@ -2,3 +2,4 @@ from apps.medical_data.forms.medical_visit_form import MedicalVisitForm
 from apps.medical_data.forms.medical_filter_form import MedicalFilterForm
 from apps.medical_data.forms.medical_attachment_form import MedicalAttachmentForm
 from apps.medical_data.forms.medical_follow_up_form import MedicalFollowUpForm
+from apps.medical_data.forms.medical_recovery_forms import ( MedicalRecoveryPlanForm, MedicalRecoveryDayForm, )

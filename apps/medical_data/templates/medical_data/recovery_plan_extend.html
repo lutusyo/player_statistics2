@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Extend Recovery Plan{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+
+        <h2>Extend Recovery Plan</h2>
+
+        <p class="text-muted">
+            {{ plan.visit.player }}
+            ·
+            {{ plan.visit.get_main_complaint_display }}
+        </p>
+
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <div class="alert alert-warning">
+
+                Current recovery period:
+                <strong>{{ plan.planned_days }} days</strong>
+
+            </div>
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        New Total Recovery Days
+                    </label>
+
+                    <input
+                        type="number"
+                        name="planned_days"
+                        class="form-control"
+                        min="{{ plan.planned_days|add:'1' }}"
+                        value="{{ plan.planned_days|add:'7' }}"
+                        required
+                    >
+
+                    <div class="form-text">
+                        Enter the total number of recovery days,
+                        not the additional days.
+                    </div>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn btn-warning">
+
+                    Extend Recovery
+
+                </button>
+
+                <a
+                    href="{% url 'medical_data:recovery_plan_detail' plan.pk %}"
+                    class="btn btn-outline-secondary">
+
+                    Cancel
+
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

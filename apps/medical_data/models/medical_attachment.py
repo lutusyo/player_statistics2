@@ -1,12 +1,7 @@
 # models/medical_attachment.py
 from django.db import models
-
 from apps.core.choices import AttachmentType
 from apps.medical_data.models.medical_visit import MedicalVisit
-
-
-
-
 
 class MedicalAttachment(models.Model):
 

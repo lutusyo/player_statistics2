@@ -3,17 +3,10 @@ from django.urls import path
 
 from version1.reports_app.views.daily_report_views import ( fitness_views, iap_views, medical_views,
     mesocycle_views, performance_views, report_exports, result_views,
-    scouting_views, statistics_view,
-    individual_statistics_view,
-    team_reports_view,
-    transition_views,
-    report_filters)
+    scouting_views, statistics_view, individual_statistics_view, team_reports_view, transition_views, report_filters)
 
-from version1.reports_app.views.match_report_views import ( 
-    goalkeeping_view, 
-    set_plays_views, in_possession_views, 
-    post_match_summary_views, full_match_report_views,
-    summary_key_statistics_views,)
+from version1.reports_app.views.match_report_views import ( goalkeeping_view, set_plays_views, in_possession_views, 
+    post_match_summary_views, full_match_report_views, summary_key_statistics_views,)
 
 from version1.reports_app.views.match_report_views.full_match_report_views import full_match_report_view, download_full_report_pdf
 from version1.reports_app.views.match_report_views import match_summary_team_view
@@ -24,13 +17,32 @@ from version1.reports_app.views.daily_report_views.technical_report_views import
 from version1.reports_app.views2.download_technical_report_pdf import download_technical_report_pdf
 from version1.reports_app.views2.download_technical_report_ppt import download_technical_report_ppt
 from version1.reports_app.views2.download_technical_report_excel import download_technical_report_excel
+from version1.reports_app.views2.preview_technical_report import preview_technical_report
+from version1.reports_app.views2.rating import rate_player, player_rating_list
 
 app_name = 'reports_app'
 
+
 urlpatterns = [
+
+    # Performance and potential rating
+
+    path(
+        'teams/<int:team_id>/ratings/',
+        player_rating_list,
+        name='player_rating_list',
+    ),
+
+    path(
+        'teams/<int:team_id>/players/<int:player_id>/rate/',
+        rate_player,
+        name='rate_player',
+    ),
 
     #path("technical-report/<int:team_id>/", technical_report_views.download_technical_report_excel, name="download_technical_report"),
     path("technical-report/<int:team_id>/", technical_report_page, name="technical_report_page",),
+    path(
+    "technical-report/<int:team_id>/preview/", preview_technical_report, name="technical_report_preview",),
     path("technical-report/<int:team_id>/excel/",download_technical_report_excel,name="technical_report_excel2",),
     path("technical-report/<int:team_id>/pdf/",download_technical_report_pdf,name="technical_report_pdf2",),
     path("technical-report/<int:team_id>/ppt/",download_technical_report_ppt,name="technical_report_ppt2",),
@@ -88,10 +100,10 @@ urlpatterns = [
     path("player/<int:player_id>/report/excel/", individual_statistics_view.player_report_export_excel, name='player_report_excel'),
     path("player/<int:player_id>/report/pdf/", individual_statistics_view.player_report_export_pdf, name="player_report_pdf"),
 
-
     # Dashboards
     path('team-reports/<int:team_id>/dashboard/', report_filters.reports_dashboard, name='reports_dashboard'),
     path('team-reports/<int:team_id>/', team_reports_view.team_reports_view, name='team_reports'),
+
     # existing export URLs
     path('export/excel/<str:section>/', report_exports.export_section_excel, name='export_section_excel'),
     path('reports-dashboard/combined-excel/', report_exports.export_combined_excel, name='export_combined_excel'),

@@ -1,7 +1,8 @@
-{% extends "base.html" %}
+{% extends "reports_app/reports_base.html" %}
 {% load static %}
 
-{% block content %}
+{% block reports_content %}
+
 <style>
 /* === Sticky navbar below base.html navbar === */
 .sticky-nav-wrapper {
@@ -48,66 +49,6 @@
 
 </style>
 
-<div class="sticky-nav-wrapper">
-  <div class="container">
-    <div class="sticky-nav">
-      <div class="row g-2 justify-content-center">
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:mesocycle_reports' team_id=team.id %}"
-             class="btn btn-outline-primary {% if request.resolver_match.url_name == 'mesocycle_reports' %}active{% endif %}">
-            Mesocycle</a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:fitness_reports' team_id=team.id %}"
-             class="btn btn-outline-success {% if request.resolver_match.url_name == 'fitness_reports' %}active{% endif %}">
-            Fitness Plan</a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:iap_reports' team_id=team.id %}"
-             class="btn btn-outline-warning {% if request.resolver_match.url_name == 'iap_reports' %}active{% endif %}">
-            IAP</a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:performance_reports' team_id=team.id %}"
-             class="btn btn-outline-info {% if request.resolver_match.url_name == 'performance_reports' %}active{% endif %}">
-            Performance</a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:scouting_reports' team_id=team.id %}"
-             class="btn btn-outline-dark {% if request.resolver_match.url_name == 'scouting_reports' %}active{% endif %}">
-            Scouting</a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:medical_reports' team_id=team.id %}"
-             class="btn btn-outline-danger {% if request.resolver_match.url_name == 'medical_reports' %}active{% endif %}">
-            Medical</a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:transition_reports' team_id=team.id %}"
-             class="btn btn-outline-secondary {% if request.resolver_match.url_name == 'transition_reports' %}active{% endif %}">
-            Transition</a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:result_reports' team_id=team.id %}"
-             class="btn btn-outline-secondary {% if request.resolver_match.url_name == 'result_reports' %}active{% endif %}">
-            Results</a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:statistics_list' team_id=team.id %}"
-             class="btn btn-outline-secondary {% if request.resolver_match.url_name == 'statistics_list' %}active{% endif %}">
-            Statistics</a>
-        </div>
-
-        <div><a href="{% url 'loans_app_v2:loan_players_list' %}">Loaned Players </a></div>
 
         <div class="col-auto">
             <form method="get" class="d-flex align-items-center flex-wrap gap-1">
@@ -122,8 +63,7 @@
             >
 
             <!-- End Date -->
-            <input
-                type="date"
+            <input type="date"
                 name="end_date"
                 class="form-control form-control-sm"
                 value="{{ request.GET.end_date }}"
@@ -131,36 +71,39 @@
             >
 
             <!-- Keep selected season -->
-            <input
-                type="hidden"
+            <input type="hidden"
                 name="season"
                 value="{{ request.GET.season }}">
 
             <!-- Excel -->
-            <button
-                type="submit"
+            <button type="submit"
                 formaction="{% url 'reports_app:technical_report_excel2' team.id %}"
                 class="btn btn-success btn-sm" title="Download Technical Report as Excel">📊 Excel</button>
 
             <!-- PDF -->
-            <button
-                type="submit"
-                formaction="{% url 'reports_app:technical_report_pdf2' team.id %}"
-                class="btn btn-danger btn-sm"
-                title="Download Technical Report as PDF"
-            > 📄 PDF </button>
+
+
+                <a
+                    href="{% url 'reports_app:technical_report_preview' team.id %}?start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}&season={{ request.GET.season }}"
+                    class="btn btn-danger btn-sm"
+                    target="_blank"
+                >
+                    👁 View Report
+                </a>
+
+                
 
             <!-- PowerPoint -->
             <button
                 type="submit"
                 formaction="{% url 'reports_app:technical_report_ppt2' team.id %}"
                 class="btn btn-primary btn-sm"
-                title="Download Technical Report as PowerPoint"
-            >  📽 PPT </button>
+                title="Download Technical Report as PowerPoint">  📽 PPT </button>
 
         </form>
 
         </div>
+        <div><a href="{% url 'loans_app_v2:loan_players_list' %}">Loaned Players </a></div>
 
 
       </div>

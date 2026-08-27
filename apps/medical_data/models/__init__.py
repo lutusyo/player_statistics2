@@ -1,3 +1,5 @@
 from .medical_visit import MedicalVisit
 from .medical_attachment import MedicalAttachment
 from .medical_follow_up import MedicalFollowUp
+from .medical_recovery_plan import MedicalRecoveryPlan
+from .medical_recovery_day import MedicalRecoveryDay

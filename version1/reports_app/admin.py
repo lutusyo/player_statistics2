@@ -43,7 +43,6 @@ class PerformanceAdmin(admin.ModelAdmin):
     list_filter = ('activity', 'squad')
     search_fields = ('squad__name',)
 
-
 @admin.register(IndividualActionPlan)
 class IndividualActionPlanAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'responsibility', 'status', 'date', 'squad')
@@ -57,13 +56,11 @@ class MesocycleAdmin(admin.ModelAdmin):
     list_filter = ('team',)
     search_fields = ('title', 'team__name')
 
-
 @admin.register(FitnessPlan)
 class FitnessPlanAdmin(admin.ModelAdmin):
     list_display = ('title', 'team', 'start_date', 'end_date', 'uploaded_at')
     list_filter = ('team',)
     search_fields = ('title', 'team__name')
-
 
 @admin.register(Result)
 class ResultAdmin(admin.ModelAdmin):
@@ -90,17 +87,25 @@ class ResultAdmin(admin.ModelAdmin):
 class PlayerTrainingMinutesInline(admin.TabularInline):
     model = PlayerTrainingMinutes
     extra = 0
+    fields = ('player', 'trained_with_team', 'minutes')
+    autocomplete_fields = ('player', 'trained_with_team')
 
-    fields = (
-        'player',
-        'trained_with_team',
-        'minutes',
-    )
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        if db_field.name == "player":
+            obj_id = request.resolver_match.kwargs.get("object_id")
 
-    autocomplete_fields = (
-        'player',
-        'trained_with_team',
-    )
+            if obj_id:
+                training = TrainingMinutes.objects.get(id=obj_id)
+
+                kwargs["queryset"] = Player.objects.filter(
+                    team=training.team,
+                    status='SIGNED',
+                    is_active=True,
+                )
+
+        return super().formfield_for_foreignkey(
+            db_field, request, **kwargs
+        )
 
 
 class TrainingAbsenceInline(admin.TabularInline):
@@ -118,35 +123,14 @@ class TrainingAbsenceInline(admin.TabularInline):
     
 @admin.register(TrainingAbsence)
 class TrainingAbsenceAdmin(admin.ModelAdmin):
-
-    list_display = (
-        'player',
-        'training_session',
-        'reason',
-    )
-
-    list_filter = (
-        'reason',
-        'training_session__team',
-        'training_session__session',
-        'training_session__date',
-    )
-
-    search_fields = (
-        'player__first_name',
-        'player__last_name',
-    )
+    list_display = ('player','training_session','reason',)
+    list_filter = ('reason','training_session__team','training_session__session','training_session__date',)
+    search_fields = ('player__first_name','player__last_name',)
 
 
 @admin.register(TrainingMinutes)
 class TrainingMinutesAdmin(admin.ModelAdmin):
-    list_display = (
-        'date',
-        'team',
-        'session',
-        'total_minutes',
-    )
-
+    list_display = ('date','team','session','total_minutes',)
     list_filter = ('team','session','date',)
     search_fields = ('team__name',)
     ordering = ('-date','team','session',)
@@ -168,7 +152,7 @@ class PlayerTrainingMinutesAdmin(admin.ModelAdmin):
 
     ##################################################################################################################
 
-    from django.contrib import admin
+from django.contrib import admin
 
 from .models import (
     WeeklyReport,

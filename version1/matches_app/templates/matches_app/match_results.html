@@ -3,10 +3,7 @@
 
 {% block title %}{{ team }} Results{% endblock %}
 
-
-
 {% block match_content %}
-
 
 <form method="get" class="results-filter-form">
 
@@ -34,8 +31,7 @@
             name="date_from"
             id="date_from"
             value="{{ date_from|default:'' }}"
-        >
-    </div>
+        ></div>
 
 
     <div class="filter-group">
@@ -67,16 +63,8 @@
     <div class="results-header">
 
         <!-- DATE LINK -->
-        <div class="results-date">
-            <a href="{% url 'matches_app:match_detail' match.id %}" class="detail-link">
-                {{ match.date|date:"D M d" }} - {{ match.time|time:"H:i" }}
-            </a>
-        </div>
-
-        <div class="results-venue">
-            {{ match.venue }}
-        </div>
-
+        <div class="results-date"><a href="{% url 'matches_app:match_detail' match.id %}" class="detail-link">{{ match.date|date:"D M d" }} - {{ match.time|time:"H:i" }}</a></div>
+        <div class="results-venue">{{ match.venue }}</div>
         <div class="results-type">
             {% if match.competition.logo %}
                 <img src="{{ match.competition.logo.url }}" class="competition-logo">
@@ -85,12 +73,7 @@
         </div>
 
         <!-- FULL REPORT ICON -->
-        <div class="card-actions">
-            <a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}" class="report-icon">
-                <i class="fas fa-search"> Details</i>
-            </a>
-        </div>
-
+        <div class="card-actions"><a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}" class="report-icon"><i class="fas fa-search"> Details</i></a></div>
     </div>
 
     <!-- BODY -->
@@ -117,25 +100,12 @@
             <div>{{ match.away_team }}</div>
         </div>
     </div>
-
 </div>
 
-
-
     <div class="export-buttons">
-
-        <a href="{% url 'matches_app:results_export_excel' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">
-            Export Excel
-        </a>
-
-        <a href="{% url 'matches_app:results_export_pdf' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">
-            Export PDF
-        </a>
-
-        <a href="{% url 'matches_app:results_export_ppt' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">
-            Export PowerPoint
-        </a>
-
+        <a href="{% url 'matches_app:results_export_excel' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">Export Excel</a>
+        <a href="{% url 'matches_app:results_export_pdf' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">Export PDF</a>
+        <a href="{% url 'matches_app:results_export_ppt' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">Export PowerPoint</a>
     </div>
 
 {% endfor %}

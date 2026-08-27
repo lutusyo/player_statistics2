@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="mb-1">
+                Player Performance & Potential
+            </h2>
+
+            <div class="text-muted">
+                {{ team.name }} · {{ season }}
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Messages -->
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                ></button>
+
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+
+    <!-- Players table -->
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th style="width: 40px;">
+                                #
+                            </th>
+
+                            <th style="min-width: 180px;">
+                                Player
+                            </th>
+
+                            <th style="min-width: 300px;">
+                                Performance
+                            </th>
+
+                            <th style="min-width: 300px;">
+                                Potential
+                            </th>
+
+                            <th style="min-width: 250px;">
+                                Notes
+                            </th>
+
+                            <th style="min-width: 150px;">
+                                Current Category
+                            </th>
+
+                            <th style="min-width: 150px;">
+                                Latest Rating
+                            </th>
+
+                            <th style="width: 100px;">
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% if players %}
+
+                            {% for item in players %}
+
+                                <tr>
+
+                                    <!-- Number -->
+
+                                    <td>
+                                        {{ forloop.counter }}
+                                    </td>
+
+
+                                    <!-- Player -->
+
+                                    <td>
+
+                                        <strong>
+                                            {{ item.player.full_name }}
+                                        </strong>
+
+                                    </td>
+
+
+                                    <!-- Rating Form -->
+
+                                    <form
+                                        method="POST"
+                                        action="{% url 'reports_app:player_rating_list' team.id %}?season={{ season|urlencode }}"
+                                    >
+
+                                        {% csrf_token %}
+
+                                        <input
+                                            type="hidden"
+                                            name="player_id"
+                                            value="{{ item.player.id }}"
+                                        >
+
+
+                                        <!-- Performance -->
+
+                                        <td>
+
+                                            <div class="rating-options">
+
+                                                <label class="rating-option performance-poor">
+
+                                                    <input
+                                                        type="radio"
+                                                        name="performance"
+                                                        value="1"
+                                                        {% if item.rating and item.rating.performance == 1 %}
+                                                            checked
+                                                        {% endif %}
+                                                        required
+                                                    >
+
+                                                    <span>
+                                                        1 - Poor
+                                                    </span>
+
+                                                </label>
+
+
+                                                <label class="rating-option performance-average">
+
+                                                    <input
+                                                        type="radio"
+                                                        name="performance"
+                                                        value="2"
+                                                        {% if item.rating and item.rating.performance == 2 %}
+                                                            checked
+                                                        {% endif %}
+                                                    >
+
+                                                    <span>
+                                                        2 - Average
+                                                    </span>
+
+                                                </label>
+
+
+                                                <label class="rating-option performance-good">
+
+                                                    <input
+                                                        type="radio"
+                                                        name="performance"
+                                                        value="3"
+                                                        {% if item.rating and item.rating.performance == 3 %}
+                                                            checked
+                                                        {% endif %}
+                                                    >
+
+                                                    <span>
+                                                        3 - Good
+                                                    </span>
+
+                                                </label>
+
+                                            </div>
+
+                                        </td>
+
+
+                                        <!-- Potential -->
+
+                                        <td>
+
+                                            <div class="rating-options">
+
+                                                <label class="rating-option potential-poor">
+
+                                                    <input
+                                                        type="radio"
+                                                        name="potential"
+                                                        value="1"
+                                                        {% if item.rating and item.rating.potential == 1 %}
+                                                            checked
+                                                        {% endif %}
+                                                        required
+                                                    >
+
+                                                    <span>
+                                                        1 - Poor
+                                                    </span>
+
+                                                </label>
+
+
+                                                <label class="rating-option potential-average">
+
+                                                    <input
+                                                        type="radio"
+                                                        name="potential"
+                                                        value="2"
+                                                        {% if item.rating and item.rating.potential == 2 %}
+                                                            checked
+                                                        {% endif %}
+                                                    >
+
+                                                    <span>
+                                                        2 - Average
+                                                    </span>
+
+                                                </label>
+
+
+                                                <label class="rating-option potential-good">
+
+                                                    <input
+                                                        type="radio"
+                                                        name="potential"
+                                                        value="3"
+                                                        {% if item.rating and item.rating.potential == 3 %}
+                                                            checked
+                                                        {% endif %}
+                                                    >
+
+                                                    <span>
+                                                        3 - Good
+                                                    </span>
+
+                                                </label>
+
+                                            </div>
+
+                                        </td>
+
+
+                                        <!-- Notes -->
+
+                                        <td>
+
+                                            <textarea
+                                                name="notes"
+                                                class="form-control"
+                                                rows="2"
+                                                placeholder="Coach's note..."
+                                            >{% if item.rating %}{{ item.rating.notes }}{% endif %}</textarea>
+
+                                        </td>
+
+
+                                        <!-- Category -->
+
+                                        <td>
+
+                                            {% if item.rating %}
+
+                                                <span class="badge bg-primary fs-6">
+
+                                                    {{ item.rating.get_matrix_category }}
+
+                                                </span>
+
+                                            {% else %}
+
+                                                <span class="text-muted">
+                                                    Not rated
+                                                </span>
+
+                                            {% endif %}
+
+                                        </td>
+
+
+                                        <!-- Latest Rating -->
+
+                                        <td>
+
+                                            {% if item.rating %}
+
+                                                <div>
+                                                    {{ item.rating.rated_at|date:"d M Y" }}
+                                                </div>
+
+                                                <small class="text-muted">
+                                                    {{ item.rating.rated_at|date:"H:i" }}
+                                                </small>
+
+                                            {% else %}
+
+                                                <span class="text-muted">
+                                                    —
+                                                </span>
+
+                                            {% endif %}
+
+                                        </td>
+
+
+                                        <!-- Action -->
+
+                                        <td>
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-primary btn-sm w-100"
+                                            >
+
+                                                {% if item.rating %}
+                                                    Re-rate
+                                                {% else %}
+                                                    Save
+                                                {% endif %}
+
+                                            </button>
+
+                                        </td>
+
+                                    </form>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        {% else %}
+
+                            <tr>
+
+                                <td
+                                    colspan="8"
+                                    class="text-center py-4"
+                                >
+
+                                    <span class="text-muted">
+                                        No active players found for this team.
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+                        {% endif %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Rating Styles -->
+
+<style>
+
+    .rating-options {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .rating-option {
+        cursor: pointer;
+        position: relative;
+    }
+
+    .rating-option input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .rating-option span {
+        display: inline-block;
+        padding: 7px 10px;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        background: #f8f9fa;
+        font-size: 13px;
+        transition: all 0.15s ease;
+    }
+
+    .rating-option span:hover {
+        border-color: #6c757d;
+        background: #e9ecef;
+    }
+
+    .rating-option input:checked + span {
+        background: #0d6efd;
+        border-color: #0d6efd;
+        color: white;
+        font-weight: 600;
+    }
+
+    textarea {
+        resize: vertical;
+    }
+
+</style>
+
+{% endblock %}

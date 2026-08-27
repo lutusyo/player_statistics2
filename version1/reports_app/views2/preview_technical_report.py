@@ -21,10 +21,7 @@ from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.enum.text import PP_ALIGN
 
-
-
-
-def get_technical_report_data(request, team_id):
+def preview_technical_report(request, team_id):
     team = get_object_or_404(Team, id=team_id)
 
     start = parse_date(request.GET.get("start_date", ""))
@@ -35,6 +32,7 @@ def get_technical_report_data(request, team_id):
 
     if start:
         results = results.filter(date__gte=start)
+
     if end:
         results = results.filter(date__lte=end)
 
@@ -42,14 +40,16 @@ def get_technical_report_data(request, team_id):
         filter_type=request.GET.get("filter", "all"),
         team=team,
         start_date=start,
-        end_date=end,
+        end_date=end
     )
 
-    return {
+    context = {
         "team": team,
+        "results": results,
+        "stats": stats,
         "start": start,
         "end": end,
         "season": season,
-        "results": results.order_by("date"),
-        "stats": stats,
     }
+
+    return render(request, "reports_app/preview_technical_report.html",context)
