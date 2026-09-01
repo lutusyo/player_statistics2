@@ -26,7 +26,7 @@
 
         <div>
 
-            <a href="{% url 'gym_app:gym_group_create' session.id %}"
+            <a href="{% url 'gym_data:gym_group_create' session.id %}"
                class="btn btn-primary">
                 + Add Gym Type
             </a>
@@ -70,7 +70,7 @@
 
                 <div class="player-list">
 
-                    {% for player in group.players %}
+                    {% for player in group.players.all %}
 
                     <span class="player-chip">
                         {{ player }}
@@ -95,7 +95,7 @@
 
                     <h3>Exercises</h3>
 
-                    <a href="{% url 'gym_app:group_exercise_create' group.id %}"
+                    <a href="{% url 'gym_data:group_exercise_create' group.id %}"
                        class="small-btn">
                         + Add Exercise
                     </a>
@@ -103,7 +103,7 @@
                 </div>
 
 
-                {% for item in group.exercises %}
+                {% for item in group.exercises.all %}
 
                 <div class="exercise-row">
 

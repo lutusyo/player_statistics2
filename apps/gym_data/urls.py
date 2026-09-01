@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import  group_exercise_create_view, gym_dashboard_view, gym_group_create_view, gym_report_view, gym_session_create_view, gym_session_detail_view
                      
-app_name = "gym_app"
+app_name = "gym_data"
 
 urlpatterns = [
     path("", gym_dashboard_view.gym_dashboard, name="dashboard"),

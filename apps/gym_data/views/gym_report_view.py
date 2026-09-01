@@ -12,9 +12,7 @@ def gym_report(request):
 
     form = GymReportFilterForm(request.GET or None)
 
-    exercises = (
-        GroupExercise.objects
-        .select_related(
+    exercises = (GroupExercise.objects.select_related(
             "gym_group",
             "gym_group__gym_session",
             "gym_group__gym_session__team",
@@ -53,9 +51,9 @@ def gym_report(request):
         if exercise:
             exercises = exercises.filter(exercise=exercise)
 
-    return render(request, "gym_app/report.html",
-        {
+    context = {
             "form": form,
             "exercises": exercises,
-        },
-    )
+            }
+
+    return render(request, "gym_data/report.html", context,)

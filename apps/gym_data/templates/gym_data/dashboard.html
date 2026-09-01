@@ -23,12 +23,12 @@
 
         <div class="header-actions">
 
-            <a href="{% url 'gym_app:gym_report' %}"
+            <a href="{% url 'gym_data:gym_report' %}"
                class="btn btn-outline">
                 📊 Reports
             </a>
 
-            <a href="{% url 'gym_app:gym_session_create' %}"
+            <a href="{% url 'gym_data:gym_session_create' %}"
                class="btn btn-primary">
                 + New Session
             </a>
@@ -92,7 +92,7 @@
             </div>
 
 
-            <a href="{% url 'gym_app:gym_session_detail' session.id %}"
+            <a href="{% url 'gym_data:gym_session_detail' session.id %}"
                class="session-link">
                 Open Session →
             </a>
@@ -111,7 +111,7 @@
                 Create today's gym session to start recording data.
             </p>
 
-            <a href="{% url 'gym_app:gym_session_create' %}"
+            <a href="{% url 'gym_data:gym_session_create' %}"
                class="btn btn-primary">
                 Create First Session
             </a>

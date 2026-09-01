@@ -30,24 +30,17 @@ def group_exercise_create(request, group_id):
             exercise.gym_group = group
             exercise.save()
 
-            messages.success(
-                request,
-                "Exercise recorded successfully.",
-            )
-
-            return redirect(
-                "gym_app:gym_session_detail",
-                session_id=group.gym_session.id,
-            )
+            messages.success(request, "Exercise recorded successfully.",)
+            return redirect("gym_data:gym_session_detail", session_id=group.gym_session.id,)
 
     else:
         form = GroupExerciseForm()
 
-    return render(request, "gym_app/exercise_form.html",
-        {
-            "form": form,
-            "group": group,
-        },
-    )
+    context = {
+                "form": form,
+                "group": group,
+            }
+
+    return render(request, "gym_data/exercise_form.html", context,)
 
 

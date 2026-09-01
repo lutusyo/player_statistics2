@@ -33,26 +33,20 @@ def gym_group_create(request, session_id):
 
             form.save_m2m()
 
-            messages.success(
-                request,
+            messages.success(request,
                 "Gym group created successfully.",
             )
 
-            return redirect(
-                "gym_app:gym_session_detail",
-                session_id=session.id,
-            )
+            return redirect("gym_data:gym_session_detail",session_id=session.id,)
 
     else:
         form = GymGroupForm()
 
-    return render(
-        request,
-        "gym_app/group_form.html",
-        {
-            "form": form,
-            "session": session,
-        },
-    )
+    context = {
+                "form": form,
+                "session": session,
+            }
+
+    return render(request, "gym_data/group_form.html", context,)
 
 
