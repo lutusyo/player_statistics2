@@ -1,8 +1,6 @@
 from django.db import models
-
 from version1.teams_app.models import Team
 from version1.players_app.models import Player
-
 
 class GymType(models.Model):
     """

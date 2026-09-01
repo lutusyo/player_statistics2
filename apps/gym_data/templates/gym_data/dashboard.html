@@ -63,7 +63,7 @@
 
             <div class="group-list">
 
-                {% for group in session.groups %}
+                {% for group in session.groups.all %}
 
                 <div class="group-row">
 
@@ -72,31 +72,21 @@
                             {{ group.gym_type.name }}
                         </strong>
 
-                        <span>
-                            {{ group.players.count }} players
-                        </span>
+                        <span>{{ group.players.count }} players</span>
                     </div>
-
                     <span class="arrow">→</span>
 
                 </div>
 
                 {% empty %}
-
                 <div class="empty-state">
                     No gym groups added yet.
                 </div>
-
                 {% endfor %}
-
             </div>
 
 
-            <a href="{% url 'gym_data:gym_session_detail' session.id %}"
-               class="session-link">
-                Open Session →
-            </a>
-
+            <a href="{% url 'gym_data:gym_session_detail' session.id %}" class="session-link">Open Session →</a>
         </div>
 
         {% empty %}
@@ -104,22 +94,12 @@
         <div class="empty-dashboard">
 
             <div class="empty-icon">🏋️</div>
-
             <h2>No gym sessions yet</h2>
-
-            <p>
-                Create today's gym session to start recording data.
-            </p>
-
-            <a href="{% url 'gym_data:gym_session_create' %}"
-               class="btn btn-primary">
-                Create First Session
-            </a>
+            <p>Create today's gym session to start recording data.</p>
+            <a href="{% url 'gym_data:gym_session_create' %}" class="btn btn-primary">Create First Session</a>
 
         </div>
-
         {% endfor %}
-
     </div>
 
 </div>
