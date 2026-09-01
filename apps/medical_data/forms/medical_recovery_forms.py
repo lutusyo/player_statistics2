@@ -6,7 +6,7 @@ class MedicalRecoveryPlanForm(forms.ModelForm):
 
     class Meta:
         model = MedicalRecoveryPlan
-        fields = ["start_date", "planned_days", "recovery_notes",]
+        fields = ["start_date", "planned_days", "next_review_date", "recovery_notes",]
         widgets = {
 
             "start_date": forms.DateInput(
@@ -23,6 +23,15 @@ class MedicalRecoveryPlanForm(forms.ModelForm):
                     "placeholder": "e.g. 14",
                 }
             ),
+
+
+            "next_review_date": forms.DateInput(
+                attrs={
+                    "type": "date",
+                    "class": "form-control",
+                }
+            ),
+
 
             "recovery_notes": forms.Textarea(
                 attrs={

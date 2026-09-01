@@ -27,8 +27,8 @@ class MedicalVisitForm(forms.ModelForm):
             "working_diagnosis": forms.Textarea(attrs={"class": "form-control","rows": 4,}),
             "therapy": forms.Textarea(attrs={"class": "form-control","rows": 4,}),
             "recommendations": forms.Textarea(attrs={"class": "form-control","rows": 4,}),
-            "next_review_date": forms.DateInput(attrs={"type": "date","class": "form-control",}),
-            "expected_return_date": forms.DateInput(attrs={"type": "date","class": "form-control",}),
+            #"next_review_date": forms.DateInput(attrs={"type": "date","class": "form-control",}),
+            #"expected_return_date": forms.DateInput(attrs={"type": "date","class": "form-control",}),
         }
 
     def __init__(self, *args, **kwargs):

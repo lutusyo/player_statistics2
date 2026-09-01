@@ -1,5 +1,4 @@
 # apps/medical_data/models/medical_recovery_plan.py
-
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -10,59 +9,23 @@ from datetime import timedelta
 class RecoveryPlanStatus(models.TextChoices):
     ACTIVE = "active", "Active"
     COMPLETED = "completed", "Completed"
+    RECOVERED_EARLY = "recovered_early", "Recovered Early"
     CANCELLED = "cancelled", "Cancelled"
     EXTENDED = "extended", "Extended"
 
-
 class MedicalRecoveryPlan(models.Model):
 
-    visit = models.OneToOneField(
-        "medical_data.MedicalVisit",
-        on_delete=models.CASCADE,
-        related_name="recovery_plan",
-    )
-
+    visit = models.OneToOneField("medical_data.MedicalVisit",on_delete=models.CASCADE,related_name="recovery_plan",)
     start_date = models.DateField()
-
-    planned_days = models.PositiveIntegerField(
-        help_text="Initial number of recovery days."
-    )
-
-    expected_end_date = models.DateField(
-        null=True,
-        blank=True,
-    )
-
-    actual_recovery_date = models.DateField(
-        null=True,
-        blank=True,
-    )
-
-    status = models.CharField(
-        max_length=20,
-        choices=RecoveryPlanStatus.choices,
-        default=RecoveryPlanStatus.ACTIVE,
-    )
-
-    recovery_notes = models.TextField(
-        blank=True
-    )
-
-    doctor = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="medical_recovery_plans",
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    updated_at = models.DateTimeField(
-        auto_now=True
-    )
+    planned_days = models.PositiveIntegerField(help_text="Initial number of recovery days.")
+    expected_end_date = models.DateField(null=True,blank=True,)
+    actual_recovery_date = models.DateField(null=True,blank=True,)
+    status = models.CharField(max_length=20,choices=RecoveryPlanStatus.choices,default=RecoveryPlanStatus.ACTIVE,)
+    recovery_notes = models.TextField(blank=True)
+    next_review_date = models.DateField(null=True,blank=True,)
+    doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,related_name="medical_recovery_plans",)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-start_date", "-created_at"]
@@ -72,7 +35,6 @@ class MedicalRecoveryPlan(models.Model):
             models.Index(fields=["expected_end_date"]),
             models.Index(fields=["status"]),
         ]
-
 
 
     def clean(self):
@@ -99,6 +61,17 @@ class MedicalRecoveryPlan(models.Model):
             raise ValidationError(
                 "Actual recovery date cannot be before start date."
             )
+
+
+        if (
+            self.next_review_date
+            and self.start_date
+            and self.next_review_date < self.start_date
+        ):
+            raise ValidationError(
+                "Next review date cannot be before recovery start date."
+            )
+
 
 
     def save(self, *args, **kwargs):

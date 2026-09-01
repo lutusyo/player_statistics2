@@ -15,7 +15,15 @@ import json
 def player_list(request):
     age_group_id = request.GET.get('age_group')
 
-    players = Player.objects.prefetch_related('assessments')
+    #players = Player.objects.prefetch_related('assessments')
+    players = Player.objects.filter(
+        is_active=True
+    ).order_by(
+        'name',
+        'second_name',
+        'surname'
+    )
+
 
     if age_group_id:
         players = players.filter(age_group_id=age_group_id)

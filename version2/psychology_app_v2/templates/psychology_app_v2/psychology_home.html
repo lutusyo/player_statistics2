@@ -99,7 +99,7 @@
 
         <div class="teams-grid">
             {% for group in age_groups %}
-                <a href="{% url 'player_list' %}?age_group={{ group.id }}" class="team-card">
+                <a href="{% url 'psychology_app_v2:player_list' %}?age_group={{ group.id }}" class="team-card">
                     {{ group.name }}
                 </a>
             {% endfor %}
@@ -108,7 +108,7 @@
 
     <!-- 🔷 ACTION -->
     <div class="dashboard-footer">
-        <a href="{% url 'player_list' %}" class="btn-primary">
+        <a href="{% url 'psychology_app_v2:player_list' %}" class="btn-primary">
             ➡ View All Players
         </a>
     </div>
