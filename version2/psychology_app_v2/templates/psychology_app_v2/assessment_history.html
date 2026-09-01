@@ -1,0 +1,298 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+
+
+<div class="page-container">
+
+
+    <div class="page-header">
+
+        <div>
+
+            <h2>Psychology Assessment History</h2>
+
+            <p>
+                View previous psychology assessments for Academy players.
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <a
+                href="{% url 'psychology_app_v2:add_assessment' %}"
+                class="button button-primary">
+                + Add Assessment
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- FILTERS -->
+
+    <div class="form-card">
+
+        <form method="get">
+
+            <div class="form-section">
+
+                <h3>Filter Assessments</h3>
+
+
+                <div class="form-row">
+
+
+                    <!-- AGE GROUP -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Age Group
+                        </label>
+
+                        <select name="age_group">
+
+                            <option value="">
+                                All Age Groups
+                            </option>
+
+
+                            {% for age_group in age_groups %}
+
+                                <option
+                                    value="{{ age_group.id }}"
+                                    {% if selected_age_group == age_group.id|stringformat:"s" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ age_group.name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- TEAM -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Team
+                        </label>
+
+                        <select name="team">
+
+                            <option value="">
+                                All Teams
+                            </option>
+
+
+                            {% for team in teams %}
+
+                                <option
+                                    value="{{ team.id }}"
+                                    {% if selected_team == team.id|stringformat:"s" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ team }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- PLAYER -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Player
+                        </label>
+
+                        <select name="player">
+
+                            <option value="">
+                                All Players
+                            </option>
+
+
+                            {% for player in players %}
+
+                                <option
+                                    value="{{ player.id }}"
+                                    {% if selected_player == player.id|stringformat:"s" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ player.full_name }}
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        class="button button-primary">
+                        Filter
+                    </button>
+
+
+                    <a
+                        href="{% url 'psychology_app_v2:assessment_history' %}"
+                        class="button button-secondary">
+                        Clear
+                    </a>
+
+                </div>
+
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- RESULTS -->
+
+    <div class="form-card">
+
+        <div class="table-responsive">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Player</th>
+
+                        <th>Age Group</th>
+
+                        <th>Team</th>
+
+                        <th>Start Date</th>
+
+                        <th>End Date</th>
+
+                        <th>Task</th>
+
+                        <th>IQ</th>
+
+                        <th>Cognitive</th>
+
+                        <th>Personality</th>
+
+                        <th>Neuro Psychology</th>
+
+                        <th>Education</th>
+
+                        <th>Overall</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for assessment in assessments %}
+
+                        <tr>
+
+                            <td>
+                                {{ assessment.player.full_name }}
+                            </td>
+
+                            <td>
+                                {{ assessment.player.age_group }}
+                            </td>
+
+                            <td>
+                                {{ assessment.player.team }}
+                            </td>
+
+                            <td>
+                                {{ assessment.start_date|date:"d/m/Y" }}
+                            </td>
+
+                            <td>
+                                {{ assessment.end_date|date:"d/m/Y" }}
+                            </td>
+
+                            <td>
+                                {{ assessment.task }}
+                            </td>
+
+                            <td>
+                                {{ assessment.iq_range|default:"-" }}
+                            </td>
+
+                            <td>
+                                {{ assessment.cognitive_percent|default:"-" }}%
+                            </td>
+
+                            <td>
+                                {{ assessment.personality_percent|default:"-" }}%
+                            </td>
+
+                            <td>
+                                {{ assessment.neuro_psychology_percent|default:"-" }}%
+                            </td>
+
+                            <td>
+                                {{ assessment.education_percent|default:"-" }}%
+                            </td>
+
+                            <td>
+                                <strong>
+                                    {{ assessment.overall|default:"-" }}%
+                                </strong>
+                            </td>
+
+                        </tr>
+
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td colspan="12">
+
+                                No psychology assessments found.
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,30 +1,20 @@
 import pandas as pd
 from django.shortcuts import render
 from version2.psychology_app_v2.forms import UploadExcelForm
-from version2.psychology_app_v2.models import Player, Assessment, AgeGroup
 
+from version1.players_app.models import Player
+from version2.psychology_app_v2.models import  Assessment
+from version1.players_app.models import AgeGroup
 
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 import json
-
-
-
-from django.db.models import Avg
 from datetime import datetime
-
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta  # install if needed
 
 
-
-
-
-
-
-# ------------------------
 # ✅ HELPER FUNCTIONS
-# ------------------------
 
 def clean_percent(value):
     if pd.isna(value):
@@ -48,10 +38,7 @@ def parse_int(value):
         return None
 
 
-# ------------------------
 # ✅ DASHBOARD VIEW
-# ------------------------
-
 
 
 
@@ -89,9 +76,7 @@ def home(request):
         except:
             pass
 
-    # -----------------------------------
     # ✅ NORMAL DATE FILTER
-    # -----------------------------------
     else:
         if start_date:
             assessments = assessments.filter(start_date__gte=start_date)
@@ -99,9 +84,8 @@ def home(request):
         if end_date:
             assessments = assessments.filter(end_date__lte=end_date)
 
-    # -----------------------------------
+
     # 📊 STATS
-    # -----------------------------------
     total_players = Player.objects.count()
     total_assessments = assessments.count()
     age_groups = AgeGroup.objects.all()

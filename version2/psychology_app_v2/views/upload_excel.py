@@ -1,14 +1,14 @@
 import pandas as pd
 from django.shortcuts import render
 from version2.psychology_app_v2.forms import UploadExcelForm
-from version2.psychology_app_v2.models import Player, Assessment, AgeGroup
+from version1.players_app.models import Player
+from version2.psychology_app_v2.models import  Assessment
+from version1.players_app.models import AgeGroup
 
 
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 import json
-
-
 
 
 def upload_excel(request):
@@ -22,15 +22,11 @@ def upload_excel(request):
             df_age = pd.read_excel(file, header=None, nrows=1)
 
             age_group_value = (
-                str(df_age.iloc[0, 1])
-                .replace('\n', '')
-                .replace(' ', '')
-                .strip()
-                .upper()
+                str(df_age.iloc[0, 1]).replace('\n', '')
+                .replace(' ', '').strip().upper()
             )
 
             age_group, _ = AgeGroup.objects.get_or_create(name=age_group_value)
-
             # 🔥 Reset file pointer
             file.seek(0)
 

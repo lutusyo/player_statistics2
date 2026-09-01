@@ -1,0 +1,478 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+
+<div class="page-container">
+
+    <div class="page-header">
+
+        <div>
+            <h2>Add Psychology Assessment</h2>
+
+            <p>
+                Enter a new psychology assessment for an existing player.
+            </p>
+        </div>
+
+    </div>
+
+
+    {% if messages %}
+
+        {% for message in messages %}
+
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+
+    <div class="form-card">
+
+        <form method="post">
+
+            {% csrf_token %}
+
+
+            {% if form.non_field_errors %}
+
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+
+            {% endif %}
+
+
+            <!-- PLAYER FILTERS -->
+
+            <div class="form-section">
+
+                <h3>Player Selection</h3>
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label for="{{ form.age_group.id_for_label }}">
+                            Age Group
+                        </label>
+
+                        {{ form.age_group }}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="{{ form.team.id_for_label }}">
+                            Team
+                        </label>
+
+                        {{ form.team }}
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="{{ form.player.id_for_label }}">
+                        Player
+                    </label>
+
+                    {{ form.player }}
+
+                    {% if form.player.errors %}
+
+                        <div class="error">
+                            {{ form.player.errors }}
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <!-- ASSESSMENT PERIOD -->
+
+            <div class="form-section">
+
+                <h3>Assessment Period</h3>
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label>
+                            Start Date
+                        </label>
+
+                        {{ form.start_date }}
+
+                        {% if form.start_date.errors %}
+
+                            <div class="error">
+                                {{ form.start_date.errors }}
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            End Date
+                        </label>
+
+                        {{ form.end_date }}
+
+                        {% if form.end_date.errors %}
+
+                            <div class="error">
+                                {{ form.end_date.errors }}
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TASK -->
+
+            <div class="form-section">
+
+                <h3>Assessment</h3>
+
+                <div class="form-group">
+
+                    <label>
+                        Task
+                    </label>
+
+                    {{ form.task }}
+
+                </div>
+
+            </div>
+
+
+            <!-- RESULTS -->
+
+            <div class="form-section">
+
+                <h3>Psychology Results</h3>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label>
+                            IQ Range
+                        </label>
+
+                        {{ form.iq_range }}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Cognitive %
+                        </label>
+
+                        {{ form.cognitive_percent }}
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label>
+                            Personality %
+                        </label>
+
+                        {{ form.personality_percent }}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Neuro Psychology %
+                        </label>
+
+                        {{ form.neuro_psychology_percent }}
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label>
+                            Education %
+                        </label>
+
+                        {{ form.education_percent }}
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Overall %
+                        </label>
+
+                        <input
+                            type="text"
+                            id="overall"
+                            value=""
+                            readonly
+                            placeholder="Automatically calculated"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- BUTTON -->
+
+            <div class="form-actions">
+
+                <button
+                    type="submit"
+                    class="button button-primary">
+                    Save Assessment
+                </button>
+
+                <a
+                    href="javascript:history.back()"
+                    class="button button-secondary">
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const ageGroup = document.getElementById(
+        '{{ form.age_group.id_for_label }}'
+    );
+
+    const team = document.getElementById(
+        '{{ form.team.id_for_label }}'
+    );
+
+    const player = document.getElementById(
+        '{{ form.player.id_for_label }}'
+    );
+
+
+    function loadPlayers() {
+
+        const ageGroupId = ageGroup.value;
+        const teamId = team.value;
+
+
+        player.innerHTML = '';
+
+        const defaultOption = document.createElement('option');
+
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select Player';
+
+        player.appendChild(defaultOption);
+
+
+        const params = new URLSearchParams();
+
+
+        if (ageGroupId) {
+            params.append(
+                'age_group',
+                ageGroupId
+            );
+        }
+
+
+        if (teamId) {
+            params.append(
+                'team',
+                teamId
+            );
+        }
+
+
+        fetch(
+            "{% url 'psychology_app_v2:filter_players' %}?"
+            + params.toString()
+        )
+
+        .then(response => response.json())
+
+        .then(data => {
+
+            data.players.forEach(function (item) {
+
+                const option =
+                    document.createElement('option');
+
+                option.value = item.id;
+
+                option.textContent = item.name;
+
+                player.appendChild(option);
+
+            });
+
+        })
+
+        .catch(error => {
+
+            console.error(
+                'Error loading players:',
+                error
+            );
+
+        });
+
+    }
+
+
+    ageGroup.addEventListener(
+        'change',
+        loadPlayers
+    );
+
+
+    team.addEventListener(
+        'change',
+        loadPlayers
+    );
+
+
+    /*
+     * AUTOMATIC OVERALL CALCULATION
+     */
+
+    const cognitive =
+        document.getElementById(
+            '{{ form.cognitive_percent.id_for_label }}'
+        );
+
+    const personality =
+        document.getElementById(
+            '{{ form.personality_percent.id_for_label }}'
+        );
+
+    const neuro =
+        document.getElementById(
+            '{{ form.neuro_psychology_percent.id_for_label }}'
+        );
+
+    const education =
+        document.getElementById(
+            '{{ form.education_percent.id_for_label }}'
+        );
+
+    const overall =
+        document.getElementById('overall');
+
+
+    function calculateOverall() {
+
+        const values = [
+            cognitive.value,
+            personality.value,
+            neuro.value,
+            education.value
+        ];
+
+        const numbers = values
+            .filter(value => value !== '')
+            .map(value => parseFloat(value))
+            .filter(value => !isNaN(value));
+
+
+        if (numbers.length === 0) {
+
+            overall.value = '';
+
+            return;
+        }
+
+
+        const total =
+            numbers.reduce(
+                (sum, value) => sum + value,
+                0
+            );
+
+
+        const average =
+            total / numbers.length;
+
+
+        overall.value =
+            average.toFixed(2);
+    }
+
+
+    cognitive.addEventListener(
+        'input',
+        calculateOverall
+    );
+
+    personality.addEventListener(
+        'input',
+        calculateOverall
+    );
+
+    neuro.addEventListener(
+        'input',
+        calculateOverall
+    );
+
+    education.addEventListener(
+        'input',
+        calculateOverall
+    );
+
+});
+
+</script>

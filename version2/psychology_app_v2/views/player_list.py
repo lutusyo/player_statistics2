@@ -1,8 +1,10 @@
 import pandas as pd
 from django.shortcuts import render
 from version2.psychology_app_v2.forms import UploadExcelForm
-from version2.psychology_app_v2.models import Player, Assessment, AgeGroup
 
+from version1.players_app.models import Player
+from version2.psychology_app_v2.models import  Assessment
+from version1.players_app.models import AgeGroup
 
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
