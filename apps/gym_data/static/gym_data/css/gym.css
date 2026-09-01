@@ -1,0 +1,453 @@
+.gym-container,
+.report-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+
+/* HEADER */
+
+.gym-header,
+.report-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.eyebrow {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    opacity: .65;
+}
+
+.gym-header h1,
+.report-heading h1 {
+    margin: 0;
+    font-size: 34px;
+}
+
+.gym-header p,
+.report-heading p {
+    margin-top: 8px;
+    opacity: .7;
+}
+
+
+/* BUTTONS */
+
+.header-actions,
+.form-actions,
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 18px;
+    border-radius: 9px;
+    text-decoration: none;
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: #111827;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #000;
+}
+
+.btn-outline {
+    background: white;
+    color: #111827;
+    border-color: #d1d5db;
+}
+
+
+/* SESSION GRID */
+
+.session-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(auto-fill, minmax(330px, 1fr));
+    gap: 20px;
+}
+
+.session-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, .04);
+}
+
+.session-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.session-date {
+    font-size: 13px;
+    font-weight: 700;
+    opacity: .6;
+}
+
+.session-top h2 {
+    margin: 5px 0 0;
+}
+
+.session-icon {
+    font-size: 28px;
+}
+
+
+/* GROUP */
+
+.group-list {
+    border-top: 1px solid #eee;
+}
+
+.group-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.group-row strong {
+    display: block;
+}
+
+.group-row span {
+    font-size: 13px;
+    opacity: .6;
+}
+
+.arrow {
+    font-size: 18px;
+    opacity: .5;
+}
+
+.session-link {
+    display: block;
+    margin-top: 18px;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+
+/* GROUP CARDS */
+
+.group-cards {
+    display: grid;
+    gap: 24px;
+}
+
+.group-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 24px;
+}
+
+.group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+}
+
+.group-header h2 {
+    margin: 0;
+}
+
+.player-count {
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.player-count small {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    opacity: .6;
+}
+
+.player-section {
+    padding: 20px 0;
+}
+
+.player-section h3,
+.exercise-section h3 {
+    margin-top: 0;
+}
+
+.player-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.player-chip {
+    background: #f3f4f6;
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+
+/* EXERCISES */
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.small-btn {
+    border: 1px solid #d1d5db;
+    padding: 7px 12px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.exercise-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    align-items: center;
+    gap: 15px;
+    padding: 14px 0;
+    border-top: 1px solid #eee;
+}
+
+.exercise-name strong {
+    display: block;
+}
+
+.exercise-name span {
+    font-size: 12px;
+    opacity: .6;
+}
+
+.exercise-value {
+    font-weight: 600;
+}
+
+
+/* FORM */
+
+.form-container {
+    max-width: 700px;
+    margin: 50px auto;
+    padding: 30px;
+}
+
+.page-heading {
+    margin-bottom: 30px;
+}
+
+.page-heading h1 {
+    margin: 0;
+}
+
+.gym-form {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 28px;
+}
+
+.form-field {
+    margin-bottom: 20px;
+}
+
+.form-field label,
+.filter-field label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.form-control,
+.form-select,
+.gym-form input,
+.gym-form select {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+}
+
+.player-select {
+    min-height: 180px !important;
+}
+
+
+/* REPORT FILTER */
+
+.filter-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 25px;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(5, 1fr);
+    gap: 15px;
+}
+
+.filter-actions {
+    margin-top: 20px;
+}
+
+
+/* REPORT TABLE */
+
+.report-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.report-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px;
+}
+
+.report-card-header h2 {
+    margin: 0;
+}
+
+.report-card-header p {
+    margin: 5px 0 0;
+    opacity: .6;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.gym-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.gym-table th {
+    background: #f8fafc;
+    text-align: left;
+    padding: 13px 15px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.gym-table td {
+    padding: 15px;
+    border-top: 1px solid #eee;
+    font-size: 14px;
+}
+
+.category-badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 15px;
+    background: #f3f4f6;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.no-data {
+    text-align: center;
+    padding: 50px !important;
+    opacity: .6;
+}
+
+
+/* EMPTY */
+
+.empty-dashboard {
+    text-align: center;
+    padding: 80px 30px;
+    background: white;
+    border: 1px dashed #d1d5db;
+    border-radius: 16px;
+}
+
+.empty-icon {
+    font-size: 45px;
+    margin-bottom: 15px;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 900px) {
+
+    .gym-header,
+    .report-heading {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .filter-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .gym-container,
+    .report-container {
+        padding: 15px;
+    }
+
+    .filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .exercise-row {
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+
+    .header-actions {
+        width: 100%;
+    }
+
+    .header-actions .btn {
+        flex: 1;
+    }
+
+}

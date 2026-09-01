@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="form-container">
+
+    <div class="page-heading">
+
+        <span class="eyebrow">
+            {{ group.gym_session.team }}
+            ·
+            {{ group.gym_type.name }}
+        </span>
+
+        <h1>Add Exercise</h1>
+
+        <p>
+            Record the exercise prescription for this group.
+        </p>
+
+    </div>
+
+
+    <form method="post" class="gym-form">
+
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+
+        <div class="form-field">
+
+            <label>Exercise</label>
+
+            {{ form.exercise }}
+
+            {{ form.exercise.errors }}
+
+        </div>
+
+
+        <div class="form-grid">
+
+            <div class="form-field">
+
+                <label>Weight (kg)</label>
+
+                {{ form.weight_kg }}
+
+                {{ form.weight_kg.errors }}
+
+            </div>
+
+
+            <div class="form-field">
+
+                <label>Sets</label>
+
+                {{ form.sets }}
+
+                {{ form.sets.errors }}
+
+            </div>
+
+
+            <div class="form-field">
+
+                <label>Reps</label>
+
+                {{ form.reps }}
+
+                {{ form.reps.errors }}
+
+            </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <a href="{% url 'gym_app:gym_session_detail' group.gym_session.id %}"
+               class="btn btn-outline">
+                Cancel
+            </a>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Save Exercise
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

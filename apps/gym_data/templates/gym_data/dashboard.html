@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'gym_data/css/gym.css' %}">
+
+<div class="gym-container">
+
+    <div class="gym-header">
+
+        <div>
+            <span class="eyebrow">STRENGTH & CONDITIONING</span>
+
+            <h1>Gym Training</h1>
+
+            <p>
+                Record and monitor daily gym sessions,
+                exercises and player workloads.
+            </p>
+        </div>
+
+        <div class="header-actions">
+
+            <a href="{% url 'gym_app:gym_report' %}"
+               class="btn btn-outline">
+                📊 Reports
+            </a>
+
+            <a href="{% url 'gym_app:gym_session_create' %}"
+               class="btn btn-primary">
+                + New Session
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="session-grid">
+
+        {% for session in sessions %}
+
+        <div class="session-card">
+
+            <div class="session-top">
+
+                <div>
+                    <span class="session-date">
+                        {{ session.date|date:"d M Y" }}
+                    </span>
+
+                    <h2>{{ session.team }}</h2>
+                </div>
+
+                <div class="session-icon">
+                    🏋️
+                </div>
+
+            </div>
+
+
+            <div class="group-list">
+
+                {% for group in session.groups %}
+
+                <div class="group-row">
+
+                    <div>
+                        <strong>
+                            {{ group.gym_type.name }}
+                        </strong>
+
+                        <span>
+                            {{ group.players.count }} players
+                        </span>
+                    </div>
+
+                    <span class="arrow">→</span>
+
+                </div>
+
+                {% empty %}
+
+                <div class="empty-state">
+                    No gym groups added yet.
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+
+            <a href="{% url 'gym_app:gym_session_detail' session.id %}"
+               class="session-link">
+                Open Session →
+            </a>
+
+        </div>
+
+        {% empty %}
+
+        <div class="empty-dashboard">
+
+            <div class="empty-icon">🏋️</div>
+
+            <h2>No gym sessions yet</h2>
+
+            <p>
+                Create today's gym session to start recording data.
+            </p>
+
+            <a href="{% url 'gym_app:gym_session_create' %}"
+               class="btn btn-primary">
+                Create First Session
+            </a>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

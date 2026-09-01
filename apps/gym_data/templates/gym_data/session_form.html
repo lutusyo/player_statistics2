@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'gym_data/css/gym.css' %}">
+
+<div class="form-container">
+
+    <div class="page-heading">
+
+        <span class="eyebrow">GYM MANAGEMENT</span>
+
+        <h1>New Gym Session</h1>
+
+        <p>
+            Select the team and date for today's gym session.
+        </p>
+
+    </div>
+
+
+    <form method="post" class="gym-form">
+
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div class="form-field">
+
+            <label>
+                Session Date
+            </label>
+
+            {{ form.date }}
+
+            {{ form.date.errors }}
+
+        </div>
+
+
+        <div class="form-field">
+
+            <label>
+                Team
+            </label>
+
+            {{ form.team }}
+
+            {{ form.team.errors }}
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <a href="{% url 'gym_app:dashboard' %}"
+               class="btn btn-outline">
+                Cancel
+            </a>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Create Session
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

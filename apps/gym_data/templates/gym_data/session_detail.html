@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'gym_data/css/gym.css' %}">
+
+<div class="gym-container">
+
+    <div class="gym-header">
+
+        <div>
+
+            <span class="eyebrow">
+                GYM SESSION
+            </span>
+
+            <h1>{{ session.team }}</h1>
+
+            <p>
+                {{ session.date|date:"l, d F Y" }}
+            </p>
+
+        </div>
+
+        <div>
+
+            <a href="{% url 'gym_app:gym_group_create' session.id %}"
+               class="btn btn-primary">
+                + Add Gym Type
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="group-cards">
+
+        {% for group in groups %}
+
+        <div class="group-card">
+
+            <div class="group-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        GYM TYPE
+                    </span>
+
+                    <h2>
+                        {{ group.gym_type.name }}
+                    </h2>
+
+                </div>
+
+                <div class="player-count">
+                    {{ group.players.count }}
+                    <small>players</small>
+                </div>
+
+            </div>
+
+
+            <div class="player-section">
+
+                <h3>Players</h3>
+
+                <div class="player-list">
+
+                    {% for player in group.players %}
+
+                    <span class="player-chip">
+                        {{ player }}
+                    </span>
+
+                    {% empty %}
+
+                    <span class="muted">
+                        No players assigned.
+                    </span>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+            <div class="exercise-section">
+
+                <div class="section-heading">
+
+                    <h3>Exercises</h3>
+
+                    <a href="{% url 'gym_app:group_exercise_create' group.id %}"
+                       class="small-btn">
+                        + Add Exercise
+                    </a>
+
+                </div>
+
+
+                {% for item in group.exercises %}
+
+                <div class="exercise-row">
+
+                    <div class="exercise-name">
+
+                        <strong>
+                            {{ item.exercise.name }}
+                        </strong>
+
+                        <span>
+                            {{ item.exercise.category.name }}
+                        </span>
+
+                    </div>
+
+                    <div class="exercise-value">
+                        {{ item.weight_kg }} kg
+                    </div>
+
+                    <div class="exercise-value">
+                        {{ item.sets }} × {{ item.reps }}
+                    </div>
+
+                </div>
+
+                {% empty %}
+
+                <div class="empty-state">
+                    No exercises recorded.
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <div class="empty-dashboard">
+
+            <h2>No gym types added</h2>
+
+            <p>
+                Add the gym types used for this session.
+            </p>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

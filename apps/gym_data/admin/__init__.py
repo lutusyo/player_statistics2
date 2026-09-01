@@ -1,0 +1,1 @@
+from .first_admin import GymTypeAdmin, ExerciseAdmin,ExerciseCategoryAdmin, GymSessionAdmin,GymGroupAdmin, GroupExerciseAdmin

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="form-container">
+
+    <div class="page-heading">
+
+        <span class="eyebrow">
+            {{ session.team }} · {{ session.date }}
+        </span>
+
+        <h1>Add Gym Type</h1>
+
+        <p>
+            Select the gym type and assign players.
+        </p>
+
+    </div>
+
+
+    <form method="post" class="gym-form">
+
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div class="form-field">
+
+            <label>Gym Type</label>
+
+            {{ form.gym_type }}
+
+            {{ form.gym_type.errors }}
+
+        </div>
+
+
+        <div class="form-field">
+
+            <label>Players</label>
+
+            {{ form.players }}
+
+            {{ form.players.errors }}
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <a href="{% url 'gym_app:gym_session_detail' session.id %}"
+               class="btn btn-outline">
+                Cancel
+            </a>
+
+            <button class="btn btn-primary"
+                    type="submit">
+                Save Gym Type
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

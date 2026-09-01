@@ -40,8 +40,9 @@ urlpatterns = [
     path("tagging_app_v3/", include("version3.tagging_app_v3.urls")),
     path("medical_data/", include("apps.medical_data.urls")),
 
-]
+    path("gym_data/", include("apps.gym_data.urls")),
 
+]
 
 
 if settings.DEBUG:

@@ -1,7 +1,6 @@
 from django.urls import path
 from apps.medical_data.views import *
 
-
 app_name = "medical_data"
 
 urlpatterns = [
