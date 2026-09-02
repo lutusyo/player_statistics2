@@ -1,68 +1,38 @@
 from datetime import timedelta
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import (get_object_or_404,redirect, render,)
 from django.utils import timezone
-from apps.medical_data.forms import ( MedicalRecoveryPlanForm, MedicalRecoveryDayForm,)
+from apps.medical_data.forms import ( MedicalRecoveryPlanForm, MedicalRecoveryDayForm, MedicalRecoveryCoachForm, )
 from apps.medical_data.models import (MedicalVisit, MedicalRecoveryPlan, MedicalRecoveryDay,)
+from apps.medical_data.models.medical_recovery_day import (RecoveryDayStatus,)
 
-
-
-from apps.medical_data.services.recovery import (
-    create_recovery_days,
-    extend_recovery_plan,
+from apps.medical_data.services.recovery import (create_recovery_days, extend_recovery_plan,
     complete_recovery_plan,
     cancel_recovery_plan,
 )
 
-
-
 @login_required
 def recovery_plan_create(request, visit_id):
 
-    visit = get_object_or_404(
-        MedicalVisit,
-        pk=visit_id,
-    )
-
+    visit = get_object_or_404(MedicalVisit,pk=visit_id,)
     if hasattr(visit, "recovery_plan"):
-
-        messages.warning(
-            request,
-            "This medical visit already has a recovery plan.",
-        )
-
-        return redirect(
-            "medical_data:recovery_plan_detail",
-            pk=visit.recovery_plan.pk,
-        )
+        messages.warning(request,"This medical visit already has a recovery plan.",)
+        return redirect("medical_data:recovery_plan_detail",pk=visit.recovery_plan.pk,)
 
     if request.method == "POST":
-
         form = MedicalRecoveryPlanForm(request.POST)
-
         if form.is_valid():
-
             with transaction.atomic():
-
                 plan = form.save(commit=False)
                 plan.visit = visit
                 plan.doctor = request.user
                 plan.save()
 
                 create_recovery_days(plan)
-
-            messages.success(
-                request,
-                "Recovery plan created successfully.",
-            )
-
-            return redirect(
-                "medical_data:recovery_plan_detail",
-                pk=plan.pk,
-            )
+            messages.success(request,"Recovery plan created successfully.",)
+            return redirect("medical_data:recovery_plan_detail",pk=plan.pk,)
 
     else:
 
@@ -105,12 +75,10 @@ def recovery_plan_detail(request, pk):
     )
 
 
-
 @login_required
 def recovery_day_update(request, pk):
 
-    day = get_object_or_404(
-        MedicalRecoveryDay.objects
+    day = get_object_or_404(MedicalRecoveryDay.objects
         .select_related(
             "recovery_plan__visit__player",
             "recovery_plan__visit__team",
@@ -147,10 +115,7 @@ def recovery_day_update(request, pk):
 @login_required
 def recovery_plan_extend(request, pk):
 
-    plan = get_object_or_404(
-        MedicalRecoveryPlan,
-        pk=pk,
-    )
+    plan = get_object_or_404(MedicalRecoveryPlan,pk=pk,)
 
     if request.method == "POST":
 
@@ -166,10 +131,7 @@ def recovery_plan_extend(request, pk):
 
         if new_days <= plan.planned_days:
 
-            messages.error(
-                request,
-                "New recovery period must be longer than the current period.",
-            )
+            messages.error(request,"New recovery period must be longer than the current period.",)
 
         else:
 
@@ -206,75 +168,44 @@ def recovery_plan_extend(request, pk):
 
 
 
-
-
 @login_required
 def recovery_day_complete(request, pk):
-
-    day = get_object_or_404(MedicalRecoveryDay,pk=pk,)
+    day = get_object_or_404(MedicalRecoveryDay.objects.select_related("recovery_plan"),pk=pk,)
     if request.method == "POST":
-        day.status = "completed"
-        day.completed_at = timezone.now()
-        day.save(
-            update_fields=[
-                "status",
-                "completed_at",
-            ]
-        )
+        form = MedicalRecoveryCoachForm(request.POST, instance=day,)
+        if form.is_valid():
+            day = form.save(commit=False)
+            day.status = RecoveryDayStatus.COMPLETED
+            day.completed_at = timezone.now()
+            day.save()
+            messages.success(request,f"Day {day.day_number} marked as completed.",)
+    return redirect("medical_data:medical_coach_dashboard")
 
-        messages.success(request,
-            f"Day {day.day_number} marked as completed.",
-        )
 
-    return redirect("medical_data:recovery_plan_detail", pk=day.recovery_plan.pk,)
 
 
 @login_required
 def recovery_plan_complete(request, pk):
 
-    plan = get_object_or_404(
-        MedicalRecoveryPlan,
-        pk=pk,
-    )
-
+    plan = get_object_or_404(MedicalRecoveryPlan,pk=pk,)
     if request.method == "POST":
-
-        recovery_date = request.POST.get(
-            "recovery_date"
-        )
-
+        recovery_date = request.POST.get("recovery_date")
         if recovery_date:
-
             from datetime import datetime
-
             recovery_date = datetime.strptime(
                 recovery_date,
                 "%Y-%m-%d",
             ).date()
 
         else:
-
             recovery_date = timezone.localdate()
 
-        complete_recovery_plan(
-            plan,
-            recovery_date,
-        )
-
-        messages.success(
-            request,
-            "Player recovery has been completed. Remaining days were cancelled.",
-        )
-
-        return redirect(
-            "medical_data:recovery_plan_detail",
-            pk=plan.pk,
-        )
+        complete_recovery_plan(plan,recovery_date,)
+        messages.success(request,"Player recovery has been completed. Remaining days were cancelled.",)
+        return redirect("medical_data:recovery_plan_detail",pk=plan.pk,)
 
 
-    return render(
-        request,
-        "medical_data/recovery_plan_complete.html",
+    return render(request,"medical_data/recovery_plan_complete.html",
         {
             "plan": plan,
             "today": timezone.localdate(),
@@ -283,33 +214,17 @@ def recovery_plan_complete(request, pk):
     )
 
 
-
-
 @login_required
 def recovery_plan_cancel(request, pk):
 
-    plan = get_object_or_404(
-        MedicalRecoveryPlan,
-        pk=pk,
-    )
-
+    plan = get_object_or_404(MedicalRecoveryPlan,pk=pk,)
     if request.method == "POST":
-
         cancel_recovery_plan(plan)
+        messages.success(request,"Recovery plan cancelled.",)
 
-        messages.success(
-            request,
-            "Recovery plan cancelled.",
-        )
+        return redirect("medical_data:recovery_plan_detail",pk=plan.pk,)
 
-        return redirect(
-            "medical_data:recovery_plan_detail",
-            pk=plan.pk,
-        )
-
-    return render(
-        request,
-        "medical_data/recovery_plan_cancel.html",
+    return render(request, "medical_data/recovery_plan_cancel.html",
         {
             "plan": plan,
             "page_title": "Cancel Recovery Plan",

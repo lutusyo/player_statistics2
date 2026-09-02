@@ -18,21 +18,11 @@
                 has fully recovered?
             </p>
 
-            <p class="text-muted">
-                All remaining planned recovery days will be
-                cancelled.
-            </p>
-
+            <p class="text-muted"> All remaining planned recovery days will be cancelled.</p>
             <form method="post">
-
                 {% csrf_token %}
-
                 <div class="mb-3">
-
-                    <label class="form-label">
-                        Recovery Date
-                    </label>
-
+                    <label class="form-label">Recovery Date</label>
                     <input
                         type="date"
                         name="recovery_date"
@@ -43,24 +33,11 @@
 
                 </div>
 
-                <button
-                    type="submit"
-                    class="btn btn-success">
-
-                    Confirm Recovery
-
-                </button>
-
-                <a
-                    href="{% url 'medical_data:recovery_plan_detail' plan.pk %}"
-                    class="btn btn-outline-secondary">
-
-                    Cancel
-
-                </a>
+                <button type="submit" class="btn btn-success">Confirm Recovery</button>
+                <a href="{% url 'medical_data:recovery_plan_detail' plan.pk %}"
+                    class="btn btn-outline-secondary">Cancel</a>
 
             </form>
-
         </div>
 
     </div>

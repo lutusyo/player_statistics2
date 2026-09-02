@@ -85,3 +85,20 @@ class MedicalRecoveryDayForm(forms.ModelForm):
             ),
 
         }
+
+
+class MedicalRecoveryCoachForm(forms.ModelForm):
+    class Meta:
+        model = MedicalRecoveryDay
+        fields = ["coach_notes",]
+
+        widgets = {
+            "coach_notes": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "rows": 4,
+                    "placeholder": ("Write notes about today's session..."),
+                }
+            ),
+
+        }

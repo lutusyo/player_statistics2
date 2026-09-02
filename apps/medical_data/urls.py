@@ -1,5 +1,6 @@
 from django.urls import path
 from apps.medical_data.views import *
+from apps.medical_data.views.medical_coach_views import (medical_coach_dashboard,)
 
 app_name = "medical_data"
 
@@ -30,9 +31,11 @@ urlpatterns = [
 
     path("recovery/<int:pk>/extend/", recovery_plan_extend,name="recovery_plan_extend",),
     path("recovery/<int:pk>/complete/", recovery_plan_complete, name="recovery_plan_complete",),
-
     path("recovery/<int:pk>/cancel/",recovery_plan_cancel,name="recovery_plan_cancel",),
 
+
+    #Coach Dashboard
+    path("coach/", medical_coach_dashboard, name="medical_coach_dashboard",),
     
 ]
 

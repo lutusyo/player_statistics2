@@ -44,26 +44,15 @@
 
         <a
             href="{% url 'medical_data:recovery_plan_extend' plan.pk %}"
-            class="btn btn-warning">
-
-            Extend Recovery
-
-        </a>
+            class="btn btn-warning">Extend Recovery</a>
 
         <a
             href="{% url 'medical_data:recovery_plan_complete' plan.pk %}"
-            class="btn btn-success">
-
-            Player Recovered
-
-        </a>
+            class="btn btn-success">Player Recovered</a>
 
         <a
             href="{% url 'medical_data:recovery_plan_cancel' plan.pk %}"
-            class="btn btn-outline-danger">
-
-            Cancel Plan
-
+            class="btn btn-outline-danger">Cancel Plan
         </a>
 
     {% endif %}
@@ -71,46 +60,29 @@
 </div>
 
 
-
-
-
-
     <!-- PLAN SUMMARY -->
 
     <div class="row g-3 mb-4">
-
-
         <div class="col-md-3">
-
             <div class="card shadow-sm">
-
                 <div class="card-body">
-
                     <small class="text-muted">
                         Start Date
                     </small>
-
                     <h5 class="mt-2">
                         {{ plan.start_date|date:"d M Y" }}
                     </h5>
-
                 </div>
-
             </div>
-
         </div>
 
 
         <div class="col-md-3">
-
             <div class="card shadow-sm">
-
                 <div class="card-body">
-
                     <small class="text-muted">
                         Planned Recovery
                     </small>
-
                     <h5 class="mt-2">
                         {{ plan.planned_days }} days
                     </h5>

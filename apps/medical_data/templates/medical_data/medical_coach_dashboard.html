@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Special Coach Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Special Coach Dashboard</h2>
+            <p class="text-muted mb-0">
+                Today's medical recovery programs
+                ·
+                {{ today|date:"l, d F Y" }}
+            </p>
+        </div>
+        <a
+            href="{% url 'medical_data:medical_visit_list' %}"
+            class="btn btn-outline-primary">Medical Records</a>
+    </div>
+
+    <!-- STATISTICS -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Today's Programs</small>
+                    <h2 class="mt-2 mb-0">{{ total_today }}</h2>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Completed Today</small>
+                    <h2 class="mt-2 mb-0">{{ completed_count }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Remaining</small>
+                    <h2 class="mt-2 mb-0">{{ remaining_count }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- TODAY'S PROGRAMS -->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">Today's Player Programs</h5>
+        </div>
+
+
+        <div class="card-body">
+            {% if today_programs %}
+                <div class="row g-4">
+                    {% for program in today_programs %}
+                        <div class="col-xl-4 col-lg-6">
+                            <div class="card h-100 border">
+                                <div class="card-body">
+                                    <!-- PLAYER -->
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <h5 class="mb-1">{{ program.recovery_plan.visit.player }}</h5>
+                                            <span class="text-muted">{{ program.recovery_plan.visit.team }}</span>
+                                        </div>
+                                        <span class="badge bg-warning text-dark">Day {{ program.day_number }}</span>
+                                    </div>
+                                    <!-- COMPLAINT -->
+                                    <div class="mb-3">
+                                        <small class="text-muted">Medical Condition</small>
+                                        <div class="fw-semibold">
+                                            {{ program.recovery_plan.visit.get_main_complaint_display }}
+                                        </div>
+                                    </div>
+
+                                    <!-- FOCUS -->
+                                    <div class="mb-3">
+                                        <small class="text-muted">Today's Focus</small>
+                                        <div class="fs-5 fw-semibold">
+                                            {{ program.focus_point|default:"Focus not yet added" }}
+                                        </div>
+                                    </div>
+
+                                    <!-- ACTIVITIES -->
+                                    <div class="mb-3">
+                                        <small class="text-muted">Program</small>
+
+                                        <div
+                                            class="mt-1"
+                                            style="white-space: pre-line;">
+                                            {{ program.activities|default:"Activities not yet added." }}
+                                        </div>
+                                    </div>
+
+                                    <!-- ACTION -->
+                                    <div class="d-flex gap-2 mt-4">
+                                        <a href="{% url 'medical_data:recovery_day_update' program.pk %}"
+                                            class="btn btn-outline-primary btn-sm">View / Edit</a>
+
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'medical_data:recovery_day_complete' program.pk %}">
+                                            {% csrf_token %}
+                                            <div class="mb-2">
+                                                <textarea
+                                                    name="coach_notes"
+                                                    class="form-control form-control-sm"
+                                                    rows="2"
+                                                    placeholder="Coach notes..."></textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-success btn-sm"> Mark Completed</button>
+                                        </form>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <h5>No recovery programs for today</h5>
+                    <p class="text-muted mb-0">
+                        There are no active players with
+                        planned medical programs today.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <!-- COMPLETED TODAY -->
+    {% if completed_today %}
+        <div class="card shadow-sm mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Completed Today</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Team</th>
+                            <th>Day</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        {% for program in completed_today %}
+                            <tr>
+                                <td>{{ program.recovery_plan.visit.player }}</td>
+                                <td>{{ program.recovery_plan.visit.team }}</td>
+                                <td>Day {{ program.day_number }}</td>
+                                <td><span class="badge bg-success">Completed</span></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
