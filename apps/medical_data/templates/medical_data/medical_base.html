@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'medical_data/css/medical.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    <nav class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex gap-2">
+            <a href="{% url 'medical_data:medical_dashboard' %}" class="btn btn-sm btn-outline-primary">Dashboard</a>
+            <a href="{% url 'medical_data:medical_visit_list' %}" class="btn btn-sm btn-outline-primary">Records</a>
+            <a href="{% url 'medical_data:medical_report' %}" class="btn btn-sm btn-outline-primary">Reports</a>
+            <a href="{% url 'medical_data:medical_coach_dashboard' %}" class="btn btn-sm btn-outline-primary">Coach</a>
+        </div>
+        <a href="{% url 'medical_data:medical_visit_create' %}" class="btn btn-sm btn-primary">+ New Visit</a>
+    </nav>
+
+    {% block medical_content %}{% endblock %}
+
+</div>
+{% endblock %}

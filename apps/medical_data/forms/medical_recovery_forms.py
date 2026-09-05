@@ -37,12 +37,10 @@ class MedicalRecoveryPlanForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "rows": 4,
-                    "placeholder": (
-                        "General recovery instructions..."
+                    "placeholder": ("General recovery instructions..."
                     ),
                 }
             ),
-
         }
 
     def clean_planned_days(self):
@@ -63,13 +61,10 @@ class MedicalRecoveryDayForm(forms.ModelForm):
         fields = ["focus_point", "activities",]
 
         widgets = {
-
             "focus_point": forms.TextInput(
                 attrs={
                     "class": "form-control",
-                    "placeholder": (
-                        "e.g. Mobility and activation"
-                    ),
+                    "placeholder": ("e.g. Mobility and activation"),
                 }
             ),
 
@@ -77,13 +72,11 @@ class MedicalRecoveryDayForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "rows": 5,
-                    "placeholder": (
-                        "Describe exactly what the player "
+                    "placeholder": ("Describe exactly what the player "
                         "should do..."
                     ),
                 }
             ),
-
         }
 
 
@@ -100,5 +93,4 @@ class MedicalRecoveryCoachForm(forms.ModelForm):
                     "placeholder": ("Write notes about today's session..."),
                 }
             ),
-
         }

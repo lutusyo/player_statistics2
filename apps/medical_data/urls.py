@@ -1,12 +1,15 @@
 from django.urls import path
 from apps.medical_data.views import *
 from apps.medical_data.views.medical_coach_views import (medical_coach_dashboard,)
+from apps.medical_data.views.medical_dashboard_views import medical_dashboard
+from apps.medical_data.views.medical_report_views import medical_report
 
 app_name = "medical_data"
 
 urlpatterns = [
 
     path("dashboard/",medical_dashboard,name="medical_dashboard",),
+
     path("",medical_visit_list,name="medical_visit_list",),
     path("create/",medical_visit_create,name="medical_visit_create",),
     path("<int:pk>/",medical_visit_detail,name="medical_visit_detail",),
@@ -36,6 +39,8 @@ urlpatterns = [
 
     #Coach Dashboard
     path("coach/", medical_coach_dashboard, name="medical_coach_dashboard",),
+
+
     
 ]
 

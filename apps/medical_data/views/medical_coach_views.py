@@ -11,27 +11,16 @@ from apps.medical_data.models.medical_recovery_plan import (RecoveryPlanStatus,)
 @login_required
 def medical_coach_dashboard(request):
     today = timezone.localdate()
-    today_programs = (MedicalRecoveryDay.objects
-        .filter(date=today, status=RecoveryDayStatus.PLANNED,
-            recovery_plan__status__in=[
-                RecoveryPlanStatus.ACTIVE,
-                RecoveryPlanStatus.EXTENDED,
-            ],
+    today_programs = (MedicalRecoveryDay.objects.filter(date=today, status=RecoveryDayStatus.PLANNED,
+            recovery_plan__status__in=[RecoveryPlanStatus.ACTIVE, RecoveryPlanStatus.EXTENDED,],
         )
-        .select_related(
-            "recovery_plan",
-            "recovery_plan__visit",
-            "recovery_plan__visit__player",
-            "recovery_plan__visit__team",
-        )
-        .order_by("recovery_plan__visit__team", "recovery_plan__visit__player",)
+        .select_related("recovery_plan", "recovery_plan__visit",
+            "recovery_plan__visit__player","recovery_plan__visit__team",
+        ).order_by("recovery_plan__visit__team", "recovery_plan__visit__player",)
     )
 
     completed_today = (MedicalRecoveryDay.objects.filter(date=today,status=RecoveryDayStatus.COMPLETED,)
-        .select_related(
-            "recovery_plan__visit__player",
-            "recovery_plan__visit__team",
-        )
+        .select_related("recovery_plan__visit__player", "recovery_plan__visit__team",)
     )
 
     total_today = ( today_programs.count() + completed_today.count() )

@@ -8,10 +8,7 @@ from apps.medical_data.forms import ( MedicalRecoveryPlanForm, MedicalRecoveryDa
 from apps.medical_data.models import (MedicalVisit, MedicalRecoveryPlan, MedicalRecoveryDay,)
 from apps.medical_data.models.medical_recovery_day import (RecoveryDayStatus,)
 
-from apps.medical_data.services.recovery import (create_recovery_days, extend_recovery_plan,
-    complete_recovery_plan,
-    cancel_recovery_plan,
-)
+from apps.medical_data.services.recovery import (create_recovery_days, extend_recovery_plan, complete_recovery_plan, cancel_recovery_plan,)
 
 @login_required
 def recovery_plan_create(request, visit_id):
@@ -36,21 +33,14 @@ def recovery_plan_create(request, visit_id):
 
     else:
 
-        form = MedicalRecoveryPlanForm(
-            initial={
-                "start_date": visit.date
-            }
-        )
-
-    return render(
-        request,
-        "medical_data/recovery_plan_form.html",
-        {
+        form = MedicalRecoveryPlanForm( initial={"start_date": visit.date})
+    
+    context = {
             "form": form,
             "visit": visit,
             "page_title": "Create Recovery Plan",
-        },
-    )
+    }
+    return render(request, "medical_data/recovery_plan_form.html", context,)
 
 
 @login_required
@@ -73,7 +63,6 @@ def recovery_plan_detail(request, pk):
             "page_title": "Recovery Plan",
         },
     )
-
 
 @login_required
 def recovery_day_update(request, pk):
@@ -116,9 +105,7 @@ def recovery_day_update(request, pk):
 def recovery_plan_extend(request, pk):
 
     plan = get_object_or_404(MedicalRecoveryPlan,pk=pk,)
-
     if request.method == "POST":
-
         try:
             new_days = int(
                 request.POST.get(
@@ -135,37 +122,19 @@ def recovery_plan_extend(request, pk):
 
         else:
 
-            success = extend_recovery_plan(
-                plan,
-                new_days,
-            )
-
+            success = extend_recovery_plan(plan, new_days,)
             if success:
+                messages.success(request, f"Recovery plan extended to {new_days} days.",)
+                return redirect("medical_data:recovery_plan_detail",pk=plan.pk,)
 
-                messages.success(
-                    request,
-                    f"Recovery plan extended to {new_days} days.",
-                )
+            messages.error(request,"This recovery plan cannot be extended.",)
 
-                return redirect(
-                    "medical_data:recovery_plan_detail",
-                    pk=plan.pk,
-                )
-
-            messages.error(
-                request,
-                "This recovery plan cannot be extended.",
-            )
-
-    return render(
-        request,
-        "medical_data/recovery_plan_extend.html",
+    return render(request, "medical_data/recovery_plan_extend.html",
         {
             "plan": plan,
             "page_title": "Extend Recovery Plan",
         },
     )
-
 
 
 @login_required
@@ -180,8 +149,6 @@ def recovery_day_complete(request, pk):
             day.save()
             messages.success(request,f"Day {day.day_number} marked as completed.",)
     return redirect("medical_data:medical_coach_dashboard")
-
-
 
 
 @login_required
