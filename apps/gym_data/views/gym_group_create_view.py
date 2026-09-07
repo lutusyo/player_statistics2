@@ -12,9 +12,6 @@ from ..forms import (
 from ..models import (GymSession, GymGroup, GroupExercise,)
 
 def gym_group_create(request, session_id):
-    """
-    Add a gym type/group to a session.
-    """
 
     session = get_object_or_404(
         GymSession,
@@ -22,8 +19,10 @@ def gym_group_create(request, session_id):
     )
 
     if request.method == "POST":
-
-        form = GymGroupForm(request.POST)
+        form = GymGroupForm(
+            request.POST,
+            team=session.team,
+        )
 
         if form.is_valid():
 
@@ -33,20 +32,30 @@ def gym_group_create(request, session_id):
 
             form.save_m2m()
 
-            messages.success(request,
+            messages.success(
+                request,
                 "Gym group created successfully.",
             )
 
-            return redirect("gym_data:gym_session_detail",session_id=session.id,)
+            return redirect(
+                "gym_data:gym_session_detail",
+                session_id=session.id,
+            )
 
     else:
-        form = GymGroupForm()
+        form = GymGroupForm(
+            team=session.team,
+        )
 
     context = {
-                "form": form,
-                "session": session,
-            }
+        "form": form,
+        "session": session,
+    }
 
-    return render(request, "gym_data/group_form.html", context,)
+    return render(
+        request,
+        "gym_data/group_form.html",
+        context,
+    )
 
 

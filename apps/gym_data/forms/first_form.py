@@ -1,13 +1,5 @@
 from django import forms
-from apps.gym_data.models import (
-    GymSession,
-    GymGroup,
-    GroupExercise,
-    GymType,
-    Exercise,
-    ExerciseCategory,
-)
-
+from apps.gym_data.models import (GymSession, GymGroup, GroupExercise, GymType, Exercise, ExerciseCategory,)
 
 class GymSessionForm(forms.ModelForm):
 
@@ -17,15 +9,10 @@ class GymSessionForm(forms.ModelForm):
 
         widgets = {
             "date": forms.DateInput(
-                attrs={
-                    "type": "date",
-                    "class": "form-control",
-                }
+                attrs={ "type": "date", "class": "form-control",}
             ),
             "team": forms.Select(
-                attrs={
-                    "class": "form-select",
-                }
+                attrs={"class": "form-select",}
             ),
         }
 
@@ -42,13 +29,17 @@ class GymGroupForm(forms.ModelForm):
                     "class": "form-select",
                 }
             ),
-            "players": forms.SelectMultiple(
-                attrs={
-                    "class": "form-select player-select",
-                }
-            ),
         }
 
+    def __init__(self, *args, team=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if team:
+            self.fields["players"].queryset = team.players.all()
+        else:
+            self.fields["players"].queryset = (
+                self.fields["players"].queryset.none()
+            )
 
 class GroupExerciseForm(forms.ModelForm):
 

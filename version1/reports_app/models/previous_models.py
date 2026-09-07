@@ -165,7 +165,7 @@ class Result(models.Model):
 
 class TrainingSessionType(models.TextChoices):
     TEAM = "TEAM", "Team Training"
-    GYM = "GYM", "Gym Session"
+    #GYM = "GYM", "Gym Session"
     INDIVIDUAL = "INDIVIDUAL", "Individual Training"
 
 

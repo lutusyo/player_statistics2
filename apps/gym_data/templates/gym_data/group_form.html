@@ -2,6 +2,60 @@
 
 {% block content %}
 
+<style>
+
+.player-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.player-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+
+    padding: 12px !important;
+
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+.player-item input[type="checkbox"] {
+    display: block !important;
+
+    width: 20px !important;
+    height: 20px !important;
+
+    min-width: 20px !important;
+    margin: 0 !important;
+
+    opacity: 1 !important;
+    visibility: visible !important;
+
+    appearance: auto !important;
+
+    cursor: pointer;
+}
+
+.player-item:hover {
+    background: #f5f5f5;
+}
+
+.player-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+</style>
+
+
 <div class="form-container">
 
     <div class="page-heading">
@@ -25,9 +79,14 @@
 
         {{ form.non_field_errors }}
 
+
+        <!-- GYM TYPE -->
+
         <div class="form-field">
 
-            <label>Gym Type</label>
+            <label for="{{ form.gym_type.id_for_label }}">
+                Gym Type
+            </label>
 
             {{ form.gym_type }}
 
@@ -40,22 +99,64 @@
 
             <label>Players</label>
 
-            {{ form.players }}
+            <div class="player-actions">
+
+                <button type="button"
+                        id="select-all"
+                        class="btn btn-outline">
+                    Select All
+                </button>
+
+                <button type="button"
+                        id="unselect-all"
+                        class="btn btn-outline">
+                    Unselect All
+                </button>
+
+            </div>
+
+
+            <div class="player-list">
+
+                {% for player in form.fields.players.queryset %}
+
+                    <label class="player-item">
+
+                        <input
+                            type="checkbox"
+                            name="players"
+                            value="{{ player.id }}"
+                            class="player-checkbox"
+                        >
+
+                        <span>
+                            {{ player }}
+                        </span>
+
+                    </label>
+
+                {% endfor %}
+
+            </div>
 
             {{ form.players.errors }}
 
         </div>
 
+        <!-- ACTIONS -->
 
         <div class="form-actions">
 
-            <a href="{% url 'gym_data:gym_session_detail' session.id %}"
-               class="btn btn-outline">
+            <a
+                href="{% url 'gym_data:gym_session_detail' session.id %}"
+                class="btn btn-outline">
                 Cancel
             </a>
 
-            <button class="btn btn-primary"
-                    type="submit">
+
+            <button
+                class="btn btn-primary"
+                type="submit">
                 Save Gym Type
             </button>
 
@@ -64,5 +165,47 @@
     </form>
 
 </div>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const selectAll =
+        document.getElementById("select-all");
+
+    const unselectAll =
+        document.getElementById("unselect-all");
+
+
+    function getCheckboxes() {
+
+        return document.querySelectorAll(
+            ".player-checkbox"
+        );
+
+    }
+
+
+    selectAll.addEventListener("click", function () {
+
+        getCheckboxes().forEach(function (checkbox) {
+            checkbox.checked = true;
+        });
+
+    });
+
+
+    unselectAll.addEventListener("click", function () {
+
+        getCheckboxes().forEach(function (checkbox) {
+            checkbox.checked = false;
+        });
+
+    });
+
+});
+
+</script>
 
 {% endblock %}
