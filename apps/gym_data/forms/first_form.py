@@ -1,5 +1,17 @@
 from django import forms
-from apps.gym_data.models import (GymSession, GymGroup, GroupExercise, GymType, Exercise, ExerciseCategory,)
+
+from apps.gym_data.models import (
+    GymSession,
+    GymGroup,
+    GroupExercise,
+    GymType,
+    Exercise,
+    ExerciseCategory,
+)
+
+from version1.teams_app.models import Team
+from django.forms import modelformset_factory
+
 
 class GymSessionForm(forms.ModelForm):
 
@@ -9,10 +21,15 @@ class GymSessionForm(forms.ModelForm):
 
         widgets = {
             "date": forms.DateInput(
-                attrs={ "type": "date", "class": "form-control",}
+                attrs={
+                    "type": "date",
+                    "class": "form-control",
+                }
             ),
             "team": forms.Select(
-                attrs={"class": "form-select",}
+                attrs={
+                    "class": "form-select",
+                }
             ),
         }
 
@@ -29,17 +46,26 @@ class GymGroupForm(forms.ModelForm):
                     "class": "form-select",
                 }
             ),
+            "players": forms.SelectMultiple(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
         }
 
     def __init__(self, *args, team=None, **kwargs):
         super().__init__(*args, **kwargs)
 
         if team:
-            self.fields["players"].queryset = team.players.all()
+            self.fields["players"].queryset = team.players.filter(
+                is_active=True,
+                status="SIGNED",
+            )
         else:
             self.fields["players"].queryset = (
                 self.fields["players"].queryset.none()
             )
+
 
 class GroupExerciseForm(forms.ModelForm):
 
@@ -80,10 +106,23 @@ class GroupExerciseForm(forms.ModelForm):
         }
 
 
+
+
+GroupExerciseFormSet = modelformset_factory(
+    GroupExercise,
+    form=GroupExerciseForm,
+    extra=3,
+    can_delete=True,
+)
+
+
+
+
+
 class GymReportFilterForm(forms.Form):
 
     team = forms.ModelChoiceField(
-        queryset=None,
+        queryset=Team.objects.all(),
         required=False,
         empty_label="All Teams",
         widget=forms.Select(
@@ -134,10 +173,3 @@ class GymReportFilterForm(forms.Form):
             }
         ),
     )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        from version1.teams_app.models import Team
-
-        self.fields["team"].queryset = Team.objects.all()

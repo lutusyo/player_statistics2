@@ -1,20 +1,16 @@
+#gym_group_create_view.py
+
 from django.contrib import messages
-from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 
-from ..forms import (
-    GymSessionForm,
-    GymGroupForm,
-    GroupExerciseForm,
-    GymReportFilterForm,
-)
+from ..forms import GymGroupForm
+from ..models import GymSession
 
-from ..models import (GymSession, GymGroup, GroupExercise,)
 
 def gym_group_create(request, session_id):
 
     session = get_object_or_404(
-        GymSession,
+        GymSession.objects.select_related("team"),
         id=session_id,
     )
 
@@ -57,5 +53,3 @@ def gym_group_create(request, session_id):
         "gym_data/group_form.html",
         context,
     )
-
-

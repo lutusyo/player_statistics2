@@ -3,4 +3,5 @@ from .first_form import  (
     GymGroupForm,
     GroupExerciseForm,
     GymReportFilterForm,
+    GroupExerciseFormSet,
 )

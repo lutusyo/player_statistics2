@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'gym_data/css/gym.css' %}">
+
+<div class="gym-container">
+
+    <div class="gym-header">
+
+        <div>
+
+            <span class="eyebrow">
+                ADD EXERCISES
+            </span>
+
+            <h1>
+                {{ group.gym_type.name }}
+            </h1>
+
+            <p>
+                {{ group.gym_session.team }}
+                —
+                {{ group.gym_session.date|date:"d F Y" }}
+            </p>
+
+        </div>
+
+        <div>
+
+            <a
+                href="{% url 'gym_data:gym_session_detail' group.gym_session.id %}"
+                class="btn btn-secondary"
+            >
+                ← Back
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="gym-card">
+
+        <div class="section-heading">
+
+            <div>
+                <h2>Exercises</h2>
+
+                <p class="muted">
+                    Add the exercises performed by this gym group.
+                </p>
+            </div>
+
+        </div>
+
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            {{ formset.management_form }}
+
+
+            <div class="exercise-form-table">
+
+                {% for form in formset %}
+
+                    <div class="exercise-input-row">
+
+                        {{ form.id }}
+
+                        <div>
+                            <label>Exercise</label>
+                            {{ form.exercise }}
+                        </div>
+
+                        <div>
+                            <label>Weight (kg)</label>
+                            {{ form.weight_kg }}
+                        </div>
+
+                        <div>
+                            <label>Sets</label>
+                            {{ form.sets }}
+                        </div>
+
+                        <div>
+                            <label>Reps</label>
+                            {{ form.reps }}
+                        </div>
+
+                        {% if form.DELETE %}
+                            <div>
+                                <label>Remove</label>
+                                {{ form.DELETE }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                    {% if form.errors %}
+                        <div class="form-errors">
+                            {{ form.errors }}
+                        </div>
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <a
+                    href="{% url 'gym_data:gym_session_detail' group.gym_session.id %}"
+                    class="btn btn-secondary"
+                >
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Save All Exercises
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

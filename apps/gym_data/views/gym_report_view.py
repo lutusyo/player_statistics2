@@ -1,9 +1,10 @@
-from django.contrib import messages
-from django.db.models import Prefetch
-from django.shortcuts import get_object_or_404, redirect, render
+#gym_report_view.py
 
-from ..forms import ( GymSessionForm, GymGroupForm, GroupExerciseForm, GymReportFilterForm,)
-from ..models import ( GymSession, GymGroup, GroupExercise,)
+from django.shortcuts import render
+
+from ..forms import GymReportFilterForm
+from ..models import GroupExercise
+
 
 def gym_report(request):
     """
@@ -12,7 +13,9 @@ def gym_report(request):
 
     form = GymReportFilterForm(request.GET or None)
 
-    exercises = (GroupExercise.objects.select_related(
+    exercises = (
+        GroupExercise.objects
+        .select_related(
             "gym_group",
             "gym_group__gym_session",
             "gym_group__gym_session__team",
@@ -20,7 +23,9 @@ def gym_report(request):
             "exercise",
             "exercise__category",
         )
-        .prefetch_related("gym_group__players",)
+        .prefetch_related(
+            "gym_group__players",
+        )
         .order_by(
             "-gym_group__gym_session__date",
             "gym_group__gym_session__team",
@@ -37,23 +42,37 @@ def gym_report(request):
         exercise = form.cleaned_data.get("exercise")
 
         if team:
-            exercises = exercises.filter(gym_group__gym_session__team=team)
+            exercises = exercises.filter(
+                gym_group__gym_session__team=team
+            )
 
         if start_date:
-            exercises = exercises.filter(gym_group__gym_session__date__gte=start_date)
+            exercises = exercises.filter(
+                gym_group__gym_session__date__gte=start_date
+            )
 
         if end_date:
-            exercises = exercises.filter(gym_group__gym_session__date__lte=end_date)
+            exercises = exercises.filter(
+                gym_group__gym_session__date__lte=end_date
+            )
 
         if category:
-            exercises = exercises.filter( exercise__category=category)
+            exercises = exercises.filter(
+                exercise__category=category
+            )
 
         if exercise:
-            exercises = exercises.filter(exercise=exercise)
+            exercises = exercises.filter(
+                exercise=exercise
+            )
 
     context = {
-            "form": form,
-            "exercises": exercises,
-            }
+        "form": form,
+        "exercises": exercises,
+    }
 
-    return render(request, "gym_data/report.html", context,)
+    return render(
+        request,
+        "gym_data/report.html",
+        context,
+    )
