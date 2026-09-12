@@ -28,7 +28,7 @@
         <a href="{% url 'matches_app:competition_season_teams' competition_season.id %}">Teams</a>
         <a href="{% url 'matches_app:competition_season_rules' competition_season.id %}">Rules</a>
         <a href="#">Match Data</a>
-        <a href="#">Goal Scorers</a>
+        <a href="{% url 'matches_app:competition_season_goal_scorers' competition_season.id %}">Goal Scorers</a>
         <a href="#">Player Statistics</a>
 
     </nav>

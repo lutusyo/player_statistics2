@@ -100,11 +100,8 @@
 
 
             <div>
-
-                <a href="{% url 'matches_app:match_result_update' match.id %}">
-                    Edit Result
-                </a>
-
+                <a href="{% url 'matches_app:competition_match_data' match.id %}">Match Data</a>
+                <a href="{% url 'matches_app:match_result_update' match.id %}">Edit Result</a>
             </div>
 
         </div>

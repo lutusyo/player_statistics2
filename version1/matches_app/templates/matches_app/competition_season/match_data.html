@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="page-header">
+
+        <h1>
+            Match Data
+        </h1>
+
+        <p>
+            {{ match.home_team.name }}
+            vs
+            {{ match.away_team.name }}
+        </p>
+
+    </div>
+
+
+    <!-- Match Header -->
+
+    <div class="match-header">
+
+        <div class="team">
+
+            {% if match.home_team.logo %}
+                <img
+                    src="{{ match.home_team.logo.url }}"
+                    alt="{{ match.home_team.name }}"
+                    width="80"
+                >
+            {% endif %}
+
+            <h2>
+                {{ match.home_team.name }}
+            </h2>
+
+        </div>
+
+
+        <div class="score">
+
+            <strong>
+                {{ match.home_score }}
+                -
+                {{ match.away_score }}
+            </strong>
+
+            <span>
+                {{ match.date|date:"d M Y" }}
+            </span>
+
+            {% if match.time %}
+                <span>
+                    {{ match.time|time:"H:i" }}
+                </span>
+            {% endif %}
+
+        </div>
+
+
+        <div class="team">
+
+            {% if match.away_team.logo %}
+                <img
+                    src="{{ match.away_team.logo.url }}"
+                    alt="{{ match.away_team.name }}"
+                    width="80"
+                >
+            {% endif %}
+
+            <h2>
+                {{ match.away_team.name }}
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <!-- Match Information -->
+
+    <div class="match-information">
+
+        <div>
+            <strong>Venue</strong>
+
+            {% if match.venue %}
+                <span>{{ match.venue.name }}</span>
+            {% else %}
+                <span>Not recorded</span>
+            {% endif %}
+        </div>
+
+
+        <div>
+            <strong>Status</strong>
+
+            <span>
+                {{ match.get_result_status_display }}
+            </span>
+        </div>
+
+
+        <div>
+            <strong>Competition</strong>
+
+            <span>
+                {{ match.competition_season }}
+            </span>
+        </div>
+
+    </div>
+
+
+    <!-- Goals -->
+
+    <div class="match-section">
+
+        <h2>
+            Goals
+        </h2>
+
+
+        {% for goal in goals %}
+
+            <div class="goal-row">
+
+                <span class="goal-minute">
+                    {{ goal.minute }}'
+                </span>
+
+
+                <div>
+
+                    {% if goal.player %}
+
+                        <strong>
+                            {{ goal.player.name }}
+                        </strong>
+
+                    {% else %}
+
+                        <strong>
+                            Unknown
+                        </strong>
+
+                    {% endif %}
+
+
+                    {% if goal.assist_by %}
+
+                        <span>
+                            Assist:
+                            {{ goal.assist_by.name }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                <span>
+                    {{ goal.team.name }}
+                </span>
+
+            </div>
+
+        {% empty %}
+
+            <p>
+                No goals have been tagged for this match.
+            </p>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- Attempts -->
+
+    <div class="match-section">
+
+        <h2>
+            Goal Attempts
+        </h2>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Time</th>
+                        <th>Team</th>
+                        <th>Player</th>
+                        <th>Outcome</th>
+                        <th>Body Part</th>
+                        <th>Location</th>
+                        <th>Assist</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for attempt in attempts %}
+
+                    <tr>
+
+                        <td>
+                            {{ attempt.minute }}:
+                            {{ attempt.second|stringformat:"02d" }}
+                        </td>
+
+                        <td>
+                            {{ attempt.team.name }}
+                        </td>
+
+                        <td>
+
+                            {% if attempt.player %}
+                                {{ attempt.player.name }}
+                            {% else %}
+                                Unknown
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ attempt.outcome }}
+                        </td>
+
+                        <td>
+                            {{ attempt.body_part }}
+                        </td>
+
+                        <td>
+                            {{ attempt.location_tag }}
+                        </td>
+
+                        <td>
+
+                            {% if attempt.assist_by %}
+                                {{ attempt.assist_by.name }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="7">
+                            No tagged events for this match.
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

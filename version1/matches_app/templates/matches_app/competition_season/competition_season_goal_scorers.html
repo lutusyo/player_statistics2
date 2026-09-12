@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="page-header">
+
+        <h1>
+            {{ competition_season.competition.name }}
+        </h1>
+
+        <p>
+            {{ competition_season.season }} — Goal Scorers
+        </p>
+
+    </div>
+
+
+    <!-- League Navigation -->
+
+    <div class="league-navigation">
+
+        <a href="{% url 'matches_app:competition_season_dashboard' competition_season.id %}">
+            Overview
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_standings' competition_season.id %}">
+            Standings
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_fixtures' competition_season.id %}">
+            Fixtures
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_results' competition_season.id %}">
+            Results
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_teams' competition_season.id %}">
+            Teams
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_rules' competition_season.id %}">
+            Rules
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_goal_scorers' competition_season.id %}">
+            Goal Scorers
+        </a>
+
+    </div>
+
+
+    <!-- Goal Scorers -->
+
+    <div class="scorers-card">
+
+        <div class="section-header">
+
+            <div>
+
+                <h2>
+                    Goal Scorers
+                </h2>
+
+                <p>
+                    Goals recorded from match event data
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>#</th>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th>Goals</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for scorer in goal_scorers %}
+
+                    <tr>
+
+                        <td>
+                            {{ forloop.counter }}
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ scorer.player__name }}
+                            </strong>
+                        </td>
+
+                        <td>
+                            {{ scorer.team__name }}
+                        </td>
+
+                        <td>
+                            <strong>
+                                {{ scorer.goals }}
+                            </strong>
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="4">
+                            No goal scorers recorded yet.
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
