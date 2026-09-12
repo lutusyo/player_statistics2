@@ -87,14 +87,18 @@ class CompetitionTeam(models.Model):
         return ( f"{self.team} - " f"{self.competition_season}")
 
 
-
 class CompetitionRule(models.Model):
-    competition_season = models.OneToOneField(CompetitionSeason, on_delete=models.CASCADE, related_name="rules")
-    title = models.CharField(max_length=200)
-    content = models.TextField()
+    competition_season = models.ForeignKey(CompetitionSeason, on_delete=models.CASCADE, related_name="rules",)
+    title = models.CharField(max_length=150)
+    description = models.TextField()
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order", "id"]
 
     def __str__(self):
-        return f"Rules - {self.competition_season}"
+        return f"{self.competition_season} - {self.title}"
 
     
 

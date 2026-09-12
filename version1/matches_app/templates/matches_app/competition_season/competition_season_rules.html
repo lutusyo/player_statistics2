@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="page-header">
+
+        <h1>
+            {{ competition_season.competition.name }}
+        </h1>
+
+        <p>
+            {{ competition_season.season }} — Competition Rules
+        </p>
+
+    </div>
+
+
+    <!-- League Navigation -->
+
+    <div class="league-navigation">
+
+        <a href="{% url 'matches_app:competition_season_dashboard' competition_season.id %}">
+            Overview
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_standings' competition_season.id %}">
+            Standings
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_fixtures' competition_season.id %}">
+            Fixtures
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_results' competition_season.id %}">
+            Results
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_teams' competition_season.id %}">
+            Teams
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_rules' competition_season.id %}">
+            Rules
+        </a>
+
+    </div>
+
+
+    <!-- Rules -->
+
+    <div class="rules-card">
+
+        <div class="section-header">
+
+            <div>
+
+                <h2>
+                    Competition Rules
+                </h2>
+
+                <p>
+                    Official rules for
+                    {{ competition_season.competition.name }}
+                    {{ competition_season.season }}
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="rules-list">
+
+            {% for rule in rules %}
+
+                <div class="rule-item">
+
+                    <div class="rule-number">
+                        {{ forloop.counter }}
+                    </div>
+
+                    <div class="rule-content">
+
+                        <h3>
+                            {{ rule.title }}
+                        </h3>
+
+                        <p>
+                            {{ rule.description|linebreaksbr }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <div class="empty-state">
+
+                    <h3>
+                        No rules available
+                    </h3>
+
+                    <p>
+                        Competition rules have not been added yet.
+                    </p>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

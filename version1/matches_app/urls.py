@@ -4,7 +4,16 @@ from version1.matches_app.views import  ( career_stage, fixture_view, get_match_
 from version1.lineup_app.views import lineup_bila_uwanja, match_lineup_view_with_uwanja, substitution_panel
 from version1.lineup_app.views.substitution_panel import (substitution_panel, api_get_lists, api_finalize_substitution, api_undo_substitution,)
 from version1.matches_app.views import table_view
-from version1.matches_app.views import competition_season_view
+from version1.matches_app.views.competition_season import rules
+from version1.matches_app.views.competition_season.dashboard_view import competition_season_dashboard
+from version1.matches_app.views.competition_season.standings import competition_season_standings
+from version1.matches_app.views.competition_season.results_update import match_result_update
+from version1.matches_app.views.competition_season.fixture import competition_season_fixtures
+from version1.matches_app.views.competition_season.results import competition_season_results
+from version1.matches_app.views.competition_season.teams import competition_season_teams
+from version1.matches_app.views.competition_season.rules import competition_season_rules
+
+
 
 app_name = 'matches_app'
 
@@ -45,12 +54,14 @@ urlpatterns = [
 
 
     # Competition and Season
-    path("competitions/<int:competition_season_id>/", competition_season_view.competition_season_dashboard, name="competition_season_dashboard",),
-    path("competitions/<int:competition_season_id>/standings/", competition_season_view.competition_season_standings,name="competition_season_standings",),
-    path("matches/<int:match_id>/result/", competition_season_view.match_result_update, name="match_result_update",),
+    path("competitions/<int:competition_season_id>/", competition_season_dashboard, name="competition_season_dashboard",),
+    path("competitions/<int:competition_season_id>/standings/", competition_season_standings,name="competition_season_standings",),
+    path("matches/<int:match_id>/result/", match_result_update, name="match_result_update",),
 
-    path("competitions/<int:competition_season_id>/fixtures/", competition_season_view.competition_season_fixtures, name="competition_season_fixtures",),
-    path("competitions/<int:competition_season_id>/results/", competition_season_view.competition_season_results, name="competition_season_results",),
+    path("competitions/<int:competition_season_id>/fixtures/", competition_season_fixtures, name="competition_season_fixtures",),
+    path("competitions/<int:competition_season_id>/results/", competition_season_results, name="competition_season_results",),
+    path("competitions/<int:competition_season_id>/teams/",competition_season_teams, name="competition_season_teams",),
+    path("competitions/<int:competition_season_id>/rules/",rules.competition_season_rules, name="competition_season_rules",),
 
 ]
 

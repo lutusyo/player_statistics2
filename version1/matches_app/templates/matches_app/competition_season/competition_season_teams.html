@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="page-header">
+
+        <h1>
+            {{ competition_season.competition.name }}
+        </h1>
+
+        <p>
+            {{ competition_season.season }} — Teams
+        </p>
+
+    </div>
+
+
+    <!-- League Navigation -->
+
+    <div class="league-navigation">
+
+        <a href="{% url 'matches_app:competition_season_dashboard' competition_season.id %}">
+            Overview
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_standings' competition_season.id %}">
+            Standings
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_fixtures' competition_season.id %}">
+            Fixtures
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_results' competition_season.id %}">
+            Results
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_teams' competition_season.id %}">
+            Teams
+        </a>
+
+        <a href="#">
+            Rules
+        </a>
+
+    </div>
+
+
+    <!-- Teams -->
+
+    <div class="teams-card">
+
+        <div class="section-header">
+
+            <div>
+
+                <h2>
+                    Participating Teams
+                </h2>
+
+                <p>
+                    {{ teams|length }} teams
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="teams-grid">
+
+            {% for entry in teams %}
+
+                <div class="team-card">
+
+                    <div class="team-logo">
+
+                        {% if entry.team.logo %}
+
+                            <img
+                                src="{{ entry.team.logo.url }}"
+                                alt="{{ entry.team.name }}"
+                            >
+
+                        {% else %}
+
+                            <div class="team-logo-placeholder">
+                                {{ entry.team.name|first|upper }}
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="team-info">
+
+                        <h3>
+                            {{ entry.team.name }}
+                        </h3>
+
+
+                        {% if entry.team.short_name %}
+
+                            <p>
+                                {{ entry.team.short_name }}
+                            </p>
+
+                        {% endif %}
+
+
+                        {% if entry.team.age_group %}
+
+                            <span>
+                                {{ entry.team.age_group.name }}
+                            </span>
+
+                        {% endif %}
+
+
+                        {% if entry.team.country %}
+
+                            <span>
+                                {{ entry.team.country.name }}
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <div class="empty-state">
+
+                    <h3>
+                        No teams yet
+                    </h3>
+
+                    <p>
+                        No teams have been registered for this competition season.
+                    </p>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

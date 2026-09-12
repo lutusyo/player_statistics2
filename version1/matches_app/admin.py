@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from version1.matches_app.models import Country, Region, Venue, Match, Competition, CompetitionSeason, CompetitionTeam
+from version1.matches_app.models import Country, Region, Venue, Match, Competition, CompetitionSeason, CompetitionTeam, CompetitionRule
 
 
 class RegionInline(admin.TabularInline): # Inline for Regions in Country
@@ -43,11 +43,6 @@ class CompetitionAdmin(admin.ModelAdmin):
 
 
 
-
-
-
-
-
 @admin.register(CompetitionSeason)
 class CompetitionSeasonAdmin(admin.ModelAdmin):
     list_display = ("competition", "season", "is_active",)
@@ -60,10 +55,12 @@ class CompetitionTeamAdmin(admin.ModelAdmin):
     list_filter = ("competition_season","is_active",)
     search_fields = ("team__name","team__short_name",)
 
-
-
-
-
+@admin.register(CompetitionRule)
+class CompetitionRuleAdmin(admin.ModelAdmin):
+    list_display = ("title", "competition_season", "order", "is_active",)
+    list_filter = ("competition_season", "is_active",)
+    search_fields = ("title", "description",)
+    ordering = ("competition_season", "order",)
 
 
 @admin.register(Match)                  # Match Admin
