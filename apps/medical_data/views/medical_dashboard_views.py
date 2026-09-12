@@ -17,43 +17,23 @@ from apps.medical_data.models.medical_recovery_plan import (
 def medical_dashboard(request):
 
     today = timezone.localdate()
-
-    # ============================================================
     # BASE QUERYSET
-    # ============================================================
-
     visits = MedicalVisit.objects.all()
-
-    # ============================================================
     # BASIC VISIT STATISTICS
-    # ============================================================
-
     total_records = visits.count()
-
-    visits_today = visits.filter(
-        date=today
-    ).count()
+    visits_today = visits.filter(date=today).count()
 
     visits_this_month = visits.filter(
         date__year=today.year,
         date__month=today.month,
     ).count()
 
-    new_injuries = visits.filter(
-        visit_type="new_injury"
-    ).count()
+    new_injuries = visits.filter(visit_type="new_injury").count()
 
-    regular_checkups = visits.filter(
-        visit_type="regular_checkup"
-    ).count()
+    regular_checkups = visits.filter(visit_type="regular_checkup").count()
 
-    # ============================================================
     # AVAILABILITY STATISTICS
-    # ============================================================
-
-    available_players = visits.filter(
-        availability_status="available"
-    ).count()
+    available_players = visits.filter(availability_status="available").count()
 
     restricted_players = visits.filter(
         availability_status="restricted"
@@ -63,10 +43,7 @@ def medical_dashboard(request):
         availability_status="unavailable"
     ).count()
 
-    # ============================================================
     # RECOVERY PLAN STATISTICS
-    # ============================================================
-
     active_recovery_plans = MedicalRecoveryPlan.objects.filter(
         status__in=[
             RecoveryPlanStatus.ACTIVE,
@@ -82,9 +59,7 @@ def medical_dashboard(request):
         status=RecoveryPlanStatus.CANCELLED
     ).count()
 
-    # ============================================================
     # INJURIES BY COMPLAINT
-    # ============================================================
 
     complaint_data = list(
         visits
@@ -139,9 +114,7 @@ def medical_dashboard(request):
         for item in team_data
     ]
 
-    # ============================================================
     # AVAILABILITY STATISTICS FOR CHART
-    # ============================================================
 
     availability_stats = (
         visits
@@ -150,10 +123,7 @@ def medical_dashboard(request):
         .order_by("-total")
     )
 
-    # ============================================================
     # VISITS OVER LAST 30 DAYS
-    # ============================================================
-
     start_date = today - timedelta(days=29)
 
     daily_data = list(
@@ -255,10 +225,7 @@ def medical_dashboard(request):
         )[:10]
     )
 
-    # ============================================================
     # CONTEXT
-    # ============================================================
-
     context = {
 
         "page_title": "Medical Dashboard",

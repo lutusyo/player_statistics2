@@ -1,3 +1,5 @@
+# matches_app/models.py
+
 from django.db import models
 from version1.teams_app.models import AgeGroup, Team
 from version1.players_app.models import Player
@@ -44,7 +46,64 @@ class Competition(models.Model):
     def __str__(self):
         return self.name
 
+
+class CompetitionSeason(models.Model):
+    competition = models.ForeignKey(Competition, on_delete=models.CASCADE, related_name="seasons")
+    season = models.CharField(max_length=20, choices=SeasonChoices.choices)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["competition", "season"],
+                name="unique_competition_season"
+            )
+        ]
+        ordering = ["-season"]
+
+    def __str__(self):
+        return f"{self.competition.name} - {self.season}"
+
+    
+
+
+
+
+class CompetitionTeam(models.Model):
+    competition_season = models.ForeignKey(CompetitionSeason,on_delete=models.CASCADE, related_name="participating_teams")
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="competition_entries")
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["competition_season", "team"],
+                name="unique_team_in_competition_season"
+            )
+        ]
+        ordering = ["team__name"]
+
+    def __str__(self):
+        return ( f"{self.team} - " f"{self.competition_season}")
+
+
+
+class CompetitionRule(models.Model):
+    competition_season = models.OneToOneField(CompetitionSeason, on_delete=models.CASCADE, related_name="rules")
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+
+    def __str__(self):
+        return f"Rules - {self.competition_season}"
+
+    
+
+
+
 class Match(models.Model):
+
+    competition_season = models.ForeignKey( CompetitionSeason, on_delete=models.SET_NULL, null=True, blank=True, related_name="matches")
+
     home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home_matches')
     away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_matches')
     date = models.DateField()
@@ -68,6 +127,18 @@ class Match(models.Model):
     opponent_yellow_cards = models.PositiveIntegerField(default=0)
     opponent_red_cards = models.PositiveIntegerField(default=0)
     rating_links_sent = models.BooleanField(default=False)
+
+    home_score = models.PositiveIntegerField(default=0)
+    away_score = models.PositiveIntegerField(default=0)
+    result_status = models.CharField(max_length=20,
+    choices=[
+        ("SCHEDULED", "Scheduled"),
+        ("LIVE", "Live"),
+        ("FINISHED", "Finished"),
+        ("POSTPONED", "Postponed"),
+        ("CANCELLED", "Cancelled"),
+        ("ABANDONED", "Abandoned"),
+    ],default="SCHEDULED",)
 
     def __str__(self):
         return f"{self.home_team.name} vs {self.away_team.name} ({self.date})"
@@ -104,3 +175,6 @@ class Match(models.Model):
         if now >= self.end_time:
             return "ended"
         return "running"
+
+
+

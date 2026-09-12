@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="page-header">
+
+        <h1>Match Result</h1>
+
+        <p>
+            {{ match.date }}
+        </p>
+
+    </div>
+
+
+    <div class="match-result-card">
+
+        <div class="teams">
+
+            <div class="team">
+
+                {% if match.home_team.logo %}
+                    <img
+                        src="{{ match.home_team.logo.url }}"
+                        alt="{{ match.home_team.name }}"
+                        width="80"
+                    >
+                {% endif %}
+
+                <h2>
+                    {{ match.home_team.name }}
+                </h2>
+
+                <span>
+                    Home
+                </span>
+
+            </div>
+
+
+            <div class="vs">
+                VS
+            </div>
+
+
+            <div class="team">
+
+                {% if match.away_team.logo %}
+                    <img
+                        src="{{ match.away_team.logo.url }}"
+                        alt="{{ match.away_team.name }}"
+                        width="80"
+                    >
+                {% endif %}
+
+                <h2>
+                    {{ match.away_team.name }}
+                </h2>
+
+                <span>
+                    Away
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="score-fields">
+
+                <div>
+
+                    <label>
+                        {{ match.home_team.name }} Score
+                    </label>
+
+                    {{ form.home_score }}
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        {{ match.away_team.name }} Score
+                    </label>
+
+                    {{ form.away_score }}
+
+                </div>
+
+            </div>
+
+
+            <div class="status-field">
+
+                <label>
+                    Match Status
+                </label>
+
+                {{ form.result_status }}
+
+            </div>
+
+
+            {% if form.errors %}
+
+                <div class="form-errors">
+                    {{ form.errors }}
+                </div>
+
+            {% endif %}
+
+
+            <button type="submit">
+                Save Match Result
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

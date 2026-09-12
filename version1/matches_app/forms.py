@@ -13,3 +13,25 @@ class MatchForm(forms.ModelForm):
         model = Match
         fields = '__all__'
 
+
+
+class MatchResultForm(forms.ModelForm):
+
+    class Meta:
+        model = Match
+        fields = ["home_score", "away_score", "result_status",]
+
+        widgets = {
+            "home_score": forms.NumberInput(
+                attrs={"min": 0,"class": "form-control",}
+            ),
+
+            "away_score": forms.NumberInput(
+                attrs={"min": 0,"class": "form-control",}
+            ),
+
+            "result_status": forms.Select(
+                attrs={"class": "form-control",}
+            ),
+        }
+

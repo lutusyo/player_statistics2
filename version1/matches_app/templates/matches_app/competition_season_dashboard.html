@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="competition-dashboard">
+
+    <!-- HEADER -->
+
+    <div class="competition-header">
+
+        <div>
+            <p>COMPETITION</p>
+            <h1>{{ competition_season.competition.name }}</h1>
+            <h2>{{ competition_season.season }}</h2>
+        </div>
+
+    </div>
+
+
+    <!-- NAVIGATION -->
+
+    <nav class="competition-navigation">
+        <a href="#">Overview</a>
+        <a href="#">Schedule</a>
+        <a href="{% url 'matches_app:competition_season_fixtures' competition_season.id %}">Fixtures</a>
+        <a href="{% url 'matches_app:competition_season_results' competition_season.id %}">Results</a>
+        <a href="{% url 'matches_app:competition_season_standings' competition_season.id %}">Standingsllala</a>
+        <a href="#">Standings</a>
+        <a href="#">Teams</a>
+        <a href="#">Rules</a>
+        <a href="#">Match Data</a>
+        <a href="#">Goal Scorers</a>
+        <a href="#">Player Statistics</a>
+
+    </nav>
+
+
+    <!-- TEAMS -->
+
+    <section>
+
+        <h2>Participating Teams</h2>
+        <div>
+
+            {% for entry in participating_teams %}
+
+                <div>
+
+                    {% if entry.team.logo %}
+
+                        <img
+                            src="{{ entry.team.logo.url }}"
+                            alt="{{ entry.team.name }}"
+                            width="50"
+                        >
+
+                    {% endif %}
+
+                    <strong>
+                        {{ entry.team.name }}
+                    </strong>
+
+                    {% if entry.team.age_group %}
+
+                        <span>
+                            {{ entry.team.age_group.name }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            {% empty %}
+                <p>No teams have been added to this competition yet.</p>
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+
+    <!-- UPCOMING MATCHES -->
+
+    <section>
+
+        <h2>
+            Upcoming Fixtures
+        </h2>
+
+        {% for match in upcoming_matches %}
+
+            <div>
+
+                <strong>
+                    {{ match.home_team }}
+                </strong>
+
+                vs
+
+                <strong>
+                    {{ match.away_team }}
+                </strong>
+
+                <span>
+                    {{ match.date }}
+                </span>
+
+                {% if match.time %}
+
+                    <span>
+                        {{ match.time }}
+                    </span>
+
+                {% endif %}
+
+                {% if match.venue %}
+
+                    <span>
+                        {{ match.venue }}
+                    </span>
+
+                {% endif %}
+
+                <a href="{% url 'matches_app:match_result_update' match.id %}">Enter Result</a>
+
+            </div>
+
+        {% empty %}
+
+            <p>
+                No upcoming fixtures.
+            </p>
+
+        {% endfor %}
+
+    </section>
+
+
+    <!-- RECENT RESULTS -->
+
+    <section>
+
+        <h2>
+            Recent Results
+        </h2>
+
+        {% for match in recent_matches %}
+
+            <div>
+
+                <strong>
+                    {{ match.home_team }}
+                </strong>
+
+                vs
+
+                <strong>
+                    {{ match.away_team }}
+                </strong>
+
+                <span>
+                    {{ match.date }}
+                </span>
+
+            </div>
+
+        {% empty %}
+            <p>No results available.</p>
+        {% endfor %}
+
+    </section>
+
+</div>
+
+{% endblock %}

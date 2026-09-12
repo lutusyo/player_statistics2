@@ -1,5 +1,6 @@
-from django.db import models
+# tagging_app/models.py
 
+from django.db import models
 from version1.players_app.models import Player
 from version1.matches_app.models import Match
 from version1.teams_app.models import Team
@@ -89,6 +90,8 @@ class AttemptToGoal(models.Model):
         player_name = self.player.name if self.player else "Unknown"
         return f"{player_name} | {self.outcome} | {self.minute}:{self.second:02d}"
 
+    
+
 class PassEvent(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     from_player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='passes_made', null=True, blank=True)
@@ -100,7 +103,6 @@ class PassEvent(models.Model):
     minute = models.PositiveIntegerField()
     second = models.PositiveIntegerField()
     
-
     x_start = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     y_start = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     x_end = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
@@ -161,8 +163,7 @@ class GoalkeeperDistributionEvent(models.Model):
 
     involvement_duration = models.FloatField(
         help_text="Duration in seconds the goalkeeper had the ball",
-        null=True, blank=True
-    )
+        null=True, blank=True)
 
     timestamp = models.DateTimeField(auto_now_add=True)
 

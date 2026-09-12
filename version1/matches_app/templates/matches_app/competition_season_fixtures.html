@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="page-header">
+
+        <h1>{{ competition_season.competition.name }}</h1>
+        <p>{{ competition_season.season }} — Fixtures</p>
+
+    </div>
+
+
+    <div class="league-navigation">
+
+        <a href="{% url 'matches_app:competition_season_dashboard' competition_season.id %}">Overview</a>
+        <a href="{% url 'matches_app:competition_season_standings' competition_season.id %}">Standings</a>
+        <a href="{% url 'matches_app:competition_season_fixtures' competition_season.id %}">Fixtures</a>
+        <a href="{% url 'matches_app:competition_season_results' competition_season.id %}">Results</a>
+        <a href="#">Teams</a>
+        <a href="#">Rules</a>
+
+    </div>
+
+
+    <div class="fixtures-card">
+
+        <h2>Fixtures</h2>
+        {% for match in fixtures %}
+        <div class="fixture-row">
+            <div class="fixture-date">
+
+                <strong>{{ match.date|date:"D, d M Y" }}</strong>
+
+                {% if match.time %}
+                    <span>{{ match.time|time:"H:i" }}</span>
+                {% endif %}
+
+            </div>
+
+
+            <div class="fixture-teams">
+                <strong>{{ match.home_team.name }}</strong>
+                <span>vs</span>
+                <strong>{{ match.away_team.name }}</strong>
+            </div>
+
+
+            <div class="fixture-venue">
+
+                {% if match.venue %}
+                    {{ match.venue.name }}
+                {% else %}
+                    Venue TBC
+                {% endif %}
+
+            </div>
+
+
+            <div class="fixture-status">
+
+                {% if match.result_status == "LIVE" %}
+
+                    <span>
+                        LIVE
+                    </span>
+
+                {% else %}
+
+                    <span>
+                        Scheduled
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+            <div>
+                <a href="{% url 'matches_app:match_result_update' match.id %}">Enter Result</a>
+            </div>
+
+        </div>
+
+        {% empty %}
+
+            <p>
+                No fixtures available.
+            </p>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

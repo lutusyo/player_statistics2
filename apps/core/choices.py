@@ -28,6 +28,8 @@ class CompetitionType(models.TextChoices):
     NMB_MAPINDUZI_CUP = 'NMB Mapinduzi Cup', 'NMB Mapinduzi Cup'
     TOURNAMENT = 'Tournament', 'Tournament'
 
+    LEAGUE = 'League' , 'League'
+
 # For medical_data app
 class VisitType(models.TextChoices):
     REGULAR_CHECKUP = "regular_checkup", "Regular checkup"

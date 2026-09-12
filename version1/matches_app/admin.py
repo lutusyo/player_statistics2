@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from version1.matches_app.models import Country, Region, Venue, Match, Competition
+from version1.matches_app.models import Country, Region, Venue, Match, Competition, CompetitionSeason, CompetitionTeam
+
 
 class RegionInline(admin.TabularInline): # Inline for Regions in Country
     model = Region
@@ -39,6 +40,31 @@ class CompetitionAdmin(admin.ModelAdmin):
             return format_html('<img src="{}" width="30" />', obj.logo.url)
         return "-"
     logo_preview.short_description = "Logo"
+
+
+
+
+
+
+
+
+@admin.register(CompetitionSeason)
+class CompetitionSeasonAdmin(admin.ModelAdmin):
+    list_display = ("competition", "season", "is_active",)
+    list_filter = ("competition","season","is_active",)
+
+
+@admin.register(CompetitionTeam)
+class CompetitionTeamAdmin(admin.ModelAdmin):
+    list_display = ("competition_season", "team", "is_active",)
+    list_filter = ("competition_season","is_active",)
+    search_fields = ("team__name","team__short_name",)
+
+
+
+
+
+
 
 @admin.register(Match)                  # Match Admin
 class MatchAdmin(admin.ModelAdmin):

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="page-header">
+
+        <h1>
+            {{ competition_season.competition.name }}
+        </h1>
+
+        <p>
+            {{ competition_season.season }} — Results
+        </p>
+
+    </div>
+
+
+    <div class="league-navigation">
+
+        <a href="{% url 'matches_app:competition_season_dashboard' competition_season.id %}">
+            Overview
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_standings' competition_season.id %}">
+            Standings
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_fixtures' competition_season.id %}">
+            Fixtures
+        </a>
+
+        <a href="{% url 'matches_app:competition_season_results' competition_season.id %}">
+            Results
+        </a>
+
+        <a href="#">
+            Teams
+        </a>
+
+        <a href="#">
+            Rules
+        </a>
+
+    </div>
+
+
+    <div class="results-card">
+
+        <h2>Results</h2>
+
+        {% for match in results %}
+
+        <div class="result-row">
+
+            <div class="result-date">
+
+                <strong>
+                    {{ match.date|date:"D, d M Y" }}
+                </strong>
+
+                {% if match.time %}
+                    <span>
+                        {{ match.time|time:"H:i" }}
+                    </span>
+                {% endif %}
+
+            </div>
+
+
+            <div class="result-teams">
+
+                <strong>
+                    {{ match.home_team.name }}
+                </strong>
+
+                <strong class="score">
+                    {{ match.home_score }}
+                    -
+                    {{ match.away_score }}
+                </strong>
+
+                <strong>
+                    {{ match.away_team.name }}
+                </strong>
+
+            </div>
+
+
+            <div class="result-venue">
+
+                {% if match.venue %}
+                    {{ match.venue.name }}
+                {% else %}
+                    Venue not recorded
+                {% endif %}
+
+            </div>
+
+
+            <div>
+
+                <a href="{% url 'matches_app:match_result_update' match.id %}">
+                    Edit Result
+                </a>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+            <p>
+                No results available yet.
+            </p>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}
