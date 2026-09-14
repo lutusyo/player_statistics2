@@ -19,6 +19,7 @@ from version1.reports_app.views2.download_technical_report_ppt import download_t
 from version1.reports_app.views2.download_technical_report_excel import download_technical_report_excel
 from version1.reports_app.views2.preview_technical_report import preview_technical_report
 from version1.reports_app.views2.rating import rate_player, player_rating_list
+from version1.reports_app.views.training_min import training_minutes_entry
 
 app_name = 'reports_app'
 
@@ -130,6 +131,9 @@ urlpatterns = [
     path("aar/<int:report_id>/", aar_report_view.after_action_review_detail, name="aar_detail"),
     path("aar/<int:report_id>/pdf/", aar_report_view.download_aar_pdf, name="aar_pdf"),
     path("aar/<int:report_id>/ppt/", aar_report_view.download_aar_ppt, name="aar_ppt"),
+
+    # Training minutes
+        path( "training-minutes/", training_minutes_entry, name="training_minutes_entry",),
 ]
 
 

@@ -214,6 +214,40 @@
                     </ul>
                 </li>
 
+
+
+                <!-- Competitions -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                    href="#">
+                        Competitions
+                    </a>
+
+                    <ul class="dropdown-menu">
+
+                        {% for competition_season in competition_seasons %}
+                            <li>
+                                <a class="dropdown-item"
+                                href="{% url 'matches_app:competition_season_dashboard' competition_season.id %}">
+                                    {{ competition_season }}
+                                </a>
+                            </li>
+                        {% empty %}
+                            <li>
+                                <span class="dropdown-item text-muted">
+                                    No competitions
+                                </span>
+                            </li>
+                        {% endfor %}
+
+                    </ul>
+                </li>
+
+
+
+
+
                 <!-- Performance -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Performance</a>

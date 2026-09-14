@@ -97,6 +97,7 @@ TEMPLATES = [
 
                 # local
                 "version1.matches_app.context_processors.competitions_processor",
+                "version1.matches_app.context_processors.competition_seasons",
 
             ],
             'builtins': [

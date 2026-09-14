@@ -1,0 +1,911 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+
+.training-page {
+    max-width: 1400px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.page-header {
+    margin-bottom: 25px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 30px;
+}
+
+.page-header p {
+    color: #777;
+}
+
+
+/* ==========================================================
+   SETUP
+========================================================== */
+
+.setup-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.setup-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.load-btn {
+    margin-top: 20px;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+
+/* ==========================================================
+   DEFAULT MINUTES
+========================================================== */
+
+.minutes-control {
+    background: #fff;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.minutes-control input {
+    width: 100px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.minutes-control button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+
+/* ==========================================================
+   BOARD
+========================================================== */
+
+.training-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.drop-zone {
+    background: #f5f6f8;
+    border: 2px dashed #d5d7dc;
+    border-radius: 12px;
+    min-height: 300px;
+    padding: 15px;
+    transition: 0.2s;
+}
+
+.drop-zone.drag-over {
+    border-color: #333;
+    background: #eef0f3;
+}
+
+.zone-header {
+    margin-bottom: 15px;
+}
+
+.zone-header h3 {
+    margin: 0;
+    font-size: 17px;
+}
+
+.zone-header span {
+    font-size: 12px;
+    color: #777;
+}
+
+
+/* ==========================================================
+   PLAYER CARD
+========================================================== */
+
+.player-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    cursor: grab;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.player-card:active {
+    cursor: grabbing;
+}
+
+.player-name {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.player-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.minutes-input {
+    width: 70px;
+    padding: 7px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.other-team-select {
+    flex: 1;
+    padding: 7px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    display: none;
+}
+
+
+/* ==========================================================
+   SAVE
+========================================================== */
+
+.save-container {
+    margin-top: 25px;
+    text-align: right;
+}
+
+.save-btn {
+    padding: 14px 35px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width: 1000px) {
+
+    .training-board {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 700px) {
+
+    .setup-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .training-board {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+</style>
+
+
+<div class="training-page">
+
+
+    <!-- ======================================================
+         HEADER
+    ======================================================= -->
+
+    <div class="page-header">
+
+        <h1>
+            Training Minutes
+        </h1>
+
+        <p>
+            Drag players into the correct training status.
+        </p>
+
+    </div>
+
+
+
+    <!-- ======================================================
+         LOAD SESSION
+    ======================================================= -->
+
+    <form
+        method="GET"
+        id="load-form"
+    >
+
+        <div class="setup-card">
+
+            <div class="setup-grid">
+
+
+                <!-- TEAM -->
+
+                <div class="form-group">
+
+                    <label>
+                        Team
+                    </label>
+
+                    <select
+                        name="team"
+                        required
+                    >
+
+                        <option value="">
+                            Select Team
+                        </option>
+
+                        {% for team in teams %}
+
+                            <option
+                                value="{{ team.id }}"
+                                {% if selected_team and selected_team.id == team.id %}
+                                    selected
+                                {% endif %}
+                            >
+
+                                {{ team.name }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- DATE -->
+
+                <div class="form-group">
+
+                    <label>
+                        Date
+                    </label>
+
+                    <input
+                        type="date"
+                        name="date"
+                        value="{{ request.GET.date }}"
+                        required
+                    >
+
+                </div>
+
+
+
+                <!-- SESSION -->
+
+                <div class="form-group">
+
+                    <label>
+                        Session
+                    </label>
+
+                    <select
+                        name="session"
+                        required
+                    >
+
+                        {% for value, label in session_types %}
+
+                            <option
+                                value="{{ value }}"
+                                {% if request.GET.session == value %}
+                                    selected
+                                {% endif %}
+                            >
+
+                                {{ label }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="load-btn"
+            >
+                Load Players
+            </button>
+
+        </div>
+
+    </form>
+
+
+
+    {% if players %}
+
+
+    <!-- ======================================================
+         SAVE FORM
+    ======================================================= -->
+
+    <form
+        method="POST"
+        id="training-form"
+    >
+
+        {% csrf_token %}
+
+
+        <!-- Keep session information -->
+
+        <input
+            type="hidden"
+            name="team"
+            value="{{ selected_team.id }}"
+        >
+
+        <input
+            type="hidden"
+            name="date"
+            value="{{ request.GET.date }}"
+        >
+
+        <input
+            type="hidden"
+            name="session"
+            value="{{ request.GET.session }}"
+        >
+
+
+
+        <!-- ==================================================
+             DEFAULT MINUTES
+        =================================================== -->
+
+        <div class="minutes-control">
+
+            <strong>
+                Default Minutes
+            </strong>
+
+            <input
+                type="number"
+                id="default-minutes"
+                min="0"
+                max="300"
+                value="90"
+            >
+
+            <button
+                type="button"
+                id="apply-minutes"
+            >
+                Apply to Regular Players
+            </button>
+
+        </div>
+
+
+
+        <!-- ==================================================
+             TRAINING BOARD
+        =================================================== -->
+
+        <div class="training-board">
+
+
+            <!-- ==================================================
+                 REGULAR TEAM
+            =================================================== -->
+
+            <div
+                class="drop-zone"
+                data-participation="REGULAR"
+            >
+
+                <div class="zone-header">
+
+                    <h3>
+                        Regular Team
+                    </h3>
+
+                    <span>
+                        Training with {{ selected_team.name }}
+                    </span>
+
+                </div>
+
+
+                {% for player in players %}
+
+                    <div
+                        class="player-card"
+                        draggable="true"
+                        data-player-id="{{ player.id }}"
+                    >
+
+
+                        <div class="player-name">
+
+                            {{ player.name }}
+
+                            {% if player.second_name %}
+                                {{ player.second_name }}
+                            {% endif %}
+
+                            {% if player.surname %}
+                                {{ player.surname }}
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="player-controls">
+
+                            <input
+                                type="number"
+                                class="minutes-input"
+                                name="minutes_{{ player.id }}"
+                                value="0"
+                                min="0"
+                                max="300"
+                            >
+
+
+                            <select
+                                class="other-team-select"
+                                name="trained_with_team_{{ player.id }}"
+                            >
+
+                                <option value="">
+                                    Other team
+                                </option>
+
+                                {% for team in other_teams %}
+
+                                    {% if team.id != selected_team.id %}
+
+                                        <option value="{{ team.id }}">
+                                            {{ team.name }}
+                                        </option>
+
+                                    {% endif %}
+
+                                {% endfor %}
+
+                            </select>
+
+                        </div>
+
+
+                        <input
+                            type="hidden"
+                            class="participation-input"
+                            name="participation_{{ player.id }}"
+                            value="REGULAR"
+                        >
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 OTHER TEAM
+            =================================================== -->
+
+            <div
+                class="drop-zone"
+                data-participation="OTHER_TEAM"
+            >
+
+                <div class="zone-header">
+
+                    <h3>
+                        Other Team
+                    </h3>
+
+                    <span>
+                        U20 / Senior / other club team
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 NATIONAL TEAM
+            =================================================== -->
+
+            <div
+                class="drop-zone"
+                data-participation="NATIONAL_TEAM"
+            >
+
+                <div class="zone-header">
+
+                    <h3>
+                        National Team
+                    </h3>
+
+                    <span>
+                        With national team
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 INDIVIDUAL
+            =================================================== -->
+
+            <div
+                class="drop-zone"
+                data-participation="INDIVIDUAL"
+            >
+
+                <div class="zone-header">
+
+                    <h3>
+                        Individual Training
+                    </h3>
+
+                    <span>
+                        Individual programme
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 INJURED
+            =================================================== -->
+
+            <div
+                class="drop-zone"
+                data-participation="INJURED"
+            >
+
+                <div class="zone-header">
+
+                    <h3>
+                        Injured
+                    </h3>
+
+                    <span>
+                        Not available
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==================================================
+                 ABSENT
+            =================================================== -->
+
+            <div
+                class="drop-zone"
+                data-participation="ABSENT"
+            >
+
+                <div class="zone-header">
+
+                    <h3>
+                        Absent
+                    </h3>
+
+                    <span>
+                        Not present
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ==================================================
+             SAVE
+        =================================================== -->
+
+        <div class="save-container">
+
+            <button
+                type="submit"
+                class="save-btn"
+            >
+                Save Training Minutes
+            </button>
+
+        </div>
+
+    </form>
+
+    {% endif %}
+
+</div>
+
+
+
+<script>
+
+
+/* ==========================================================
+   DRAG & DROP
+========================================================== */
+
+let draggedPlayer = null;
+
+
+document.addEventListener(
+    "dragstart",
+    function(event) {
+
+        if (
+            event.target.classList.contains(
+                "player-card"
+            )
+        ) {
+
+            draggedPlayer = event.target;
+
+            event.target.style.opacity = "0.5";
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "dragend",
+    function(event) {
+
+        if (
+            event.target.classList.contains(
+                "player-card"
+            )
+        ) {
+
+            event.target.style.opacity = "1";
+
+        }
+
+        draggedPlayer = null;
+
+    }
+);
+
+
+
+document.querySelectorAll(
+    ".drop-zone"
+).forEach(function(zone) {
+
+
+    zone.addEventListener(
+        "dragover",
+        function(event) {
+
+            event.preventDefault();
+
+            zone.classList.add(
+                "drag-over"
+            );
+
+        }
+    );
+
+
+    zone.addEventListener(
+        "dragleave",
+        function() {
+
+            zone.classList.remove(
+                "drag-over"
+            );
+
+        }
+    );
+
+
+    zone.addEventListener(
+        "drop",
+        function(event) {
+
+            event.preventDefault();
+
+            zone.classList.remove(
+                "drag-over"
+            );
+
+
+            if (!draggedPlayer) {
+                return;
+            }
+
+
+            zone.appendChild(
+                draggedPlayer
+            );
+
+
+            updateParticipation(
+                draggedPlayer,
+                zone.dataset.participation
+            );
+
+        }
+    );
+
+});
+
+
+
+/* ==========================================================
+   PARTICIPATION
+========================================================== */
+
+function updateParticipation(
+    player,
+    participation
+) {
+
+    const participationInput =
+        player.querySelector(
+            ".participation-input"
+        );
+
+    const minutesInput =
+        player.querySelector(
+            ".minutes-input"
+        );
+
+    const otherTeamSelect =
+        player.querySelector(
+            ".other-team-select"
+        );
+
+
+    participationInput.value =
+        participation;
+
+
+    /*
+     * OTHER TEAM
+     */
+
+    if (
+        participation === "OTHER_TEAM"
+    ) {
+
+        otherTeamSelect.style.display =
+            "block";
+
+    }
+
+    else {
+
+        otherTeamSelect.style.display =
+            "none";
+
+        otherTeamSelect.value = "";
+
+    }
+
+
+    /*
+     * These statuses don't count
+     * as team training minutes.
+     */
+
+    if (
+        participation === "INJURED" ||
+        participation === "ABSENT"
+    ) {
+
+        minutesInput.value = 0;
+
+    }
+
+
+
+}
+
+
+
+/* ==========================================================
+   DEFAULT MINUTES
+========================================================== */
+
+document.getElementById(
+    "apply-minutes"
+)?.addEventListener(
+    "click",
+    function() {
+
+        const minutes =
+            document.getElementById(
+                "default-minutes"
+            ).value;
+
+
+        document.querySelectorAll(
+            '.drop-zone[data-participation="REGULAR"] .minutes-input'
+        ).forEach(
+            function(input) {
+
+                input.value = minutes;
+
+            }
+        );
+
+    }
+);
+
+</script>
+
+
+{% endblock %}

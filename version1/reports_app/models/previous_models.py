@@ -165,34 +165,64 @@ class Result(models.Model):
 
 class TrainingSessionType(models.TextChoices):
     TEAM = "TEAM", "Team Training"
-    #GYM = "GYM", "Gym Session"
     INDIVIDUAL = "INDIVIDUAL", "Individual Training"
 
 
+class TrainingParticipationType(models.TextChoices):
+    REGULAR = "REGULAR", "Regular Team"
+    OTHER_TEAM = "OTHER_TEAM", "Other Team"
+    NATIONAL_TEAM = "NATIONAL_TEAM", "National Team"
+    INDIVIDUAL = "INDIVIDUAL", "Individual Training"
+    INJURED = "INJURED", "Injured"
+    ABSENT = "ABSENT", "Absent"
+
+
 class TrainingMinutes(models.Model):
+
     date = models.DateField(default=timezone.now)
-    team = models.ForeignKey(Team,on_delete=models.CASCADE,related_name='training_minutes')
-    session = models.CharField(max_length=20,choices=TrainingSessionType.choices,default=TrainingSessionType.TEAM)
-    total_minutes = models.PositiveIntegerField(default=0)
+
+    team = models.ForeignKey(
+        Team,
+        on_delete=models.CASCADE,
+        related_name="training_minutes"
+    )
+
+    session = models.CharField(
+        max_length=20,
+        choices=TrainingSessionType.choices,
+        default=TrainingSessionType.TEAM
+    )
+
+    total_minutes = models.PositiveIntegerField(
+        default=0
+    )
 
     def __str__(self):
         return f"{self.team.name} - {self.date} - {self.session}"
 
     def save(self, *args, **kwargs):
+
         creating = self.pk is None
+
         super().save(*args, **kwargs)
 
         if creating:
-            players = Player.objects.filter(team=self.team)
 
+            players = Player.objects.filter(
+                team=self.team
+            )
 
             for player in players:
+
                 PlayerTrainingMinutes.objects.get_or_create(
                     training_session=self,
                     player=player,
                     defaults={
-                        "minutes": self.total_minutes,
-                        "trained_with_team": player.team,
+                        "minutes": 0,
+                        "participation_type": (
+                            TrainingParticipationType.REGULAR
+                        ),
+                        "trained_with_team": self.team,
                     }
                 )
 
@@ -205,16 +235,49 @@ class TrainingMinutes(models.Model):
         ]
 
 class PlayerTrainingMinutes(models.Model):
-    training_session = models.ForeignKey(TrainingMinutes, on_delete=models.CASCADE, related_name='player_minutes')
-    player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='training_minutes')
-    trained_with_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="trained_players",null=True,blank=True)
-    minutes = models.PositiveIntegerField(default=0)
+
+    training_session = models.ForeignKey(
+        TrainingMinutes,
+        on_delete=models.CASCADE,
+        related_name="player_minutes"
+    )
+
+    player = models.ForeignKey(
+        Player,
+        on_delete=models.CASCADE,
+        related_name="training_minutes"
+    )
+
+    participation_type = models.CharField(
+        max_length=20,
+        choices=TrainingParticipationType.choices,
+        default=TrainingParticipationType.REGULAR
+    )
+
+    trained_with_team = models.ForeignKey(
+        Team,
+        on_delete=models.CASCADE,
+        related_name="trained_players",
+        null=True,
+        blank=True
+    )
+
+    minutes = models.PositiveIntegerField(
+        default=0
+    )
 
     class Meta:
-        unique_together = ('training_session', 'player')
+        unique_together = (
+            "training_session",
+            "player",
+        )
 
     def __str__(self):
-        return f"{self.player} - {self.training_session.date}: {self.minutes} min"
+        return (
+            f"{self.player} - "
+            f"{self.training_session.date}: "
+            f"{self.minutes} min"
+        )
     
 class TrainingAbsence(models.Model):
     REASON_CHOICE = [ ('INJURED', 'Injured'), ('SICK', 'Sick'), ('PERSONAL', 'Personal'), ('UNEXCUSED', 'Unexcused'),]
