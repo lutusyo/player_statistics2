@@ -1,10 +1,10 @@
 {% extends "base.html" %}
+
 {% load static %}
 
 {% block content %}
 
 <style>
-
 .training-page {
     max-width: 1400px;
     margin: 30px auto;
@@ -24,7 +24,6 @@
     color: #777;
 }
 
-
 /* ==========================================================
    SETUP
 ========================================================== */
@@ -34,7 +33,7 @@
     padding: 20px;
     border-radius: 12px;
     margin-bottom: 25px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
 .setup-grid {
@@ -67,7 +66,6 @@
     font-weight: 600;
 }
 
-
 /* ==========================================================
    DEFAULT MINUTES
 ========================================================== */
@@ -80,7 +78,7 @@
     display: flex;
     align-items: center;
     gap: 15px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
 .minutes-control input {
@@ -96,7 +94,6 @@
     border-radius: 7px;
     cursor: pointer;
 }
-
 
 /* ==========================================================
    BOARD
@@ -136,7 +133,6 @@
     color: #777;
 }
 
-
 /* ==========================================================
    PLAYER CARD
 ========================================================== */
@@ -147,7 +143,7 @@
     padding: 12px;
     margin-bottom: 10px;
     cursor: grab;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 .player-card:active {
@@ -166,20 +162,32 @@
 }
 
 .minutes-input {
-    width: 70px;
+    width: 80px;
     padding: 7px;
     border: 1px solid #ddd;
     border-radius: 6px;
 }
 
-.other-team-select {
-    flex: 1;
+.other-team-wrapper,
+.national-team-wrapper {
+    margin-top: 10px;
+}
+
+.other-team-wrapper label,
+.national-team-wrapper label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.other-team-select,
+.national-team-select {
+    width: 100%;
     padding: 7px;
     border: 1px solid #ddd;
     border-radius: 6px;
-    display: none;
 }
-
 
 /* ==========================================================
    SAVE
@@ -199,21 +207,17 @@
     cursor: pointer;
 }
 
-
 /* ==========================================================
    RESPONSIVE
 ========================================================== */
 
 @media (max-width: 1000px) {
-
     .training-board {
         grid-template-columns: repeat(2, 1fr);
     }
-
 }
 
 @media (max-width: 700px) {
-
     .setup-grid {
         grid-template-columns: 1fr;
     }
@@ -222,475 +226,531 @@
         grid-template-columns: 1fr;
     }
 
+    .minutes-control {
+        flex-wrap: wrap;
+    }
 }
-
 </style>
-
 
 <div class="training-page">
 
+```
+<!-- ======================================================
+     HEADER
+======================================================= -->
 
-    <!-- ======================================================
-         HEADER
-    ======================================================= -->
+<div class="page-header">
+    <h1>Training Minutes</h1>
 
-    <div class="page-header">
+    <p>
+        Drag players into the correct training status.
+    </p>
+</div>
 
-        <h1>
-            Training Minutes
-        </h1>
 
-        <p>
-            Drag players into the correct training status.
-        </p>
+<!-- ======================================================
+     LOAD SESSION
+======================================================= -->
+
+<form method="GET" id="load-form">
+
+    <div class="setup-card">
+
+        <div class="setup-grid">
+
+            <!-- TEAM -->
+
+            <div class="form-group">
+
+                <label for="team">
+                    Team
+                </label>
+
+                <select
+                    name="team"
+                    id="team"
+                    required
+                >
+
+                    <option value="">
+                        Select Team
+                    </option>
+
+                    {% for team in teams %}
+
+                        <option
+                            value="{{ team.id }}"
+                            {% if selected_team and selected_team.id == team.id %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ team.name }}
+
+                            {% if team.age_group %}
+                                - {{ team.age_group.code }}
+                            {% endif %}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- DATE -->
+
+            <div class="form-group">
+
+                <label for="date">
+                    Date
+                </label>
+
+                <input
+                    type="date"
+                    name="date"
+                    id="date"
+                    value="{{ request.GET.date }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- SESSION -->
+
+            <div class="form-group">
+
+                <label for="session">
+                    Session
+                </label>
+
+                <select
+                    name="session"
+                    id="session"
+                    required
+                >
+
+                    {% for value, label in session_types %}
+
+                        <option
+                            value="{{ value }}"
+                            {% if request.GET.session == value %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ label }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="load-btn"
+        >
+            Load Players
+        </button>
+
+    </div>
+
+</form>
+
+
+{% if players %}
+
+<!-- ======================================================
+     SAVE FORM
+======================================================= -->
+
+<form
+    method="POST"
+    id="training-form"
+>
+
+    {% csrf_token %}
+
+
+    <!-- SESSION INFORMATION -->
+
+    <input
+        type="hidden"
+        name="team"
+        value="{{ selected_team.id }}"
+    >
+
+    <input
+        type="hidden"
+        name="date"
+        value="{{ request.GET.date }}"
+    >
+
+    <input
+        type="hidden"
+        name="session"
+        value="{{ request.GET.session }}"
+    >
+
+
+    <!-- ==================================================
+         DEFAULT MINUTES
+    =================================================== -->
+
+    <div class="minutes-control">
+
+        <strong>
+            Default Minutes
+        </strong>
+
+        <input
+            type="number"
+            id="default-minutes"
+            min="0"
+            max="300"
+            value="90"
+        >
+
+        <button
+            type="button"
+            id="apply-minutes"
+        >
+            Apply to Regular Players
+        </button>
 
     </div>
 
 
+    <!-- ==================================================
+         TRAINING BOARD
+    =================================================== -->
 
-    <!-- ======================================================
-         LOAD SESSION
-    ======================================================= -->
-
-    <form
-        method="GET"
-        id="load-form"
-    >
-
-        <div class="setup-card">
-
-            <div class="setup-grid">
+    <div class="training-board">
 
 
-                <!-- TEAM -->
+        <!-- ==================================================
+             REGULAR TEAM
+        =================================================== -->
 
-                <div class="form-group">
+        <div
+            class="drop-zone"
+            data-participation="REGULAR"
+        >
 
-                    <label>
-                        Team
-                    </label>
+            <div class="zone-header">
 
-                    <select
-                        name="team"
-                        required
-                    >
+                <h3>
+                    Regular Team
+                </h3>
 
-                        <option value="">
-                            Select Team
-                        </option>
-
-                        {% for team in teams %}
-
-                            <option
-                                value="{{ team.id }}"
-                                {% if selected_team and selected_team.id == team.id %}
-                                    selected
-                                {% endif %}
-                            >
-
-                                {{ team.name }}
-
-                            </option>
-
-                        {% endfor %}
-
-                    </select>
-
-                </div>
-
-
-
-                <!-- DATE -->
-
-                <div class="form-group">
-
-                    <label>
-                        Date
-                    </label>
-
-                    <input
-                        type="date"
-                        name="date"
-                        value="{{ request.GET.date }}"
-                        required
-                    >
-
-                </div>
-
-
-
-                <!-- SESSION -->
-
-                <div class="form-group">
-
-                    <label>
-                        Session
-                    </label>
-
-                    <select
-                        name="session"
-                        required
-                    >
-
-                        {% for value, label in session_types %}
-
-                            <option
-                                value="{{ value }}"
-                                {% if request.GET.session == value %}
-                                    selected
-                                {% endif %}
-                            >
-
-                                {{ label }}
-
-                            </option>
-
-                        {% endfor %}
-
-                    </select>
-
-                </div>
+                <span>
+                    Training with {{ selected_team.name }}
+                </span>
 
             </div>
 
 
-            <button
-                type="submit"
-                class="load-btn"
-            >
-                Load Players
-            </button>
+            {% for player in players %}
 
-        </div>
+                <div
+                    class="player-card"
+                    draggable="true"
+                    data-player-id="{{ player.id }}"
+                >
 
-    </form>
+                    <div class="player-name">
 
+                        {{ player.name }}
 
+                        {% if player.second_name %}
+                            {{ player.second_name }}
+                        {% endif %}
 
-    {% if players %}
-
-
-    <!-- ======================================================
-         SAVE FORM
-    ======================================================= -->
-
-    <form
-        method="POST"
-        id="training-form"
-    >
-
-        {% csrf_token %}
-
-
-        <!-- Keep session information -->
-
-        <input
-            type="hidden"
-            name="team"
-            value="{{ selected_team.id }}"
-        >
-
-        <input
-            type="hidden"
-            name="date"
-            value="{{ request.GET.date }}"
-        >
-
-        <input
-            type="hidden"
-            name="session"
-            value="{{ request.GET.session }}"
-        >
-
-
-
-        <!-- ==================================================
-             DEFAULT MINUTES
-        =================================================== -->
-
-        <div class="minutes-control">
-
-            <strong>
-                Default Minutes
-            </strong>
-
-            <input
-                type="number"
-                id="default-minutes"
-                min="0"
-                max="300"
-                value="90"
-            >
-
-            <button
-                type="button"
-                id="apply-minutes"
-            >
-                Apply to Regular Players
-            </button>
-
-        </div>
-
-
-
-        <!-- ==================================================
-             TRAINING BOARD
-        =================================================== -->
-
-        <div class="training-board">
-
-
-            <!-- ==================================================
-                 REGULAR TEAM
-            =================================================== -->
-
-            <div
-                class="drop-zone"
-                data-participation="REGULAR"
-            >
-
-                <div class="zone-header">
-
-                    <h3>
-                        Regular Team
-                    </h3>
-
-                    <span>
-                        Training with {{ selected_team.name }}
-                    </span>
-
-                </div>
-
-
-                {% for player in players %}
-
-                    <div
-                        class="player-card"
-                        draggable="true"
-                        data-player-id="{{ player.id }}"
-                    >
-
-
-                        <div class="player-name">
-
-                            {{ player.name }}
-
-                            {% if player.second_name %}
-                                {{ player.second_name }}
-                            {% endif %}
-
-                            {% if player.surname %}
-                                {{ player.surname }}
-                            {% endif %}
-
-                        </div>
-
-
-                        <div class="player-controls">
-
-                            <input
-                                type="number"
-                                class="minutes-input"
-                                name="minutes_{{ player.id }}"
-                                value="0"
-                                min="0"
-                                max="300"
-                            >
-
-
-                            <select
-                                class="other-team-select"
-                                name="trained_with_team_{{ player.id }}"
-                            >
-
-                                <option value="">
-                                    Other team
-                                </option>
-
-                                {% for team in other_teams %}
-
-                                    {% if team.id != selected_team.id %}
-
-                                        <option value="{{ team.id }}">
-                                            {{ team.name }}
-                                        </option>
-
-                                    {% endif %}
-
-                                {% endfor %}
-
-                            </select>
-
-                        </div>
-
-
-                        <input
-                            type="hidden"
-                            class="participation-input"
-                            name="participation_{{ player.id }}"
-                            value="REGULAR"
-                        >
+                        {% if player.surname %}
+                            {{ player.surname }}
+                        {% endif %}
 
                     </div>
 
-                {% endfor %}
 
-            </div>
+                    <!-- MINUTES -->
 
+                    <div class="player-controls">
 
+                        <input
+                            type="number"
+                            class="minutes-input"
+                            name="minutes_{{ player.id }}"
+                            value="{% if player.training_record %}{{ player.training_record.minutes }}{% else %}90{% endif %}"
+                            min="0"
+                            max="300"
+                        >
 
-            <!-- ==================================================
-                 OTHER TEAM
-            =================================================== -->
+                        <span>
+                            min
+                        </span>
 
-            <div
-                class="drop-zone"
-                data-participation="OTHER_TEAM"
-            >
-
-                <div class="zone-header">
-
-                    <h3>
-                        Other Team
-                    </h3>
-
-                    <span>
-                        U20 / Senior / other club team
-                    </span>
-
-                </div>
-
-            </div>
+                    </div>
 
 
+                    <!-- OTHER TEAM -->
 
-            <!-- ==================================================
-                 NATIONAL TEAM
-            =================================================== -->
+                    <div
+                        class="other-team-wrapper"
+                        style="display: none;"
+                    >
 
-            <div
-                class="drop-zone"
-                data-participation="NATIONAL_TEAM"
-            >
+                        <label>
+                            Other Team
+                        </label>
 
-                <div class="zone-header">
+                        <select
+                            name="trained_with_team_{{ player.id }}"
+                            class="other-team-select"
+                        >
 
-                    <h3>
-                        National Team
-                    </h3>
+                            <option value="">
+                                Select Team
+                            </option>
 
-                    <span>
-                        With national team
-                    </span>
+                            {% for other_team in other_teams %}
 
-                </div>
+                                <option
+                                    value="{{ other_team.id }}"
+                                    {% if player.training_record and player.training_record.trained_with_team_id == other_team.id %}
+                                        selected
+                                    {% endif %}
+                                >
 
-            </div>
+                                    {{ other_team.name }}
 
+                                    {% if other_team.age_group %}
+                                        - {{ other_team.age_group.code }}
+                                    {% endif %}
 
+                                </option>
 
-            <!-- ==================================================
-                 INDIVIDUAL
-            =================================================== -->
+                            {% endfor %}
 
-            <div
-                class="drop-zone"
-                data-participation="INDIVIDUAL"
-            >
+                        </select>
 
-                <div class="zone-header">
-
-                    <h3>
-                        Individual Training
-                    </h3>
-
-                    <span>
-                        Individual programme
-                    </span>
-
-                </div>
-
-            </div>
+                    </div>
 
 
+                    <!-- NATIONAL TEAM -->
 
-            <!-- ==================================================
-                 INJURED
-            =================================================== -->
+                    <div
+                        class="national-team-wrapper"
+                        style="display: none;"
+                    >
 
-            <div
-                class="drop-zone"
-                data-participation="INJURED"
-            >
+                        <label>
+                            National Team
+                        </label>
 
-                <div class="zone-header">
+                        <select
+                            name="national_team_{{ player.id }}"
+                            class="national-team-select"
+                        >
 
-                    <h3>
-                        Injured
-                    </h3>
+                            <option value="">
+                                Select National Team
+                            </option>
 
-                    <span>
-                        Not available
-                    </span>
+                            {% for national_team in national_teams %}
 
-                </div>
+                                <option
+                                    value="{{ national_team.id }}"
+                                    {% if player.training_record and player.training_record.trained_with_team_id == national_team.id %}
+                                        selected
+                                    {% endif %}
+                                >
 
-            </div>
+                                    {{ national_team.name }}
+
+                                    {% if national_team.age_group %}
+                                        - {{ national_team.age_group.code }}
+                                    {% endif %}
+
+                                </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
 
 
+                    <!-- PARTICIPATION -->
 
-            <!-- ==================================================
-                 ABSENT
-            =================================================== -->
-
-            <div
-                class="drop-zone"
-                data-participation="ABSENT"
-            >
-
-                <div class="zone-header">
-
-                    <h3>
-                        Absent
-                    </h3>
-
-                    <span>
-                        Not present
-                    </span>
+                    <input
+                        type="hidden"
+                        class="participation-input"
+                        name="participation_{{ player.id }}"
+                        value="{% if player.training_record %}{{ player.training_record.participation_type }}{% else %}REGULAR{% endif %}"
+                    >
 
                 </div>
 
-            </div>
+            {% endfor %}
 
         </div>
-
 
 
         <!-- ==================================================
-             SAVE
+             OTHER TEAM
         =================================================== -->
 
-        <div class="save-container">
+        <div
+            class="drop-zone"
+            data-participation="OTHER_TEAM"
+        >
 
-            <button
-                type="submit"
-                class="save-btn"
-            >
-                Save Training Minutes
-            </button>
+            <div class="zone-header">
+
+                <h3>
+                    Other Team
+                </h3>
+
+                <span>
+                    U20 / Senior / other club team
+                </span>
+
+            </div>
 
         </div>
 
-    </form>
 
-    {% endif %}
+        <!-- ==================================================
+             NATIONAL TEAM
+        =================================================== -->
+
+        <div
+            class="drop-zone"
+            data-participation="NATIONAL_TEAM"
+        >
+
+            <div class="zone-header">
+
+                <h3>
+                    National Team
+                </h3>
+
+                <span>
+                    With national team
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             INDIVIDUAL
+        =================================================== -->
+
+        <div
+            class="drop-zone"
+            data-participation="INDIVIDUAL"
+        >
+
+            <div class="zone-header">
+
+                <h3>
+                    Individual Training
+                </h3>
+
+                <span>
+                    Individual programme
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             INJURED
+        =================================================== -->
+
+        <div
+            class="drop-zone"
+            data-participation="INJURED"
+        >
+
+            <div class="zone-header">
+
+                <h3>
+                    Injured
+                </h3>
+
+                <span>
+                    Not available
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             ABSENT
+        =================================================== -->
+
+        <div
+            class="drop-zone"
+            data-participation="ABSENT"
+        >
+
+            <div class="zone-header">
+
+                <h3>
+                    Absent
+                </h3>
+
+                <span>
+                    Not present
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         SAVE
+    =================================================== -->
+
+    <div class="save-container">
+
+        <button
+            type="submit"
+            class="save-btn"
+        >
+            Save Training Minutes
+        </button>
+
+    </div>
+
+</form>
+
+{% endif %}
+```
 
 </div>
 
-
-
 <script>
-
 
 /* ==========================================================
    DRAG & DROP
@@ -712,9 +772,7 @@ document.addEventListener(
             draggedPlayer = event.target;
 
             event.target.style.opacity = "0.5";
-
         }
-
     }
 );
 
@@ -730,14 +788,11 @@ document.addEventListener(
         ) {
 
             event.target.style.opacity = "1";
-
         }
 
         draggedPlayer = null;
-
     }
 );
-
 
 
 document.querySelectorAll(
@@ -754,7 +809,6 @@ document.querySelectorAll(
             zone.classList.add(
                 "drag-over"
             );
-
         }
     );
 
@@ -766,7 +820,6 @@ document.querySelectorAll(
             zone.classList.remove(
                 "drag-over"
             );
-
         }
     );
 
@@ -803,7 +856,6 @@ document.querySelectorAll(
 });
 
 
-
 /* ==========================================================
    PARTICIPATION
 ========================================================== */
@@ -818,94 +870,218 @@ function updateParticipation(
             ".participation-input"
         );
 
+    const otherWrapper =
+        player.querySelector(
+            ".other-team-wrapper"
+        );
+
+    const nationalWrapper =
+        player.querySelector(
+            ".national-team-wrapper"
+        );
+
     const minutesInput =
         player.querySelector(
             ".minutes-input"
         );
 
-    const otherTeamSelect =
-        player.querySelector(
-            ".other-team-select"
-        );
 
+    /* Save participation type */
 
     participationInput.value =
         participation;
 
 
-    /*
-     * OTHER TEAM
-     */
+    /* Hide selectors */
+
+    otherWrapper.style.display =
+        "none";
+
+    nationalWrapper.style.display =
+        "none";
+
+
+    /* ======================================================
+       REGULAR
+    ====================================================== */
 
     if (
+        participation === "REGULAR"
+    ) {
+
+        minutesInput.disabled =
+            false;
+
+    }
+
+
+    /* ======================================================
+       OTHER TEAM
+    ====================================================== */
+
+    else if (
         participation === "OTHER_TEAM"
     ) {
 
-        otherTeamSelect.style.display =
+        otherWrapper.style.display =
             "block";
 
-    }
-
-    else {
-
-        otherTeamSelect.style.display =
-            "none";
-
-        otherTeamSelect.value = "";
+        minutesInput.disabled =
+            false;
 
     }
 
 
-    /*
-     * These statuses don't count
-     * as team training minutes.
-     */
+    /* ======================================================
+       NATIONAL TEAM
+    ====================================================== */
 
-    if (
-        participation === "INJURED" ||
+    else if (
+        participation === "NATIONAL_TEAM"
+    ) {
+
+        nationalWrapper.style.display =
+            "block";
+
+        minutesInput.disabled =
+            false;
+
+    }
+
+
+    /* ======================================================
+       INDIVIDUAL
+    ====================================================== */
+
+    else if (
+        participation === "INDIVIDUAL"
+    ) {
+
+        minutesInput.disabled =
+            false;
+
+    }
+
+
+    /* ======================================================
+       INJURED
+    ====================================================== */
+
+    else if (
+        participation === "INJURED"
+    ) {
+
+        minutesInput.value =
+            0;
+
+        minutesInput.disabled =
+            true;
+
+    }
+
+
+    /* ======================================================
+       ABSENT
+    ====================================================== */
+
+    else if (
         participation === "ABSENT"
     ) {
 
-        minutesInput.value = 0;
+        minutesInput.value =
+            0;
+
+        minutesInput.disabled =
+            true;
 
     }
-
-
 
 }
 
 
-
 /* ==========================================================
-   DEFAULT MINUTES
+   APPLY DEFAULT MINUTES
 ========================================================== */
 
-document.getElementById(
-    "apply-minutes"
-)?.addEventListener(
-    "click",
-    function() {
-
-        const minutes =
-            document.getElementById(
-                "default-minutes"
-            ).value;
+const applyMinutesButton =
+    document.getElementById(
+        "apply-minutes"
+    );
 
 
-        document.querySelectorAll(
-            '.drop-zone[data-participation="REGULAR"] .minutes-input'
-        ).forEach(
-            function(input) {
+if (applyMinutesButton) {
 
-                input.value = minutes;
+    applyMinutesButton.addEventListener(
+        "click",
+        function() {
 
-            }
+            const defaultMinutes =
+                document.getElementById(
+                    "default-minutes"
+                ).value;
+
+
+            document
+                .querySelectorAll(
+                    '.player-card[data-player-id]'
+                )
+                .forEach(function(player) {
+
+                    const participation =
+                        player.querySelector(
+                            ".participation-input"
+                        ).value;
+
+
+                    const minutesInput =
+                        player.querySelector(
+                            ".minutes-input"
+                        );
+
+
+                    if (
+                        participation ===
+                        "REGULAR"
+                    ) {
+
+                        minutesInput.value =
+                            defaultMinutes;
+
+                    }
+
+                });
+
+        }
+    );
+
+}
+
+
+/* ==========================================================
+   RESTORE EXISTING PARTICIPATION STATES
+========================================================== */
+
+document
+    .querySelectorAll(".player-card")
+    .forEach(function(player) {
+
+        const participationInput =
+            player.querySelector(
+                ".participation-input"
+            );
+
+        if (!participationInput) {
+            return;
+        }
+
+
+        updateParticipation(
+            player,
+            participationInput.value
         );
 
-    }
-);
+    });
 
 </script>
-
 
 {% endblock %}
