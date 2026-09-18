@@ -76,12 +76,11 @@
 <!-- TEAM SWITCH -->
 
 <div style="margin-bottom: 10px;">
-    <a href="{% url 'lineup_app:create_lineup' match.id match.home_team.id %}" class="btn btn-primary">Home Team Lineup</a>
-    <a href="{% url 'lineup_app:create_lineup' match.id match.away_team.id %}" class="btn btn-secondary">Away Team Lineup</a>
+    <a href="{% url 'lineup_app:create_lineup' match.id match.home_team.id %}" class="btn btn-primary">Home Team </a>
+    <a href="{% url 'lineup_app:create_lineup' match.id match.away_team.id %}" class="btn btn-secondary">Away Team </a>
 </div>
 
 <!-- FORMATION -->
-
 <div>
     <select id="formation-select">
         <option value="">-- Select Formation --</option>
@@ -116,7 +115,7 @@
                  data-name="{{ player.name }}"
                  data-photo="{{ player.photo.url }}">
                 <img src="{{ player.photo.url }}">
-                <p>{{ player.name }} {{ player.surname }}</p>
+                <p>{{ player.name }} {{ player.second_name }} {{ player.surname }}</p>
             </div>
             {% endfor %}
         </div>

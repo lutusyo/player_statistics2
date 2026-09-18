@@ -64,10 +64,6 @@ class CompetitionSeason(models.Model):
     def __str__(self):
         return f"{self.competition.name} - {self.season}"
 
-    
-
-
-
 
 class CompetitionTeam(models.Model):
     competition_season = models.ForeignKey(CompetitionSeason,on_delete=models.CASCADE, related_name="participating_teams")

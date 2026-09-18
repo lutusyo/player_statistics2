@@ -1,51 +1,15 @@
-{% extends "base.html" %}
+{% extends "matches_app/competition_season/competition_season_base.html" %}
 
-{% block content %}
+{% block competition_content %}
 
 <div class="container">
 
     <div class="page-header">
-
-        <h1>
-            {{ competition_season.competition.name }}
-        </h1>
-
-        <p>
-            {{ competition_season.season }} — Competition Rules
-        </p>
-
+        <h1>{{ competition_season.competition.name }}</h1>
+        <p>{{ competition_season.season }} — Competition Rules</p>
     </div>
 
 
-    <!-- League Navigation -->
-
-    <div class="league-navigation">
-
-        <a href="{% url 'matches_app:competition_season_dashboard' competition_season.id %}">
-            Overview
-        </a>
-
-        <a href="{% url 'matches_app:competition_season_standings' competition_season.id %}">
-            Standings
-        </a>
-
-        <a href="{% url 'matches_app:competition_season_fixtures' competition_season.id %}">
-            Fixtures
-        </a>
-
-        <a href="{% url 'matches_app:competition_season_results' competition_season.id %}">
-            Results
-        </a>
-
-        <a href="{% url 'matches_app:competition_season_teams' competition_season.id %}">
-            Teams
-        </a>
-
-        <a href="{% url 'matches_app:competition_season_rules' competition_season.id %}">
-            Rules
-        </a>
-
-    </div>
 
 
     <!-- Rules -->

@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "matches_app/competition_season/competition_season_base.html" %}
 
-{% block content %}
+{% block competition_content %}
 
 <div class="container">
 
@@ -17,58 +17,16 @@
     </div>
 
 
-    <div class="league-navigation">
-
-        <a href="{% url 'matches_app:competition_season_dashboard' competition_season.id %}">
-            Overview
-        </a>
-
-        <a href="{% url 'matches_app:competition_season_standings' competition_season.id %}">
-            Standings
-        </a>
-
-        <a href="#">
-            Fixtures
-        </a>
-
-        <a href="#">
-            Results
-        </a>
-
-        <a href="#">
-            Teams
-        </a>
-
-        <a href="#">
-            Rules
-        </a>
-
-    </div>
-
-
     <div class="standings-card">
 
         <h2>League Table</h2>
-
         <div class="table-wrapper">
 
             <table>
-
                 <thead>
-
                     <tr>
-                        <th>#</th>
-                        <th>Team</th>
-                        <th>P</th>
-                        <th>W</th>
-                        <th>D</th>
-                        <th>L</th>
-                        <th>GF</th>
-                        <th>GA</th>
-                        <th>GD</th>
-                        <th>Pts</th>
+                        <th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
                     </tr>
-
                 </thead>
 
 
@@ -77,40 +35,14 @@
                     {% for row in standings %}
 
                     <tr>
-
-                        <td>
-                            {{ row.position }}
-                        </td>
-
-                        <td>
-                            <strong>
-                                {{ row.team.name }}
-                            </strong>
-                        </td>
-
-                        <td>
-                            {{ row.played }}
-                        </td>
-
-                        <td>
-                            {{ row.wins }}
-                        </td>
-
-                        <td>
-                            {{ row.draws }}
-                        </td>
-
-                        <td>
-                            {{ row.losses }}
-                        </td>
-
-                        <td>
-                            {{ row.goals_for }}
-                        </td>
-
-                        <td>
-                            {{ row.goals_against }}
-                        </td>
+                        <td>{{ row.position }}</td>
+                        <td><strong>{{ row.team.name }}</strong></td>
+                        <td>{{ row.played }}</td>
+                        <td>{{ row.wins }}</td>
+                        <td>{{ row.draws }}</td>
+                        <td>{{ row.losses }}</td>
+                        <td>{{ row.goals_for }}</td>
+                        <td>{{ row.goals_against }}</td>
 
                         <td>
                             {% if row.goal_difference > 0 %}
@@ -120,22 +52,15 @@
                             {% endif %}
                         </td>
 
-                        <td>
-                            <strong>
-                                {{ row.points }}
-                            </strong>
-                        </td>
-
+                        <td><strong>{{ row.points }}</strong></td>
                     </tr>
 
                     {% empty %}
 
                     <tr>
-
                         <td colspan="10">
                             No teams have been added to this competition yet.
                         </td>
-
                     </tr>
 
                     {% endfor %}

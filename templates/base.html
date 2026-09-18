@@ -159,184 +159,160 @@
     </style>
 </head>
 
-<body>
-<div id="page-wrapper">
+    <body>
+    <div id="page-wrapper">
+    <div id="header-wrapper">
 
-<div id="header-wrapper">
+    <header class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark">
 
+            <!-- Logo -->
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'home' %}">
+                <img src="{% static 'accounts_app/images/logo.png' %}" style="height:50px;">
+                <span>Azam FC Academy</span>
+            </a>
 
-<header class="container">
-    <nav class="navbar navbar-expand-lg navbar-dark">
+            <!-- ✅ HAMBURGER BUTTON (VERY IMPORTANT) -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-        <!-- Logo -->
-        <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'home' %}">
-            <img src="{% static 'accounts_app/images/logo.png' %}" style="height:50px;">
-            <span>Azam FC Academy</span>
-        </a>
+            <!-- ✅ COLLAPSIBLE MENU -->
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav ms-auto">
 
-        <!-- ✅ HAMBURGER BUTTON (VERY IMPORTANT) -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+                    <!-- Home -->
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}nav-active{% endif %}"
+                        href="{% url 'home' %}">Home</a></li>
 
-        <!-- ✅ COLLAPSIBLE MENU -->
-        <div class="collapse navbar-collapse" id="mainNavbar">
-            <ul class="navbar-nav ms-auto">
+                    <!-- Teams -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Teams</a>
+                        <ul class="dropdown-menu">
+                            {% for team in our_teams %}
+                                <li><a class="dropdown-item" href="{% url 'teams_app:team_squad' team.id %}">
+                                        {{ team.age_group.code }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
 
-                <!-- Home -->
-                <li class="nav-item">
-                    <a class="nav-link {% if request.resolver_match.url_name == 'home' %}nav-active{% endif %}"
-                    href="{% url 'home' %}">Home</a></li>
-
-                <!-- Teams -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Teams</a>
-                    <ul class="dropdown-menu">
-                        {% for team in our_teams %}
-                            <li><a class="dropdown-item" href="{% url 'teams_app:team_squad' team.id %}">
-                                    {{ team.age_group.code }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </li>
-
-                <!-- Matches -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Matches</a>
-                    <ul class="dropdown-menu">
-                        {% for team in our_teams %}
-                        <li>
-                            <a class="dropdown-item"
-                            href="{% url 'matches_app:team_results' team.age_group.code %}">
-                                {{ team.age_group.code }} Matches
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </li>
-
-
-
-                <!-- Competitions -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle"
-                    data-bs-toggle="dropdown"
-                    href="#">
-                        Competitions
-                    </a>
-
-                    <ul class="dropdown-menu">
-
-                        {% for competition_season in competition_seasons %}
+                    <!-- Matches -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Matches</a>
+                        <ul class="dropdown-menu">
+                            {% for team in our_teams %}
                             <li>
                                 <a class="dropdown-item"
-                                href="{% url 'matches_app:competition_season_dashboard' competition_season.id %}">
-                                    {{ competition_season }}
+                                href="{% url 'matches_app:team_results' team.age_group.code %}">
+                                    {{ team.age_group.code }} Matches
                                 </a>
                             </li>
-                        {% empty %}
-                            <li>
-                                <span class="dropdown-item text-muted">
-                                    No competitions
-                                </span>
-                            </li>
-                        {% endfor %}
-
-                    </ul>
-                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
 
 
 
+                    <!-- Competitions -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Competitions</a>
+
+                        <ul class="dropdown-menu">
+
+                            {% for competition_season in competition_seasons %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'matches_app:competition_season_dashboard' competition_season.id %}">{{ competition_season }}</a>
+                                </li>
+                            {% empty %}
+                                <li>
+                                    <span class="dropdown-item text-muted"> No competitions </span>
+                                </li>
+                            {% endfor %}
+
+                        </ul>
+                    </li>
 
 
-                <!-- Performance -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Performance</a>
 
-                    <ul class="dropdown-menu p-3 performance-dropdown">
-                        
-                        <!-- Technical Reports -->
-                        <li class="fw-bold text-white mb-1">Technical Reports</li>
-                        {% for team in our_teams %}
+                    <!-- Performance -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Performance</a>
+
+                        <ul class="dropdown-menu p-3 performance-dropdown">
+                            
+                            <!-- Technical Reports -->
+                            <li class="fw-bold text-white mb-1">Technical Reports</li>
+                            {% for team in our_teams %}
+                                <li><a class="dropdown-item"
+                                    href="{% url 'reports_app:reports_dashboard' team.id %}">
+                                        {{ team.age_group.code }}</a></li>
+                            {% endfor %}
+
+                            <li><hr class="dropdown-divider"></li>
+
+                            <!-- GPS -->
+                            <li class="fw-bold text-white mb-1">GPS Data</li>
+                            
+                            {% for team in our_teams %}
                             <li><a class="dropdown-item"
-                                href="{% url 'reports_app:reports_dashboard' team.id %}">
-                                    {{ team.age_group.code }}</a></li>
-                        {% endfor %}
+                                href="{% url 'gps_app:gps_list' team.id %}">
+                                    {{ team.age_group.code }}
+                                </a></li>
+                            {% endfor %}
 
-                        <li><hr class="dropdown-divider"></li>
+                            <li><hr class="dropdown-divider"></li>
 
-                        <!-- GPS -->
-                        <li class="fw-bold text-white mb-1">GPS Data</li>
-                        
-                        {% for team in our_teams %}
-                        <li><a class="dropdown-item"
-                            href="{% url 'gps_app:gps_list' team.id %}">
-                                {{ team.age_group.code }}
-                            </a></li>
-                        {% endfor %}
-
-                        <li><hr class="dropdown-divider"></li>
-
-                        <!-- Performance Evaluation -->
-                        <li class="fw-bold text-white mb-1">Performance Evaluation</li>
-                        {% for team in our_teams %}
-                        <li>
-                            <a class="dropdown-item"
-                            href="{% url 'performance_rating_app:performance_list' team.id %}">
-                                {{ team.age_group.code }}
-                            </a>
-                        </li>
-                        {% endfor %}
-                        <a class="dropdown-item" href="{% url 'psychology_app_v2:psychology_dashboard' %}">Psychology Dashboard</a>
+                            <!-- Performance Evaluation -->
+                            <li class="fw-bold text-white mb-1">Performance Evaluation</li>
+                            {% for team in our_teams %}
+                            <li>
+                                <a class="dropdown-item" href="{% url 'performance_rating_app:performance_list' team.id %}">{{ team.age_group.code }}</a>
+                            </li>
+                            {% endfor %}
+                            <a class="dropdown-item" href="{% url 'psychology_app_v2:psychology_dashboard' %}">Psychology Dashboard</a>
 
 
-                    </ul>
+                        </ul>
 
-                </li>
+                    </li>
 
-                <!-- Logout -->
-                {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <form method="POST" action="{% url 'accounts_app:logout' %}">
-                        {% csrf_token %}
-                        <button class="nav-link btn btn-link text-white">Logout</button></form>
-                </li>
-                {% endif %}
+                    <!-- Logout -->
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <form method="POST" action="{% url 'accounts_app:logout' %}">
+                            {% csrf_token %}
+                            <button class="nav-link btn btn-link text-white">Logout</button></form>
+                    </li>
+                    {% endif %}
 
-            </ul>
-        </div>
-    </nav>
+                </ul>
+            </div>
+        </nav>
 
-</header>
+    </header>
 
 
-</div>
-
-<div id="main-wrapper">
-    {% block content %}{% endblock %}
-</div>
-
-<div id="footer-wrapper">
-<footer class="container">
-    <div class="row">
-        <div class="col-md-6">
-            <h3>Contact</h3>
-            <p>Email: info@azamfc.co.tz</p>
-        </div>
-        <div class="col-md-6">
-            <h3>About</h3>
-            <p>Elite youth football development.</p>
-        </div>
     </div>
-</footer>
-</div>
 
-</div>
+    <div id="main-wrapper">
+        {% block content %}{% endblock %}
+    </div>
 
-<!-- BOOTSTRAP JS ONLY -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <div id="footer-wrapper">
+        <footer class="container">
+            <p>&copy; Azam FC Academy</p>
+            <!--<p>&copy; {new Date().getFullYear()}Azam FC Academy</p>-->
+        </footer>
+    </div>
 
-{% block extra_js %}
-{% endblock %}
+    </div>
 
-</body>
+    <!-- BOOTSTRAP JS ONLY -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% block extra_js %}
+    {% endblock %}
+
+    </body>
 </html>

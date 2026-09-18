@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "matches_app/competition_season/competition_season_base.html" %}
 
-{% block content %}
+{% block competition_content %}
 
 <div class="container">
 
@@ -13,41 +13,6 @@
         <p>
             {{ competition_season.season }} — Goal Scorers
         </p>
-
-    </div>
-
-
-    <!-- League Navigation -->
-
-    <div class="league-navigation">
-
-        <a href="{% url 'matches_app:competition_season_dashboard' competition_season.id %}">
-            Overview
-        </a>
-
-        <a href="{% url 'matches_app:competition_season_standings' competition_season.id %}">
-            Standings
-        </a>
-
-        <a href="{% url 'matches_app:competition_season_fixtures' competition_season.id %}">
-            Fixtures
-        </a>
-
-        <a href="{% url 'matches_app:competition_season_results' competition_season.id %}">
-            Results
-        </a>
-
-        <a href="{% url 'matches_app:competition_season_teams' competition_season.id %}">
-            Teams
-        </a>
-
-        <a href="{% url 'matches_app:competition_season_rules' competition_season.id %}">
-            Rules
-        </a>
-
-        <a href="{% url 'matches_app:competition_season_goal_scorers' competition_season.id %}">
-            Goal Scorers
-        </a>
 
     </div>
 
