@@ -13,28 +13,14 @@
 <div class="gym-header">
 
     <div>
-
-        <span class="eyebrow">
-            GYM SESSION
-        </span>
-
-        <h1>
-            {{ session.team }}
-        </h1>
-
-        <p>
-            {{ session.date|date:"l, d F Y" }}
-        </p>
-
+        <span class="eyebrow">GYM SESSION</span>
+        <h1>{{ session.team }}</h1>
+        <p>{{ session.date|date:"l, d F Y" }}</p>
     </div>
 
     <div>
-
-        <a href="{% url 'gym_data:gym_group_create' session.id %}"
-           class="btn btn-primary">
-            + Add Gym Type
-        </a>
-
+        <a href="{% url 'gym_data:gym_group_create' session.id %}" class="btn btn-primary"> + Add Gym Type</a>
+        <a href="{% url 'gym_data:group_exercises_create' session.id %}" class="btn btn-primary">+ Add Exercises</a>
     </div>
 
 </div>
@@ -107,16 +93,7 @@
         <div class="exercise-section">
 
             <div class="section-heading">
-
-                <h3>
-                    Exercises
-                </h3>
-
-                <a href="{% url 'gym_data:group_exercises_create' group.id %}"
-                   class="small-btn">
-                    + Add Exercises
-                </a>
-
+                <h3>Exercises</h3>
             </div>
 
 
@@ -155,22 +132,14 @@
             {% endfor %}
 
         </div>
-
     </div>
 
     {% empty %}
 
     <!-- NO GROUPS -->
     <div class="empty-dashboard">
-
-        <h2>
-            No gym types added
-        </h2>
-
-        <p>
-            Add the gym types used for this session.
-        </p>
-
+        <h2>No gym types added</h2>
+        <p>Add the gym types used for this session.</p>
     </div>
 
     {% endfor %}

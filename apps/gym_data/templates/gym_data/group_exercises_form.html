@@ -4,34 +4,31 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="{% static 'gym_data/css/gym.css' %}">
+<link
+    rel="stylesheet"
+    href="{% static 'gym_data/css/gym.css' %}"
+>
 
 <div class="gym-container">
+
+    <!-- HEADER -->
 
     <div class="gym-header">
 
         <div>
+            <span class="eyebrow">GYM EXERCISES</span>
 
-            <span class="eyebrow">
-                ADD EXERCISES
-            </span>
-
-            <h1>
-                {{ group.gym_type.name }}
-            </h1>
+            <h1>{{ session.team }}</h1>
 
             <p>
-                {{ group.gym_session.team }}
-                —
-                {{ group.gym_session.date|date:"d F Y" }}
+                {{ session.date|date:"l, d F Y" }}
             </p>
-
         </div>
 
         <div>
 
             <a
-                href="{% url 'gym_data:gym_session_detail' group.gym_session.id %}"
+                href="{% url 'gym_data:gym_session_detail' session.id %}"
                 class="btn btn-secondary"
             >
                 ← Back
@@ -42,80 +39,227 @@
     </div>
 
 
+    <!-- EXERCISE FORM -->
+
     <div class="gym-card">
 
         <div class="section-heading">
 
             <div>
-                <h2>Exercises</h2>
+
+                <h2>Exercise Data</h2>
 
                 <p class="muted">
-                    Add the exercises performed by this gym group.
+                    Add each exercise once, then enter KG, sets and reps for each group.
                 </p>
+
             </div>
 
         </div>
 
 
-        <form method="POST">
+        <form
+            method="POST"
+            id="exercise-form"
+        >
 
             {% csrf_token %}
 
-            {{ formset.management_form }}
+            <!-- Number of exercise rows -->
+            <input
+                type="hidden"
+                name="row_count"
+                id="row-count"
+                value="1"
+            >
 
 
-            <div class="exercise-form-table">
+            <div class="exercise-table-wrapper">
 
-                {% for form in formset %}
+                <table class="exercise-entry-table">
 
-                    <div class="exercise-input-row">
+                    <!-- GROUP HEADERS -->
 
-                        {{ form.id }}
+                    <thead>
 
-                        <div>
-                            <label>Exercise</label>
-                            {{ form.exercise }}
-                        </div>
+                        <tr>
 
-                        <div>
-                            <label>Weight (kg)</label>
-                            {{ form.weight_kg }}
-                        </div>
+                            <th class="exercise-column">
+                                Exercise
+                            </th>
 
-                        <div>
-                            <label>Sets</label>
-                            {{ form.sets }}
-                        </div>
+                            {% for group in groups %}
 
-                        <div>
-                            <label>Reps</label>
-                            {{ form.reps }}
-                        </div>
+                                <th
+                                    colspan="3"
+                                    class="group-header"
+                                >
+                                    {{ group.gym_type.name }}
+                                </th>
 
-                        {% if form.DELETE %}
-                            <div>
-                                <label>Remove</label>
-                                {{ form.DELETE }}
-                            </div>
-                        {% endif %}
+                            {% endfor %}
 
-                    </div>
+                            <th class="remove-column">
+                               
+                            </th>
 
-                    {% if form.errors %}
-                        <div class="form-errors">
-                            {{ form.errors }}
-                        </div>
-                    {% endif %}
+                        </tr>
 
-                {% endfor %}
+
+                        <!-- SUB HEADERS -->
+
+                        <tr>
+
+                            <th></th>
+
+                            {% for group in groups %}
+
+                                <th>KG</th>
+                                <th>SET</th>
+                                <th>REP</th>
+
+                            {% endfor %}
+
+                            <th></th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <!-- EXERCISE ROWS -->
+
+                    <tbody id="exercise-rows">
+
+                        <tr
+                            class="exercise-row"
+                            data-row-index="0"
+                        >
+
+                            <!-- EXERCISE -->
+
+                            <td>
+
+                                <select
+                                    name="exercise_0"
+                                    class="form-control exercise-select"
+                                    required
+                                >
+
+                                    <option value="">
+                                        Select exercise
+                                    </option>
+
+                                    {% for exercise in exercises %}
+
+                                        <option value="{{ exercise.id }}">
+                                            {{ exercise.name }}
+                                            — {{ exercise.category.name }}
+                                        </option>
+
+                                    {% endfor %}
+
+                                </select>
+
+                            </td>
+
+
+                            <!-- GROUP DATA -->
+
+                            {% for group in groups %}
+
+                                <!-- WEIGHT -->
+
+                                <td>
+
+                                    <input
+                                        type="number"
+                                        name="weight_0_{{ group.id }}"
+                                        class="form-control"
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="kg"
+                                    >
+
+                                </td>
+
+
+                                <!-- SETS -->
+
+                                <td>
+
+                                    <input
+                                        type="number"
+                                        name="sets_0_{{ group.id }}"
+                                        class="form-control"
+                                        min="1"
+                                        value="3"
+                                    >
+
+                                </td>
+
+
+                                <!-- REPS -->
+
+                                <td>
+
+                                    <input
+                                        type="number"
+                                        name="reps_0_{{ group.id }}"
+                                        class="form-control"
+                                        min="1"
+                                        value="8"
+                                    >
+
+                                </td>
+
+                            {% endfor %}
+
+
+                            <!-- REMOVE -->
+
+                            <td>
+
+                                <button
+                                    type="button"
+                                    class="remove-exercise"
+                                    title="Remove exercise"
+                                >
+                                    ×
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
 
             </div>
 
 
+            <!-- ADD EXERCISE -->
+
+            <div class="exercise-actions">
+
+                <button
+                    type="button"
+                    id="add-exercise"
+                    class="btn btn-outline"
+                >
+                    + Add Exercise
+                </button>
+
+            </div>
+
+
+            <!-- ACTIONS -->
+
             <div class="form-actions">
 
                 <a
-                    href="{% url 'gym_data:gym_session_detail' group.gym_session.id %}"
+                    href="{% url 'gym_data:gym_session_detail' session.id %}"
                     class="btn btn-secondary"
                 >
                     Cancel
@@ -135,5 +279,144 @@
     </div>
 
 </div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const rowsContainer = document.getElementById("exercise-rows");
+    const addButton = document.getElementById("add-exercise");
+    const rowCountInput = document.getElementById("row-count");
+
+    let rowIndex = 1;
+
+
+    function createExerciseRow() {
+
+        const firstRow = document.querySelector(".exercise-row");
+
+        const newRow = firstRow.cloneNode(true);
+
+        /*
+        Set row index
+        */
+        newRow.dataset.rowIndex = rowIndex;
+
+
+        /*
+        Exercise
+        */
+        const exerciseSelect =
+            newRow.querySelector(".exercise-select");
+
+        exerciseSelect.value = "";
+        exerciseSelect.name = `exercise_${rowIndex}`;
+
+
+        /*
+        Weight inputs
+        */
+        const weightInputs =
+            newRow.querySelectorAll('input[name^="weight_"]');
+
+        {% for group in groups %}
+
+        weightInputs[{{ forloop.counter0 }}].name =
+            `weight_${rowIndex}_{{ group.id }}`;
+
+        weightInputs[{{ forloop.counter0 }}].value = "";
+
+        {% endfor %}
+
+
+        /*
+        Sets inputs
+        */
+        const setsInputs =
+            newRow.querySelectorAll('input[name^="sets_"]');
+
+        {% for group in groups %}
+
+        setsInputs[{{ forloop.counter0 }}].name =
+            `sets_${rowIndex}_{{ group.id }}`;
+
+        setsInputs[{{ forloop.counter0 }}].value = "3";
+
+        {% endfor %}
+
+
+        /*
+        Reps inputs
+        */
+        const repsInputs =
+            newRow.querySelectorAll('input[name^="reps_"]');
+
+        {% for group in groups %}
+
+        repsInputs[{{ forloop.counter0 }}].name =
+            `reps_${rowIndex}_{{ group.id }}`;
+
+        repsInputs[{{ forloop.counter0 }}].value = "8";
+
+        {% endfor %}
+
+
+        /*
+        Add new row
+        */
+        rowsContainer.appendChild(newRow);
+
+
+        /*
+        Increase row count
+        */
+        rowIndex++;
+
+        rowCountInput.value = rowIndex;
+    }
+
+
+    /*
+    ADD EXERCISE
+    */
+    addButton.addEventListener(
+        "click",
+        createExerciseRow
+    );
+
+
+    /*
+    REMOVE EXERCISE
+    */
+    rowsContainer.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                event.target.classList.contains(
+                    "remove-exercise"
+                )
+            ) {
+
+                const rows =
+                    rowsContainer.querySelectorAll(
+                        ".exercise-row"
+                    );
+
+                if (rows.length > 1) {
+
+                    event.target
+                        .closest(".exercise-row")
+                        .remove();
+
+                }
+
+            }
+
+        }
+    );
+
+});
+</script>
 
 {% endblock %}

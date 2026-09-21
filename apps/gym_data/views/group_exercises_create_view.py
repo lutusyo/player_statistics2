@@ -1,61 +1,92 @@
 from django.contrib import messages
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 
-from ..forms import GroupExerciseFormSet
-from ..models import GymGroup
+from ..models import GymSession, Exercise, GroupExercise
 
 
-def group_exercises_create(request, group_id):
-    """
-    Add multiple exercises to one gym group.
-    """
+def group_exercises_create(request, session_id):
 
-    group = get_object_or_404(
-        GymGroup.objects.select_related(
-            "gym_session",
-            "gym_session__team",
-            "gym_type",
-        ),
-        id=group_id,
+    session = get_object_or_404(
+        GymSession.objects.select_related("team"),
+        id=session_id,
+    )
+
+    groups = list(
+        session.groups
+        .select_related("gym_type")
+        .prefetch_related("players")
+    )
+
+    exercises = (
+        Exercise.objects
+        .select_related("category")
+        .order_by("category__name", "name")
     )
 
     if request.method == "POST":
 
-        formset = GroupExerciseFormSet(
-            request.POST,
-            queryset=group.exercises.all(),
+        row_count = int(request.POST.get("row_count", 0))
+
+        with transaction.atomic():
+
+            for row_index in range(row_count):
+
+                exercise_id = request.POST.get(
+                    f"exercise_{row_index}"
+                )
+
+                if not exercise_id:
+                    continue
+
+                exercise = get_object_or_404(
+                    Exercise,
+                    id=exercise_id,
+                )
+
+                for group in groups:
+
+                    weight = request.POST.get(
+                        f"weight_{row_index}_{group.id}"
+                    )
+
+                    sets = request.POST.get(
+                        f"sets_{row_index}_{group.id}"
+                    ) or 3
+
+                    reps = request.POST.get(
+                        f"reps_{row_index}_{group.id}"
+                    ) or 8
+
+                    # If no weight was entered for this group,
+                    # don't create an exercise record.
+                    if not weight:
+                        continue
+
+                    GroupExercise.objects.update_or_create(
+                        gym_group=group,
+                        exercise=exercise,
+                        defaults={
+                            "weight_kg": weight,
+                            "sets": sets,
+                            "reps": reps,
+                        },
+                    )
+
+        messages.success(
+            request,
+            "All exercises were saved successfully.",
         )
 
-        if formset.is_valid():
-
-            exercises = formset.save(commit=False)
-
-            for exercise in exercises:
-                exercise.gym_group = group
-                exercise.save()
-
-            for deleted_exercise in formset.deleted_objects:
-                deleted_exercise.delete()
-
-            messages.success(
-                request,
-                "Exercises recorded successfully.",
-            )
-
-            return redirect(
-                "gym_data:gym_session_detail",
-                session_id=group.gym_session.id,
-            )
-
-    else:
-
-        formset = GroupExerciseFormSet(
-            queryset=group.exercises.all(),
+        return redirect(
+            "gym_data:gym_session_detail",
+            session_id=session.id,
         )
 
     context = {
-        "group": group,
-        "formset": formset,
+        "session": session,
+        "groups": groups,
+        "exercises": exercises,
     }
 
     return render(

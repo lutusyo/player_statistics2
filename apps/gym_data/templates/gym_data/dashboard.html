@@ -12,9 +12,7 @@
 
         <div>
             <span class="eyebrow">STRENGTH & CONDITIONING</span>
-
             <h1>Gym Training</h1>
-
             <p>
                 Record and monitor daily gym sessions,
                 exercises and player workloads.
@@ -22,35 +20,18 @@
         </div>
 
         <div class="header-actions">
-
-            <a href="{% url 'gym_data:gym_report' %}"
-               class="btn btn-outline">
-                📊 Reports
-            </a>
-
-            <a href="{% url 'gym_data:gym_session_create' %}"
-               class="btn btn-primary">
-                + New Session
-            </a>
-
+            <a href="{% url 'gym_data:gym_report' %}" class="btn btn-outline">📊 Reports</a>
+            <a href="{% url 'gym_data:gym_session_create' %}" class="btn btn-primary"> + New Session</a>
         </div>
-
     </div>
 
 
     <div class="session-grid">
-
         {% for session in sessions %}
-
         <div class="session-card">
-
             <div class="session-top">
-
                 <div>
-                    <span class="session-date">
-                        {{ session.date|date:"d M Y" }}
-                    </span>
-
+                    <span class="session-date">{{ session.date|date:"d M Y" }}</span>
                     <h2>{{ session.team }}</h2>
                 </div>
 
@@ -64,14 +45,10 @@
             <div class="group-list">
 
                 {% for group in session.groups.all %}
-
                 <div class="group-row">
 
                     <div>
-                        <strong>
-                            {{ group.gym_type.name }}
-                        </strong>
-
+                        <strong>{{ group.gym_type.name }}</strong>
                         <span>{{ group.players.count }} players</span>
                     </div>
                     <span class="arrow">→</span>

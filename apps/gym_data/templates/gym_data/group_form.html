@@ -85,11 +85,9 @@
         <div class="form-field">
 
             <label for="{{ form.gym_type.id_for_label }}">
-                Gym Type
-            </label>
+                Gym Type</label>
 
             {{ form.gym_type }}
-
             {{ form.gym_type.errors }}
 
         </div>
@@ -171,19 +169,13 @@
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    const selectAll =
-        document.getElementById("select-all");
-
-    const unselectAll =
-        document.getElementById("unselect-all");
+    const selectAll = document.getElementById("select-all");
+    const unselectAll = document.getElementById("unselect-all");
 
 
     function getCheckboxes() {
 
-        return document.querySelectorAll(
-            ".player-checkbox"
-        );
-
+        return document.querySelectorAll(".player-checkbox");
     }
 
 

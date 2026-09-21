@@ -1,66 +1,178 @@
 {% extends "matches_app/competition_season/competition_season_base.html" %}
 
 {% block competition_content %}
+
 <div class="container">
 
     <div class="page-header">
         <h1>{{ competition_season.competition.name }}</h1>
-        <p>{{ competition_season.season }} — Goal Scorers</p>
+        <p>{{ competition_season.season }} — Player Statistics</p>
     </div>
 
 
-    <!-- Goal Scorers -->
+    <!-- DATE FILTER -->
     <div class="scorers-card">
+
         <div class="section-header">
             <div>
-                <h2>Goal Scorers</h2>
-                <p>Goals recorded from match event data</p>
+                <h2>Filter by Date</h2>
+                <p>Select a start and end date</p>
+            </div>
+        </div>
+
+        <form method="get">
+
+            <div class="row">
+
+                <div class="col-md-5">
+                    <label for="start_date">
+                        <strong>Start Date</strong>
+                    </label>
+
+                    <input
+                        type="date"
+                        name="start_date"
+                        id="start_date"
+                        class="form-control"
+                        value="{{ start_date }}"
+                    >
+                </div>
+
+
+                <div class="col-md-5">
+                    <label for="end_date">
+                        <strong>End Date</strong>
+                    </label>
+
+                    <input
+                        type="date"
+                        name="end_date"
+                        id="end_date"
+                        class="form-control"
+                        value="{{ end_date }}"
+                    >
+                </div>
+
+
+                <div class="col-md-2 d-flex align-items-end">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary w-100"
+                    >
+                        Filter
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- PLAYER STATISTICS -->
+    <div class="scorers-card">
+
+        <div class="section-header">
+
+            <div>
+                <h2>Player Statistics</h2>
+                <p>
+                    Goals, assists and pre-assists recorded from match event data
+                </p>
             </div>
 
         </div>
 
+
         <div class="table-wrapper">
+
             <table>
+
                 <thead>
                     <tr>
-                        <th>#</th><th>Player</th><th>Team</th><th>Goals</th><th>Assists</th>
+                        <th>#</th>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th>Goals</th>
+                        <th>Assists</th>
+                        <th>Pre-Assists</th>
                     </tr>
                 </thead>
 
+
                 <tbody>
 
-                    {% for scorer in goal_scorers %}
+                    {% for player in player_statistics %}
+
                     <tr>
-                        <td>{{ forloop.counter }}</td>
 
                         <td>
-                            <strong>{{ scorer.player__name }}</strong>
+                            {{ forloop.counter }}
                         </td>
 
+
                         <td>
-                            <strong>{{ scorer.team__name }}</strong>
+                            <strong>
+                                {{ player.player_name }}
+                            </strong>
+                        </td>
+
+
+                        <td>
+                            <strong>
+                                {{ player.team_name }}
+                            </strong>
                             <br>
-                            <small>{{ scorer.team__age_group__name }}</small>
+                            <small>
+                                {{ player.age_group }}
+                            </small>
                         </td>
 
-                        <td><strong>{{ scorer.goals }}</strong></td>
-                        <td><strong>{{ scorer.assists }}</strong></td>
+
+                        <td>
+                            <strong>
+                                {{ player.goals }}
+                            </strong>
+                        </td>
+
+
+                        <td>
+                            <strong>
+                                {{ player.assists }}
+                            </strong>
+                        </td>
+
+
+                        <td>
+                            <strong>
+                                {{ player.pre_assists }}
+                            </strong>
+                        </td>
+
                     </tr>
+
 
                     {% empty %}
 
                     <tr>
-                        <td colspan="5">
-                            No goal scorers recorded yet.
+                        <td colspan="6">
+                            No player statistics recorded for the selected period.
                         </td>
                     </tr>
 
                     {% endfor %}
 
                 </tbody>
+
             </table>
+
         </div>
+
     </div>
+
 </div>
 
 {% endblock %}
