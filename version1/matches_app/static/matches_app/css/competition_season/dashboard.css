@@ -1,0 +1,371 @@
+/* =========================================================
+   COMPETITION OVERVIEW / DASHBOARD
+   ========================================================= */
+
+
+/* =========================================================
+   DASHBOARD CONTAINER
+   ========================================================= */
+
+.competition-dashboard {
+    width: 100%;
+}
+
+
+/* =========================================================
+   DASHBOARD SECTIONS
+   ========================================================= */
+
+.competition-dashboard section {
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+
+    padding: 22px;
+
+    margin-bottom: 20px;
+}
+
+
+/* Section heading */
+
+.competition-dashboard section h2 {
+    margin: 0 0 18px;
+
+    font-size: 19px;
+    font-weight: 700;
+
+    color: #111827;
+}
+
+
+/* =========================================================
+   PARTICIPATING TEAMS
+   ========================================================= */
+
+.competition-dashboard section:first-child > div {
+    display: grid;
+
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(220px, 1fr)
+    );
+
+    gap: 12px;
+}
+
+
+/* Individual team */
+
+.competition-dashboard section:first-child > div > div {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    min-height: 70px;
+
+    padding: 12px 14px;
+
+    background: #f9fafb;
+
+    border: 1px solid #eef0f2;
+
+    border-radius: 10px;
+
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease;
+}
+
+
+.competition-dashboard section:first-child > div > div:hover {
+    background: #f3f4f6;
+
+    border-color: #dfe3e8;
+}
+
+
+/* Team logo */
+
+.competition-dashboard section:first-child img {
+    width: 46px;
+    height: 46px;
+
+    object-fit: contain;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+}
+
+
+/* Team name */
+
+.competition-dashboard section:first-child strong {
+    display: block;
+
+    font-size: 14px;
+    font-weight: 650;
+
+    color: #111827;
+}
+
+
+/* Age group */
+
+.competition-dashboard section:first-child span {
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 12px;
+
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   UPCOMING FIXTURES
+   ========================================================= */
+
+.competition-dashboard section:nth-child(2) > div {
+    display: flex;
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 15px 0;
+
+    border-bottom: 1px solid #eef0f2;
+}
+
+
+.competition-dashboard section:nth-child(2) > div:last-child {
+    border-bottom: none;
+}
+
+
+/* Teams */
+
+.competition-dashboard section:nth-child(2) strong {
+    font-size: 14px;
+
+    font-weight: 650;
+
+    color: #111827;
+}
+
+
+/* VS */
+
+.competition-dashboard section:nth-child(2) > div {
+    color: #6b7280;
+}
+
+
+/* Date */
+
+.competition-dashboard section:nth-child(2) span {
+    font-size: 13px;
+
+    color: #6b7280;
+}
+
+
+/* Enter Result */
+
+.competition-dashboard section:nth-child(2) a {
+    margin-left: auto;
+
+    padding: 8px 13px;
+
+    background: #111827;
+
+    border-radius: 7px;
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    text-decoration: none;
+
+    white-space: nowrap;
+}
+
+
+.competition-dashboard section:nth-child(2) a:hover {
+    background: #374151;
+}
+
+
+/* =========================================================
+   RECENT RESULTS
+   ========================================================= */
+
+.competition-dashboard section:nth-child(3) > div {
+    display: grid;
+
+    grid-template-columns:
+        minmax(150px, 1fr)
+        auto
+        minmax(150px, 1fr)
+        110px;
+
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 15px 0;
+
+    border-bottom: 1px solid #eef0f2;
+}
+
+
+.competition-dashboard section:nth-child(3) > div:last-child {
+    border-bottom: none;
+}
+
+
+/* Home and away team */
+
+.competition-dashboard section:nth-child(3) strong {
+    font-size: 14px;
+
+    font-weight: 650;
+
+    color: #111827;
+}
+
+
+/* VS */
+
+.competition-dashboard section:nth-child(3) > div {
+    color: #6b7280;
+}
+
+
+/* Date */
+
+.competition-dashboard section:nth-child(3) span {
+    text-align: right;
+
+    font-size: 13px;
+
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   EMPTY STATES
+   ========================================================= */
+
+.competition-dashboard section > p {
+    margin: 0;
+
+    padding: 20px;
+
+    text-align: center;
+
+    background: #f9fafb;
+
+    border: 1px dashed #d1d5db;
+
+    border-radius: 8px;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    /* Teams */
+
+    .competition-dashboard section:first-child > div {
+        grid-template-columns: 1fr;
+    }
+
+
+    /* Fixtures */
+
+    .competition-dashboard section:nth-child(2) > div {
+        flex-wrap: wrap;
+
+        gap: 8px 12px;
+
+        padding: 14px 0;
+    }
+
+    .competition-dashboard section:nth-child(2) a {
+        margin-left: 0;
+    }
+
+
+    /* Results */
+
+    .competition-dashboard section:nth-child(3) > div {
+        grid-template-columns: 1fr auto;
+
+        gap: 8px 12px;
+    }
+
+    .competition-dashboard section:nth-child(3) span {
+        text-align: left;
+
+        grid-column: 1 / -1;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+    .competition-dashboard section {
+        padding: 16px;
+
+        border-radius: 10px;
+    }
+
+
+    .competition-dashboard section h2 {
+        font-size: 17px;
+    }
+
+
+    /* Fixture layout */
+
+    .competition-dashboard section:nth-child(2) > div {
+        display: grid;
+
+        grid-template-columns: 1fr auto;
+
+        gap: 8px;
+    }
+
+
+    .competition-dashboard section:nth-child(2) a {
+        grid-column: 1 / -1;
+
+        width: fit-content;
+    }
+
+
+    /* Results */
+
+    .competition-dashboard section:nth-child(3) > div {
+        grid-template-columns: 1fr;
+    }
+
+}

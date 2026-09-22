@@ -1,6 +1,9 @@
 {% extends "matches_app/competition_season/competition_season_base.html" %}
+{% load static %}
 
 {% block competition_content %}
+<link rel="stylesheet" href="{% static 'matches_app/css/competition_season/results.css' %}">
+
 
 <div class="container">
 
@@ -69,21 +72,20 @@
 
             </div>
 
-
-            <div>
+            <div class="result-actions">
                 <a href="{% url 'matches_app:competition_match_data' match.id %}">Match Data</a>
                 <a href="{% url 'matches_app:competition_match_centre' match.id %}">Match Centre</a>
-                <a href="{% url 'matches_app:match_result_update' match.id %}">Edit Result</a>
+                {% if request.user.is_staff %}
+                    <a href="{% url 'matches_app:match_result_update' match.id %}">
+                        Edit
+                    </a>
+                {% endif %}
             </div>
 
         </div>
 
         {% empty %}
-
-            <p>
-                No results available yet.
-            </p>
-
+            <p>No results available yet.</p>
         {% endfor %}
 
     </div>

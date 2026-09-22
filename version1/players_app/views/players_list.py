@@ -13,9 +13,20 @@ from version1.tagging_app.models import AttemptToGoal, PassEvent, GoalkeeperDist
 #from goalkeeping_app.models import GoalkeeperDistributionEvent
 from version1.defensive_app.models import PlayerDefensiveStats
 from version1.players_app.models import Player, PlayerCareerStage
+from django.contrib.admin.views.decorators import staff_member_required
+from apps.core.decorators import staff_required
 
-@login_required
+from django.shortcuts import render
+from collections import defaultdict
+
+from version1.teams_app.models import AgeGroup
+from version1.players_app.models import Player
+from apps.core.decorators import staff_required
+
+
+@staff_required
 def player_list(request):
+
     age_group_code = request.GET.get('age_group')
 
     players = Player.objects.filter(is_active=True)
@@ -30,16 +41,30 @@ def player_list(request):
         players = players.filter(age_group__code='U20')
 
     grouped_players = defaultdict(list)
+
     for player in players:
         grouped_players[player.position].append(player)
 
-    position_order = ['Goalkeeper', 'Defender', 'Midfielder', 'Forward']
-    age_groups = AgeGroup.objects.values_list('code', flat=True)
+    position_order = [
+        'Goalkeeper',
+        'Defender',
+        'Midfielder',
+        'Forward'
+    ]
 
-    return render(request, 'players_app/player_list.html', {
-        'grouped_players': grouped_players,
-        'position_order': position_order,
-        'players': players,
-        'age_groups': age_groups,
-        'selected_age_group': age_group_code
-    })
+    age_groups = AgeGroup.objects.values_list(
+        'code',
+        flat=True
+    )
+
+    return render(
+        request,
+        'players_app/player_list.html',
+        {
+            'grouped_players': grouped_players,
+            'position_order': position_order,
+            'players': players,
+            'age_groups': age_groups,
+            'selected_age_group': age_group_code,
+        }
+    )

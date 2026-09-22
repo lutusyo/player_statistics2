@@ -1,6 +1,12 @@
 {% extends "matches_app/competition_season/competition_season_base.html" %}
 
+{% load static %}
+
+
+
+
 {% block competition_content %}
+<link rel="stylesheet" href="{% static 'matches_app/css/competition_season/dashboard.css' %}">
 
 <div class="competition-dashboard">
 
@@ -8,35 +14,25 @@
 
 
     <!-- TEAMS -->
-
     <section>
 
         <h2>Participating Teams</h2>
         <div>
 
             {% for entry in participating_teams %}
-
                 <div>
-
                     {% if entry.team.logo %}
-
                         <img
                             src="{{ entry.team.logo.url }}"
                             alt="{{ entry.team.name }}"
-                            width="50"
-                        >
+                            width="50">
 
                     {% endif %}
 
-                    <strong>
-                        {{ entry.team.name }}
-                    </strong>
-
+                    <strong>{{ entry.team.name }}</strong>
                     {% if entry.team.age_group %}
 
-                        <span>
-                            {{ entry.team.age_group.name }}
-                        </span>
+                        <span>{{ entry.team.age_group.name }}</span>
 
                     {% endif %}
 
@@ -52,50 +48,44 @@
 
 
     <!-- UPCOMING MATCHES -->
-
     <section>
 
-        <h2>
-            Upcoming Fixtures
-        </h2>
-
+        <h2>Upcoming Fixtures</h2>
         {% for match in upcoming_matches %}
 
-            <div>
+            <div class="dashboard-match-row">
 
-                <strong>
-                    {{ match.home_team }}
-                </strong>
+                <div class="dashboard-match-teams">
+                    <strong>{{ match.home_team }}</strong>
+                    <span>vs</span>
+                    <strong>{{ match.away_team }}</strong>
+                </div>
 
-                vs
-
-                <strong>
-                    {{ match.away_team }}
-                </strong>
-
-                <span>
-                    {{ match.date }}
-                </span>
-
-                {% if match.time %}
+                <div class="dashboard-match-info">
 
                     <span>
-                        {{ match.time }}
+                        {{ match.date|date:"D, d M Y" }}
                     </span>
 
-                {% endif %}
+                    {% if match.time %}
+                        <span>{{ match.time|time:"H:i" }}</span>
+                    {% endif %}
 
-                {% if match.venue %}
+                    {% if match.venue %}
+                        <span>{{ match.venue }}</span>
+                    {% endif %}
 
-                    <span>
-                        {{ match.venue }}
-                    </span>
+                </div>
 
-                {% endif %}
-
-                <a href="{% url 'matches_app:match_result_update' match.id %}">Enter Result</a>
+                <a
+                    href="{% url 'matches_app:match_result_update' match.id %}"
+                    class="dashboard-result-btn"
+                >
+                    Enter Result
+                </a>
 
             </div>
+
 
         {% empty %}
 

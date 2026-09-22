@@ -1,0 +1,119 @@
+/* =========================================================
+   COMPETITION SEASON
+   Dedicated styles
+   ========================================================= */
+
+.competition-page {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.competition-header {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 28px 32px;
+    margin-bottom: 16px;
+}
+
+.competition-label {
+    margin: 0 0 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: #6b7280;
+}
+
+.competition-header h1 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.competition-header h2 {
+    margin: 6px 0 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.competition-navigation {
+    display: flex;
+    gap: 4px;
+
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+
+    padding: 6px;
+    margin-bottom: 20px;
+
+    overflow-x: auto;
+}
+
+.competition-navigation a {
+    padding: 10px 15px;
+
+    border-radius: 8px;
+
+    color: #4b5563;
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.competition-navigation a:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+.competition-content {
+    width: 100%;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    .competition-page {
+        padding: 14px;
+    }
+
+    .competition-header {
+        padding: 20px;
+    }
+
+    .competition-header h1 {
+        font-size: 24px;
+    }
+
+    .competition-navigation a {
+        padding: 9px 12px;
+        font-size: 13px;
+    }
+
+}
