@@ -19,7 +19,6 @@ urlpatterns = [
 
     path("send-links/<int:match_id>/", staffRating.send_rating_links, name="send_rating_links"),
     path("rate/<uuid:token_uuid>/", staffRating.staff_rate_with_token, name="staff_rate_with_token"),
-
     path("match/<int:match_id>/aggregates/", staffRating.match_staff_aggregates, name="match_staff_aggregates"),
 
 

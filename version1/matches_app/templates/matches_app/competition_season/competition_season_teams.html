@@ -1,4 +1,9 @@
 {% extends "matches_app/competition_season/competition_season_base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'matches_app/css/competition_season/teams.css' %}">
+{% endblock %}
 
 {% block competition_content %}
 
