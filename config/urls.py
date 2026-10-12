@@ -5,9 +5,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from version1.accounts_app import views 
 
-from django.conf import settings
-from django.conf.urls.static import static
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('version1.accounts_app.urls')),
@@ -17,9 +14,7 @@ urlpatterns = [
     path('gps_app/', include('version1.gps_app.urls')),
     path('', views.index, name='home'),
     path('teams/', include('version1.teams_app.urls')),
-
     path('announcements/', include('version1.announcements_app.urls')),
-
     path('reports_app/', include('version1.reports_app.urls')),  #reports_app
     path('tagging/', include('version1.tagging_app.urls')),      #tagging_app
     path('defensive/', include('version1.defensive_app.urls')),  #defensive_app
@@ -29,18 +24,19 @@ urlpatterns = [
     path("sheets/", include("version1.sheets_generator_app.urls")), #sheets generator
     path('library/', include('version1.library_app.urls')),
 
-    #############################
     # Version2
     path('tagging_v2/', include('version2.tagging_app_v2.urls')), #tagging_app_v2
     path('loans_app_v2/', include('version2.loans_app_v2.urls')), # loaned players
     path('psychology_app_v2/', include('version2.psychology_app_v2.urls')), # psychology app
 
-
     # version3
     path("tagging_app_v3/", include("version3.tagging_app_v3.urls")),
     path("medical_data/", include("apps.medical_data.urls")),
 
+
+    # apps
     path("gym_data/", include("apps.gym_data.urls")),
+    path("individual_training/", include("apps.individual_data.urls")),
 
 ]
 

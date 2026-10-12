@@ -1,0 +1,446 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Training Session Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+    <style>
+        .section-card { margin-bottom: 1.5rem; }
+        .section-title { font-size: 1.15rem; font-weight: 600; }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+
+    <a href="{% url 'individual_training:session_list' %}"
+       class="text-decoration-none">
+        &larr; Back to sessions
+    </a>
+
+    <div class="d-flex justify-content-between align-items-start mt-3 mb-4">
+        <div>
+            <h2 class="mb-1">Individual Training Session</h2>
+            <p class="text-muted mb-0">
+                {{ session.date|date:"d M Y" }} |
+                {{ session.age_group.name }}
+                {% if session.team %}| {{ session.team.name }}{% endif %}
+            </p>
+        </div>
+        <span class="badge text-bg-primary">
+            {{ session.get_training_type_display }}
+        </span>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-info alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- SESSION SUMMARY -->
+    <div class="card shadow-sm section-card">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <small class="text-muted">Date</small>
+                    <div class="fw-semibold">{{ session.date|date:"d M Y" }}</div>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted">Age Group</small>
+                    <div class="fw-semibold">{{ session.age_group.name }}</div>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted">Coach</small>
+                    <div class="fw-semibold">{{ session.coach|default:"—" }}</div>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted">Duration</small>
+                    <div class="fw-semibold">
+                        {% if session.duration_minutes %}
+                            {{ session.duration_minutes }} minutes
+                        {% else %}—{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 1: TOPICS -->
+    <div class="card shadow-sm section-card">
+        <div class="card-header bg-white py-3">
+            <div class="section-title">1. Training Topics and Objectives</div>
+        </div>
+        <div class="card-body">
+
+            {% if topics %}
+                <div class="table-responsive mb-4">
+                    <table class="table table-sm table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Topic</th>
+                                <th>Objective</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in topics %}
+                                <tr>
+                                    <td>{{ item.topic.name }}</td>
+                                    <td>{{ item.objective.name }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No topics added yet.</p>
+            {% endif %}
+
+            <h6>Add a topic</h6>
+            <form method="post"
+                  action="{% url 'individual_training:add_session_topic' session.id %}">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label class="form-label">Topic</label>
+                        {{ topic_form.topic }}
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Objective</label>
+                        {{ topic_form.objective }}
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" type="submit">
+                            Add Topic
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SECTION 2: PLAYERS -->
+    <div class="card shadow-sm section-card">
+        <div class="card-header bg-white py-3">
+            <div class="section-title">2. Player Participation</div>
+            <small class="text-muted">
+                Only active players in {{ session.age_group.name }} are listed.
+            </small>
+        </div>
+        <div class="card-body">
+
+            <form method="post"
+                  action="{% url 'individual_training:add_participation' session.id %}">
+                {% csrf_token %}
+
+                <div class="row g-3">
+                    {% for field in participation_form %}
+                        <div class="col-md-6">
+                            <label class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <button class="btn btn-primary mt-3" type="submit">
+                    Add Player
+                </button>
+            </form>
+
+            <hr class="my-4">
+
+            <h6>Players Recorded ({{ participations|length }})</h6>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Player</th>
+                            <th>Position</th>
+                            <th>Participation</th>
+                            <th>Minutes</th>
+                            <th>Performance</th>
+                            <th>General Observation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for participation in participations %}
+                            <tr>
+                                <td>{{ participation.player.full_name }}</td>
+                                <td>{{ participation.get_position_display|default:"—" }}</td>
+                                <td>{{ participation.get_participation_display }}</td>
+                                <td>{{ participation.minutes|default:"—" }}</td>
+                                <td>{{ participation.get_performance_display|default:"—" }}</td>
+                                <td>{{ participation.observation|default:"—" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">
+                                    No players recorded yet.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+
+        <hr class="my-4">
+
+        <h5 class="mb-3">Player Development Interventions</h5>
+
+        {% for row in player_rows %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6>{{ row.participation.player.full_name }}</h6>
+
+                    {% with intervention_rows=row.intervention_rows %}
+                        {% if intervention_rows %}
+                            <ul class="list-group mb-3">
+
+                                {% for intervention_row in intervention_rows %}
+                                    {% with intervention=intervention_row.intervention point_form=intervention_row.coaching_point_form %}
+                                        <li class="list-group-item">
+                                            <strong>{{ intervention.session_topic.topic.name }}</strong>
+                                            — {{ intervention.session_topic.objective.name }}
+
+                                            <div class="small text-muted mb-2">
+                                                Result: {{ intervention.get_result_display }}
+                                            </div>
+
+                                            {% if intervention.observation %}
+                                                <div class="mb-1">
+                                                    <strong>Observation:</strong>
+                                                    {{ intervention.observation }}
+                                                </div>
+                                            {% endif %}
+
+                                            {% if intervention.next_action %}
+                                                <div class="mb-2">
+                                                    <strong>Next action:</strong>
+                                                    {{ intervention.next_action }}
+                                                </div>
+                                            {% endif %}
+
+                                            <div class="mt-3">
+                                                <strong>Selected Coaching Points</strong>
+
+                                                <ul class="mt-2">
+                                                    {% for selection in intervention.coaching_points.all %}
+                                                        <li>
+                                                            {{ selection.coaching_point.name }}
+
+                                                            {% if selection.achieved %}
+                                                                <span class="badge text-bg-success">Achieved</span>
+                                                            {% else %}
+                                                                <span class="badge text-bg-secondary">Not achieved</span>
+                                                            {% endif %}
+
+                                                            {% if selection.note %}
+                                                                <div class="small text-muted">
+                                                                    {{ selection.note }}
+                                                                </div>
+                                                            {% endif %}
+                                                        </li>
+                                                    {% empty %}
+                                                        <li class="text-muted">
+                                                            No coaching points selected.
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+
+                                                <form method="post"
+                                                    action="{% url 'individual_training:add_intervention_coaching_point' session.id intervention.id %}"
+                                                    class="row g-2 align-items-end mt-2">
+
+                                                    {% csrf_token %}
+
+                                                    <div class="col-md-5">
+                                                        <label class="form-label">Coaching Point</label>
+                                                        {{ point_form.coaching_point }}
+                                                        {% for error in point_form.coaching_point.errors %}
+                                                            <div class="text-danger small">{{ error }}</div>
+                                                        {% endfor %}
+                                                    </div>
+
+                                                    <div class="col-md-2">
+                                                        <div class="form-check mb-2">
+                                                            {{ point_form.achieved }}
+                                                            <label class="form-check-label"
+                                                                for="{{ point_form.achieved.id_for_label }}">
+                                                                Achieved
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Note</label>
+                                                        {{ point_form.note }}
+                                                    </div>
+
+                                                    <div class="col-md-2">
+                                                        <button type="submit"
+                                                                class="btn btn-outline-primary w-100">
+                                                            Add Point
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </li>
+                                    {% endwith %}
+                                {% endfor %}
+
+                            </ul>
+                        {% endif %}
+                    {% endwith %}
+
+                    {% if topics %}
+                        <form method="post"
+                            action="{% url 'individual_training:add_intervention' session.id row.participation.id %}">
+                            {% csrf_token %}
+
+                            <div class="row g-3">
+                                {% for field in row.intervention_form %}
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ field.label }}</label>
+                                        {{ field }}
+
+                                        {% for error in field.errors %}
+                                            <div class="text-danger small">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <button type="submit"
+                                    class="btn btn-outline-primary btn-sm mt-3">
+                                Add Intervention
+                            </button>
+                        </form>
+                    {% else %}
+                        <p class="text-muted mb-0">
+                            Add a session topic and objective before recording interventions.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-muted">
+                Add a player to start recording interventions.
+            </p>
+        {% endfor %}
+        
+
+
+
+    </div>
+
+    <!-- SECTION 3: SESSION EVALUATION -->
+    <div class="card shadow-sm section-card">
+        <div class="card-header bg-white py-3">
+            <div class="section-title">3. Session Evaluation</div>
+        </div>
+        <div class="card-body">
+            <form method="post"
+                  action="{% url 'individual_training:save_evaluation' session.id %}">
+                {% csrf_token %}
+
+                <div class="row g-3">
+                    {% for field in evaluation_form %}
+                        <div class="col-md-6">
+                            <label class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% for error in field.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="btn btn-success mt-3">
+                    Save Evaluation
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const topicSelect = document.querySelector(".topic-select");
+    const objectiveSelect = document.querySelector(".objective-select");
+
+    if (!topicSelect || !objectiveSelect) return;
+
+    const endpoint = "{% url 'individual_training:objectives_by_topic' %}";
+
+    async function loadObjectives(topicId, selectedId = "") {
+        objectiveSelect.innerHTML = "";
+
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = topicId
+            ? "Select objective"
+            : "Select a topic first";
+        objectiveSelect.appendChild(placeholder);
+
+        if (!topicId) return;
+
+        try {
+            const response = await fetch(
+                `${endpoint}?topic_id=${encodeURIComponent(topicId)}`
+            );
+
+            if (!response.ok) {
+                throw new Error("Could not load objectives.");
+            }
+
+            const data = await response.json();
+
+            data.objectives.forEach(function (objective) {
+                const option = document.createElement("option");
+                option.value = objective.id;
+                option.textContent = objective.name;
+
+                if (String(objective.id) === String(selectedId)) {
+                    option.selected = true;
+                }
+
+                objectiveSelect.appendChild(option);
+            });
+        } catch (error) {
+            objectiveSelect.innerHTML = "";
+            const option = document.createElement("option");
+            option.value = "";
+            option.textContent = "Error loading objectives";
+            objectiveSelect.appendChild(option);
+            console.error(error);
+        }
+    }
+
+    topicSelect.addEventListener("change", function () {
+        loadObjectives(this.value);
+    });
+
+    loadObjectives(topicSelect.value);
+});
+</script>
+
+</body>
+</html>

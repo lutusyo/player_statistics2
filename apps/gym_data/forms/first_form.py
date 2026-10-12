@@ -10,6 +10,7 @@ from apps.gym_data.models import (
 )
 
 from version1.teams_app.models import Team
+from version1.players_app.models import Player
 from django.forms import modelformset_factory
 
 
@@ -106,25 +107,36 @@ class GroupExerciseForm(forms.ModelForm):
         }
 
 
-
-
-GroupExerciseFormSet = modelformset_factory(
-    GroupExercise,
-    form=GroupExerciseForm,
-    extra=3,
-    can_delete=True,
-)
-
-
-
+GroupExerciseFormSet = modelformset_factory(GroupExercise, form=GroupExerciseForm, extra=3, can_delete=True,)
 
 
 class GymReportFilterForm(forms.Form):
 
-    team = forms.ModelChoiceField(
-        queryset=Team.objects.all(),
+
+    #team = forms.ModelsChoiceField(
+     #   queryset = Team.objects.all().order_by("name"),
+      #  required = False,
+       # empty_label = "All Teams",
+       # widget=forms.select(
+       #     attrs = {
+        #        "class": "form-select"
+         #       }
+        #),
+    #)
+
+    
+################################################
+
+    player = forms.ModelChoiceField(
+        queryset=Player.objects.filter(
+            is_active=True,
+            status="SIGNED",
+        ).order_by(
+            "surname",
+            "name",
+        ),
         required=False,
-        empty_label="All Teams",
+        empty_label="All Players",
         widget=forms.Select(
             attrs={
                 "class": "form-select",
@@ -152,8 +164,19 @@ class GymReportFilterForm(forms.Form):
         ),
     )
 
+    gym_type = forms.ModelChoiceField(
+        queryset=GymType.objects.all().order_by("name"),
+        required=False,
+        empty_label="All Gym Types",
+        widget=forms.Select(
+            attrs={
+                "class": "form-select",
+            }
+        ),
+    )
+
     category = forms.ModelChoiceField(
-        queryset=ExerciseCategory.objects.all(),
+        queryset=ExerciseCategory.objects.all().order_by("name"),
         required=False,
         empty_label="All Categories",
         widget=forms.Select(
@@ -164,7 +187,7 @@ class GymReportFilterForm(forms.Form):
     )
 
     exercise = forms.ModelChoiceField(
-        queryset=Exercise.objects.all(),
+        queryset=Exercise.objects.all().order_by("name"),
         required=False,
         empty_label="All Exercises",
         widget=forms.Select(

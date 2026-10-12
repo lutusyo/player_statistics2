@@ -59,6 +59,7 @@ INSTALLED_APPS = [
      #apps
      'apps.gym_data',
      'apps.medical_data',
+     'apps.individual_data',
 
 
     # version3

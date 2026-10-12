@@ -130,12 +130,6 @@
         margin: 20px auto;
         padding: 0 12px;
     }
-
-    .teams-card {
-        padding: 15px;
-    }
-
-    .teams-grid {
-        grid-template-columns: 1fr;
-    }
+    .teams-card {padding: 15px;}
+    .teams-grid {grid-template-columns: 1fr;}
 }

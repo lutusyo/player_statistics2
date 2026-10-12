@@ -30,6 +30,13 @@ class CompetitionType(models.TextChoices):
 
     LEAGUE = 'League' , 'League'
 
+
+class PitchType(models.TextChoices):
+    NATURAL = "NATURAL", "Natural"
+    ARTIFICIAL = "ARTIFICIAL", "Artificial"
+    
+#############################################################################################################################
+
 # For medical_data app
 class VisitType(models.TextChoices):
     REGULAR_CHECKUP = "regular_checkup", "Regular checkup"

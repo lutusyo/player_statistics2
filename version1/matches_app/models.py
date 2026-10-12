@@ -6,7 +6,8 @@ from version1.players_app.models import Player
 from django.utils import timezone
 from datetime import datetime, timedelta
 
-from apps.core.choices import CompetitionType, SeasonChoices
+from apps.core.choices import CompetitionType, SeasonChoices, PitchType
+
 
 class Country(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -98,8 +99,6 @@ class CompetitionRule(models.Model):
 
     
 
-
-
 class Match(models.Model):
 
     competition_season = models.ForeignKey( CompetitionSeason, on_delete=models.SET_NULL, null=True, blank=True, related_name="matches")
@@ -109,6 +108,7 @@ class Match(models.Model):
     date = models.DateField()
     time = models.TimeField(null=True, blank=True)  # kickoff time
     venue = models.ForeignKey(Venue, on_delete=models.SET_NULL, null=True, blank=True)
+    pitch_type = models.CharField(max_length=20,choices=PitchType.choices, default=PitchType.ARTIFICIAL, null=True, blank=True)
     season = models.CharField(max_length=20, choices=SeasonChoices.choices)
     competition = models.ForeignKey(Competition, on_delete=models.SET_NULL, null=True, blank=True)
     age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)
