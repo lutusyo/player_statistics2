@@ -73,7 +73,7 @@
                 {% for player in group.players.all %}
 
                 <span class="player-chip">
-                    {{ player }}
+                    <a href="{% url 'gym_data:gym_player_report' player.id %}">{{ player.full_name }}</a>
                 </span>
 
                 {% empty %}

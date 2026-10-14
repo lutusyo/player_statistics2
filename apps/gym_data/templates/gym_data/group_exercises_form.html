@@ -1,422 +1,242 @@
-{% extends "base.html" %}
 
+{% extends "base.html" %}
 {% load static %}
 
 {% block content %}
+<style>
+.exercise-page{max-width:1100px;margin:auto;padding:12px;color:#172033}
+.page-header,.exercise-heading,.actions{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.page-header{margin-bottom:12px}
+.page-header h1{font-size:21px;margin:0}
+.page-header p{margin:4px 0;color:#667085;font-size:13px}
+.panel{background:white;border:1px solid #e1e7ef;border-radius:12px;padding:12px}
+.panel h2{font-size:18px;margin:0 0 12px}
+.info-box{background:#f8fafc;border:1px solid #e1e7ef;border-radius:8px;padding:10px;margin-bottom:8px}
+.info-box summary{cursor:pointer;font-weight:600;font-size:14px}
+.saved-item,.draft-item{padding:9px 0;border-bottom:1px solid #e1e7ef;font-size:13px}
+.exercise-row{border:1px solid #dce4ed;border-radius:10px;margin:12px 0;overflow:hidden}
+.exercise-heading{background:#f2f6fb;padding:10px}
+.exercise-label{flex:1;min-width:0;font-weight:600;font-size:13px}
+.exercise-number{display:block;margin-bottom:6px}
+.exercise-select,.group-fields input{width:100%;min-width:0;box-sizing:border-box;padding:12px 8px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font-size:16px}
+.exercise-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:8px}
+.group-card{min-width:0;border:1px solid #dce4ed;border-radius:8px;padding:10px}
+.group-card h3{font-size:14px;color:#14548b;margin:0}
+.group-card p{font-size:12px;color:#667085;margin:4px 0 10px}
+.group-fields{display:grid;gap:8px}
+.group-fields label{font-size:12px;font-weight:600}
+.group-fields input{display:block;margin-top:4px}
+.btn{display:inline-flex;justify-content:center;align-items:center;min-height:44px;padding:10px 14px;border:0;border-radius:8px;font-weight:600;font-size:14px;text-decoration:none;cursor:pointer;box-sizing:border-box}
+.light{background:#eef2f6;color:#344054}
+.add{background:#e6f2ff;color:#14548b}
+.remove{background:#fff0f0;color:#b42318}
+.save{background:#1769aa;color:white}
+.actions{margin-top:12px}
+.save-bar{position:sticky;bottom:0;background:#fff;padding:10px 0 2px;display:flex;gap:8px;z-index:2}
+.save-bar>*{flex:1}
+@media(max-width:650px){
+ .exercise-page{padding:6px}
+ .panel{padding:9px}
+ .page-header h1{font-size:18px}
+ .exercise-groups{grid-template-columns:1fr}
+ .group-fields{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+ .group-fields label{font-size:11px}
+ .group-fields input{padding:12px 5px}
+ .exercise-heading{align-items:flex-start}
+ .exercise-heading .remove{padding:8px;font-size:12px}
+ .actions .btn{width:100%}
+}
+</style>
 
-<link
-    rel="stylesheet"
-    href="{% static 'gym_data/css/gym.css' %}"
->
-
-<div class="gym-container">
-
-    <!-- HEADER -->
-
-    <div class="gym-header">
-
+<div class="exercise-page">
+    <header class="page-header">
         <div>
-            <span class="eyebrow">GYM EXERCISES</span>
-
             <h1>{{ session.team }}</h1>
-
-            <p>
-                {{ session.date|date:"l, d F Y" }}
-            </p>
+            <p>Gym session · {{ session.date|date:"d M Y" }}</p>
         </div>
+        <a class="btn light" href="{% url 'gym_data:gym_session_detail' session.id %}">← Back</a>
+    </header>
 
-        <div>
+    <main class="panel">
+        <h2>Add Exercises</h2>
 
-            <a
-                href="{% url 'gym_data:gym_session_detail' session.id %}"
-                class="btn btn-secondary"
-            >
-                ← Back
-            </a>
+        {% if not groups %}
+            <p>No gym groups found. Create a group first.</p>
+        {% else %}
 
-        </div>
+        <details class="info-box">
+            <summary>Saved Exercises ({{ saved_exercises|length }})</summary>
+            {% for item in saved_exercises %}
+                <div class="saved-item">
+                    <strong>{{ item.exercise.name }}</strong><br>
+                    {% for group in item.groups %}
+                        {{ group.name }}: {{ group.weight }} KG · {{ group.sets }} × {{ group.reps }}{% if not forloop.last %}<br>{% endif %}
+                    {% endfor %}
+                </div>
+            {% empty %}
+                <p>No saved exercises.</p>
+            {% endfor %}
+        </details>
 
-    </div>
+        <details class="info-box">
+            <summary>Current Entries (<span id="draft-exercise-count">0</span>)</summary>
+            <div id="draft-exercise-list">No entries yet.</div>
+        </details>
 
-
-    <!-- EXERCISE FORM -->
-
-    <div class="gym-card">
-
-        <div class="section-heading">
-
-            <div>
-
-                <h2>Exercise Data</h2>
-
-                <p class="muted">
-                    Add each exercise once, then enter KG, sets and reps for each group.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <form
-            method="POST"
-            id="exercise-form"
-        >
-
+        <form method="POST" id="exercise-form">
             {% csrf_token %}
+            <input type="hidden" name="row_count" id="row-count" value="1">
 
-            <!-- Number of exercise rows -->
-            <input
-                type="hidden"
-                name="row_count"
-                id="row-count"
-                value="1"
-            >
+            <div id="exercise-rows">
+                <section class="exercise-row">
+                    <div class="exercise-heading">
+                        <label class="exercise-label">
+                            <span class="exercise-number">Exercise 1</span>
+                            <select name="exercise_0" class="exercise-select">
+                                <option value="">Select exercise...</option>
+                                {% for exercise in exercises %}
+                                    <option value="{{ exercise.id }}">{{ exercise.name }} — {{ exercise.category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <button type="button" class="btn remove remove-exercise">Remove</button>
+                    </div>
 
-
-            <div class="exercise-table-wrapper">
-
-                <table class="exercise-entry-table">
-
-                    <!-- GROUP HEADERS -->
-
-                    <thead>
-
-                        <tr>
-
-                            <th class="exercise-column">
-                                Exercise
-                            </th>
-
-                            {% for group in groups %}
-
-                                <th
-                                    colspan="3"
-                                    class="group-header"
-                                >
-                                    {{ group.gym_type.name }}
-                                </th>
-
-                            {% endfor %}
-
-                            <th class="remove-column">
-                               
-                            </th>
-
-                        </tr>
-
-
-                        <!-- SUB HEADERS -->
-
-                        <tr>
-
-                            <th></th>
-
-                            {% for group in groups %}
-
-                                <th>KG</th>
-                                <th>SET</th>
-                                <th>REP</th>
-
-                            {% endfor %}
-
-                            <th></th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <!-- EXERCISE ROWS -->
-
-                    <tbody id="exercise-rows">
-
-                        <tr
-                            class="exercise-row"
-                            data-row-index="0"
-                        >
-
-                            <!-- EXERCISE -->
-
-                            <td>
-
-                                <select
-                                    name="exercise_0"
-                                    class="form-control exercise-select"
-                                    required
-                                >
-
-                                    <option value="">
-                                        Select exercise
-                                    </option>
-
-                                    {% for exercise in exercises %}
-
-                                        <option value="{{ exercise.id }}">
-                                            {{ exercise.name }}
-                                            — {{ exercise.category.name }}
-                                        </option>
-
-                                    {% endfor %}
-
-                                </select>
-
-                            </td>
-
-
-                            <!-- GROUP DATA -->
-
-                            {% for group in groups %}
-
-                                <!-- WEIGHT -->
-
-                                <td>
-
-                                    <input
-                                        type="number"
-                                        name="weight_0_{{ group.id }}"
-                                        class="form-control"
-                                        step="0.01"
-                                        min="0"
-                                        placeholder="kg"
-                                    >
-
-                                </td>
-
-
-                                <!-- SETS -->
-
-                                <td>
-
-                                    <input
-                                        type="number"
-                                        name="sets_0_{{ group.id }}"
-                                        class="form-control"
-                                        min="1"
-                                        value="3"
-                                    >
-
-                                </td>
-
-
-                                <!-- REPS -->
-
-                                <td>
-
-                                    <input
-                                        type="number"
-                                        name="reps_0_{{ group.id }}"
-                                        class="form-control"
-                                        min="1"
-                                        value="8"
-                                    >
-
-                                </td>
-
-                            {% endfor %}
-
-
-                            <!-- REMOVE -->
-
-                            <td>
-
-                                <button
-                                    type="button"
-                                    class="remove-exercise"
-                                    title="Remove exercise"
-                                >
-                                    ×
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
+                    <div class="exercise-groups">
+                        {% for group in groups %}
+                        <div class="group-card">
+                            <h3>{{ group.gym_type.name }}</h3>
+                            <p>{{ group.players.count }} players</p>
+                            <div class="group-fields">
+                                <label>Weight (KG)
+                                    <input name="weight_0_{{ group.id }}" type="number" min="0" step="0.01" placeholder="KG" inputmode="decimal">
+                                </label>
+                                <label>Sets
+                                    <input name="sets_0_{{ group.id }}" type="number" min="1" value="3" inputmode="numeric">
+                                </label>
+                                <label>Reps
+                                    <input name="reps_0_{{ group.id }}" type="number" min="1" value="8" inputmode="numeric">
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
             </div>
 
-
-            <!-- ADD EXERCISE -->
-
-            <div class="exercise-actions">
-
-                <button
-                    type="button"
-                    id="add-exercise"
-                    class="btn btn-outline"
-                >
-                    + Add Exercise
-                </button>
-
+            <div class="actions">
+                <button type="button" id="add-exercise" class="btn add">+ Add Another Exercise</button>
             </div>
 
-
-            <!-- ACTIONS -->
-
-            <div class="form-actions">
-
-                <a
-                    href="{% url 'gym_data:gym_session_detail' session.id %}"
-                    class="btn btn-secondary"
-                >
-                    Cancel
-                </a>
-
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                >
-                    Save All Exercises
-                </button>
-
+            <div class="save-bar">
+                <a class="btn light" href="{% url 'gym_data:gym_session_detail' session.id %}">Cancel</a>
+                <button type="submit" class="btn save">Save Exercises</button>
             </div>
-
         </form>
-
-    </div>
-
+        {% endif %}
+    </main>
 </div>
 
-
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const rowsContainer = document.getElementById("exercise-rows");
+document.addEventListener("DOMContentLoaded", () => {
+    const container = document.getElementById("exercise-rows");
+    const form = document.getElementById("exercise-form");
+    const countInput = document.getElementById("row-count");
+    const draftList = document.getElementById("draft-exercise-list");
+    const draftCount = document.getElementById("draft-exercise-count");
     const addButton = document.getElementById("add-exercise");
-    const rowCountInput = document.getElementById("row-count");
+    if (!container || !form) return;
 
-    let rowIndex = 1;
-
-
-    function createExerciseRow() {
-
-        const firstRow = document.querySelector(".exercise-row");
-
-        const newRow = firstRow.cloneNode(true);
-
-        /*
-        Set row index
-        */
-        newRow.dataset.rowIndex = rowIndex;
-
-
-        /*
-        Exercise
-        */
-        const exerciseSelect =
-            newRow.querySelector(".exercise-select");
-
-        exerciseSelect.value = "";
-        exerciseSelect.name = `exercise_${rowIndex}`;
-
-
-        /*
-        Weight inputs
-        */
-        const weightInputs =
-            newRow.querySelectorAll('input[name^="weight_"]');
-
-        {% for group in groups %}
-
-        weightInputs[{{ forloop.counter0 }}].name =
-            `weight_${rowIndex}_{{ group.id }}`;
-
-        weightInputs[{{ forloop.counter0 }}].value = "";
-
-        {% endfor %}
-
-
-        /*
-        Sets inputs
-        */
-        const setsInputs =
-            newRow.querySelectorAll('input[name^="sets_"]');
-
-        {% for group in groups %}
-
-        setsInputs[{{ forloop.counter0 }}].name =
-            `sets_${rowIndex}_{{ group.id }}`;
-
-        setsInputs[{{ forloop.counter0 }}].value = "3";
-
-        {% endfor %}
-
-
-        /*
-        Reps inputs
-        */
-        const repsInputs =
-            newRow.querySelectorAll('input[name^="reps_"]');
-
-        {% for group in groups %}
-
-        repsInputs[{{ forloop.counter0 }}].name =
-            `reps_${rowIndex}_{{ group.id }}`;
-
-        repsInputs[{{ forloop.counter0 }}].value = "8";
-
-        {% endfor %}
-
-
-        /*
-        Add new row
-        */
-        rowsContainer.appendChild(newRow);
-
-
-        /*
-        Increase row count
-        */
-        rowIndex++;
-
-        rowCountInput.value = rowIndex;
+    function refresh() {
+        const rows = [...container.querySelectorAll(".exercise-row")];
+        rows.forEach((row, i) => {
+            row.querySelector(".exercise-number").textContent = `Exercise ${i + 1}`;
+            row.querySelector(".exercise-select").name = `exercise_${i}`;
+            row.querySelectorAll("input[name]").forEach(input => {
+                const m = input.name.match(/^(weight|sets|reps)_\d+_(\d+)$/);
+                if (m) input.name = `${m[1]}_${i}_${m[2]}`;
+            });
+        });
+        countInput.value = rows.length;
+        updateDraft();
     }
 
+    function updateDraft() {
+        draftList.replaceChildren();
+        let count = 0;
+        container.querySelectorAll(".exercise-row").forEach(row => {
+            const select = row.querySelector(".exercise-select");
+            if (!select.value) return;
+            const lines = [];
+            row.querySelectorAll(".group-card").forEach(card => {
+                const inputs = card.querySelectorAll("input");
+                if (!inputs[0].value.trim()) return;
+                lines.push(`${card.querySelector("h3").textContent}: ${inputs[0].value} KG · ${inputs[1].value || 3} × ${inputs[2].value || 8}`);
+            });
+            if (!lines.length) return;
+            count++;
+            const item = document.createElement("div");
+            item.className = "draft-item";
+            const title = document.createElement("strong");
+            title.textContent = select.options[select.selectedIndex].text;
+            item.append(title);
+            lines.forEach(line => {
+                const p = document.createElement("div");
+                p.textContent = line;
+                item.append(p);
+            });
+            draftList.append(item);
+        });
+        draftCount.textContent = count;
+        if (!count) draftList.textContent = "No entries yet.";
+    }
 
-    /*
-    ADD EXERCISE
-    */
-    addButton.addEventListener(
-        "click",
-        createExerciseRow
-    );
+    addButton.addEventListener("click", () => {
+        const row = container.querySelector(".exercise-row").cloneNode(true);
+        row.querySelector(".exercise-select").value = "";
+        row.querySelectorAll("input").forEach(input => {
+            input.value = input.name.startsWith("sets_") ? "3" :
+                          input.name.startsWith("reps_") ? "8" : "";
+        });
+        container.append(row);
+        refresh();
+        row.querySelector(".exercise-select").focus();
+    });
 
-
-    /*
-    REMOVE EXERCISE
-    */
-    rowsContainer.addEventListener(
-        "click",
-        function (event) {
-
-            if (
-                event.target.classList.contains(
-                    "remove-exercise"
-                )
-            ) {
-
-                const rows =
-                    rowsContainer.querySelectorAll(
-                        ".exercise-row"
-                    );
-
-                if (rows.length > 1) {
-
-                    event.target
-                        .closest(".exercise-row")
-                        .remove();
-
-                }
-
-            }
-
+    container.addEventListener("click", e => {
+        const button = e.target.closest(".remove-exercise");
+        if (!button) return;
+        const row = button.closest(".exercise-row");
+        if (container.querySelectorAll(".exercise-row").length > 1) {
+            row.remove();
+        } else {
+            row.querySelector(".exercise-select").value = "";
+            row.querySelectorAll("input").forEach(input => {
+                input.value = input.name.startsWith("sets_") ? "3" :
+                              input.name.startsWith("reps_") ? "8" : "";
+            });
         }
-    );
+        refresh();
+    });
 
+    container.addEventListener("input", updateDraft);
+    container.addEventListener("change", updateDraft);
+
+    form.addEventListener("submit", e => {
+        refresh();
+        for (const row of container.querySelectorAll(".exercise-row")) {
+            const hasWeight = [...row.querySelectorAll('input[name^="weight_"]')]
+                .some(input => input.value.trim());
+            if (hasWeight && !row.querySelector(".exercise-select").value) {
+                e.preventDefault();
+                alert("Select an exercise for every row where you entered a weight.");
+                row.querySelector(".exercise-select").focus();
+                return;
+            }
+        }
+    });
+
+    refresh();
 });
 </script>
-
 {% endblock %}

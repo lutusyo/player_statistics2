@@ -14,6 +14,10 @@ from version1.players_app.models import Player
 from django.forms import modelformset_factory
 
 
+
+
+
+
 class GymSessionForm(forms.ModelForm):
 
     class Meta:
@@ -112,87 +116,66 @@ GroupExerciseFormSet = modelformset_factory(GroupExercise, form=GroupExerciseFor
 
 class GymReportFilterForm(forms.Form):
 
-
-    #team = forms.ModelsChoiceField(
-     #   queryset = Team.objects.all().order_by("name"),
-      #  required = False,
-       # empty_label = "All Teams",
-       # widget=forms.select(
-       #     attrs = {
-        #        "class": "form-select"
-         #       }
-        #),
-    #)
-
-    
-################################################
+    team = forms.ModelChoiceField(
+        queryset=Team.objects.all().order_by("name"),
+        required=False,
+        empty_label="All Teams",
+        widget=forms.Select(attrs={
+            "class": "form-select",
+        }),
+    )
 
     player = forms.ModelChoiceField(
         queryset=Player.objects.filter(
             is_active=True,
             status="SIGNED",
-        ).order_by(
-            "surname",
-            "name",
-        ),
+        ).order_by("surname", "name"),
         required=False,
         empty_label="All Players",
-        widget=forms.Select(
-            attrs={
-                "class": "form-select",
-            }
-        ),
+        widget=forms.Select(attrs={
+            "class": "form-select",
+        }),
     )
 
     start_date = forms.DateField(
         required=False,
-        widget=forms.DateInput(
-            attrs={
-                "type": "date",
-                "class": "form-control",
-            }
-        ),
+        widget=forms.DateInput(attrs={
+            "type": "date",
+            "class": "form-control",
+        }),
     )
 
     end_date = forms.DateField(
         required=False,
-        widget=forms.DateInput(
-            attrs={
-                "type": "date",
-                "class": "form-control",
-            }
-        ),
+        widget=forms.DateInput(attrs={
+            "type": "date",
+            "class": "form-control",
+        }),
     )
 
     gym_type = forms.ModelChoiceField(
         queryset=GymType.objects.all().order_by("name"),
         required=False,
         empty_label="All Gym Types",
-        widget=forms.Select(
-            attrs={
-                "class": "form-select",
-            }
-        ),
+        widget=forms.Select(attrs={
+            "class": "form-select",
+        }),
     )
 
     category = forms.ModelChoiceField(
         queryset=ExerciseCategory.objects.all().order_by("name"),
         required=False,
         empty_label="All Categories",
-        widget=forms.Select(
-            attrs={
-                "class": "form-select",
-            }
-        ),
+        widget=forms.Select(attrs={
+            "class": "form-select",
+        }),
     )
 
     exercise = forms.ModelChoiceField(
         queryset=Exercise.objects.all().order_by("name"),
         required=False,
         empty_label="All Exercises",
-        widget=forms.Select(
-            attrs={
-                "class": "form-select",
-            }
-        ),
+        widget=forms.Select(attrs={
+            "class": "form-select",
+        }),
     )

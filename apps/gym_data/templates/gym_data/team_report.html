@@ -1,0 +1,285 @@
+{% extends "gym_data/reports/base_report.html" %}
+
+{% block report_content %}
+
+<div class="filter-card">
+
+    <form method="get">
+
+        <div class="filter-grid">
+
+            <div class="filter-field">
+                <label>Player</label>
+                {{ form.player }}
+            </div>
+
+            <div class="filter-field">
+                <label>Start Date</label>
+                {{ form.start_date }}
+            </div>
+
+            <div class="filter-field">
+                <label>End Date</label>
+                {{ form.end_date }}
+            </div>
+
+            <div class="filter-field">
+                <label>Gym Type</label>
+                {{ form.gym_type }}
+            </div>
+
+            <div class="filter-field">
+                <label>Exercise Category</label>
+                {{ form.category }}
+            </div>
+
+            <div class="filter-field">
+                <label>Exercise</label>
+                {{ form.exercise }}
+            </div>
+
+        </div>
+
+        <div class="filter-actions">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Apply Filters
+            </button>
+
+            <a href="{% url 'gym_data:gym_team_report' team.id %}"
+               class="btn btn-secondary">
+                Reset
+            </a>
+
+
+            <a href="{% url 'gym_data:gym_report_pdf' %}?{{ request.GET.urlencode }}"
+            class="btn btn-secondary"
+            target="_blank">
+                Download PDF
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<div class="report-stats">
+
+    <div class="stat-card">
+        <span>Team</span>
+        <strong>{{ team.name }}</strong>
+    </div>
+
+    <div class="stat-card">
+        <span>Players</span>
+        <strong>{{ player_count }}</strong>
+    </div>
+
+    <div class="stat-card">
+        <span>Exercise Records</span>
+        <strong>{{ total_exercises }}</strong>
+    </div>
+
+    <div class="stat-card">
+        <span>Total Volume</span>
+        <strong>{{ total_volume|floatformat:2 }} kg</strong>
+    </div>
+
+</div>
+
+
+<div class="chart-grid">
+
+    <div class="report-card">
+
+        <div class="report-card-header">
+
+            <div>
+                <h2>Volume by Category</h2>
+                <p>{{ team.name }}</p>
+            </div>
+
+        </div>
+
+        <div style="padding:20px;">
+            <canvas id="categoryChart"></canvas>
+        </div>
+
+    </div>
+
+
+    <div class="report-card">
+
+        <div class="report-card-header">
+
+            <div>
+                <h2>Volume Progress</h2>
+                <p>Training volume by date</p>
+            </div>
+
+        </div>
+
+        <div style="padding:20px;">
+            <canvas id="dateChart"></canvas>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="report-card">
+
+    <div class="report-card-header">
+
+        <div>
+            <h2>Exercise Records</h2>
+            <p>All recorded gym exercises</p>
+        </div>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+        <table class="gym-table">
+
+            <thead>
+
+                <tr>
+                    <th>Date</th>
+                    <th>Gym Type</th>
+                    <th>Exercise</th>
+                    <th>Category</th>
+                    <th>Weight</th>
+                    <th>Sets</th>
+                    <th>Reps</th>
+                    <th>Volume</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for item in records %}
+
+                <tr>
+
+                    <td>
+                        {{ item.gym_group.gym_session.date|date:"d M Y" }}
+                    </td>
+
+                    <td>
+                        {{ item.gym_group.gym_type }}
+                    </td>
+
+                    <td>
+                        {{ item.exercise.name }}
+                    </td>
+
+                    <td>
+                        {{ item.exercise.category.name }}
+                    </td>
+
+                    <td>
+                        {{ item.weight_kg }} kg
+                    </td>
+
+                    <td>
+                        {{ item.sets }}
+                    </td>
+
+                    <td>
+                        {{ item.reps }}
+                    </td>
+
+                    <td>
+                        {{ item.volume|floatformat:2 }} kg
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="8"
+                        class="no-data">
+                        No records found.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+{{ category_data|json_script:"category-data" }}
+{{ date_data|json_script:"date-data" }}
+
+
+<script>
+
+const categoryData =
+    JSON.parse(
+        document.getElementById("category-data").textContent
+    );
+
+const dateData =
+    JSON.parse(
+        document.getElementById("date-data").textContent
+    );
+
+
+new Chart(
+    document.getElementById("categoryChart"),
+    {
+        type: "doughnut",
+
+        data: {
+            labels: Object.keys(categoryData),
+
+            datasets: [{
+                data: Object.values(categoryData)
+            }]
+        },
+
+        options: {
+            responsive: true
+        }
+    }
+);
+
+
+new Chart(
+    document.getElementById("dateChart"),
+    {
+        type: "line",
+
+        data: {
+            labels: Object.keys(dateData),
+
+            datasets: [{
+                label: "Volume (kg)",
+                data: Object.values(dateData),
+                tension: 0.3
+            }]
+        },
+
+        options: {
+            responsive: true
+        }
+    }
+);
+
+</script>
+
+{% endblock %}
