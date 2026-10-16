@@ -1,42 +1,77 @@
+
 {% extends "matches_app/competition_season/competition_season_base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'matches_app/css/competition_season/standings.css' %}">
+{% endblock %}
 
 {% block competition_content %}
 
-<div class="container">
+<div class="standings-page">
 
-    <div class="page-header">
+    <div class="competition-heading">
 
-        <h1>
-            {{ competition_season.competition.name }}
-        </h1>
+        <div class="competition-logos">
+            {% if competition_season.supervising_organization_logo %}
+                <img src="{{ competition_season.supervising_organization_logo.url }}"
+                     alt="Supervising organization logo">
+            {% endif %}
 
-        <p>
-            {{ competition_season.season }} — Standings
-        </p>
+            {% if competition_season.competition_season_logo %}
+                <img src="{{ competition_season.competition_season_logo.url }}"
+                     alt="Competition logo">
+            {% elif competition_season.competition.logo %}
+                <img src="{{ competition_season.competition.logo.url }}"
+                     alt="Competition logo">
+            {% endif %}
+        </div>
+
+        <h1>{{ competition_season.competition.name }}</h1>
+        <p>{{ competition_season.season }} — Standings</p>
 
     </div>
 
-
     <div class="standings-card">
-
         <h2>League Table</h2>
-        <div class="table-wrapper">
 
+        <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
+                        <th>#</th>
+                        <th class="team-heading">Team</th>
+                        <th>P</th>
+                        <th>W</th>
+                        <th>D</th>
+                        <th>L</th>
+                        <th>GF</th>
+                        <th>GA</th>
+                        <th>GD</th>
+                        <th>Pts</th>
                     </tr>
                 </thead>
 
-
                 <tbody>
-
                     {% for row in standings %}
-
                     <tr>
                         <td>{{ row.position }}</td>
-                        <td><strong>{{ row.team.name }} {{ row.team.age_group }}</strong></td>
+
+                        <td class="team-cell">
+                            {% if row.team.logo %}
+                                <img src="{{ row.team.logo.url }}"
+                                     alt="{{ row.team.name }} logo"
+                                     class="team-logo">
+                            {% endif %}
+
+                            <strong>
+                                {{ row.team.name }}
+                                {% if row.team.age_group %}
+                                    {{ row.team.age_group }}
+                                {% endif %}
+                            </strong>
+                        </td>
+
                         <td>{{ row.played }}</td>
                         <td>{{ row.wins }}</td>
                         <td>{{ row.draws }}</td>
@@ -54,23 +89,16 @@
 
                         <td><strong>{{ row.points }}</strong></td>
                     </tr>
-
                     {% empty %}
-
                     <tr>
-                        <td colspan="10">
+                        <td colspan="10" class="empty-row">
                             No teams have been added to this competition yet.
                         </td>
                     </tr>
-
                     {% endfor %}
-
                 </tbody>
-
             </table>
-
         </div>
-
     </div>
 
 </div>

@@ -7,13 +7,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import mm
-from reportlab.platypus import (
-    SimpleDocTemplate,
-    Paragraph,
-    Spacer,
-    Table,
-    TableStyle,
-)
+from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer, Table,TableStyle,)
 
 from ..forms import GymReportFilterForm
 from ..report_utils import (

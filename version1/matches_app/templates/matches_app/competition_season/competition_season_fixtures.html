@@ -1,6 +1,12 @@
 {% extends "matches_app/competition_season/competition_season_base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'matches_app/css/competition_season/competition_season_fixture.css' %}">
+{% endblock %}
 
 {% block competition_content %}
+
 <div class="container">
 
     <div class="page-header">
@@ -9,8 +15,6 @@
         <p>{{ competition_season.season }} — Fixtures</p>
 
     </div>
-
-
 
     <div class="fixtures-card">
 
@@ -28,40 +32,50 @@
             </div>
 
 
+
+
             <div class="fixture-teams">
-                <strong>{{ match.home_team.name }}</strong>
-                <span>vs</span>
-                <strong>{{ match.away_team.name }}</strong>
+                <div class="fixture-team">
+                    {% if match.home_team.logo %}
+                        <img src="{{ match.home_team.logo.url }}" alt="{{ match.home_team.name }} logo" class="team-logo">
+                    {% endif %}
+                    <strong>{{ match.home_team.name }}</strong>
+                </div>
+
+                <span class="vs">vs</span>
+
+                <div class="fixture-team">
+                    {% if match.away_team.logo %}
+                        <img src="{{ match.away_team.logo.url }}" alt="{{ match.away_team.name }} logo" class="team-logo">
+                    {% endif %}
+                    <strong>{{ match.away_team.name }}</strong>
+                </div>
             </div>
 
+            
 
             <div class="fixture-venue">
-
-                {% if match.venue %}
-                    {{ match.venue.name }}
-                {% else %}
-                    Venue TBC
-                {% endif %}
+                <strong>
+                    {% if match.venue %}
+                        {{ match.venue.name }}
+                    {% else %}
+                        Venue TBC
+                    {% endif %}
+                </strong>
+                <span>
+                    {{ match.get_pitch_type_display| default:"Pitch TBC"}}
+                </span>
 
             </div>
 
 
             <div class="fixture-status">
-
                 {% if match.result_status == "LIVE" %}
-
-                    <span>
-                        LIVE
-                    </span>
+                    <span>LIVE</span>
 
                 {% else %}
-
-                    <span>
-                        Scheduled
-                    </span>
-
+                    <span>Scheduled</span>
                 {% endif %}
-
             </div>
 
 
@@ -72,11 +86,7 @@
         </div>
 
         {% empty %}
-
-            <p>
-                No fixtures available.
-            </p>
-
+            <p>No fixtures available.</p>
         {% endfor %}
 
     </div>

@@ -51,6 +51,12 @@ class Competition(models.Model):
 class CompetitionSeason(models.Model):
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE, related_name="seasons")
     season = models.CharField(max_length=20, choices=SeasonChoices.choices)
+
+    # Competition branding for this season
+    supervising_organization_logo = models.ImageField(upload_to="competition_organization/",null=True, blank=True)
+    competition_season_logo = models.ImageField(upload_to="competition_organization/", null=True,blank=True)
+
+
     is_active = models.BooleanField(default=True)
 
     class Meta:
