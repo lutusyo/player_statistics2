@@ -1,0 +1,67 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2>Psychology Assessments</h2>
+            <p>View and manage player psychology assessments.</p>
+        </div>
+
+        <a href="{% url 'psychology_app:add_assessment' %}"
+           class="button button-primary">
+            Add Assessment
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="form-card">
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Team</th>
+                        <th>Task</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Overall</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in assessments %}
+                        <tr>
+                            <td>{{ item.player.full_name }}</td>
+                            <td>{{ item.player.team|default:"—" }}</td>
+                            <td>{{ item.get_task_display }}</td>
+                            <td>{{ item.start_date|date:"d M Y" }}</td>
+                            <td>{{ item.end_date|date:"d M Y" }}</td>
+                            <td>
+                                {% if item.overall != None %}
+                                    {{ item.overall|floatformat:2 }}%
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'psychology_app:assessment_detail' item.pk %}">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7">No assessments have been recorded yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

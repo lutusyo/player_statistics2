@@ -9,6 +9,8 @@ from version1.reports_app.models.previous_models import (
 from django.shortcuts import render, get_object_or_404
 from version1.teams_app.models import Team
 
+from apps.core.decorators import staff_required
+
 
 SECTION_MAP = {
     'Medical': (Medical, 'date'),
@@ -42,8 +44,7 @@ def filter_queryset_by_period(queryset, period, start_date=None, end_date=None, 
 
 
 
-
-
+@staff_required
 def reports_dashboard(request, team_id=None):
     """Team-specific Reports Dashboard."""
     team = get_object_or_404(Team, id=team_id) if team_id else None

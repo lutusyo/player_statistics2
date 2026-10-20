@@ -60,6 +60,7 @@ INSTALLED_APPS = [
      'apps.gym_data',
      'apps.medical_data',
      'apps.individual_data',
+     'apps.psychology_app',
 
 
     # version3

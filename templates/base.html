@@ -213,7 +213,6 @@
                     </li>
 
 
-
                     <!-- Competitions -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Competitions</a>
@@ -232,8 +231,6 @@
 
                         </ul>
                     </li>
-
-
 
                     <!-- Performance -->
                     <li class="nav-item dropdown">
@@ -266,9 +263,7 @@
                             <!-- Performance Evaluation -->
                             <li class="fw-bold text-white mb-1">Performance Evaluation</li>
                             {% for team in our_teams %}
-                            <li>
-                                <a class="dropdown-item" href="{% url 'performance_rating_app:performance_list' team.id %}">{{ team.age_group.code }}</a>
-                            </li>
+                                <li><a class="dropdown-item" href="{% url 'performance_rating_app:performance_list' team.id %}">{{ team.age_group.code }}</a></li>
                             {% endfor %}
                             <a class="dropdown-item" href="{% url 'psychology_app_v2:psychology_dashboard' %}">Psychology Dashboard</a>
 
@@ -277,13 +272,22 @@
 
                     </li>
 
-                    <!-- Logout -->
+                    <!-- Login / Logout -->
                     {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <form method="POST" action="{% url 'accounts_app:logout' %}">
-                            {% csrf_token %}
-                            <button class="nav-link btn btn-link text-white">Logout</button></form>
-                    </li>
+                        <li class="nav-item">
+                            <form method="POST" action="{% url 'accounts_app:logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="nav-link btn btn-link text-white">
+                                    Logout
+                                </button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts_app:login' %}">
+                                Login
+                            </a>
+                        </li>
                     {% endif %}
 
                 </ul>

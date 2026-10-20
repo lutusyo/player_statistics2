@@ -27,27 +27,16 @@ app_name = 'reports_app'
 urlpatterns = [
 
     # Performance and potential rating
-
-    path(
-        'teams/<int:team_id>/ratings/',
-        player_rating_list,
-        name='player_rating_list',
-    ),
-
-    path(
-        'teams/<int:team_id>/players/<int:player_id>/rate/',
-        rate_player,
-        name='rate_player',
-    ),
+    path('teams/<int:team_id>/ratings/', player_rating_list, name='player_rating_list',),
+    path('teams/<int:team_id>/players/<int:player_id>/rate/', rate_player, name='rate_player',),
 
     #path("technical-report/<int:team_id>/", technical_report_views.download_technical_report_excel, name="download_technical_report"),
     path("technical-report/<int:team_id>/", technical_report_page, name="technical_report_page",),
-    path(
-    "technical-report/<int:team_id>/preview/", preview_technical_report, name="technical_report_preview",),
+    path("technical-report/<int:team_id>/preview/", preview_technical_report, name="technical_report_preview",),
+
     path("technical-report/<int:team_id>/excel/",download_technical_report_excel,name="technical_report_excel2",),
     path("technical-report/<int:team_id>/pdf/",download_technical_report_pdf,name="technical_report_pdf2",),
     path("technical-report/<int:team_id>/ppt/",download_technical_report_ppt,name="technical_report_ppt2",),
-
 
     # Medical
     path('medical/<int:team_id>/', medical_views.medical_reports, name='medical_reports'),
@@ -127,13 +116,12 @@ urlpatterns = [
     path('match/<int:match_id>/<int:our_team_id>/full-report/',full_match_report_views.full_match_report_view,name='full_match_report'),
     path('match/<int:match_id>/download-pdf/', download_full_report_pdf,name='download_full_report_pdf'),
 
-
     path("aar/<int:report_id>/", aar_report_view.after_action_review_detail, name="aar_detail"),
     path("aar/<int:report_id>/pdf/", aar_report_view.download_aar_pdf, name="aar_pdf"),
     path("aar/<int:report_id>/ppt/", aar_report_view.download_aar_ppt, name="aar_ppt"),
 
     # Training minutes
-        path( "training-minutes/", training_minutes_entry, name="training_minutes_entry",),
+    path( "training-minutes/", training_minutes_entry, name="training_minutes_entry",),
 ]
 
 

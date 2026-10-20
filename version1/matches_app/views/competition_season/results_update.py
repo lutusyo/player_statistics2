@@ -4,9 +4,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from version1.matches_app.forms import MatchResultForm
 from version1.matches_app.models import Match
+from django.contrib.auth.decorators import user_passes_test
 
 
 @staff_member_required
+@user_passes_test(lambda user: user.is_superuser)
 def match_result_update(request, match_id):
 
     match = get_object_or_404(

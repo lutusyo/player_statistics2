@@ -9,35 +9,18 @@ class Assessment(models.Model):
         ('Observation', 'Observation'),
     ]
 
-    player = models.ForeignKey(
-        Player,
-        on_delete=models.CASCADE,
-        related_name='psychology_assessments'
-    )
-
+    player = models.ForeignKey(Player,on_delete=models.CASCADE,related_name='psychology_assessments')
     start_date = models.DateField()
     end_date = models.DateField()
 
-    task = models.CharField(
-        max_length=20,
-        choices=TASK_CHOICES
-    )
-
+    task = models.CharField(max_length=20, choices=TASK_CHOICES)
     iq_range = models.IntegerField(
         null=True,
         blank=True
     )
 
-    cognitive_percent = models.FloatField(
-        null=True,
-        blank=True
-    )
-
-    personality_percent = models.FloatField(
-        null=True,
-        blank=True
-    )
-
+    cognitive_percent = models.FloatField(null=True,blank=True)
+    personality_percent = models.FloatField(null=True,blank=True)
     neuro_psychology_percent = models.FloatField(
         null=True,
         blank=True

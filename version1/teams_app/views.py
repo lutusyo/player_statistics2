@@ -11,10 +11,7 @@ from apps.core.decorators import staff_required
 @staff_required
 def team_squad_view(request, pk):
 
-    team = Team.objects.filter(
-        id=pk,
-        team_type='OUR_TEAM'
-    ).select_related('age_group').first()
+    team = Team.objects.filter(id=pk, team_type='OUR_TEAM').select_related('age_group').first()
 
     if not team:
         return render(request, '404.html', status=404)

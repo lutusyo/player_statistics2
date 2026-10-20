@@ -79,9 +79,13 @@
             </div>
 
 
+
+
+        {% if request.user.is_authenticated and request.user.is_superuser %}
             <div>
                 <a href="{% url 'matches_app:match_result_update' match.id %}">Enter Result</a>
             </div>
+        {% endif %}
 
         </div>
 

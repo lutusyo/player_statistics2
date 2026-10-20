@@ -1,0 +1,110 @@
+
+.psychology-home {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.psychology-hero {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding: 35px;
+    background: #12304a;
+    color: white;
+    border-radius: 12px;
+}
+
+.hero-icon {
+    font-size: 48px;
+}
+
+.psychology-hero h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+}
+
+.hero-subtitle {
+    color: #b9d7ed;
+    margin: 0 0 12px;
+}
+
+.hero-description {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.welcome-section {
+    margin: 30px 0 22px;
+}
+
+.welcome-section h2 {
+    margin-bottom: 8px;
+    color: #12304a;
+}
+
+.welcome-section p {
+    color: #64748b;
+    line-height: 1.7;
+}
+
+.psychology-menu {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.psychology-card {
+    padding: 25px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #12304a;
+    background: white;
+    transition: 0.2s ease;
+}
+
+.psychology-card:hover {
+    border-color: #2876b8;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 18px #12304a12;
+}
+
+.card-icon {
+    font-size: 30px;
+}
+
+.psychology-card h3 {
+    margin: 15px 0 8px;
+}
+
+.psychology-card p {
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.psychology-card span {
+    display: inline-block;
+    margin-top: 10px;
+    color: #2876b8;
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    .psychology-home {
+        padding: 15px;
+    }
+
+    .psychology-hero {
+        padding: 22px;
+        align-items: flex-start;
+    }
+
+    .psychology-hero h1 {
+        font-size: 22px;
+    }
+
+    .psychology-menu {
+        grid-template-columns: 1fr;
+    }
+}

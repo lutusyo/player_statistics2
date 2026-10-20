@@ -1,0 +1,57 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Psychology | Azam FC Academy{% endblock %}
+
+{% block content %}
+<link rel="stylesheet"
+      href="{% static 'psychology_app/css/home.css' %}">
+
+<div class="psychology-home">
+
+    <section class="psychology-hero">
+        <div class="hero-icon">🧠</div>
+
+        <div>
+            <h1>Psychology Department</h1>
+            <p class="hero-subtitle">Azam FC Academy</p>
+
+            <p class="hero-description">
+                Supporting players' psychological well-being,
+                mental development, and performance.
+            </p>
+        </div>
+    </section>
+
+    <section class="welcome-section">
+        <h2>Welcome to Psychology</h2>
+        <p>
+            Manage player psychological assessments, monitor
+            development, and maintain appropriate records to
+            support each player's progress.
+        </p>
+    </section>
+
+    <section class="psychology-menu">
+
+        <a href="{% url 'psychology_app_v2:psychology_dashboard' %}"
+           class="psychology-card">
+            <div class="card-icon">📊</div>
+            <h3>Dashboard</h3>
+            <p>View assessment statistics and development indicators.</p>
+            <span>Open Dashboard →</span>
+        </a>
+
+        <a href="{% url 'psychology_app_v2:player_list' %}"
+           class="psychology-card">
+            <div class="card-icon">👥</div>
+            <h3>Players</h3>
+            <p>View players and access their authorized records.</p>
+            <span>View Players →</span>
+        </a>
+
+    </section>
+
+</div>
+{% endblock %}

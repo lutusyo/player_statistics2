@@ -22,6 +22,7 @@ def competition_match_data(request, match_id):
 
     context = {
         "match": match,
+        "competition_season": match.competition_season,
         "attempts": attempts,
         "goals": goals,
     }

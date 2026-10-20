@@ -1,0 +1,38 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2>Assessment Details</h2>
+            <p>{{ assessment.player.full_name }}</p>
+        </div>
+
+        <a href="{% url 'psychology_app:assessment_list' %}"
+           class="button button-secondary">
+            Back to Assessments
+        </a>
+    </div>
+
+    <div class="form-card">
+        <div class="form-section">
+            <h3>Player and Assessment</h3>
+            <p><strong>Player:</strong> {{ assessment.player.full_name }}</p>
+            <p><strong>Team:</strong> {{ assessment.player.team|default:"—" }}</p>
+            <p><strong>Age Group:</strong> {{ assessment.player.age_group|default:"—" }}</p>
+            <p><strong>Task:</strong> {{ assessment.get_task_display }}</p>
+            <p><strong>Start Date:</strong> {{ assessment.start_date|date:"d M Y" }}</p>
+            <p><strong>End Date:</strong> {{ assessment.end_date|date:"d M Y" }}</p>
+        </div>
+
+        <div class="form-section">
+            <h3>Results</h3>
+            <p><strong>IQ Range:</strong> {{ assessment.iq_range|default:"—" }}</p>
+            <p><strong>Cognitive:</strong> {{ assessment.cognitive_percent|default_if_none:"—" }}{% if assessment.cognitive_percent != None %}%{% endif %}</p>
+            <p><strong>Personality:</strong> {{ assessment.personality_percent|default_if_none:"—" }}{% if assessment.personality_percent != None %}%{% endif %}</p>
+            <p><strong>Neuro Psychology:</strong> {{ assessment.neuro_psychology_percent|default_if_none:"—" }}{% if assessment.neuro_psychology_percent != None %}%{% endif %}</p>
+            <p><strong>Education:</strong> {{ assessment.education_percent|default_if_none:"—" }}{% if assessment.education_percent != None %}%{% endif %}</p>
+            <p><strong>Overall:</strong> {{ assessment.overall|default_if_none:"—" }}{% if assessment.overall != None %}%{% endif %}</p>
+        </div>
+    </div>
+</div>
