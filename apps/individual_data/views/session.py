@@ -26,9 +26,6 @@ from apps.individual_data.models.data_collection import (
 
 
 
-
-
-
 def session_list(request):
     sessions = TrainingSession.objects.select_related(
         "age_group", "team", "coach"
@@ -50,9 +47,7 @@ def session_create(request):
             "individual_training:session_detail", session_id=session.pk
         )
 
-    return render(
-        request, "individual_data/session_form.html", {"form": form}
-    )
+    return render(request, "individual_data/session_form.html", {"form": form})
 
 
 def session_detail(request, session_id):
@@ -114,15 +109,14 @@ def session_detail(request, session_id):
         "player_rows": player_rows,
         "topic_form": SessionTopicForm(),
         "participation_form": PlayerParticipationForm(
-            age_group=session.age_group
+            age_group=session.age_group,
+            team=session.team,
         ),
         "evaluation": evaluation,
         "evaluation_form": SessionEvaluationForm(instance=evaluation),
     }
 
-    return render(
-        request, "individual_data/session_detail.html", context
-    )
+    return render(request, "individual_data/session_detail.html", context)
 
 
 def _session_redirect(session):

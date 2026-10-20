@@ -106,12 +106,15 @@ class PlayerParticipationForm(forms.ModelForm):
             "observation": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
         }
 
-    def __init__(self, *args, age_group=None, **kwargs):
+    def __init__(self, *args, age_group=None, team=None, **kwargs):
         super().__init__(*args, **kwargs)
 
         players = Player.objects.filter(is_active=True).order_by(
             "surname", "name", "second_name"
         )
+
+        if team:
+            players = players.filter(team=team)
 
         if age_group:
             players = players.filter(age_group=age_group)
