@@ -1,0 +1,2 @@
+1. Take players who did not train
+2. Take players with few gametime

@@ -23,6 +23,23 @@
         Data is generated from existing individual training records.
     </p>
 
+    
+    <div class="d-flex justify-content-end mb-3">
+
+
+
+        <a
+            href="{% url 'individual_training:weekly_report_pdf' %}?age_group={{ selected_age_group.pk }}&week_start={{ week_start|date:'Y-m-d' }}&week_end={{ week_end|date:'Y-m-d' }}{% if selected_team %}&team={{ selected_team.pk }}{% endif %}"
+            class="btn btn-danger"
+        >
+            Download PDF
+        </a>
+
+
+
+    </div>
+
+
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <form method="get">
@@ -32,9 +49,11 @@
                         <label for="age_group" class="form-label">
                             Age Group
                         </label>
-                        <select name="age_group" id="age_group"
-                                class="form-select" required>
-                            <option value="">Select age group</option>
+                        <select name="age_group" id="age_group" class="form-select">
+                            <option value="" {% if all_groups_selected %}selected{% endif %}>
+                                All Age Groups
+                            </option>
+
                             {% for group in age_groups %}
                                 <option value="{{ group.pk }}"
                                     {% if selected_age_group and selected_age_group.pk == group.pk %}
@@ -45,6 +64,8 @@
                             {% endfor %}
                         </select>
                     </div>
+
+
 
                     <div class="col-md-3">
                         <label for="week_start" class="form-label">
@@ -64,6 +85,24 @@
                                value="{{ week_end|date:'Y-m-d' }}" required>
                     </div>
 
+
+                    <div class="col-md-3">
+                        <label for="team" class="form-label">Team</label>
+                        <select name="team" id="team" class="form-select">
+                            <option value="">All Teams</option>
+
+                            {% for team in teams %}
+                                <option value="{{ team.pk }}"
+                                    {% if selected_team and selected_team.pk == team.pk %}
+                                        selected
+                                    {% endif %}>
+                                    {{ team.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+
                     <div class="col-md-2">
                         <button type="submit" class="btn btn-primary w-100">
                             Generate
@@ -81,9 +120,17 @@
         </div>
     {% endif %}
 
-    {% if selected_age_group %}
+
+    {% if selected_age_group or all_groups_selected %}
+
+
         <h4>
-            {{ selected_age_group.name }}
+            {% if selected_age_group %}
+                {{ selected_age_group.name }}
+            {% else %}
+                All Age Groups
+            {% endif %}
+
             <small class="text-muted fs-6">
                 {{ week_start|date:"d M Y" }} –
                 {{ week_end|date:"d M Y" }}

@@ -1,6 +1,7 @@
 
 from django.urls import path
 from apps.individual_data import views
+from apps.individual_data.views.weekly_report import weekly_report_pdf
 
 app_name = "individual_training"
 
@@ -16,4 +17,6 @@ urlpatterns = [
 
     path("sessions/<int:session_id>/interventions/<int:intervention_id>/coaching-points/add/",views.add_intervention_coaching_point, name="add_intervention_coaching_point",),
     path("weekly-reports/", views.weekly_report, name="weekly_report",),
+
+    path("weekly-report/pdf/", weekly_report_pdf, name="weekly_report_pdf",),
 ]
