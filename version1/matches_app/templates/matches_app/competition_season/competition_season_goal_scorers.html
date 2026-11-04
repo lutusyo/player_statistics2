@@ -1,4 +1,6 @@
 {% extends "matches_app/competition_season/competition_season_base.html" %}
+{% load static %}
+{% get_media_prefix as MEDIA_PREFIX %}
 
 {% block competition_content %}
 
@@ -108,18 +110,21 @@
                         <td>{{ forloop.counter }}</td>
 
                         <!-- PLAYER PHOTO -->
+
                         <td>
                             {% if player.photo %}
                                 <img
-                                    src="{{ MEDIA_URL }}{{ player.photo }}"
+                                    src="{{ player.photo }}"
                                     alt="{{ player.first_name }}"
                                     style="
-                                        width: 45px;
-                                        height: 45px;
+                                        width: 50px;
+                                        height: 50px;
                                         object-fit: cover;
                                         border-radius: 50%;
                                     "
                                 >
+                            {% else %}
+                                <span>No Photo</span>
                             {% endif %}
                         </td>
 

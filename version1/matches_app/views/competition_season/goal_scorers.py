@@ -5,6 +5,8 @@ from django.db.models import Count
 from version1.tagging_app.models import AttemptToGoal
 from version1.matches_app.models import CompetitionSeason
 
+from django.core.files.storage import default_storage
+
 
 def competition_season_goal_scorers(request, competition_season_id):
     competition_season = get_object_or_404(
@@ -105,7 +107,13 @@ def competition_season_goal_scorers(request, competition_season_id):
                 "first_name": item[f"{prefix}name"],
                 "second_name": item[f"{prefix}second_name"],
                 "surname": item[f"{prefix}surname"],
-                "photo": item[f"{prefix}photo"],
+
+                "photo": (
+                    default_storage.url(item[f"{prefix}photo"])
+                    if item[f"{prefix}photo"]
+                    else ""
+                ),
+
                 "team": team_id,
                 "team_name": item["team__name"],
                 "age_group": item["team__age_group__name"],
