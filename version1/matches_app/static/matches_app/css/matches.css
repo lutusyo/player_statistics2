@@ -30,7 +30,7 @@
     justify-content: center;
     gap: 10px;
     background: #fff;
-    padding: 8px;
+    padding: 0px;
     border-bottom: 2px solid #0033A0;
 }
 
@@ -316,30 +316,146 @@
 }
 
 
-/* =====================================================
-   RESPONSIVE
-===================================================== */
+
+/* =========================================
+   RESULTS FILTER DESIGN
+========================================= */
+
+.results-filter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 12px 15px;
+    background: #f5f6f8;
+    border-radius: 8px;
+}
+
+/* Competition in one line */
+
+.competition-filter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.competition-filter label {
+    font-weight: 700;
+    font-size: 14px;
+    color: #222;
+    white-space: nowrap;
+}
+
+.competition-filter select {
+    padding: 8px 12px;
+    min-width: 220px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: white;
+    font-size: 14px;
+}
+
+/* From, To, Filter and Clear in one line */
+
+.date-filter-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.date-filter-group .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.date-filter-group label {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.date-filter-group input {
+    padding: 7px 9px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.filter-btn,
+.clear-btn {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.filter-btn {
+    background: #0033A0;
+    color: white;
+}
+
+.filter-btn:hover {
+    background: #002575;
+}
+
+.clear-btn {
+    background: #e5e5e5;
+    color: #333;
+}
+
+.clear-btn:hover {
+    background: #d2d2d2;
+}
+
+/* =========================================
+   REDUCE TOP SPACING IN TABS SECTION
+========================================= */
+
+.compact-tabs {
+    padding: 3px 8px;
+}
+
+.compact-content {
+    margin-top: 5px;
+}
+
+/* =========================================
+   MOBILE RESPONSIVENESS
+========================================= */
 
 @media (max-width: 600px) {
 
-    .fixture-header,
-    .results-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+    .results-filter-form {
+        align-items: stretch;
     }
 
-    .fixture-body,
-    .results-body {
-        flex-direction: column;
-        gap: 12px;
+    .competition-filter {
+        width: 100%;
     }
 
-    .vs {
-        margin: 10px 0;
+    .competition-filter select {
+        flex: 1;
+        min-width: 0;
     }
 
-    .compact-tabs {
+    .date-filter-group {
         flex-wrap: wrap;
     }
+
+    .date-filter-group .filter-group {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .date-filter-group input {
+        flex: 1;
+        min-width: 0;
+    }
 }
+
+

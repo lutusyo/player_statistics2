@@ -56,17 +56,13 @@
 
                 <div class="col-md-2 d-flex align-items-end">
 
-                    <button
-                        type="submit"
-                        class="btn btn-primary w-100"
-                    >
+                    <button type="submit" class="btn btn-primary w-100">  
                         Filter
                     </button>
 
                 </div>
 
             </div>
-
         </form>
 
     </div>
@@ -87,14 +83,16 @@
         </div>
 
 
+
+        
         <div class="table-wrapper">
 
             <table>
-
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Player</th>
+                        <th>Photo</th>
+                        <th>Player Name</th>
                         <th>Team</th>
                         <th>Goals</th>
                         <th>Assists</th>
@@ -102,63 +100,54 @@
                     </tr>
                 </thead>
 
-
                 <tbody>
 
                     {% for player in player_statistics %}
 
                     <tr>
+                        <td>{{ forloop.counter }}</td>
 
+                        <!-- PLAYER PHOTO -->
                         <td>
-                            {{ forloop.counter }}
+                            {% if player.photo %}
+                                <img
+                                    src="{{ MEDIA_URL }}{{ player.photo }}"
+                                    alt="{{ player.first_name }}"
+                                    style="
+                                        width: 45px;
+                                        height: 45px;
+                                        object-fit: cover;
+                                        border-radius: 50%;
+                                    "
+                                >
+                            {% endif %}
                         </td>
 
-
+                        <!-- FULL PLAYER NAME -->
                         <td>
                             <strong>
-                                {{ player.player_name }}
+                                {{ player.first_name }}
+                                {{ player.second_name }}
+                                {{ player.surname }}
                             </strong>
                         </td>
 
-
                         <td>
-                            <strong>
-                                {{ player.team_name }}
-                            </strong>
+                            <strong>{{ player.team_name }}</strong>
                             <br>
-                            <small>
-                                {{ player.age_group }}
-                            </small>
+                            <small>{{ player.age_group }}</small>
                         </td>
 
-
-                        <td>
-                            <strong>
-                                {{ player.goals }}
-                            </strong>
-                        </td>
-
-
-                        <td>
-                            <strong>
-                                {{ player.assists }}
-                            </strong>
-                        </td>
-
-
-                        <td>
-                            <strong>
-                                {{ player.pre_assists }}
-                            </strong>
-                        </td>
+                        <td><strong>{{ player.goals }}</strong></td>
+                        <td><strong>{{ player.assists }}</strong></td>
+                        <td><strong>{{ player.pre_assists }}</strong></td>
 
                     </tr>
-
 
                     {% empty %}
 
                     <tr>
-                        <td colspan="6">
+                        <td colspan="7" class="text-center">
                             No player statistics recorded for the selected period.
                         </td>
                     </tr>
@@ -166,10 +155,11 @@
                     {% endfor %}
 
                 </tbody>
-
             </table>
 
         </div>
+
+
 
     </div>
 

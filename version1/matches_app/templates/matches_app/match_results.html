@@ -7,12 +7,16 @@
 
 <form method="get" class="results-filter-form">
 
-    <div class="filter-group">
-        <label>Competition:</label>
-        <select name="competition" onchange="this.form.submit()">
+    <!-- COMPETITION FILTER -->
+    <div class="competition-filter">
+        <label for="competition">Competition:</label>
+
+        <select name="competition" id="competition"
+                onchange="this.form.submit()">
             <option value="all" {% if competition_selected == "all" %}selected{% endif %}>
                 All Competitions
             </option>
+
             {% for comp in competition_choices %}
             <option value="{{ comp.id }}"
                 {% if comp.id|stringformat:"s" == competition_selected %}selected{% endif %}>
@@ -22,31 +26,27 @@
         </select>
     </div>
 
+    <!-- DATE FILTERS -->
+    <div class="date-filter-group">
 
-    <div class="filter-group">
-        <label for="date_from">From</label>
+        <div class="filter-group">
+            <label for="date_from">From:</label>
+            <input type="date" name="date_from" id="date_from"
+                   value="{{ date_from|default:'' }}">
+        </div>
 
-        <input
-            type="date"
-            name="date_from"
-            id="date_from"
-            value="{{ date_from|default:'' }}"
-        ></div>
+        <div class="filter-group">
+            <label for="date_to">To:</label>
+            <input type="date" name="date_to" id="date_to"
+                   value="{{ date_to|default:'' }}">
+        </div>
 
+        <button type="submit" class="filter-btn">Filter</button>
 
-    <div class="filter-group">
-        <label for="date_to">To</label>
+        <a href="{% url 'matches_app:team_results' team %}"
+           class="clear-btn">Clear</a>
 
-        <input
-            type="date"
-            name="date_to"
-            id="date_to"
-            value="{{ date_to|default:'' }}"
-        >
     </div>
-
-    <button type="submit">Filter</button>
-    <a href="{% url 'matches_app:team_results' team %}">Clear</a>
 
 </form>
 
@@ -54,64 +54,67 @@
 
 <div class="results-container">
 
-{% if past_matches %}
-{% for match in past_matches %}
+    {% if past_matches %}
 
-<div class="results-card">
 
-    <!-- HEADER -->
-    <div class="results-header">
+            <div class="export-buttons">
+                <a href="{% url 'matches_app:results_export_excel' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">Export Excel</a>
+                <a href="{% url 'matches_app:results_export_pdf' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">Export PDF</a>
+                <a href="{% url 'matches_app:results_export_ppt' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">Export PowerPoint</a>
+            </div>
 
-        <!-- DATE LINK -->
-        <div class="results-date"><a href="{% url 'matches_app:match_detail' match.id %}" class="detail-link">{{ match.date|date:"D M d" }} - {{ match.time|time:"H:i" }}</a></div>
-        <div class="results-venue">{{ match.venue }}</div>
-        <div class="results-type">
-            {% if match.competition.logo %}
-                <img src="{{ match.competition.logo.url }}" class="competition-logo">
-            {% endif %}
-            <span>{{ match.competition.name }}</span>
-        </div>
+            {% for match in past_matches %}
 
-        <!-- FULL REPORT ICON -->
-        <div class="card-actions"><a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}" class="report-icon"><i class="fas fa-search"> Details</i></a></div>
-    </div>
+            <div class="results-card">
 
-    <!-- BODY -->
-    <div class="results-body">
-        <div class="team">
-            {% if match.home_team.logo %}
-                <img src="{{ match.home_team.logo.url }}">
-            {% endif %}
-            <div>{{ match.home_team }}</div>
-        </div>
+                <!-- HEADER -->
+                <div class="results-header">
 
-        <div class="vs">
-            {% if match.our_team_goals is not None %}
-                <strong>{{ match.our_team_goals }} - {{ match.opponent_goals }}</strong>
-            {% else %}
-                <span class="no-score">0 - 0</span>
-            {% endif %}
-        </div>
+                    <!-- DATE LINK -->
+                    <div class="results-date"><a href="{% url 'matches_app:match_detail' match.id %}" class="detail-link">{{ match.date|date:"D M d" }} - {{ match.time|time:"H:i" }}</a></div>
+                    <div class="results-venue">{{ match.venue }}</div>
+                    <div class="results-type">
+                        {% if match.competition.logo %}
+                            <img src="{{ match.competition.logo.url }}" class="competition-logo">
+                        {% endif %}
+                        <span>{{ match.competition.name }}</span>
+                    </div>
 
-        <div class="team">
-            {% if match.away_team.logo %}
-                <img src="{{ match.away_team.logo.url }}">
-            {% endif %}
-            <div>{{ match.away_team }}</div>
-        </div>
-    </div>
-</div>
+                    <!-- FULL REPORT ICON -->
+                    <div class="card-actions"><a href="{% url 'reports_app:full_match_report' match.id match.our_team_id %}" class="report-icon"><i class="fas fa-search"> Details</i></a></div>
+                </div>
 
-    <div class="export-buttons">
-        <a href="{% url 'matches_app:results_export_excel' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">Export Excel</a>
-        <a href="{% url 'matches_app:results_export_pdf' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">Export PDF</a>
-        <a href="{% url 'matches_app:results_export_ppt' team %}?competition={{ competition_selected }}&date_from={{ date_from|default:'' }}&date_to={{ date_to|default:'' }}">Export PowerPoint</a>
-    </div>
+                <!-- BODY -->
+                <div class="results-body">
+                    <div class="team">
+                        {% if match.home_team.logo %}
+                            <img src="{{ match.home_team.logo.url }}">
+                        {% endif %}
+                        <div>{{ match.home_team }}</div>
+                    </div>
 
-{% endfor %}
-{% else %}
-<p class="no-matches">No past matches.</p>
-{% endif %}
+                    <div class="vs">
+                        {% if match.our_team_goals is not None %}
+                            <strong>{{ match.our_team_goals }} - {{ match.opponent_goals }}</strong>
+                        {% else %}
+                            <span class="no-score">0 - 0</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="team">
+                        {% if match.away_team.logo %}
+                            <img src="{{ match.away_team.logo.url }}">
+                        {% endif %}
+                        <div>{{ match.away_team }}</div>
+                    </div>
+                </div>
+            </div>
+
+            {% endfor %}
+
+    {% else %}
+    <p class="no-matches">No past matches.</p>
+    {% endif %}
 
 </div>
 {% endblock %}
