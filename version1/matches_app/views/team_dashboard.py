@@ -21,6 +21,5 @@ from version1.matches_app.views.get_match_goals import get_match_goals
 def team_dashboard_view(request, team_id):
 
     team = Team.objects.get(id=team_id)
-
     # Just redirect to the fixtures view
     return redirect('matches_app:team_fixtures', team=team.age_group.code)

@@ -1,0 +1,150 @@
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/psychology_app.css' %}">
+
+<div class="psych-page">
+    <div class="psych-nav">
+        <a href="{% url 'psychology_app:dashboard' %}">Dashboard</a>
+        <a class="active" href="{% url 'psychology_app:player_directory' %}">Players</a>
+        <a href="{% url 'psychology_app:assessment_list' %}">Assessments</a>
+    </div>
+
+    <a class="back-link"
+       href="{% url 'psychology_app:player_directory' %}">
+        ← Back to Players
+    </a>
+
+    <section class="player-profile-card">
+        <div class="profile-photo-wrap">
+            {% if player.photo %}
+                <img class="profile-photo"
+                     src="{{ player.photo.url }}"
+                     alt="{{ player.full_name }}">
+            {% else %}
+                <div class="profile-photo profile-photo-placeholder">
+                    {{ player.name|first|upper }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="profile-info">
+            <span class="profile-label">PLAYER PROFILE</span>
+            <h1>{{ player.full_name }}</h1>
+            <p>{{ player.team|default:"No team assigned" }}</p>
+
+            <div class="profile-tags">
+                <span>{{ player.age_group|default:"Age group not set" }}</span>
+                <span>{{ player.position|default:"Position not set" }}</span>
+                {% if player.jersey_number %}
+                    <span>Jersey #{{ player.jersey_number }}</span>
+                {% endif %}
+            </div>
+
+            <div class="profile-details">
+                <div>
+                    <small>Specific Position</small>
+                    <strong>{{ player.specific_position|default:"—" }}</strong>
+                </div>
+                <div>
+                    <small>Date of Birth</small>
+                    <strong>{{ player.birthdate|date:"d M Y"|default:"—" }}</strong>
+                </div>
+                <div>
+                    <small>Player Status</small>
+                    <strong>{{ player.get_status_display|default:player.status|default:"—" }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-action">
+            <a class="psych-btn primary"
+               href="{% url 'psychology_app:add_assessment' %}">
+                + New Assessment
+            </a>
+        </div>
+    </section>
+
+    <div class="psych-stats">
+        <div class="psych-stat">
+            <span>Total Assessments</span>
+            <strong>{{ total_assessments }}</strong>
+        </div>
+        <div class="psych-stat">
+            <span>Average Overall Score</span>
+            <strong>
+                {% if average_score != None %}
+                    {{ average_score|floatformat:1 }}%
+                {% else %}
+                    —
+                {% endif %}
+            </strong>
+        </div>
+        <div class="psych-stat">
+            <span>Latest Assessment</span>
+            <strong>
+                {% if latest_assessment %}
+                    {{ latest_assessment.start_date|date:"d M Y" }}
+                {% else %}
+                    —
+                {% endif %}
+            </strong>
+        </div>
+    </div>
+
+    <section class="psych-card">
+        <div class="psych-card-header">
+            <h2>Assessment History</h2>
+        </div>
+
+        <div class="psych-table-wrap">
+            <table class="psych-table">
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>IQ</th>
+                        <th>Cognitive</th>
+                        <th>Personality</th>
+                        <th>Neuropsychology</th>
+                        <th>Education</th>
+                        <th>Overall</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in assessments %}
+                    <tr>
+                        <td>{{ item.get_task_display }}</td>
+                        <td>{{ item.start_date|date:"d M Y" }}</td>
+                        <td>{{ item.end_date|date:"d M Y" }}</td>
+                        <td>{{ item.iq_range|default_if_none:"—" }}</td>
+                        <td>{{ item.cognitive_percent|default_if_none:"—" }}</td>
+                        <td>{{ item.personality_percent|default_if_none:"—" }}</td>
+                        <td>{{ item.neuro_psychology_percent|default_if_none:"—" }}</td>
+                        <td>{{ item.education_percent|default_if_none:"—" }}</td>
+                        <td>
+                            {% if item.overall != None %}
+                                <strong>{{ item.overall|floatformat:1 }}%</strong>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'psychology_app:assessment_detail' item.pk %}">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="empty-state">
+                            No assessments recorded for this player yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,346 @@
+
+/* =========================================
+   TEAM PROFILE
+========================================= */
+
+.team-profile {
+    width: 100%;
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 20px 0 40px;
+    color: #202938;
+}
+
+/* =========================================
+   TEAM HEADER
+========================================= */
+
+.team-profile-header {
+    background: #ffffff;
+    border: 1px solid #e8edf2;
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+}
+
+.team-profile-identity {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.profile-team-logo,
+.profile-team-placeholder {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.profile-team-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #edf2f7;
+    color: #263b53;
+    border-radius: 12px;
+    font-size: 36px;
+    font-weight: 800;
+}
+
+.team-profile-identity h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    font-weight: 800;
+    color: #172b45;
+}
+
+.team-profile-identity p {
+    margin: 0 0 10px;
+    color: #68788a;
+    font-size: 14px;
+}
+
+.team-profile-identity span {
+    display: inline-block;
+    background: #eaf2ff;
+    color: #245b9e;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* =========================================
+   STATISTICS
+========================================= */
+
+.team-statistics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.stat-card {
+    background: #ffffff;
+    border: 1px solid #e8edf2;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.035);
+}
+
+.stat-card span {
+    color: #718096;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.stat-card strong {
+    font-size: 28px;
+    font-weight: 800;
+    color: #20364f;
+}
+
+.stat-card.highlight {
+    background: #173b67;
+    border-color: #173b67;
+}
+
+.stat-card.highlight span,
+.stat-card.highlight strong {
+    color: #ffffff;
+}
+
+/* =========================================
+   PROFILE SECTIONS
+========================================= */
+
+.profile-section {
+    background: #ffffff;
+    border: 1px solid #e8edf2;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.035);
+}
+
+.profile-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #edf0f4;
+}
+
+.profile-section-header h2 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 800;
+    color: #20364f;
+}
+
+.profile-section-header span {
+    background: #edf3fa;
+    color: #315d88;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* =========================================
+   PLAYERS TABLE
+========================================= */
+
+.players-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.players-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 550px;
+}
+
+.players-table thead {
+    background: #173b67;
+    color: #ffffff;
+}
+
+.players-table th {
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+}
+
+.players-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #edf0f4;
+    font-size: 13px;
+    color: #455468;
+}
+
+.players-table tbody tr:hover {
+    background: #f7faff;
+}
+
+.players-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.player-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.player-name-cell img {
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+    border-radius: 50%;
+    background: #edf2f7;
+    border: 1px solid #e2e8f0;
+}
+
+.player-name-cell strong {
+    color: #263b53;
+    font-weight: 700;
+}
+
+/* =========================================
+   MATCH ROWS
+========================================= */
+
+.team-match-row {
+    display: grid;
+    grid-template-columns: 100px 1fr auto 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border-bottom: 1px solid #edf0f4;
+    font-size: 13px;
+}
+
+.team-match-row:last-child {
+    border-bottom: none;
+}
+
+.team-match-row > span:first-child {
+    color: #718096;
+}
+
+.team-match-row strong {
+    color: #263b53;
+    font-weight: 700;
+}
+
+.match-score {
+    background: #edf3fa;
+    color: #173b67 !important;
+    padding: 7px 13px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 800;
+    white-space: nowrap;
+    text-align: center;
+}
+
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
+
+@media (max-width: 900px) {
+
+    .team-statistics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .team-match-row {
+        grid-template-columns: 80px 1fr auto 1fr;
+        gap: 10px;
+    }
+
+    .team-match-row > span:last-child {
+        grid-column: 2 / -1;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .team-profile {
+        padding: 12px 0 25px;
+    }
+
+    .team-profile-header,
+    .profile-section {
+        padding: 17px;
+        border-radius: 10px;
+    }
+
+    .team-profile-identity {
+        gap: 15px;
+    }
+
+    .profile-team-logo,
+    .profile-team-placeholder {
+        width: 72px;
+        height: 72px;
+    }
+
+    .profile-team-placeholder {
+        font-size: 27px;
+    }
+
+    .team-profile-identity h1 {
+        font-size: 20px;
+    }
+
+    .team-profile-identity p {
+        font-size: 12px;
+    }
+
+    .team-statistics {
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 15px;
+    }
+
+    .stat-card strong {
+        font-size: 23px;
+    }
+
+    .stat-card span {
+        font-size: 11px;
+    }
+
+    .profile-section-header h2 {
+        font-size: 17px;
+    }
+
+    .team-match-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 14px 4px;
+    }
+
+    .team-match-row strong {
+        font-size: 12px;
+    }
+}

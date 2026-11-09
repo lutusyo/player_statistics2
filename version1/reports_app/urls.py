@@ -79,9 +79,14 @@ urlpatterns = [
     path('results/<int:team_id>/', result_views.result_reports, name='result_reports'),
     path('results/<int:team_id>/export/excel/', result_views.export_results_excel, name='export_result_excel'),
     path('results/<int:team_id>/export/pdf/', result_views.export_results_pdf, name='export_result_pdf'),
+
+    
     
     # Statistics
     path('team/<int:team_id>/statistics/', statistics_view.statistics_list_view, name='statistics_list'),
+
+
+
     path('team/<int:team_id>/statistics/export/excel/', statistics_view.statistics_export_excel, name='statistics_export_excel'),
     path('team/<int:team_id>/statistics/export/pdf/', statistics_view.statistics_export_pdf, name='statistics_export_pdf'),
 

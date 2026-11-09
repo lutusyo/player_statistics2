@@ -1,0 +1,282 @@
+{% extends "matches_app/competition_season/competition_season_base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'matches_app/css/competition_season/team_detail.css' %}">
+{% endblock %}
+
+{% block competition_content %}
+
+<div class="team-profile">
+
+    <!-- TEAM HEADER -->
+    <div class="team-profile-header">
+
+        <div class="team-profile-identity">
+
+            {% if team.logo %}
+                <img src="{{ team.logo.url }}" class="profile-team-logo" alt="{{ team.name }}">
+            {% else %}
+                <div class="profile-team-placeholder">
+                    {{ team.name|first|upper }}
+                </div>
+            {% endif %}
+
+            <div>
+                <h1>{{ team.name }}</h1>
+
+                <p>
+                    {{ competition_season.competition.name }}
+                    · {{ competition_season.season }}
+                </p>
+
+                {% if team.age_group %}
+                    <span>{{ team.age_group.name }}</span>
+                {% endif %}
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- STATISTICS -->
+    <div class="team-statistics">
+
+        <div class="stat-card">
+            <span>Played</span>
+            <strong>{{ stats.played }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Wins</span>
+            <strong>{{ stats.wins }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Draws</span>
+            <strong>{{ stats.draws }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Losses</span>
+            <strong>{{ stats.losses }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Goals For</span>
+            <strong>{{ stats.goals_for }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Goals Against</span>
+            <strong>{{ stats.goals_against }}</strong>
+        </div>
+
+        <div class="stat-card">
+            <span>Goal Difference</span>
+            <strong>{{ stats.goal_difference }}</strong>
+        </div>
+
+        <div class="stat-card highlight">
+            <span>Points</span>
+            <strong>{{ stats.points }}</strong>
+        </div>
+
+    </div>
+
+
+    <!-- PLAYERS -->
+    <div class="profile-section">
+
+        <div class="profile-section-header">
+            <h2>Players</h2>
+            <span>{{ players|length }} players</span>
+        </div>
+
+        <div class="players-table-wrapper">
+
+            <table class="players-table">
+
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Player</th>
+                        <th>Position</th>
+                        <th>Age Group</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for player in players %}
+
+                    <tr>
+                        <td>{{ player.jersey_number }}</td>
+
+                        <td class="player-name-cell">
+
+                            {% if player.photo %}
+                                <img src="{{ player.photo.url }}" alt="{{ player.full_name }}">
+                            {% endif %}
+
+                            <strong>{{ player.full_name }}</strong>
+
+                        </td>
+
+                        <td>{{ player.get_position_display }}</td>
+
+                        <td>
+                            {% if player.age_group %}
+                                {{ player.age_group.name }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="4">No active players assigned to this team.</td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- STAFF -->
+    <div class="profile-section">
+
+        <div class="profile-section-header">
+            <h2>Technical & Management Staff</h2>
+            <span>{{ staff_members|length }} members</span>
+        </div>
+
+        <div class="staff-grid">
+
+            {% for member in staff_members %}
+
+                <div class="staff-card">
+
+                    <div class="staff-photo">
+
+                        {% if member.photo %}
+                            <img src="{{ member.photo.url }}" alt="{{ member.name }}">
+                        {% else %}
+                            <div class="staff-placeholder">
+                                {{ member.name|first|upper }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                    <div class="staff-info">
+
+                        <h3>{{ member.name }}</h3>
+
+                        <span class="staff-role">
+                            {{ member.get_role_display }}
+                        </span>
+
+                        {% if member.age_group %}
+                            <small>{{ member.age_group.name }}</small>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <div class="empty-staff">
+                    <p>No staff members have been assigned to this team.</p>
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+</div>
+
+
+
+    <!-- RECENT MATCHES -->
+    <div class="profile-section">
+
+        <div class="profile-section-header">
+            <h2>Recent Matches</h2>
+        </div>
+
+        {% for match in recent_matches %}
+
+            <div class="team-match-row">
+
+                <span>{{ match.date|date:"d M Y" }}</span>
+
+                <strong>
+                    {{ match.home_team.name }}
+                </strong>
+
+                <span class="match-score">
+                    {{ match.home_score }} - {{ match.away_score }}
+                </span>
+
+                <strong>
+                    {{ match.away_team.name }}
+                </strong>
+
+            </div>
+
+        {% empty %}
+
+            <p>No completed matches yet.</p>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- UPCOMING MATCHES -->
+    <div class="profile-section">
+
+        <div class="profile-section-header">
+            <h2>Upcoming Matches</h2>
+        </div>
+
+        {% for match in upcoming_matches %}
+
+            <div class="team-match-row">
+
+                <span>{{ match.date|date:"d M Y" }}</span>
+
+                <strong>{{ match.home_team.name }}</strong>
+
+                <span>vs</span>
+
+                <strong>{{ match.away_team.name }}</strong>
+
+                <span>{{ match.get_result_status_display }}</span>
+
+            </div>
+
+        {% empty %}
+
+            <p>No upcoming matches.</p>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

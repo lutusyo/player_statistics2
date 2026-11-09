@@ -15,6 +15,7 @@ from version1.matches_app.views.competition_season.rules import competition_seas
 from version1.matches_app.views.competition_season.match_data import competition_match_data
 from version1.matches_app.views.competition_season.goal_scorers import competition_season_goal_scorers
 from version1.matches_app.views.competition_season.match_center import competition_match_centre
+from version1.matches_app.views.competition_season.teams import competition_season_team_detail
 
 
 
@@ -67,6 +68,8 @@ urlpatterns = [
     path("matches/<int:match_id>/data/", competition_match_data, name="competition_match_data",),
     path("competitions/<int:competition_season_id>/goal-scorers/",competition_season_goal_scorers, name="competition_season_goal_scorers",),
     path("matches/<int:match_id>/centre/", competition_match_centre, name="competition_match_centre", ),
+
+    path("competition-season/<int:competition_season_id>/teams/<int:team_id>/", competition_season_team_detail, name="competition_season_team_detail",),
 
 ]
 

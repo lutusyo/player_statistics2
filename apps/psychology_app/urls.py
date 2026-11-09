@@ -6,7 +6,6 @@ app_name = 'psychology_app'
 urlpatterns = [
 
     
-
     path('', display_data_views.dashboard, name='dashboard'),
     path('players/', display_data_views.player_directory, name='player_directory'),
     path('players/<int:player_id>/', display_data_views.player_profile, name='player_profile',),

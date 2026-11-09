@@ -275,8 +275,8 @@ def weekly_report_pdf(request):
     styles.add(ParagraphStyle(
         name="ReportTitle",
         parent=styles["Title"],
-        fontSize=20,
-        leading=24,
+        fontSize=25,
+        leading=30,
         alignment=TA_CENTER,
         textColor=colors.HexColor("#17365D"),
         spaceAfter=10,
@@ -284,16 +284,16 @@ def weekly_report_pdf(request):
     styles.add(ParagraphStyle(
         name="TOCTitle",
         parent=styles["Heading1"],
-        fontSize=16,
-        leading=20,
+        fontSize=19,
+        leading=23,
         textColor=colors.HexColor("#17365D"),
         spaceAfter=12,
     ))
     styles.add(ParagraphStyle(
         name="TOCLevel1",
         parent=styles["Heading1"],
-        fontSize=12,
-        leading=15,
+        fontSize=15,
+        leading=19,
         textColor=colors.HexColor("#17365D"),
         spaceBefore=10,
         spaceAfter=5,
@@ -302,8 +302,8 @@ def weekly_report_pdf(request):
     styles.add(ParagraphStyle(
         name="TOCLevel2",
         parent=styles["Heading2"],
-        fontSize=9,
-        leading=12,
+        fontSize=12,
+        leading=15,
         textColor=colors.HexColor("#285A84"),
         spaceBefore=6,
         spaceAfter=3,
@@ -312,23 +312,23 @@ def weekly_report_pdf(request):
     styles.add(ParagraphStyle(
         name="SmallCell",
         parent=styles["BodyText"],
-        fontSize=7,
-        leading=9,
+        fontSize=9,
+        leading=12,
         spaceAfter=1,
         wordWrap="CJK",
     ))
     styles.add(ParagraphStyle(
         name="SmallHeader",
         parent=styles["BodyText"],
-        fontSize=7,
-        leading=9,
+        fontSize=9,
+        leading=12,
         textColor=colors.white,
     ))
     styles.add(ParagraphStyle(
         name="CoverText",
         parent=styles["Normal"],
-        fontSize=10,
-        leading=15,
+        fontSize=12,
+        leading=17,
         alignment=TA_CENTER,
     ))
 
@@ -339,11 +339,21 @@ def weekly_report_pdf(request):
             return value
         return Paragraph(_safe(value), styles["SmallCell"])
 
+    def header_cell(value):
+        if isinstance(value, Paragraph):
+            value = value.getPlainText()
+        return Paragraph(_safe(value), styles["SmallHeader"])
+
     def heading(value, level=1):
         style = styles["TOCLevel1"] if level == 1 else styles["TOCLevel2"]
         story.append(Paragraph(_safe(value), style))
 
     def make_table(rows, widths, repeat_rows=1):
+        # Paragraph text does not inherit a table's TEXTCOLOR, so explicitly
+        # apply the white header style to every first-row cell.
+        if rows:
+            rows = [list(row) for row in rows]
+            rows[0] = [header_cell(value) for value in rows[0]]
         table = Table(
             rows,
             colWidths=widths,
@@ -365,8 +375,19 @@ def weekly_report_pdf(request):
         story.append(table)
         story.append(Spacer(1, 4 * mm))
 
-    # Cover page: use the selected team's logo where available.
+    # Cover page: title first, followed by the selected team's logo once.
+    story.append(Spacer(1, 10 * mm))
+    story.append(Paragraph(
+        "WEEKLY INDIVIDUAL TRAINING<br/>PERFORMANCE REPORT",
+        styles["ReportTitle"],
+    ))
+    # Always try to show one logo on the cover page. Prefer the selected
+    # team's logo; when the report covers all teams (or that team has no logo),
+    # use the first available team logo as a single report-level fallback.
     logo = _team_logo(selected_team)
+    if logo is None:
+        fallback_team = Team.objects.exclude(logo="").order_by("name").first()
+        logo = _team_logo(fallback_team)
     if logo:
         logo_table = Table([[logo]], colWidths=[doc.width])
         logo_table.setStyle(TableStyle([
@@ -378,12 +399,6 @@ def weekly_report_pdf(request):
             ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
         ]))
         story.append(logo_table)
-
-    story.append(Spacer(1, 10 * mm))
-    story.append(Paragraph(
-        "WEEKLY INDIVIDUAL TRAINING<br/>PERFORMANCE REPORT",
-        styles["ReportTitle"],
-    ))
     report_scope = selected_team.name if selected_team else "All Teams"
     age_group_scope = selected_age_group.name if selected_age_group else "All Age Groups"
     story.append(Paragraph(
@@ -403,8 +418,8 @@ def weekly_report_pdf(request):
         ParagraphStyle(
             name="TOCEntryLevel0",
             fontName="Helvetica-Bold",
-            fontSize=9,
-            leading=14,
+            fontSize=11,
+            leading=15,
             leftIndent=0,
             firstLineIndent=0,
             spaceBefore=4,
@@ -412,8 +427,8 @@ def weekly_report_pdf(request):
         ParagraphStyle(
             name="TOCEntryLevel1",
             fontName="Helvetica",
-            fontSize=8,
-            leading=11,
+            fontSize=10,
+            leading=13,
             leftIndent=16,
             firstLineIndent=0,
         ),
@@ -440,7 +455,7 @@ def weekly_report_pdf(request):
         [38 * mm, 32 * mm, 40 * mm, 42 * mm, 30 * mm, 40 * mm],
     )
 
-    # 2. Teams included. For all-teams reports, list team names and logos.
+    # 2. Teams included. Keep this section text-only; the logo appears once on the cover.
     heading("2. REPORTING PERIOD AND TEAM COVERAGE")
     story.append(Paragraph(
         f"Age group: <b>{_safe(age_group_scope)}</b><br/>"
@@ -462,14 +477,10 @@ def weekly_report_pdf(request):
         )
 
     if coverage_teams:
-        coverage_rows = [[cell("Logo"), cell("Team")]]
+        coverage_rows = [[cell("Team")]]
         for team in coverage_teams:
-            team_logo = _team_logo(team, 12 * mm, 12 * mm)
-            coverage_rows.append([
-                team_logo if team_logo else cell("—"),
-                cell(team.name),
-            ])
-        make_table(coverage_rows, [25 * mm, 200 * mm])
+            coverage_rows.append([cell(team.name)])
+        make_table(coverage_rows, [225 * mm])
     else:
         story.append(Paragraph(
             "No teams have training sessions in this reporting period.",
@@ -539,39 +550,10 @@ def weekly_report_pdf(request):
     ])
     make_table(player_rows, [18 * mm, 95 * mm, 100 * mm, 40 * mm])
 
-    # 5. Session topics and objectives.
-    heading("5. TRAINING SESSIONS, TOPICS AND OBJECTIVES")
-    for session in sessions:
-        heading(
-            f"{session.date.strftime('%d %b %Y')} — "
-            f"{session.age_group.name if session.age_group else 'Age group not specified'} — "
-            f"{session.team.name if session.team else 'Team not specified'}",
-            level=2,
-        )
-        details = [[
-            cell("Training Type"), cell("Coach"), cell("Duration")
-        ], [
-            cell(session.get_training_type_display()),
-            cell(session.coach if session.coach else "—"),
-            cell(
-                f"{session.duration_minutes} minutes"
-                if session.duration_minutes else "—"
-            ),
-        ]]
-        make_table(details, [80 * mm, 90 * mm, 55 * mm])
+    # Topics are included directly in the interventions/coaching-points table below.
 
-        topic_rows = [[cell("Topic"), cell("Objective")]]
-        for item in session.session_topics.all():
-            topic_rows.append([
-                cell(item.topic.name if item.topic else "—"),
-                cell(item.objective.name if item.objective else "—"),
-            ])
-        if len(topic_rows) == 1:
-            topic_rows.append([cell("No topics recorded"), cell("—")])
-        make_table(topic_rows, [100 * mm, 125 * mm])
-
-    # 6. Player interventions and coaching points.
-    heading("6. INTERVENTIONS AND COACHING POINTS")
+    # 5. Player interventions and coaching points.
+    heading("5. INTERVENTIONS AND COACHING POINTS")
     for session in sessions:
         heading(
             f"{session.date.strftime('%d %b %Y')} — "
@@ -581,8 +563,8 @@ def weekly_report_pdf(request):
         )
         player_rows = [[
             cell("Player"), cell("Minutes"), cell("Performance"),
-            cell("Intervention / Objective / Observation"), cell("Result"),
-            cell("Coaching Points"), cell("Next Action"),
+            cell("Topic"), cell("Intervention / Objective / Observation"),
+            cell("Result"), cell("Coaching Points"), cell("Next Action"),
         ]]
 
         for participation in session.player_participations.all():
@@ -594,7 +576,7 @@ def weekly_report_pdf(request):
                     cell(getattr(player, "full_name", None) or str(player)),
                     cell(participation.minutes),
                     cell(participation.get_performance_display()),
-                    cell("No intervention recorded"),
+                    cell("—"), cell("No intervention recorded"),
                     cell("—"), cell("—"), cell("—"),
                 ])
                 continue
@@ -628,7 +610,12 @@ def weekly_report_pdf(request):
                     cell(getattr(player, "full_name", None) or str(player)),
                     cell(participation.minutes),
                     cell(participation.get_performance_display()),
-                    Paragraph(details_text, styles["SmallCell"]),
+                    cell(topic),
+                    Paragraph(
+                        f"Objective: {_safe(objective)}<br/>"
+                        f"Observation: {_safe(intervention.observation)}",
+                        styles["SmallCell"],
+                    ),
                     cell(intervention.get_result_display()),
                     Paragraph("<br/>".join(point_text) or "—", styles["SmallCell"]),
                     cell(intervention.next_action),
@@ -637,16 +624,16 @@ def weekly_report_pdf(request):
         if len(player_rows) == 1:
             player_rows.append([
                 cell("No player participation recorded"),
-                cell("—"), cell("—"), cell("—"), cell("—"), cell("—"), cell("—")
+                cell("—"), cell("—"), cell("—"), cell("—"), cell("—"), cell("—"), cell("—")
             ])
 
         make_table(
             player_rows,
-            [34 * mm, 17 * mm, 28 * mm, 58 * mm, 25 * mm, 48 * mm, 34 * mm],
+            [30 * mm, 14 * mm, 22 * mm, 34 * mm, 48 * mm, 20 * mm, 42 * mm, 34 * mm],
         )
 
-    # 7. Session evaluations.
-    heading("7. SESSION EVALUATIONS AND NEXT ACTIONS")
+    # 6. Session evaluations.
+    heading("6. SESSION EVALUATIONS AND NEXT ACTIONS")
     for session in sessions:
         heading(
             f"{session.date.strftime('%d %b %Y')} — "
@@ -675,7 +662,7 @@ def weekly_report_pdf(request):
         make_table(evaluation_rows, [55 * mm, 195 * mm])
 
     # Signature section.
-    heading("8. REVIEW AND APPROVAL")
+    heading("7. REVIEW AND APPROVAL")
     signature_rows = [
         [cell("Coach Name / Signature"), cell("Technical Director Name / Signature")],
         [cell(""), cell("")],
@@ -685,7 +672,7 @@ def weekly_report_pdf(request):
 
     def add_page_number(canvas, document):
         canvas.saveState()
-        canvas.setFont("Helvetica", 8)
+        canvas.setFont("Helvetica", 9)
         canvas.setFillColor(colors.HexColor("#666666"))
         canvas.drawString(12 * mm, 8 * mm, "Weekly Individual Training Report")
         canvas.drawRightString(

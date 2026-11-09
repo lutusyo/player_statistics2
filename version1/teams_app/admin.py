@@ -16,5 +16,5 @@ class TeamAdmin(admin.ModelAdmin):
 @admin.register(StaffMember)
 class StaffMemberAdmin(admin.ModelAdmin):
     list_display = ['name', 'role', 'age_group']
-    list_filter = ['role', 'age_group']
-    search_fields = ['name']
+    list_filter = ['role', 'age_group', 'teams']
+    search_fields = ['name', 'teams']

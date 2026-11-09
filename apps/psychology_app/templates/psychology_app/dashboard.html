@@ -1,0 +1,111 @@
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/psychology_app.css' %}">
+
+<div class="psych-page">
+    <header class="psych-header">
+        <div>
+            <h1>Psychology Dashboard</h1>
+            <p>Player assessments and psychology overview.</p>
+        </div>
+        <a class="psych-btn primary"
+           href="{% url 'psychology_app:add_assessment' %}">
+            + Add Assessment
+        </a>
+    </header>
+
+    <div class="psych-nav">
+        <a class="active" href="{% url 'psychology_app:dashboard' %}">Dashboard</a>
+        <a href="{% url 'psychology_app:player_directory' %}">Players</a>
+        <a href="{% url 'psychology_app:assessment_list' %}">Assessments</a>
+    </div>
+
+    <div class="psych-stats">
+        <div class="psych-stat">
+            <span>Active Players</span>
+            <strong>{{ total_players }}</strong>
+        </div>
+        <div class="psych-stat">
+            <span>Players Assessed</span>
+            <strong>{{ assessed_players }}</strong>
+        </div>
+        <div class="psych-stat">
+            <span>Total Assessments</span>
+            <strong>{{ total_assessments }}</strong>
+        </div>
+        <div class="psych-stat">
+            <span>Average Overall Score</span>
+            <strong>
+                {% if average_score != None %}
+                    {{ average_score|floatformat:1 }}%
+                {% else %}
+                    —
+                {% endif %}
+            </strong>
+        </div>
+    </div>
+
+    <section class="psych-card">
+        <div class="psych-card-header">
+            <h2>Recent Assessments</h2>
+            <a href="{% url 'psychology_app:assessment_list' %}">View all</a>
+        </div>
+
+        <div class="psych-table-wrap">
+            <table class="psych-table">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Task</th>
+                        <th>Date</th>
+                        <th>Overall</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in recent_assessments %}
+                    <tr>
+                        <td>
+                            <div class="psych-player-cell">
+                                {% if item.player.photo %}
+                                    <img class="mini-player-photo"
+                                         src="{{ item.player.photo.url }}"
+                                         alt="{{ item.player.full_name }}">
+                                {% else %}
+                                    <div class="mini-player-placeholder">
+                                        {{ item.player.name|first|upper }}
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <strong>{{ item.player.full_name }}</strong>
+                                    <small>{{ item.player.team|default:"No team" }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ item.get_task_display }}</td>
+                        <td>{{ item.start_date|date:"d M Y" }}</td>
+                        <td>
+                            {% if item.overall != None %}
+                                {{ item.overall|floatformat:1 }}%
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'psychology_app:assessment_detail' item.pk %}">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            No assessments recorded yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

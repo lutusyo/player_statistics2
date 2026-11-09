@@ -83,14 +83,19 @@ class StaffMember(models.Model):
         ('FITNESS_COACH', 'Fitness Coach'),
         ('PHYSIO', 'Physiotherapist'),
         ('ANALYST', 'Performance Analyst'),
+        ('DATA_ANALYST', 'Data Analyst'),
+        ('VIDEO_ANALYST', 'Video Analyst'),
         ('TEAM_MANAGER', 'Team Manager'),
         ('PSYCHOLOGIST','Psychologist'),
         ('MEDIA_TEAM', 'Media Team'),
+        ('INDIVIDUAL_TRAINING_COACH', ' Individual Training Coach'),
+        ('KIT_MANAGER', 'Kit Manager'),
         ('OTHER', 'Other'),
     ]
 
     name = models.CharField(max_length=100)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    teams = models.ManyToManyField(Team, blank=True, related_name="staff_members")
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES)
     age_group = models.ForeignKey(AgeGroup, on_delete=models.SET_NULL, null=True, blank=True)
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)

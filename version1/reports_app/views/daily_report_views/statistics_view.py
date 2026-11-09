@@ -8,7 +8,6 @@ from io import BytesIO
 import pandas as pd
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from django.utils.dateparse import parse_date
 
@@ -17,15 +16,11 @@ from version1.lineup_app.models import MatchLineup
 from version1.tagging_app.models import AttemptToGoal
 from version1.teams_app.models import Team
 from version1.reports_app.models.previous_models import PlayerTrainingMinutes
-
 from version1.matches_app.models import CompetitionType
-
 from version1.reports_app.models.previous_models import (PlayerTrainingMinutes,TrainingMinutes,)
-
 from version1.reports_app.models.weekly_report import WeeklyReport
 
-
-
+from reportlab.lib.pagesizes import A4, landscape
 
 
 # ====================== REPORT HELPER ======================
@@ -156,237 +151,148 @@ def get_statistics_report(filter_type="all", team=None, start_date=None, end_dat
 
     return report
 
-# ====================== NORMAL VIEW ======================
-@login_required
-def statistics_list_view(request, team_id):
+
+
+def get_statistics_context(request, team_id):
     team = get_object_or_404(Team, id=team_id)
 
-
-    report = WeeklyReport.objects.filter(
-    team_id=team_id
-    ).order_by("-id").first()
-
-
     filter_type = request.GET.get("filter", "all")
+    competition = request.GET.get("competition") or None
 
-    competition = request.GET.get("competition")
+    start_date = parse_date(request.GET.get("start_date", ""))
+    end_date = parse_date(request.GET.get("end_date", ""))
 
-    filter_type = request.GET.get("filter", "all")
+    if not start_date:
+        today = now().date()
 
-    # Parse start/end dates
-    start_date_str = request.GET.get("start_date")
-    end_date_str = request.GET.get("end_date")
-    start_date = parse_date(start_date_str) if start_date_str else None
-    end_date = parse_date(end_date_str) if end_date_str else None
-
-    # If filter is 'week' or 'month', compute start_date automatically
-    if filter_type == "week" and not start_date:
-        start_date = now().date() - timedelta(days=7)
-    elif filter_type == "month" and not start_date:
-        start_date = now().date().replace(day=1)
-
-    report = get_statistics_report(filter_type=filter_type,team=team,start_date=start_date,end_date=end_date,competition=competition)
-
-    context = {
-        "report": report,
-        "filter_type": filter_type,
-        "team": team,
-        "start_date": start_date_str,
-        "end_date": end_date_str,
-        "competition": competition,
-         "report": report,   
-    }
-
-    context["competition_choices"] = CompetitionType.choices
-
-    return render(request, "reports_app/daily_report_templates/9statistics/statistics_list.html", context)
-
-# ====================== EXPORT TO EXCEL ======================
-@login_required
-def statistics_export_excel(request, team_id):
-    team = get_object_or_404(Team, id=team_id)
-
-    competition = request.GET.get("competition")
-
-    filter_type = request.GET.get("filter", "all")
-
-    # Parse start/end dates
-    start_date_str = request.GET.get("start_date")
-    end_date_str = request.GET.get("end_date")
-    start_date = parse_date(start_date_str) if start_date_str else None
-    end_date = parse_date(end_date_str) if end_date_str else None
-
-    # If filter is 'week' or 'month', compute start_date automatically
-    if filter_type == "week" and not start_date:
-        start_date = now().date() - timedelta(days=7)
-    elif filter_type == "month" and not start_date:
-        start_date = now().date().replace(day=1)
+        if filter_type == "week":
+            start_date = today - timedelta(days=7)
+        elif filter_type == "month":
+            start_date = today.replace(day=1)
 
     report = get_statistics_report(
         filter_type=filter_type,
         team=team,
         start_date=start_date,
         end_date=end_date,
-        competition=competition
+        competition=competition,
     )
 
-    df = pd.DataFrame([{
-        "Full Name": r["player"].full_name,
-        "Jersey No": r["player"].jersey_number,
-        "Position": r["position"],
-        "Specific Position": r["player"].specific_position,
-        "Preferred Foot": r["player"].foot_preference,
+    return {
+        "report": report,
+        "team": team,
+        "filter_type": filter_type,
+        "start_date": start_date,
+        "end_date": end_date,
+        "competition": competition,
+        "competition_choices": CompetitionType.choices,
+    }
 
-        "Height (cm)": r["player"].current_measurement.height if r["player"].current_measurement else "",
-        "Weight (kg)": r["player"].current_measurement.weight if r["player"].current_measurement else "",
 
-        "Date of Birth": r["player"].birthdate,
-        "Age": r["player"].age_using_birthdate,
+@login_required
+def statistics_list_view(request, team_id):
+    context = get_statistics_context(request, team_id)
 
-        "Training Total": r["training_total"],
-        "U11": r["training_u11"],
-        "U13": r["training_u13"],
-        "U15": r["training_u15"],
-        "U17": r["training_u17"],
-        "U20": r["training_u20"],
-        "First Team": r["training_first"],
-        "National Team": r["training_national"],
+    return render(request, "reports_app/daily_report_templates/9statistics/statistics_list.html", context,)
 
-        "Game Minutes": r["game_minutes"],
-        "Appearances": r["appearances"],
-        "Starts": r["starts"],
-        "Sub In": r["sub_in"],
-        "Sub Out": r["sub_out"],
-        "Goals": r["goals"],
-        "Assists": r["assists"],
-        "Pre Assist": r["pre_assists"],
-        "Note": r["note"],
-    } for r in report])
+
+
+
+STAT_COLUMNS = [
+    ("Name", lambda r: r["player"].full_name),
+    ("Pos", lambda r: r["position"]),
+    ("Total min", lambda r: r["game_minutes"]),
+    ("Games", lambda r: r["appearances"]),
+    ("Starts", lambda r: r["starts"]),
+    ("In", lambda r: r["sub_in"]),
+    ("Out", lambda r: r["sub_out"]),
+    ("Goals", lambda r: r["goals"]),
+    ("Ast", lambda r: r["assists"]),
+    ("Pre Ast", lambda r: r["pre_assists"]),
+    ("Training Total", lambda r: r["training_total"]),
+    ("U11", lambda r: r["training_u11"]),
+    ("U13", lambda r: r["training_u13"]),
+    ("U15", lambda r: r["training_u15"]),
+    ("U17", lambda r: r["training_u17"]),
+    ("U20", lambda r: r["training_u20"]),
+    ("First", lambda r: r["training_first"]),
+    ("National", lambda r: r["training_national"]),
+]
+
+
+def get_export_data(report):
+    return [
+        [get_value(r) for _, get_value in STAT_COLUMNS]
+        for r in report
+    ]
+
+
+
+@login_required
+def statistics_export_excel(request, team_id):
+    context = get_statistics_context(request, team_id)
+
+    df = pd.DataFrame(
+        get_export_data(context["report"]),
+        columns=[name for name, _ in STAT_COLUMNS],
+    )
 
     output = BytesIO()
-    with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df.to_excel(writer, index=False, sheet_name="Player Stats")
+    df.to_excel(output, index=False, engine="openpyxl")
 
     response = HttpResponse(
         output.getvalue(),
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        content_type=(
+            "application/vnd.openxmlformats-officedocument."
+            "spreadsheetml.sheet"
+        ),
     )
-    filename = f"Player_Stats_{team.age_group.code}.xlsx"
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    response["Content-Disposition"] = (
+        f'attachment; filename="Player_Stats_'
+        f'{context["team"].age_group.code}.xlsx"'
+    )
     return response
 
 
-# ====================== EXPORT TO PDF ======================
+
 @login_required
 def statistics_export_pdf(request, team_id):
-    team = get_object_or_404(Team, id=team_id)
+    context = get_statistics_context(request, team_id)
 
-    competition = request.GET.get("competition")
-    
-    filter_type = request.GET.get("filter", "all")
-
-    # Parse start/end dates
-    start_date_str = request.GET.get("start_date")
-    end_date_str = request.GET.get("end_date")
-    start_date = parse_date(start_date_str) if start_date_str else None
-    end_date = parse_date(end_date_str) if end_date_str else None
-
-    # If filter is 'week' or 'month', compute start_date automatically
-    if filter_type == "week" and not start_date:
-        start_date = now().date() - timedelta(days=7)
-    elif filter_type == "month" and not start_date:
-        start_date = now().date().replace(day=1)
-
-    report = get_statistics_report(
-        filter_type=filter_type,
-        team=team,
-        start_date=start_date,
-        end_date=end_date,
-        competition=competition
-    )
+    data = [
+        [name for name, _ in STAT_COLUMNS],
+        *get_export_data(context["report"]),
+    ]
 
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
-    styles = getSampleStyleSheet()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=landscape(A4),
+    )
 
-    
-
-
-    data = [[
-    "Name", "No", "Pos", "Spec Pos", "Foot",
-    "Ht", "Wt", "DOB", "Age",
-    "Total",
-    "U11",
-    "U13",
-    "U15",
-    "U17",
-    "U20",
-    "First",
-    "National",
-    "Game",
-    "Apps",
-    "Starts",
-    "In",
-    "Out",
-    "Goals",
-    "Ast",
-    "Pre Ast",
-    "Note",
-    ]]
-
-
- 
-    for r in report:
-        player = r["player"]
-        m = player.current_measurement
-
-
-        data.append([
-            player.full_name,
-            player.jersey_number,
-            r["position"],
-            player.specific_position,
-            player.foot_preference,
-            m.height if m else "",
-            m.weight if m else "",
-            player.birthdate,
-            player.age_using_birthdate,
-
-            r["training_total"],
-            r["training_u11"],
-            r["training_u13"],
-            r["training_u15"],
-            r["training_u17"],
-            r["training_u20"],
-            r["training_first"],
-            r["training_national"],
-
-            r["game_minutes"],
-            r["appearances"],
-            r["starts"],
-            r["sub_in"],
-            r["sub_out"],
-            r["goals"],
-            r["assists"],
-            r["pre_assists"],
-            r["note"],
-        ])
-
-
-
-    table = Table(data)
+    table = Table(data, repeatRows=1)
     table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.gray),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-        ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.gray),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 6),
+        ("GRID", (0, 0), (-1, -1), 0.3, colors.black),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
     ]))
 
-    doc.build([Paragraph("Player Statistics Report", styles["Heading2"]), table])
-    pdf = buffer.getvalue()
-    buffer.close()
+    doc.build([
+        Paragraph("Player Statistics Report",
+                  getSampleStyleSheet()["Heading2"]),
+        table,
+    ])
 
-    response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = 'attachment; filename="player_stats.pdf"'
-    response.write(pdf)
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/pdf",
+    )
+    response["Content-Disposition"] = (
+        'attachment; filename="player_stats.pdf"'
+    )
     return response
+
+

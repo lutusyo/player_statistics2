@@ -1,0 +1,84 @@
+
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/psychology_app.css' %}">
+
+<div class="psych-page">
+    <header class="psych-header">
+        <div>
+            <h1>Player Directory</h1>
+            <p>Select a player to view their psychology profile and assessment history.</p>
+        </div>
+        <a class="psych-btn primary"
+           href="{% url 'psychology_app:add_assessment' %}">
+            + Add Assessment
+        </a>
+    </header>
+
+    <div class="psych-nav">
+        <a href="{% url 'psychology_app:dashboard' %}">Dashboard</a>
+        <a class="active" href="{% url 'psychology_app:player_directory' %}">Players</a>
+        <a href="{% url 'psychology_app:assessment_list' %}">Assessments</a>
+    </div>
+
+    <section class="psych-card">
+        <form method="get" class="player-filters">
+            <input type="search" name="q" value="{{ search }}"
+                   placeholder="Search player name...">
+
+            <select name="team">
+                <option value="">All Teams</option>
+                {% for team in teams %}
+                    <option value="{{ team.id }}"
+                        {% if selected_team == team.id|stringformat:"s" %}selected{% endif %}>
+                        {{ team.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <select name="age_group">
+                <option value="">All Age Groups</option>
+                {% for age in age_groups %}
+                    <option value="{{ age.id }}"
+                        {% if selected_age_group == age.id|stringformat:"s" %}selected{% endif %}>
+                        {{ age.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <button class="psych-btn primary" type="submit">Search</button>
+            <a class="psych-btn secondary"
+               href="{% url 'psychology_app:player_directory' %}">Reset</a>
+        </form>
+    </section>
+
+    <div class="player-grid">
+        {% for player in players %}
+        <a class="player-card"
+           href="{% url 'psychology_app:player_profile' player.id %}">
+            {% if player.photo %}
+                <img class="player-photo"
+                     src="{{ player.photo.url }}"
+                     alt="{{ player.full_name }}">
+            {% else %}
+                <div class="player-photo player-photo-placeholder">
+                    {{ player.name|first|upper }}
+                </div>
+            {% endif %}
+
+            <div class="player-card-body">
+                <h3>{{ player.full_name }}</h3>
+                <p>{{ player.team|default:"No team assigned" }}</p>
+                <p>{{ player.age_group|default:"No age group" }}</p>
+                <p>{{ player.position|default:"Position not set" }}</p>
+                <span class="assessment-count">
+                    {{ player.assessment_count }} assessment{{ player.assessment_count|pluralize }}
+                </span>
+            </div>
+        </a>
+        {% empty %}
+        <div class="psych-card empty-state">
+            No players match your search.
+        </div>
+        {% endfor %}
+    </div>
+</div>
