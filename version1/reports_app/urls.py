@@ -85,8 +85,6 @@ urlpatterns = [
     # Statistics
     path('team/<int:team_id>/statistics/', statistics_view.statistics_list_view, name='statistics_list'),
 
-
-
     path('team/<int:team_id>/statistics/export/excel/', statistics_view.statistics_export_excel, name='statistics_export_excel'),
     path('team/<int:team_id>/statistics/export/pdf/', statistics_view.statistics_export_pdf, name='statistics_export_pdf'),
 

@@ -1,0 +1,185 @@
+
+/* PLAYER PROFILE */
+.back-link {
+    display: inline-block;
+    margin: 18px 0;
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.player-profile-card {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    margin-bottom: 22px;
+}
+
+.profile-photo-wrap {
+    flex-shrink: 0;
+}
+
+.profile-photo {
+    width: 145px;
+    height: 145px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.profile-photo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e8eef5;
+    color: #2563eb;
+    font-size: 48px;
+    font-weight: 700;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-label {
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.profile-info h1 {
+    margin: 6px 0;
+    font-size: 27px;
+    color: #172033;
+}
+
+.profile-info p {
+    color: #64748b;
+    margin: 5px 0 14px;
+}
+
+.profile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.profile-tags span {
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.profile-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+}
+
+.profile-details div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.profile-details small {
+    color: #64748b;
+}
+
+.profile-details strong {
+    color: #1e293b;
+    font-size: 14px;
+}
+
+.profile-action {
+    align-self: flex-start;
+}
+
+.psych-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.psych-stat {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+
+.psych-stat span {
+    display: block;
+    color: #64748b;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.psych-stat strong {
+    font-size: 25px;
+    color: #172033;
+}
+
+.psych-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.psych-table {
+    width: 100%;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+.psych-table th {
+    background: #1e3a5f;
+    color: #fff;
+    padding: 13px;
+    text-align: left;
+    font-size: 13px;
+}
+
+.psych-table td {
+    padding: 13px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #334155;
+    font-size: 13px;
+}
+
+.psych-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.psych-table td a {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .player-profile-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .profile-action {
+        align-self: stretch;
+    }
+
+    .psych-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-details {
+        gap: 15px;
+    }
+}

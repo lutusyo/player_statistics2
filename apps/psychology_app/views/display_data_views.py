@@ -12,7 +12,7 @@ def dashboard(request):
     assessments = Assessment.objects.select_related('player')
 
     context = {
-        'total_players': Player.objects.filter(is_active=True).count(),
+        'total_players': Player.objects.filter(is_active=True, team__team_type='OUR_TEAM').count(),
         'assessed_players': assessments.values('player_id').distinct().count(),
         'total_assessments': assessments.count(),
         'average_score': assessments.aggregate(
@@ -24,11 +24,15 @@ def dashboard(request):
     return render(request, 'psychology_app/dashboard.html', context)
 
 
+
 @staff_member_required
 def player_directory(request):
-    players = Player.objects.filter(is_active=True).select_related(
-        'team', 'age_group'
-    )
+    from version1.teams_app.models import AgeGroup, Team
+
+    players = Player.objects.filter(
+        is_active=True,
+        team__team_type='OUR_TEAM'
+    ).select_related('team', 'age_group')
 
     search = request.GET.get('q', '').strip()
     team_id = request.GET.get('team', '')
@@ -51,18 +55,21 @@ def player_directory(request):
         assessment_count=Count('psychology_app_assessments')
     ).order_by('name', 'second_name', 'surname')
 
-    from version1.teams_app.models import AgeGroup, Team
-
     context = {
         'players': players,
-        'teams': Team.objects.all().order_by('name'),
-        'age_groups': AgeGroup.objects.all().order_by('name'),
+        'teams': Team.objects.filter(
+            team_type='OUR_TEAM'
+        ).order_by('name'),
+        'age_groups': AgeGroup.objects.filter(
+            team__team_type='OUR_TEAM'
+        ).distinct().order_by('name'),
         'search': search,
         'selected_team': team_id,
         'selected_age_group': age_group_id,
     }
 
     return render(request, 'psychology_app/player_directory.html', context)
+
 
 
 @staff_member_required

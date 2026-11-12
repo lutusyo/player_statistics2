@@ -1,0 +1,341 @@
+
+/* =========================================
+   PSYCHOLOGY APP - GENERAL
+========================================= */
+
+:root {
+    --psych-primary: #0756a5;
+    --psych-primary-dark: #063d78;
+    --psych-light: #eaf3fc;
+    --psych-background: #f4f7fb;
+    --psych-white: #ffffff;
+    --psych-text: #172b45;
+    --psych-muted: #718096;
+    --psych-border: #e1e8f0;
+    --psych-shadow: 0 5px 20px rgba(20, 50, 90, 0.07);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.psych-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 30px;
+    background: var(--psych-background);
+    color: var(--psych-text);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
+.psych-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.psych-header h1 {
+    margin: 0 0 8px;
+    font-size: 30px;
+    font-weight: 750;
+    color: var(--psych-primary-dark);
+}
+
+.psych-header p {
+    margin: 0;
+    color: var(--psych-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.psych-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 11px 19px;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 650;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.psych-btn.primary {
+    color: white;
+    background: var(--psych-primary);
+}
+
+.psych-btn.primary:hover {
+    background: var(--psych-primary-dark);
+    transform: translateY(-2px);
+}
+
+.psych-btn.secondary {
+    color: var(--psych-primary);
+    background: var(--psych-light);
+    border: 1px solid #c9def2;
+}
+
+.psych-btn.secondary:hover {
+    background: #dceafa;
+}
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+.psych-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    margin-bottom: 25px;
+    background: var(--psych-white);
+    border: 1px solid var(--psych-border);
+    border-radius: 10px;
+    box-shadow: var(--psych-shadow);
+}
+
+.psych-nav a {
+    display: inline-block;
+    padding: 11px 20px;
+    border-radius: 7px;
+    color: var(--psych-muted);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.psych-nav a:hover {
+    color: var(--psych-primary);
+    background: var(--psych-light);
+}
+
+.psych-nav a.active {
+    color: white;
+    background: var(--psych-primary);
+}
+
+/* =========================================
+   CONTENT CARD
+========================================= */
+
+.psych-card {
+    padding: 22px;
+    margin-bottom: 25px;
+    background: var(--psych-white);
+    border: 1px solid var(--psych-border);
+    border-radius: 12px;
+    box-shadow: var(--psych-shadow);
+}
+
+/* =========================================
+   PLAYER FILTERS
+========================================= */
+
+.player-filters {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto auto;
+    align-items: center;
+    gap: 12px;
+}
+
+.player-filters input,
+.player-filters select {
+    width: 100%;
+    min-width: 0;
+    height: 43px;
+    padding: 0 13px;
+    color: var(--psych-text);
+    background: #fff;
+    border: 1px solid var(--psych-border);
+    border-radius: 7px;
+    outline: none;
+    font-size: 13px;
+}
+
+.player-filters input:focus,
+.player-filters select:focus {
+    border-color: var(--psych-primary);
+    box-shadow: 0 0 0 3px rgba(7, 86, 165, 0.10);
+}
+
+/* =========================================
+   PLAYER GRID
+========================================= */
+
+.player-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+}
+
+/* =========================================
+   PLAYER CARD
+========================================= */
+
+.player-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+    color: inherit;
+    background: var(--psych-white);
+    border: 1px solid var(--psych-border);
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: var(--psych-shadow);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.player-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(20, 50, 90, 0.13);
+    border-color: #b8d3ed;
+}
+
+/* Player photo */
+
+.player-photo {
+    display: block;
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    object-position: center 25%;
+    background: #eaf0f6;
+}
+
+.player-photo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 65px;
+    font-weight: 750;
+    background: linear-gradient(135deg, #0756a5, #4b91ce);
+}
+
+/* Player information */
+
+.player-card-body {
+    padding: 17px;
+}
+
+.player-card-body h3 {
+    margin: 0 0 12px;
+    color: var(--psych-primary-dark);
+    font-size: 16px;
+    font-weight: 750;
+    line-height: 1.4;
+}
+
+.player-card-body p {
+    margin: 6px 0;
+    color: var(--psych-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Assessment count */
+
+.assessment-count {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 7px 11px;
+    color: var(--psych-primary);
+    background: var(--psych-light);
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* =========================================
+   EMPTY STATE
+========================================= */
+
+.empty-state {
+    grid-column: 1 / -1;
+    padding: 40px 20px;
+    color: var(--psych-muted);
+    text-align: center;
+    font-size: 15px;
+}
+
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
+
+@media (max-width: 1200px) {
+    .player-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .player-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .psych-page {
+        padding: 18px;
+    }
+
+    .psych-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .psych-header h1 {
+        font-size: 25px;
+    }
+
+    .psych-nav {
+        overflow-x: auto;
+    }
+
+    .psych-nav a {
+        white-space: nowrap;
+        padding: 10px 13px;
+    }
+
+    .player-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 13px;
+    }
+
+    .player-photo {
+        height: 190px;
+    }
+}
+
+@media (max-width: 480px) {
+    .player-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .player-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .psych-header .psych-btn {
+        width: 100%;
+    }
+
+    .player-photo {
+        height: 250px;
+    }
+}

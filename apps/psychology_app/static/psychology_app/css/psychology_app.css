@@ -1,10 +1,10 @@
 
-/* Psychology App */
+/* Player Directory */
 
 .psych-page {
     max-width: 1400px;
     margin: 25px auto;
-    padding: 0 22px 35px;
+    padding: 0 22px;
     color: #1e293b;
     font-family: Arial, sans-serif;
 }
@@ -13,32 +13,16 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 18px;
     margin-bottom: 22px;
 }
 
-.psych-header h1,
-.profile-info h1 {
-    margin: 0 0 8px;
-    color: #123b70;
-    font-size: 27px;
-}
+.psych-header h1 { color: #123b70; }
 
-.psych-header p,
-.profile-info > p {
-    margin: 0;
-    color: #64748b;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-/* Navigation */
+.psych-header p { color: #64748b; }
 
 .psych-nav {
     display: flex;
     gap: 25px;
-    overflow-x: auto;
     margin-bottom: 24px;
     border-bottom: 1px solid #e2e8f0;
 }
@@ -47,36 +31,18 @@
     padding: 12px 2px;
     color: #64748b;
     text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
 }
 
-.psych-nav a:hover,
 .psych-nav a.active {
     color: #123b70;
-}
-
-.psych-nav a.active {
     border-bottom: 3px solid #2563eb;
 }
 
-/* Buttons */
-
 .psych-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-height: 40px;
     padding: 10px 16px;
-    border: 1px solid transparent;
     border-radius: 7px;
     text-decoration: none;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    box-sizing: border-box;
+    font-weight: bold;
 }
 
 .psych-btn.primary {
@@ -84,150 +50,19 @@
     color: white;
 }
 
-.psych-btn.primary:hover {
-    background: #0b2c55;
-}
-
 .psych-btn.secondary {
-    border-color: #cbd5e1;
     background: white;
     color: #334155;
+    border: 1px solid #cbd5e1;
 }
-
-/* Dashboard Statistics */
-
-.psych-stats {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 17px;
-    margin-bottom: 25px;
-}
-
-.psych-stat {
-    min-width: 0;
-    padding: 22px;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    background: white;
-    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.035);
-}
-
-.psych-stat span {
-    display: block;
-    margin-bottom: 12px;
-    color: #64748b;
-    font-size: 13px;
-}
-
-.psych-stat strong {
-    color: #123b70;
-    font-size: 27px;
-    overflow-wrap: anywhere;
-}
-
-/* Cards */
 
 .psych-card {
-    min-width: 0;
-    margin-bottom: 24px;
     padding: 22px;
+    margin-bottom: 24px;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     background: white;
-    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.035);
 }
-
-.psych-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 18px;
-}
-
-.psych-card-header h2 {
-    margin: 0;
-    color: #123b70;
-    font-size: 18px;
-}
-
-.psych-card-header a,
-.psych-table a,
-.back-link {
-    color: #2563eb;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-/* Tables */
-
-.psych-table-wrap {
-    width: 100%;
-    overflow-x: auto;
-}
-
-.psych-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-}
-
-.psych-table th,
-.psych-table td {
-    padding: 13px 12px;
-    border-bottom: 1px solid #edf1f5;
-    text-align: left;
-    white-space: nowrap;
-}
-
-.psych-table th {
-    background: #f8fafc;
-    color: #475569;
-    font-weight: 700;
-}
-
-.psych-table tbody tr:hover {
-    background: #f8fafc;
-}
-
-/* Small Player Photos */
-
-.psych-player-cell {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-}
-
-.psych-player-cell strong,
-.psych-player-cell small {
-    display: block;
-}
-
-.psych-player-cell small {
-    margin-top: 4px;
-    color: #64748b;
-}
-
-.mini-player-photo,
-.mini-player-placeholder {
-    width: 42px;
-    height: 42px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.mini-player-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #e2e8f0;
-    color: #123b70;
-    font-weight: 700;
-}
-
-/* Player Search Filters */
 
 .player-filters {
     display: grid;
@@ -237,300 +72,76 @@
 
 .player-filters input,
 .player-filters select {
-    width: 100%;
-    min-width: 0;
-    min-height: 42px;
-    padding: 10px 12px;
-    box-sizing: border-box;
+    padding: 10px;
     border: 1px solid #cbd5e1;
     border-radius: 7px;
-    background: white;
-    color: #334155;
-    font-size: 13px;
 }
-
-.player-filters input:focus,
-.player-filters select:focus {
-    outline: none;
-    border-color: #2563eb;
-}
-
-/* Player Directory Cards */
 
 .player-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 18px;
 }
 
 .player-card {
-    min-width: 0;
     overflow: hidden;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     background: white;
     color: inherit;
     text-decoration: none;
-    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .player-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.09);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, .09);
 }
 
 .player-photo {
-    display: block;
     width: 100%;
     height: 205px;
     object-fit: cover;
-    object-position: center top;
-    background: #f1f5f9;
 }
 
 .player-photo-placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
+    background: #e2e8f0;
     color: #123b70;
     font-size: 48px;
-    font-weight: 700;
 }
 
-.player-card-body {
-    padding: 16px;
-}
+.player-card-body { padding: 16px; }
 
-.player-card-body h3 {
-    margin: 0 0 10px;
-    color: #123b70;
-    font-size: 16px;
-    line-height: 1.4;
-}
+.player-card-body h3 { color: #123b70; }
 
 .player-card-body p {
-    margin: 7px 0;
     color: #64748b;
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .assessment-count {
     display: inline-block;
-    margin-top: 9px;
     padding: 6px 9px;
-    border-radius: 5px;
     background: #eff6ff;
     color: #1d4ed8;
+    border-radius: 5px;
     font-size: 11px;
-    font-weight: 700;
 }
 
 .empty-state {
-    padding: 25px !important;
-    color: #64748b;
-    text-align: center !important;
+    grid-column: 1 / -1;
+    text-align: center;
 }
 
-/* Player Profile */
-
-.back-link {
-    display: inline-block;
-    margin-bottom: 18px;
-}
-
-.player-profile-card {
-    display: grid;
-    grid-template-columns: 190px minmax(0, 1fr) auto;
-    align-items: start;
-    gap: 25px;
-    margin-bottom: 24px;
-    padding: 25px;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    background: white;
-}
-
-.profile-photo-wrap {
-    width: 190px;
-}
-
-.profile-photo {
-    display: block;
-    width: 190px;
-    height: 220px;
-    border-radius: 9px;
-    object-fit: cover;
-    object-position: center top;
-    background: #f1f5f9;
-}
-
-.profile-photo-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #123b70;
-    font-size: 60px;
-    font-weight: 700;
-}
-
-.profile-label {
-    display: block;
-    margin-bottom: 10px;
-    color: #2563eb;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1px;
-}
-
-.profile-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 15px 0 20px;
-}
-
-.profile-tags span {
-    padding: 7px 10px;
-    border-radius: 5px;
-    background: #eff6ff;
-    color: #1e40af;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.profile-details {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 15px;
-}
-
-.profile-details small,
-.profile-details strong {
-    display: block;
-}
-
-.profile-details small {
-    margin-bottom: 5px;
-    color: #64748b;
-    font-size: 12px;
-}
-
-.profile-details strong {
-    font-size: 13px;
-    overflow-wrap: anywhere;
-}
-
-.profile-action {
-    display: flex;
-    justify-content: flex-end;
-}
-
-/* Responsive Layout */
-
-@media (max-width: 1000px) {
-    .psych-stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .player-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .player-filters {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .player-profile-card {
-        grid-template-columns: 150px minmax(0, 1fr);
-    }
-
-    .profile-photo-wrap,
-    .profile-photo {
-        width: 150px;
-    }
-
-    .profile-photo {
-        height: 185px;
-    }
-
-    .profile-action {
-        grid-column: 1 / -1;
-        justify-content: flex-start;
-    }
+@media (max-width: 900px) {
+    .player-grid { grid-template-columns: repeat(3, 1fr); }
+    .player-filters { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 600px) {
-    .psych-page {
-        margin-top: 16px;
-        padding: 0 12px 25px;
-    }
-
-    .psych-header h1,
-    .profile-info h1 {
-        font-size: 22px;
-    }
-
-    .psych-header .psych-btn {
-        width: 100%;
-    }
-
-    .psych-stats {
-        gap: 10px;
-    }
-
-    .psych-stat {
-        padding: 15px;
-    }
-
-    .psych-stat strong {
-        font-size: 22px;
-    }
-
-    .psych-card {
-        padding: 14px;
-    }
-
-    .player-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-    }
-
-    .player-photo {
-        height: 155px;
-    }
-
-    .player-card-body {
-        padding: 11px;
-    }
-
-    .player-card-body h3 {
-        font-size: 14px;
-    }
-
-    .player-filters {
-        grid-template-columns: 1fr;
-    }
-
-    .player-profile-card {
-        grid-template-columns: 1fr;
-        padding: 18px;
-    }
-
-    .profile-photo-wrap,
-    .profile-photo {
-        width: 145px;
-    }
-
-    .profile-photo {
-        height: 175px;
-    }
-
-    .profile-details {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .profile-action,
-    .profile-action .psych-btn {
-        width: 100%;
-    }
+    .psych-header { flex-direction: column; align-items: flex-start; }
+    .player-grid { grid-template-columns: repeat(2, 1fr); }
+    .player-filters { grid-template-columns: 1fr; }
 }
