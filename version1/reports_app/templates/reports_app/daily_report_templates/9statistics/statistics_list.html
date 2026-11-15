@@ -42,15 +42,15 @@
 
     <!-- EXPORT BUTTONS -->
     <div>
-      <a href="{% url 'reports_app:statistics_export_excel' team_id=team.id %}?filter={{ filter_type }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if competition %}&competition={{ competition }}{% endif %}"
-         class="btn btn-success btn-sm">
-        Excel
-      </a>
+        <a href="{% url 'reports_app:statistics_export_excel' team_id=team.id %}?{{ request.GET.urlencode }}"
+          class="btn btn-success btn-sm">
+            Excel
+        </a>
 
-      <a href="{% url 'reports_app:statistics_export_pdf' team_id=team.id %}?filter={{ filter_type }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}{% if competition %}&competition={{ competition }}{% endif %}"
-         class="btn btn-danger btn-sm">
-        PDF
-      </a>
+        <a href="{% url 'reports_app:statistics_export_pdf' team_id=team.id %}?{{ request.GET.urlencode }}"
+          class="btn btn-danger btn-sm">
+            PDF
+        </a>
     </div>
   </div>
 
@@ -68,38 +68,46 @@
       <!-- AUTO FILTER FORM -->
       <form method="get" id="filterForm" class="row g-2 align-items-end">
 
-        <div class="col-md-3">
-          <label class="form-label small">Start Date</label>
-          <input type="date" name="start_date"
-                 class="form-control form-control-sm"
-                 value="{{ start_date }}"
-                 onchange="this.form.submit()">
-        </div>
+          <div class="col-md-3">
+              <label class="form-label small">Start Date</label>
+              <input type="date"
+                    name="start_date"
+                    class="form-control form-control-sm"
+                    value="{{ start_date|date:'Y-m-d' }}">
+          </div>
 
-        <div class="col-md-3">
-          <label class="form-label small">End Date</label>
-          <input type="date" name="end_date"
-                 class="form-control form-control-sm"
-                 value="{{ end_date }}"
-                 onchange="this.form.submit()">
-        </div>
+          <div class="col-md-3">
+              <label class="form-label small">End Date</label>
+              <input type="date"
+                    name="end_date"
+                    class="form-control form-control-sm"
+                    value="{{ end_date|date:'Y-m-d' }}">
+          </div>
 
-        <div class="col-md-4">
-          <label class="form-label small">Competition</label>
-          <select name="competition"
-                  class="form-select form-select-sm"
-                  onchange="this.form.submit()">
-            <option value="">All</option>
-            {% for value, label in competition_choices %}
-              <option value="{{ value }}" {% if competition == value %}selected{% endif %}>
-                {{ label }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
+          <div class="col-md-4">
+              <label class="form-label small">Competition</label>
+              <select name="competition"
+                      class="form-select form-select-sm">
 
-        <!-- Keep filter type -->
-        <input type="hidden" name="filter" value="custom">
+                  <option value="">All</option>
+
+                  {% for value, label in competition_choices %}
+                      <option value="{{ value }}"
+                          {% if competition == value %}selected{% endif %}>
+                          {{ label }}
+                      </option>
+                  {% endfor %}
+
+              </select>
+          </div>
+
+          <input type="hidden" name="filter" value="custom">
+
+          <div class="col-md-2">
+              <button type="submit" class="btn btn-primary btn-sm w-100">
+                  Apply Filters
+              </button>
+          </div>
 
       </form>
     </div>
