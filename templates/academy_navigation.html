@@ -1,0 +1,86 @@
+
+<div class="sticky-nav-wrapper">
+    <div class="container">
+        <div class="sticky-nav">
+            <div class="row g-2 justify-content-center">
+
+                {% if team %}
+                <div class="col-auto">
+                    <a href="{% url 'reports_app:mesocycle_reports' team_id=team.id %}"
+                       class="btn btn-outline-primary">
+                        Mesocycle
+                    </a>
+                </div>
+                {% endif %}
+
+                <div class="col-auto">
+                    <a href="{% url 'gym_data:dashboard' %}"
+                       class="btn btn-outline-success {% if request.resolver_match.namespace == 'gym_data' %}active{% endif %}">
+                        Gym
+                    </a>
+                </div>
+
+                <div class="col-auto">
+                    <a href="{% url 'individual_training:session_list' %}"
+                       class="btn btn-outline-warning {% if request.resolver_match.namespace == 'individual_training' %}active{% endif %}">
+                        Individual Training
+                    </a>
+                </div>
+
+                {% if team %}
+                <div class="col-auto">
+                    <a href="{% url 'reports_app:performance_reports' team_id=team.id %}"
+                       class="btn btn-outline-info">
+                        Performance
+                    </a>
+                </div>
+
+                <div class="col-auto">
+                    <a href="{% url 'reports_app:scouting_reports' team_id=team.id %}"
+                       class="btn btn-outline-dark">
+                        Scouting
+                    </a>
+                </div>
+                {% endif %}
+
+                <div class="col-auto">
+                    <a href="{% url 'medical_data:medical_dashboard' %}"
+                       class="btn btn-outline-danger {% if request.resolver_match.namespace == 'medical_data' %}active{% endif %}">
+                        Medical
+                    </a>
+                </div>
+
+                <div class="col-auto">
+                    <a href="{% url 'psychology_app:home' %}"
+                       class="btn btn-outline-secondary {% if request.resolver_match.namespace == 'psychology_app' %}active{% endif %}">
+                        Psychology
+                    </a>
+                </div>
+
+                {% if team %}
+                <div class="col-auto">
+                    <a href="{% url 'reports_app:transition_reports' team_id=team.id %}"
+                       class="btn btn-outline-secondary">
+                        Transition
+                    </a>
+                </div>
+
+                <div class="col-auto">
+                    <a href="{% url 'reports_app:result_reports' team_id=team.id %}"
+                       class="btn btn-outline-secondary">
+                        Results
+                    </a>
+                </div>
+
+                <div class="col-auto">
+                    <a href="{% url 'reports_app:statistics_list' team_id=team.id %}"
+                       class="btn btn-outline-secondary">
+                        Statistics
+                    </a>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>

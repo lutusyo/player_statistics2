@@ -1,78 +1,96 @@
+
 {% extends "base.html" %}
 
 {% block content %}
 
 <div class="sticky-nav-wrapper">
-  <div class="container">
-    <div class="sticky-nav">
-      <div class="row g-2 justify-content-center">
+    <div class="container">
+        <div class="sticky-nav">
+            <div class="row g-2 justify-content-center">
 
-        <div class="col-auto">
-          <a href="{% url 'reports_app:mesocycle_reports' team_id=team.id %}"
-             class="btn btn-outline-primary {% if request.resolver_match.url_name == 'mesocycle_reports' %}active{% endif %}">
-            Mesocycle
-          </a>
+                <!-- MESOCYCLE -->
+                <div class="col-auto">
+                    <a href="{% url 'reports_app:mesocycle_reports' team_id=team.id %}"
+                       class="btn btn-outline-primary {% if request.resolver_match.url_name == 'mesocycle_reports' %}active{% endif %}">
+                        Mesocycle
+                    </a>
+                </div>
+
+                <!-- GYM DATA DASHBOARD -->
+                <div class="col-auto">
+                    <a href="{% url 'gym_data:dashboard' %}"
+                       class="btn btn-outline-success">
+                        Fitness Plan
+                    </a>
+                </div>
+
+                <!-- INDIVIDUAL TRAINING DASHBOARD -->
+                <div class="col-auto">
+                    <a href="{% url 'individual_training:session_list' %}"
+                       class="btn btn-outline-warning">
+                        IAP
+                    </a>
+                </div>
+
+                <!-- PERFORMANCE -->
+                <div class="col-auto">
+                    <a href="{% url 'reports_app:performance_reports' team_id=team.id %}"
+                       class="btn btn-outline-info {% if request.resolver_match.url_name == 'performance_reports' %}active{% endif %}">
+                        Performance
+                    </a>
+                </div>
+
+                <!-- SCOUTING: KEEP OLD LINK -->
+                <div class="col-auto">
+                    <a href="{% url 'reports_app:scouting_reports' team_id=team.id %}"
+                       class="btn btn-outline-dark {% if request.resolver_match.url_name == 'scouting_reports' %}active{% endif %}">
+                        Scouting
+                    </a>
+                </div>
+
+                <!-- MEDICAL DASHBOARD -->
+                <div class="col-auto">
+                    <a href="{% url 'medical_data:medical_dashboard' %}"
+                       class="btn btn-outline-danger">
+                        Medical
+                    </a>
+                </div>
+
+                <!-- PSYCHOLOGY DASHBOARD -->
+                <div class="col-auto">
+                    <a href="{% url 'psychology_app:home' %}"
+                       class="btn btn-outline-secondary">
+                        Psychology
+                    </a>
+                </div>
+
+                <!-- TRANSITION -->
+                <div class="col-auto">
+                    <a href="{% url 'reports_app:transition_reports' team_id=team.id %}"
+                       class="btn btn-outline-secondary {% if request.resolver_match.url_name == 'transition_reports' %}active{% endif %}">
+                        Transition
+                    </a>
+                </div>
+
+                <!-- RESULTS -->
+                <div class="col-auto">
+                    <a href="{% url 'reports_app:result_reports' team_id=team.id %}"
+                       class="btn btn-outline-secondary {% if request.resolver_match.url_name == 'result_reports' %}active{% endif %}">
+                        Results
+                    </a>
+                </div>
+
+                <!-- STATISTICS -->
+                <div class="col-auto">
+                    <a href="{% url 'reports_app:statistics_list' team_id=team.id %}"
+                       class="btn btn-outline-secondary {% if request.resolver_match.url_name == 'statistics_list' %}active{% endif %}">
+                        Statistics
+                    </a>
+                </div>
+
+            </div>
         </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:fitness_reports' team_id=team.id %}"
-             class="btn btn-outline-success {% if request.resolver_match.url_name == 'fitness_reports' %}active{% endif %}">
-            Fitness Plan
-          </a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:iap_reports' team_id=team.id %}"
-             class="btn btn-outline-warning {% if request.resolver_match.url_name == 'iap_reports' %}active{% endif %}">
-            IAP
-          </a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:performance_reports' team_id=team.id %}"
-             class="btn btn-outline-info {% if request.resolver_match.url_name == 'performance_reports' %}active{% endif %}">
-            Performance
-          </a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:scouting_reports' team_id=team.id %}"
-             class="btn btn-outline-dark {% if request.resolver_match.url_name == 'scouting_reports' %}active{% endif %}">
-            Scouting
-          </a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:medical_reports' team_id=team.id %}"
-             class="btn btn-outline-danger {% if request.resolver_match.url_name == 'medical_reports' %}active{% endif %}">
-            Medical
-          </a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:transition_reports' team_id=team.id %}"
-             class="btn btn-outline-secondary {% if request.resolver_match.url_name == 'transition_reports' %}active{% endif %}">
-            Transition
-          </a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:result_reports' team_id=team.id %}"
-             class="btn btn-outline-secondary {% if request.resolver_match.url_name == 'result_reports' %}active{% endif %}">
-            Results
-          </a>
-        </div>
-
-        <div class="col-auto">
-          <a href="{% url 'reports_app:statistics_list' team_id=team.id %}"
-             class="btn btn-outline-secondary {% if request.resolver_match.url_name == 'statistics_list' %}active{% endif %}">
-            Statistics
-          </a>
-        </div>
-
-      </div>
     </div>
-  </div>
 </div>
 
 {% block reports_content %}
