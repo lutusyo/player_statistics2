@@ -5,8 +5,8 @@
 <div class="container-fluid py-4">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
 
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="mb-1">
                 Player Performance & Potential
@@ -17,7 +17,15 @@
             </div>
         </div>
 
+        <div>
+            <a href="{% url 'reports_app:performance_potential_matrix' %}?team={{ team.id }}&season={{ season|urlencode }}"
+            class="btn btn-outline-success">
+                <i class="bi bi-grid-3x3-gap"></i>
+                View Saved Ratings Matrix
+            </a>
+        </div>
     </div>
+
 
 
     <!-- Messages -->

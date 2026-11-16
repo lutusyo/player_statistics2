@@ -21,6 +21,8 @@ from version1.reports_app.views2.preview_technical_report import preview_technic
 from version1.reports_app.views2.rating import rate_player, player_rating_list
 from version1.reports_app.views.training_min import training_minutes_entry
 
+from version1.reports_app.views2 import performance_potential_matrix
+
 app_name = 'reports_app'
 
 
@@ -29,6 +31,19 @@ urlpatterns = [
     # Performance and potential rating
     path('teams/<int:team_id>/ratings/', player_rating_list, name='player_rating_list',),
     path('teams/<int:team_id>/players/<int:player_id>/rate/', rate_player, name='rate_player',),
+    # path('player-rating/', player_rating.rate_players, name='player_rating'),
+
+path(
+    'performance-potential/',
+    performance_potential_matrix.performance_potential_matrix,
+    name='performance_potential_matrix'
+),
+
+path(
+    'performance-potential/',
+    performance_potential_matrix.performance_potential_matrix,
+    name='performance_potential_matrix'
+),
 
     #path("technical-report/<int:team_id>/", technical_report_views.download_technical_report_excel, name="download_technical_report"),
     path("technical-report/<int:team_id>/", technical_report_page, name="technical_report_page",),

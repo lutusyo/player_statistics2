@@ -1,0 +1,288 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .matrix-page {
+        max-width: 1250px;
+        margin: 30px auto;
+        padding: 20px;
+    }
+
+    .matrix-header {
+        margin-bottom: 25px;
+    }
+
+    .filter-panel {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        align-items: end;
+    }
+
+    .filter-grid label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .filter-grid input,
+    .filter-grid select {
+        width: 100%;
+        padding: 9px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+    }
+
+    .matrix-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 20px;
+    }
+
+    .matrix-player {
+        color: inherit;
+        padding: 5px 0;
+        margin-bottom: 3px;
+        font-size: 14px;
+        font-weight: 500;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .matrix-cell h4 {
+        font-size: 17px;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .matrix-player small {
+        display: block;
+        color: #555;
+        margin-top: 3px;
+    }
+
+    .promote {
+        background: #b8dfc5;
+        color: #155724;
+    }
+
+    .retained {
+        background: #303030;
+        color: white;
+    }
+
+    .demoted {
+        background: #efb7b7;
+        color: #721c24;
+    }
+
+    .matrix-axis {
+        text-align: center;
+        font-weight: 700;
+        margin: 15px 0;
+    }
+
+    .unrated-section {
+        margin-top: 25px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    @media(max-width: 768px) {
+        .filter-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .matrix-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="matrix-page">
+
+    <div class="matrix-header">
+        <h2>Player Performance & Potential Matrix</h2>
+        <p>
+            Evaluate players according to their performance
+            and future potential.
+        </p>
+    </div>
+
+
+
+    <!-- FILTER FORM -->
+    <div class="filter-panel">
+
+        <form method="GET">
+
+            <div class="filter-grid">
+
+                <!-- TEAM -->
+                <div>
+                    <label>Team <span class="text-danger">*</span></label>
+                    <select name="team" required>
+                        <option value="">Select Team</option>
+
+                        {% for team_option in teams %}
+                            <option value="{{ team_option.id }}"
+                                {% if selected_team_id == team_option.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}>
+                                {{ team_option.name }}
+                                {% if team_option.age_group %}
+                                    ({{ team_option.age_group.code }})
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- AGE GROUP -->
+                <div>
+                    <label>Age Group <span class="text-danger">*</span></label>
+                    <select name="age_group" required>
+                        <option value="">Select Age Group</option>
+
+                        {% for age in age_groups %}
+                            <option value="{{ age.id }}"
+                                {% if selected_age_group_id == age.id|stringformat:"s" %}
+                                    selected
+                                {% endif %}>
+                                {{ age.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- START DATE -->
+                <div>
+                    <label>Start Date <span class="text-danger">*</span></label>
+                    <input
+                        type="date"
+                        name="start_date"
+                        value="{{ start_date }}"
+                        required
+                    >
+                </div>
+
+                <!-- END DATE -->
+                <div>
+                    <label>End Date <span class="text-danger">*</span></label>
+                    <input
+                        type="date"
+                        name="end_date"
+                        value="{{ end_date }}"
+                        required
+                    >
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-3">
+                Generate Matrix
+            </button>
+
+        </form>
+
+    </div>
+
+
+
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    {% if report_generated %}
+
+        <div class="text-center mb-3">
+            <h4>{{ team.name }} - {{ age_group.name }}</h4>
+
+            <p>
+                Period:
+                {{ start_date_obj|date:"d M Y" }}
+                –
+                {{ end_date_obj|date:"d M Y" }}
+            </p>
+        </div>
+
+        <div class="matrix-axis">
+            POTENTIAL ↑
+        </div>
+
+        <div class="matrix-grid">
+
+            {% for row in matrix_rows %}
+                {% for cell in row %}
+
+                    <div class="matrix-cell
+                        {% if cell.category == 'Enigma' or cell.category == 'Unpolished' or cell.category == 'Exceptional' or cell.category == 'No brainer' or cell.category == 'Culture carrier' %}
+                            promote
+                        {% elif cell.category == 'Solid' or cell.category == 'Threshold' %}
+                            retained
+                        {% else %}
+                            demoted
+                        {% endif %}
+                    ">
+
+                        <h4>{{ cell.category }}</h4>
+
+                        {% for item in cell.players %}
+
+                            <div class="matrix-player">
+                                {{ item.player.full_name }}
+                            </div>
+
+                        {% empty %}
+
+                            <small>No players</small>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endfor %}
+            {% endfor %}
+
+        </div>
+
+        <div class="matrix-axis">
+            PERFORMANCE →
+            <span class="ms-3">Poor → Average → Good</span>
+        </div>
+
+        {% if unrated_players %}
+
+            <div class="unrated-section">
+                <h5>Players Without Ratings in This Period</h5>
+
+                <p class="text-muted">
+                    These players have no rating between the selected dates.
+                </p>
+
+                {% for player in unrated_players %}
+                    <span class="badge bg-secondary m-1">
+                        {{ player.full_name }}
+                    </span>
+                {% endfor %}
+            </div>
+
+        {% endif %}
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
