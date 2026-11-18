@@ -1,8 +1,7 @@
 # reports_app/urls.py
 from django.urls import path
 
-from version1.reports_app.views.daily_report_views import ( fitness_views, iap_views, medical_views,
-    mesocycle_views, performance_views, report_exports, result_views,
+from version1.reports_app.views.daily_report_views import ( mesocycle_views, report_exports, result_views,
     scouting_views, statistics_view, individual_statistics_view, team_reports_view, transition_views, report_filters)
 
 from version1.reports_app.views.match_report_views import ( goalkeeping_view, set_plays_views, in_possession_views, 
@@ -19,13 +18,13 @@ from version1.reports_app.views2.download_technical_report_ppt import download_t
 from version1.reports_app.views2.download_technical_report_excel import download_technical_report_excel
 from version1.reports_app.views2.preview_technical_report import preview_technical_report
 from version1.reports_app.views2.rating import rate_player, player_rating_list
+
 from version1.reports_app.views.training_min import training_minutes_entry
+from version1.reports_app.views.training_dashboard import ( training_minutes_dashboard, )
 
 from version1.reports_app.views2 import performance_potential_matrix
 
 app_name = 'reports_app'
-
-
 urlpatterns = [
 
     # Performance and potential rating
@@ -33,17 +32,8 @@ urlpatterns = [
     path('teams/<int:team_id>/players/<int:player_id>/rate/', rate_player, name='rate_player',),
     # path('player-rating/', player_rating.rate_players, name='player_rating'),
 
-path(
-    'performance-potential/',
-    performance_potential_matrix.performance_potential_matrix,
-    name='performance_potential_matrix'
-),
-
-path(
-    'performance-potential/',
-    performance_potential_matrix.performance_potential_matrix,
-    name='performance_potential_matrix'
-),
+    path('performance-potential/', performance_potential_matrix.performance_potential_matrix, name='performance_potential_matrix'),
+    path('performance-potential/', performance_potential_matrix.performance_potential_matrix, name='performance_potential_matrix'),
 
     #path("technical-report/<int:team_id>/", technical_report_views.download_technical_report_excel, name="download_technical_report"),
     path("technical-report/<int:team_id>/", technical_report_page, name="technical_report_page",),
@@ -54,9 +44,7 @@ path(
     path("technical-report/<int:team_id>/ppt/",download_technical_report_ppt,name="technical_report_ppt2",),
 
     # Medical
-    path('medical/<int:team_id>/', medical_views.medical_reports, name='medical_reports'),
-    path('medical/<int:team_id>/export/excel/', medical_views.export_medical_excel, name='export_medical_excel'),
-    path('medical/<int:team_id>/export/pdf/', medical_views.export_medical_pdf, name='export_medical_pdf'),
+
 
     # Scouting
     path('scouting/<int:team_id>/', scouting_views.scouting_reports, name='scouting_reports'),
@@ -64,9 +52,7 @@ path(
     path('scouting/<int:team_id>/export/pdf/', scouting_views.export_scouting_pdf, name='export_scouting_pdf'),
 
     # Performance
-    path('performance/<int:team_id>/', performance_views.performance_reports, name='performance_reports'),
-    path('performance/<int:team_id>/export/excel/', performance_views.export_performance_excel, name='export_performance_excel'),
-    path('performance/<int:team_id>/export/pdf/', performance_views.export_performance_pdf, name='export_performance_pdf'),
+
 
     # Mesocycle
     path('mesocycle/<int:team_id>/', mesocycle_views.mesocycle_reports, name='mesocycle_reports'),
@@ -75,15 +61,8 @@ path(
     path('team/<int:team_id>/export-all-pdfs/', mesocycle_views.export_all_mesocycle_pdfs, name='export_all_mesocycle_pdfs'),
 
     # Fitness
-    path('fitness/<int:team_id>/', fitness_views.fitness_reports, name='fitness_reports'),
-    path('fitness/<int:team_id>/export/excel/', fitness_views.export_fitness_excel, name='export_fitness_excel'),
-    path('fitness/<int:team_id>/export/pdf/', fitness_views.export_fitness_pdf, name='export_fitness_pdf'),
-    path('fitness/<int:team_id>/export-all-pdfs/', fitness_views.export_all_fitness_pdfs, name='export_all_fitness_pdfs'),
-
+  
     # IAP
-    path('iap/<int:team_id>/', iap_views.iap_reports, name='iap_reports'),
-    path('iap/<int:team_id>/export/excel/', iap_views.export_iap_excel, name='export_iap_excel'),
-    path('iap/<int:team_id>/export/pdf/', iap_views.export_iap_pdf, name='export_iap_pdf'),
 
     # Transition
     path('transition/<int:team_id>/', transition_views.transition_reports, name='transition_reports'),
@@ -140,6 +119,7 @@ path(
 
     # Training minutes
     path( "training-minutes/", training_minutes_entry, name="training_minutes_entry",),
+    path( "training-minutes/dashboard/", training_minutes_dashboard, name="training_minutes_dashboard",),
 ]
 
 

@@ -3,8 +3,7 @@ from django.utils import timezone
 from datetime import timedelta
 from version1.reports_app.forms import ReportFilterForm
 from version1.reports_app.models.previous_models import (
-    Medical, Transition, Scouting, Performance,
-    IndividualActionPlan, Mesocycle, FitnessPlan
+     Transition, Scouting, Mesocycle, 
 )
 from django.shortcuts import render, get_object_or_404
 from version1.teams_app.models import Team
@@ -13,13 +12,9 @@ from apps.core.decorators import staff_required
 
 
 SECTION_MAP = {
-    'Medical': (Medical, 'date'),
     'Transition': (Transition, 'date'),
     'Scouting': (Scouting, 'date'),
-    'Performance': (Performance, 'date'),
-    'IAP': (IndividualActionPlan, 'date'),
     'Mesocycle': (Mesocycle, 'start_date'),
-    'Fitness': (FitnessPlan, 'date'),
 }
 
 

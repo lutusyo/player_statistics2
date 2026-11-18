@@ -6,17 +6,14 @@ from version1.teams_app.models import Team
 from ..models.previous_models import (TrainingMinutes, PlayerTrainingMinutes,
     TrainingSessionType, TrainingParticipationType,
 )
+from django.urls import reverse
 
 
 def training_minutes_entry(request):
     teams = Team.objects.filter(team_type="OUR_TEAM").select_related("age_group").order_by(
-        "age_group__code", "name"
-    )
-
+        "age_group__code", "name")
     other_teams = teams
-
-    national_teams = Team.objects.filter(team_category="NATIONAL").select_related(
-        "age_group"
+    national_teams = Team.objects.filter(team_category="NATIONAL").select_related( "age_group"
     ).order_by("age_group__code", "name")
 
     selected_team = None
@@ -126,7 +123,11 @@ def training_minutes_entry(request):
         training_session.save(update_fields=["total_minutes"])
 
         messages.success(request, "Training minutes saved successfully.")
-        return redirect("reports_app:training_minutes_entry")
+
+        return redirect(
+            f"{reverse('reports_app:training_minutes_dashboard')}?team={selected_team.id}"
+            f"&start_date={date}&end_date={date}"
+        )
 
     context = {
         "teams": teams,

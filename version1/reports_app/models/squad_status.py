@@ -1,7 +1,6 @@
 from django.db import models
 
 from version1.reports_app.models.weekly_report import WeeklyReport
-from version1.reports_app.models.previous_models import Medical
 from apps.core.choices import SeasonChoices
 from version1.teams_app.models import Team
 

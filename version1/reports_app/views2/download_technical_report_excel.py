@@ -6,7 +6,7 @@ from django.utils.dateparse import parse_date
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 
 from version1.teams_app.models import Team
-from version1.reports_app.models.previous_models import Result, Medical, Transition, Scouting, Performance, IndividualActionPlan
+from version1.reports_app.models.previous_models import Result, Transition, Scouting
 from version1.reports_app.views.daily_report_views.statistics_view import get_statistics_report
 from version1.players_app.models import Player
 
@@ -135,13 +135,7 @@ def download_technical_report_excel(request, team_id):
     )
 
     # ================ MEDICAL ================
-    ws = wb.create_sheet("Medical")
-    medicals = filter_by_date(Medical.objects.filter(squad=team))
-    write_sheet(
-        ws,
-        ["Player", "Date", "Injury / Illness", "Status", "Comments"],
-        [[get_full_name(m.name), m.date, m.injury_or_illness, m.status, m.comments] for m in medicals]
-    )
+
 
     # ================ TRANSITION ================
     ws = wb.create_sheet("Transition")
@@ -162,22 +156,8 @@ def download_technical_report_excel(request, team_id):
     )
 
     # ================ PERFORMANCE ================
-    ws = wb.create_sheet("Performance")
-    performances = filter_by_date(Performance.objects.filter(squad=team))
-    write_sheet(
-        ws,
-        ["Date", "Activity", "Comments"],
-        [[p.date, p.activity, p.comments] for p in performances]
-    )
 
     # ================ INDIVIDUAL ACTION PLAN ================
-    ws = wb.create_sheet("Individual Action Plan")
-    iaps = filter_by_date(IndividualActionPlan.objects.filter(squad=team))
-    write_sheet(
-        ws,
-        ["Player", "Category", "Responsibility", "Action", "Status", "Follow Up"],
-        [[get_full_name(i.name), i.category, i.responsibility, i.action, i.status, i.follow_up] for i in iaps]
-    )
 
 
 # ================ STATISTICS ================

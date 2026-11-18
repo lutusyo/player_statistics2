@@ -8,19 +8,14 @@ from .report_filters import filter_queryset_by_period
 from django.utils import timezone
 
 from version1.reports_app.models.previous_models import (
-    Medical, Transition, Scouting, Performance,
-    IndividualActionPlan, Mesocycle, FitnessPlan)
+    Transition, Scouting, Mesocycle,)
 from version1.teams_app.models import Team
 
 
 SECTION_MAP = {
-    'Medical': (Medical.objects.all(), 'date'),
     'Transition': (Transition.objects.all(), 'date'),
     'Scouting': (Scouting.objects.all(), 'date'),
-    'Performance': (Performance.objects.all(), 'date'),
-    'IAP': (IndividualActionPlan.objects.all(), 'date'),
     'Mesocycle': (Mesocycle.objects.all(), 'start_date'),
-    'Fitness': (FitnessPlan.objects.all(), 'date'),
 }
 
 

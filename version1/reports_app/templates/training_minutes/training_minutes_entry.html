@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-
 {% load static %}
-
 {% block content %}
 
 <style>
@@ -234,17 +232,41 @@
 
 <div class="training-page">
 
-```
+
 <!-- ======================================================
      HEADER
 ======================================================= -->
 
-<div class="page-header">
-    <h1>Training Minutes</h1>
+<div class="page-header" style="
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+">
 
-    <p>
-        Drag players into the correct training status.
-    </p>
+    <div>
+        <h1>Training Minutes</h1>
+
+        <p>
+            Drag players into the correct training status.
+        </p>
+    </div>
+
+    <a href="{% url 'reports_app:training_minutes_dashboard' %}"
+       style="
+           display: inline-block;
+           background: #173b68;
+           color: white;
+           padding: 12px 20px;
+           border-radius: 8px;
+           text-decoration: none;
+           font-weight: 600;
+       ">
+        <i class="fas fa-chart-line"></i>
+        Training Minutes Dashboard
+    </a>
+
 </div>
 
 
@@ -728,9 +750,7 @@
     </div>
 
 
-    <!-- ==================================================
-         SAVE
-    =================================================== -->
+    <!-- ======== SAVE =================================================== -->
 
     <div class="save-container">
 
@@ -746,15 +766,12 @@
 </form>
 
 {% endif %}
-```
 
 </div>
 
 <script>
 
-/* ==========================================================
-   DRAG & DROP
-========================================================== */
+/* ==================================DRAG & DROP========================================================== */
 
 let draggedPlayer = null;
 

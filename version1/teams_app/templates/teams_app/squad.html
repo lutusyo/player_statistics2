@@ -1,4 +1,3 @@
-```html
 {% extends "teams_app/team_base.html" %}
 {% load static %}
 {% load player_extras %}
@@ -6,228 +5,230 @@
 {% block title %}{{ team_selected }} Players{% endblock %}
 
 {% block team_extra_css %}
-<style>
-    .players-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 15px;
-        line-height: 1.15;
-    }
+    <style>
+        .players-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+            line-height: 1.15;
+        }
 
-    .players-table th {
-        background: #f2f4f7;
-        color: #222;
-        border-bottom: 2px solid #bfc5cc;
-        padding: 7px 8px;
-        text-align: left;
-        font-weight: 700;
-        white-space: nowrap;
-    }
+        .players-table th {
+            background: #f2f4f7;
+            color: #222;
+            border-bottom: 2px solid #bfc5cc;
+            padding: 7px 8px;
+            text-align: left;
+            font-weight: 700;
+            white-space: nowrap;
+        }
 
-    .players-table td {
-        border-bottom: 1px solid #e1e5e9;
-        padding: 2px 8px;
-        height: 43px;
-        vertical-align: middle;
-        color: #0757a6;
-    }
+        .players-table td {
+            border-bottom: 1px solid #e1e5e9;
+            padding: 2px 8px;
+            height: 43px;
+            vertical-align: middle;
+            color: #0757a6;
+        }
 
-    /* Number column */
-    .players-table .row-number {
-        width: 35px;
-        text-align: center;
-        color: #555;
-        font-weight: 600;
-    }
+        /* Number column */
+        .players-table .row-number {
+            width: 35px;
+            text-align: center;
+            color: #555;
+            font-weight: 600;
+        }
 
-    /* Photo */
-    .players-table .photo-column {
-        width: 42px;
-        padding: 2px 4px;
-        text-align: center;
-    }
+        /* Photo */
+        .players-table .photo-column {
+            width: 42px;
+            padding: 2px 4px;
+            text-align: center;
+        }
 
-    .players-table .player-photo {
-        width: 36px;
-        height: 36px;
-        object-fit: cover;
-        display: block;
-        margin: auto;
-        border-radius: 2px;
-    }
+        .players-table .player-photo {
+            width: 36px;
+            height: 36px;
+            object-fit: cover;
+            display: block;
+            margin: auto;
+            border-radius: 2px;
+        }
 
-    /* Player name */
-    .players-table .player-name {
-        font-weight: 700;
-        white-space: nowrap;
-    }
+        /* Player name */
+        .players-table .player-name {
+            font-weight: 700;
+            white-space: nowrap;
+        }
 
-    .players-table .player-name a {
-        color: #0757a6;
-        text-decoration: none;
-    }
+        .players-table .player-name a {
+            color: #0757a6;
+            text-decoration: none;
+        }
 
-    .players-table .player-name a:hover {
-        color: #003d73;
-        text-decoration: underline;
-    }
+        .players-table .player-name a:hover {
+            color: #003d73;
+            text-decoration: underline;
+        }
 
-    /* Age */
-    .players-table .age {
-        width: 50px;
-        text-align: center;
-    }
+        /* Age */
+        .players-table .age {
+            width: 50px;
+            text-align: center;
+        }
 
-    /* Position */
-    .players-table .position,
-    .players-table .specific-position {
-        white-space: nowrap;
-    }
+        /* Position */
+        .players-table .position,
+        .players-table .specific-position {
+            white-space: nowrap;
+        }
 
-    /* Jersey number */
-    .players-table .jersey-number {
-        width: 55px;
-        text-align: center;
-        font-weight: 700;
-    }
+        /* Jersey number */
+        .players-table .jersey-number {
+            width: 55px;
+            text-align: center;
+            font-weight: 700;
+        }
 
-    /* Position group */
-    .players-table .position-group td {
-        background: #f7f8fa;
-        color: #333;
-        border-bottom: 1px solid #cdd2d8;
-        padding: 5px 8px;
-        height: 27px;
-        font-size: 13px;
-        font-weight: 700;
-        text-transform: uppercase;
-    }
+        /* Position group */
+        .players-table .position-group td {
+            background: #f7f8fa;
+            color: #333;
+            border-bottom: 1px solid #cdd2d8;
+            padding: 5px 8px;
+            height: 27px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
 
-    /* Player row hover */
-    .players-table tbody tr.player-row:hover {
-        background: #f3f8fd;
-    }
+        /* Player row hover */
+        .players-table tbody tr.player-row:hover {
+            background: #f3f8fd;
+        }
 
-    /* Top links */
-    .player-actions {
-        text-align: right;
-        margin-bottom: 10px;
-        font-size: 14px;
-    }
+        /* Top links */
+        .player-actions {
+            text-align: right;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
 
-    .player-actions a {
-        color: #0757a6;
-        text-decoration: none;
-        margin: 0 3px;
-    }
+        .player-actions a {
+            color: #0757a6;
+            text-decoration: none;
+            margin: 0 3px;
+        }
 
-    .player-actions a:hover {
-        text-decoration: underline;
-    }
-</style>
+        .player-actions a:hover {
+            text-decoration: underline;
+        }
+    </style>
 {% endblock %}
 
 {% block team_content %}
 
-<h2 style="margin: 0 0 10px 0;">
-    {{ team_selected }} Players
-</h2>
+    <h2 style="margin: 0 0 10px 0;">
+        {{ team_selected }} Players
+    </h2>
 
-<div class="player-actions">
-    <a href="#" onclick="showPlayers('signed'); return false;">Signed Players</a> |
-    <a href="#" onclick="showPlayers('trial'); return false;">Trial Players</a> |
-    <a href="#" onclick="showPlayers('loaned'); return false;">Loaned Players</a> |
-    <a href="{% url 'players_app:export_team_players' team.id %}">Export List</a> |
-    <a href="{% url 'reports_app:reports_dashboard' team.id %}">Team Reports</a>
-</div>
+    <div class="player-actions">
+        <a href="#" onclick="showPlayers('signed'); return false;">Signed Players</a> |
+        <a href="#" onclick="showPlayers('trial'); return false;">Trial Players</a> |
+        <a href="#" onclick="showPlayers('loaned'); return false;">Loaned Players</a> |
+        <a href="{% url 'players_app:export_team_players' team.id %}">Export List</a> |
+        <a href="{% url 'reports_app:reports_dashboard' team.id %}">Team Reports</a>
+        <a href="{% url 'reports_app:training_minutes_entry' %}?team={{ team.id }}">Add Training Minutes</a>
+        <a href="{% url 'reports_app:training_minutes_dashboard' %}?team={{ team.id }}">Training Minutes Dashboard</a>
 
-<table class="players-table">
+    </div>
 
-    <thead>
-        <tr>
-            <th class="row-number">#</th>
-            <th class="photo-column">Photo</th>
-            <th>Name</th>
-            <th class="age">Age</th>
-            <th>Height</th>
-            <th>Weight</th>
-            <th>Nationality</th>
-            <th>Position</th>
-            <th>Specific Position</th>
-            <th class="jersey-number">Jersey No.</th>
-        </tr>
-    </thead>
+    <table class="players-table">
 
-    <!-- SIGNED PLAYERS -->
-    <tbody id="signedPlayers">
-
-        {% for position in position_order %}
-            {% with players=grouped_players|get_item:position %}
-
-                {% if players %}
-
-                    <tr class="position-group">
-                        <td colspan="8">
-                            {{ position }}s
-                        </td>
-                    </tr>
-
-                    {% for player in players %}
-                        {% include "teams_app/partials/player_card.html" with player=player show_age=True row_number=forloop.counter %}
-                    {% endfor %}
-
-                {% endif %}
-
-            {% endwith %}
-        {% empty %}
-
+        <thead>
             <tr>
-                <td colspan="8">No signed players are available.</td>
+                <th class="row-number">#</th>
+                <th class="photo-column">Photo</th>
+                <th>Name</th>
+                <th class="age">Age</th>
+                <th>Height</th>
+                <th>Weight</th>
+                <th>Nationality</th>
+                <th>Position</th>
+                <th>Specific Position</th>
+                <th class="jersey-number">Jersey No.</th>
             </tr>
+        </thead>
 
-        {% endfor %}
+        <!-- SIGNED PLAYERS -->
+        <tbody id="signedPlayers">
 
-    </tbody>
+            {% for position in position_order %}
+                {% with players=grouped_players|get_item:position %}
 
-    <!-- TRIAL PLAYERS -->
-    <tbody id="trialPlayers" style="display:none;">
+                    {% if players %}
 
-        {% for player in trial_players %}
-            {% include "teams_app/partials/player_card.html" with player=player show_age=False row_number=forloop.counter %}
-        {% empty %}
+                        <tr class="position-group">
+                            <td colspan="8">
+                                {{ position }}s
+                            </td>
+                        </tr>
 
-            <tr>
-                <td colspan="8">No trial players are available.</td>
-            </tr>
-        {% endfor %}
+                        {% for player in players %}
+                            {% include "teams_app/partials/player_card.html" with player=player show_age=True row_number=forloop.counter %}
+                        {% endfor %}
 
-    </tbody>
+                    {% endif %}
 
-    <!-- LOANED PLAYERS -->
-    <tbody id="loanedPlayers" style="display:none;">
+                {% endwith %}
+            {% empty %}
 
-        {% for player in loaned_players %}
-            {% include "teams_app/partials/player_card.html" with player=player show_age=False row_number=forloop.counter %}
-        {% empty %}
+                <tr>
+                    <td colspan="8">No signed players are available.</td>
+                </tr>
 
-            <tr>
-                <td colspan="8">No loaned players are available.</td>
-            </tr>
-        {% endfor %}
+            {% endfor %}
 
-    </tbody>
+        </tbody>
 
-</table>
+        <!-- TRIAL PLAYERS -->
+        <tbody id="trialPlayers" style="display:none;">
 
-<script>
-function showPlayers(type) {
-    document.getElementById("signedPlayers").style.display = "none";
-    document.getElementById("trialPlayers").style.display = "none";
-    document.getElementById("loanedPlayers").style.display = "none";
+            {% for player in trial_players %}
+                {% include "teams_app/partials/player_card.html" with player=player show_age=False row_number=forloop.counter %}
+            {% empty %}
 
-    document.getElementById(type + "Players").style.display = "table-row-group";
-}
-</script>
+                <tr>
+                    <td colspan="8">No trial players are available.</td>
+                </tr>
+            {% endfor %}
+
+        </tbody>
+
+        <!-- LOANED PLAYERS -->
+        <tbody id="loanedPlayers" style="display:none;">
+
+            {% for player in loaned_players %}
+                {% include "teams_app/partials/player_card.html" with player=player show_age=False row_number=forloop.counter %}
+            {% empty %}
+
+                <tr>
+                    <td colspan="8">No loaned players are available.</td>
+                </tr>
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <script>
+    function showPlayers(type) {
+        document.getElementById("signedPlayers").style.display = "none";
+        document.getElementById("trialPlayers").style.display = "none";
+        document.getElementById("loanedPlayers").style.display = "none";
+
+        document.getElementById(type + "Players").style.display = "table-row-group";
+    }
+    </script>
 
 {% endblock %}
-```

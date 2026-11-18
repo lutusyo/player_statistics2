@@ -10,17 +10,6 @@ from version1.reports_app.models.weekly_report import WeeklyReport
 # Common choices
 
 
-class Medical(models.Model):
-    name = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='medical_records')
-    date = models.DateField(null=True, blank=True)
-    born = models.DateField(null=True, blank=True)
-    squad = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='medical_team')
-    injury_or_illness = models.CharField(max_length=100)
-    comments = models.CharField(max_length=150, blank=True)
-    status = models.CharField(max_length=50)
-
-    def __str__(self):
-        return f"{self.name} - {self.status}"
 
 class Transition(models.Model):
     name = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='transition_records')
@@ -56,36 +45,9 @@ class Scouting(models.Model):
     def __str__(self):
         return f"{self.name} - {self.agreement}"
 
-class Performance(models.Model):
-    date = models.DateField()
-    squad = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='performance_team')
-    activity = models.CharField(max_length=200, choices=ActivityChoices.choices)
-    comments = models.TextField(blank=True)
-
-    def __str__(self):
-        return f"{self.squad} - {self.activity} ({self.date})"
 
 
-class IndividualActionPlan(models.Model):
-    CATEGORY_CHOICES = [
-        ('Football', 'Football'),
-        ('Physical', 'Physical'),
-        ('Medical', 'Medical'),
-        ('Lifestyle', 'Lifestyle'),
-        ('Mental', 'Mental'),
-    ]
 
-    date = models.DateField()
-    name = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='action_plans')
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES)
-    responsibility = models.CharField(max_length=100)
-    action = models.TextField()
-    status = models.CharField(max_length=50)
-    follow_up = models.CharField(max_length=100, blank=True)
-    squad = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='action_plan_team')
-
-    def __str__(self):
-        return f"{self.name} - {self.category}"
 
 class Mesocycle(models.Model):
     title = models.CharField(max_length=100)
@@ -98,16 +60,6 @@ class Mesocycle(models.Model):
     def __str__(self):
         return f"{self.title} ({self.team})"
     
-class FitnessPlan(models.Model):
-    title = models.CharField(max_length=100, null=True, blank=True)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='fitness_plans', null=True, blank=True)
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
-    pdf = models.FileField(upload_to='fitness_plan_pdfs/',null=True, blank=True)
-    uploaded_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.team}"
 
 class Result(models.Model):
     date = models.DateField()
@@ -180,22 +132,9 @@ class TrainingParticipationType(models.TextChoices):
 class TrainingMinutes(models.Model):
 
     date = models.DateField(default=timezone.now)
-
-    team = models.ForeignKey(
-        Team,
-        on_delete=models.CASCADE,
-        related_name="training_minutes"
-    )
-
-    session = models.CharField(
-        max_length=20,
-        choices=TrainingSessionType.choices,
-        default=TrainingSessionType.TEAM
-    )
-
-    total_minutes = models.PositiveIntegerField(
-        default=0
-    )
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="training_minutes")
+    session = models.CharField(max_length=20, choices=TrainingSessionType.choices, default=TrainingSessionType.TEAM)
+    total_minutes = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.team.name} - {self.date} - {self.session}"
@@ -203,20 +142,11 @@ class TrainingMinutes(models.Model):
     def save(self, *args, **kwargs):
 
         creating = self.pk is None
-
         super().save(*args, **kwargs)
-
         if creating:
-
-            players = Player.objects.filter(
-                team=self.team
-            )
-
+            players = Player.objects.filter(team=self.team)
             for player in players:
-
-                PlayerTrainingMinutes.objects.get_or_create(
-                    training_session=self,
-                    player=player,
+                PlayerTrainingMinutes.objects.get_or_create(training_session=self, player=player,
                     defaults={
                         "minutes": 0,
                         "participation_type": (
@@ -236,35 +166,11 @@ class TrainingMinutes(models.Model):
 
 class PlayerTrainingMinutes(models.Model):
 
-    training_session = models.ForeignKey(
-        TrainingMinutes,
-        on_delete=models.CASCADE,
-        related_name="player_minutes"
-    )
-
-    player = models.ForeignKey(
-        Player,
-        on_delete=models.CASCADE,
-        related_name="training_minutes"
-    )
-
-    participation_type = models.CharField(
-        max_length=20,
-        choices=TrainingParticipationType.choices,
-        default=TrainingParticipationType.REGULAR
-    )
-
-    trained_with_team = models.ForeignKey(
-        Team,
-        on_delete=models.CASCADE,
-        related_name="trained_players",
-        null=True,
-        blank=True
-    )
-
-    minutes = models.PositiveIntegerField(
-        default=0
-    )
+    training_session = models.ForeignKey(TrainingMinutes, on_delete=models.CASCADE, related_name="player_minutes")
+    player = models.ForeignKey( Player, on_delete=models.CASCADE, related_name="training_minutes")
+    participation_type = models.CharField( max_length=20, choices=TrainingParticipationType.choices, default=TrainingParticipationType.REGULAR)
+    trained_with_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="trained_players", null=True,blank=True)
+    minutes = models.PositiveIntegerField(default=0)
 
     class Meta:
         unique_together = (
