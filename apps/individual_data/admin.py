@@ -189,3 +189,12 @@ class SessionEvaluationAdmin(admin.ModelAdmin):
     )
     list_filter = ("objective_status", "training_quality")
     search_fields = ("session__age_group__name", "coach_comment")
+
+
+
+from django.contrib import admin
+from .models.data_collection import IndividualTrainingReportSettings
+
+@admin.register(IndividualTrainingReportSettings)
+class IndividualTrainingReportSettingsAdmin(admin.ModelAdmin):
+    list_display = ('id', 'logo', 'updated_at')

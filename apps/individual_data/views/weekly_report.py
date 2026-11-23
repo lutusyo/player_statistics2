@@ -29,6 +29,7 @@ from apps.individual_data.models.data_collection import (
     PlayerParticipation,
     PlayerIntervention,
     PlayerInterventionCoachingPoint,
+    IndividualTrainingReportSettings,
 )
 
 
@@ -204,6 +205,37 @@ def _team_logo(team, max_width=24 * mm, max_height=24 * mm):
         return None
 
 
+
+def _report_logo(settings, max_width=65 * mm, max_height=65 * mm):
+    """Return the official report logo."""
+    if not settings or not settings.logo:
+        return None
+
+    try:
+        image = PDFImage(settings.logo.path)
+
+        image_width = image.imageWidth
+        image_height = image.imageHeight
+
+        if not image_width or not image_height:
+            return None
+
+        scale = min(
+            max_width / image_width,
+            max_height / image_height
+        )
+
+        image.drawWidth = image_width * scale
+        image.drawHeight = image_height * scale
+        image.hAlign = "CENTER"
+
+        return image
+
+    except (AttributeError, OSError, ValueError, NotImplementedError):
+        return None
+
+
+
 def weekly_report_pdf(request):
     age_groups = AgeGroup.objects.all().order_by("name")
     age_group_id = request.GET.get("age_group", "").strip()
@@ -236,6 +268,8 @@ def weekly_report_pdf(request):
     sessions = _report_queryset(
         selected_age_group, week_start, week_end, selected_team
     )
+    report_settings = (IndividualTrainingReportSettings.objects.order_by('pk').first()
+)
     participations, interventions, coaching_selections, statistics = (
         _report_statistics(sessions)
     )
@@ -265,7 +299,7 @@ def weekly_report_pdf(request):
         pagesize=landscape(A4),
         rightMargin=12 * mm,
         leftMargin=12 * mm,
-        topMargin=17 * mm,
+        topMargin=25 * mm,
         bottomMargin=15 * mm,
         title="Weekly Individual Training Performance Report",
         author="Individual Training Department",
@@ -384,21 +418,20 @@ def weekly_report_pdf(request):
     # Always try to show one logo on the cover page. Prefer the selected
     # team's logo; when the report covers all teams (or that team has no logo),
     # use the first available team logo as a single report-level fallback.
-    logo = _team_logo(selected_team)
-    if logo is None:
-        fallback_team = Team.objects.exclude(logo="").order_by("name").first()
-        logo = _team_logo(fallback_team)
+
+
+
+    # Official Individual Training report logo
+    logo = _report_logo(
+        report_settings,
+        max_width=65 * mm,
+        max_height=65 * mm
+    )
+
     if logo:
-        logo_table = Table([[logo]], colWidths=[doc.width])
-        logo_table.setStyle(TableStyle([
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("LEFTPADDING", (0, 0), (-1, -1), 0),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-            ("TOPPADDING", (0, 0), (-1, -1), 0),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
-        ]))
-        story.append(logo_table)
+        story.append(logo)
+        story.append(Spacer(1, 8 * mm))
+
     report_scope = selected_team.name if selected_team else "All Teams"
     age_group_scope = selected_age_group.name if selected_age_group else "All Age Groups"
     story.append(Paragraph(
@@ -670,16 +703,56 @@ def weekly_report_pdf(request):
     ]
     make_table(signature_rows, [125 * mm, 125 * mm])
 
+    # Get the official report logo path for the page header.
+    report_logo_path = None
+
+    if report_settings and report_settings.logo:
+        try:
+            report_logo_path = report_settings.logo.path
+        except (AttributeError, OSError, ValueError, NotImplementedError):
+            report_logo_path = None
+
     def add_page_number(canvas, document):
         canvas.saveState()
+
+        page_width, page_height = landscape(A4)
+
+        # ---------------------------------
+        # OFFICIAL LOGO - TOP LEFT
+        # ---------------------------------
+        if report_logo_path:
+            canvas.drawImage(
+                report_logo_path,
+                12 * mm,
+                page_height - 20 * mm,
+                width=14 * mm,
+                height=14 * mm,
+                preserveAspectRatio=True,
+                anchor='c',
+                mask='auto',
+            )
+
+        # ---------------------------------
+        # FOOTER TEXT
+        # ---------------------------------
         canvas.setFont("Helvetica", 9)
         canvas.setFillColor(colors.HexColor("#666666"))
-        canvas.drawString(12 * mm, 8 * mm, "Weekly Individual Training Report")
+
+        canvas.drawString(
+            12 * mm,
+            8 * mm,
+            "Weekly Individual Training Report"
+        )
+
+        # ---------------------------------
+        # PAGE NUMBER
+        # ---------------------------------
         canvas.drawRightString(
-            landscape(A4)[0] - 12 * mm,
+            page_width - 12 * mm,
             8 * mm,
             f"Page {document.page}",
         )
+
         canvas.restoreState()
 
     doc.multiBuild(

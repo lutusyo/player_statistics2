@@ -271,3 +271,11 @@ def add_intervention_coaching_point(
         "individual_training:session_detail",
         session_id=session.id,
     )
+
+
+
+from django.shortcuts import render
+
+
+def individual_training_dashboard(request):
+    return render(request,"individual_data/dashboard.html")

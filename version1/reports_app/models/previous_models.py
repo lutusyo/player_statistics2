@@ -10,18 +10,109 @@ from version1.reports_app.models.weekly_report import WeeklyReport
 # Common choices
 
 
+from django.db import models
+from django.utils import timezone
+from django.conf import settings
+
+from version1.teams_app.models import Team
+from version1.players_app.models import Player
+from apps.core.choices import ActivityChoices
+
 
 class Transition(models.Model):
-    name = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='transition_records')
-    born = models.DateField(null=True, blank=True)
-    squad = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='transition_team')
-    played_for = models.CharField(max_length=100)
-    activity = models.CharField(max_length=200, choices=ActivityChoices.choices)
-    comments = models.CharField(max_length=150, blank=True)
-    date = models.DateField(auto_now_add=True)
+
+    class StatusChoices(models.TextChoices):
+        PLANNED = "PLANNED", "Planned"
+        ONGOING = "ONGOING", "Ongoing"
+        COMPLETED = "COMPLETED", "Completed"
+        ON_HOLD = "ON_HOLD", "On Hold"
+
+    # Player information
+    name = models.ForeignKey(
+        Player,
+        on_delete=models.CASCADE,
+        related_name="transition_records"
+    )
+
+    # Transition details
+    date = models.DateField(default=timezone.localdate)
+
+    from_team = models.ForeignKey(
+        Team,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="transitions_from"
+    )
+
+    to_team = models.ForeignKey(
+        Team,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="transitions_to"
+    )
+
+    # Existing fields (kept for compatibility)
+    squad = models.ForeignKey(
+        Team,
+        on_delete=models.CASCADE,
+        related_name="transition_team"
+    )
+
+    played_for = models.CharField(
+        max_length=100,
+        blank=True
+    )
+
+    activity = models.CharField(
+        max_length=200,
+        choices=ActivityChoices.choices
+    )
+
+    # Additional information
+    reason = models.TextField(
+        blank=True,
+        help_text="Reason for this player transition"
+    )
+
+    objective = models.TextField(
+        blank=True,
+        help_text="Expected outcome of the transition"
+    )
+
+    assessment = models.TextField(
+        blank=True,
+        help_text="Assessment of the player's adaptation and progress"
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=StatusChoices.choices,
+        default=StatusChoices.PLANNED
+    )
+
+    comments = models.TextField(blank=True)
+
+    # Staff information
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="recorded_transitions"
+    )
+
+    # System timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-date", "-created_at"]
 
     def __str__(self):
-        return f"{self.name} - {self.activity}"
+        return f"{self.name} - {self.activity} ({self.date})"
+
 
 
 class Scouting(models.Model):
@@ -44,9 +135,6 @@ class Scouting(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.agreement}"
-
-
-
 
 
 class Mesocycle(models.Model):

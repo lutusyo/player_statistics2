@@ -184,3 +184,20 @@ class SessionEvaluation(models.Model):
 
     def __str__(self):
         return f'Evaluation - {self.session}'
+
+
+class IndividualTrainingReportSettings(models.Model):
+    logo = models.ImageField(
+        upload_to='individual_training/report_logos/',
+        blank=True,
+        null=True,
+        help_text='Official logo used on Individual Training PDF reports.'
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Individual Training Report Settings"
+        verbose_name_plural = "Individual Training Report Settings"
+
+    def __str__(self):
+        return "Individual Training Report Branding"

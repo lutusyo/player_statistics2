@@ -1,0 +1,207 @@
+
+{% extends "individual_data/individual_data_base.html" %}
+{% load static %}
+
+{% block individual_data_content %}
+
+<style>
+    .it-dashboard {
+        max-width: 1400px;
+        margin: 30px auto;
+        padding: 0 20px 40px;
+    }
+
+    .it-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .it-header h2 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .it-header p {
+        color: #6c757d;
+        margin: 0;
+    }
+
+    .it-card {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 25px;
+        height: 100%;
+        transition: all .2s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .it-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,.08);
+        border-color: #cbd5e1;
+        color: inherit;
+    }
+
+    .it-icon {
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .it-blue { background: #e8f1ff; color: #0d6efd; }
+    .it-green { background: #e5f7ed; color: #198754; }
+    .it-purple { background: #f1eaff; color: #7952b3; }
+    .it-orange { background: #fff1df; color: #e58a16; }
+
+    .it-card h5 {
+        font-weight: 650;
+        margin-bottom: 10px;
+    }
+
+    .it-card p {
+        color: #6c757d;
+        font-size: 14px;
+        min-height: 42px;
+        margin-bottom: 18px;
+    }
+
+    .it-link {
+        font-size: 14px;
+        font-weight: 600;
+        color: #0d6efd;
+    }
+
+    .it-section-title {
+        font-size: 19px;
+        font-weight: 650;
+        margin-bottom: 18px;
+    }
+
+    @media(max-width: 576px) {
+        .it-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="it-dashboard">
+
+    <!-- HEADER -->
+    <!--<div class="it-header">
+        <div>
+            <h2>Individual Training</h2>
+            <p>Manage individual training sessions and monitor player development.</p>
+        </div>-->
+
+        <!--<a href="{% url 'individual_training:session_create' %}"
+           class="btn btn-primary">
+            + New Session
+        </a>-->
+    </div>
+
+    <!-- MAIN NAVIGATION -->
+    <h5 class="it-section-title">Individual Training Data</h5>
+
+    <div class="row g-4">
+
+        <!-- SESSION LIST -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{% url 'individual_training:session_list' %}"
+               class="it-card">
+                <div class="it-icon it-blue">
+                    <i class="bi bi-calendar3"></i>
+                </div>
+                <h5>Training Sessions</h5>
+                <p>
+                    View, manage and review all recorded individual
+                    training sessions.
+                </p>
+                <span class="it-link">View Sessions →</span>
+            </a>
+        </div>
+
+        <!-- WEEKLY REPORT -->
+        <div class="col-md-6 col-lg-4">
+            <a href="{% url 'individual_training:weekly_report' %}"
+               class="it-card">
+                <div class="it-icon it-green">
+                    <i class="bi bi-bar-chart-line"></i>
+                </div>
+                <h5>Weekly Reports</h5>
+                <p>
+                    Analyse training activities, player participation,
+                    interventions and coaching outcomes.
+                </p>
+                <span class="it-link">View Reports →</span>
+            </a>
+        </div>
+
+        <!-- NEW SESSION 
+        <div class="col-md-6 col-lg-4">
+            <a href="{% url 'individual_training:session_create' %}"
+               class="it-card">
+                <div class="it-icon it-purple">
+                    <i class="bi bi-plus-circle"></i>
+                </div>
+                <h5>Create New Session</h5>
+                <p>
+                    Record a new individual training session and
+                    start tracking player development.
+                </p>
+                <span class="it-link">Create Session →</span>
+            </a>
+        </div>-->
+
+    </div>
+
+    <!-- FUTURE MODULES -->
+    <h5 class="it-section-title mt-5">Development Resources</h5>
+
+    <div class="row g-4">
+
+        <div class="col-md-6 col-lg-4">
+            <div class="it-card">
+                <div class="it-icon it-orange">
+                    <i class="bi bi-bullseye"></i>
+                </div>
+                <h5>Training Topics & Objectives</h5>
+                <p>
+                    Organise training topics, objectives and
+                    coaching points used during individual sessions.
+                </p>
+                <span class="text-muted small">Future development</span>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="it-card">
+                <div class="it-icon it-blue">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h5>Player Development</h5>
+                <p>
+                    Monitor individual player progress, interventions
+                    and achieved coaching points over time.
+                </p>
+                <span class="text-muted small">Future development</span>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

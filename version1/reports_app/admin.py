@@ -12,12 +12,97 @@ from version1.reports_app.models.previous_models import (
     TrainingAbsence
 )
 
+
 @admin.register(Transition)
 class TransitionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'activity', 'played_for', 'squad', 'date')
-    list_filter = ('activity', 'squad')
-    search_fields = ('name__first_name', 'name__last_name', 'played_for')
 
+    list_display = (
+        'name',
+        'date',
+        'from_team',
+        'to_team',
+        'activity',
+        'status',
+        'recorded_by',
+    )
+
+    list_filter = (
+        'date',
+        'from_team',
+        'to_team',
+        'activity',
+        'status',
+    )
+
+    search_fields = (
+        'name__first_name',
+        'name__second_name',
+        'name__surname',
+        'comments',
+        'reason',
+        'objective',
+    )
+
+    date_hierarchy = 'date'
+
+    autocomplete_fields = (
+        'name',
+        'from_team',
+        'to_team',
+        'recorded_by',
+    )
+
+    readonly_fields = (
+        'created_at',
+        'updated_at',
+    )
+
+    ordering = ('-date', 'name')
+
+    fieldsets = (
+        ('Player Information', {
+            'fields': (
+                'name',
+            )
+        }),
+
+        ('Transition Details', {
+            'fields': (
+                'date',
+                'from_team',
+                'to_team',
+                'activity',
+                'status',
+            )
+        }),
+
+        ('Transition Objectives and Assessment', {
+            'fields': (
+                'reason',
+                'objective',
+                'assessment',
+                'comments',
+            )
+        }),
+
+        ('Additional Information', {
+            'fields': (
+                'squad',
+                'played_for',
+                'recorded_by',
+            )
+        }),
+
+        ('System Information', {
+            'fields': (
+                'created_at',
+                'updated_at',
+            ),
+            'classes': ('collapse',),
+        }),
+    )
+
+    list_per_page = 30
 
 @admin.register(Scouting)
 class ScoutingAdmin(admin.ModelAdmin):
@@ -117,7 +202,6 @@ class PlayerTrainingMinutesAdmin(admin.ModelAdmin):
     list_filter = ('trained_with_team','training_session__team','training_session__session','training_session__date',)
     search_fields = ('player__first_name','player__last_name',)
     autocomplete_fields = ('player','training_session','trained_with_team',)
-
 
     ##################################################################################################################
 

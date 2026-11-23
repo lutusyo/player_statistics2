@@ -17,6 +17,29 @@
                 <h1>{{ competition_season.competition.name }}</h1>
                 <h2>{{ competition_season.season }}</h2>
             </div>
+
+
+            <div class="competition-heading">
+
+                <div class="competition-logos">
+                    {% if competition_season.supervising_organization_logo %}
+                        <img src="{{ competition_season.supervising_organization_logo.url }}"
+                            alt="Supervising organization logo">
+                    {% endif %}
+
+                    {% if competition_season.competition_season_logo %}
+                        <img src="{{ competition_season.competition_season_logo.url }}"
+                            alt="Competition logo">
+                    {% elif competition_season.competition.logo %}
+                        <img src="{{ competition_season.competition.logo.url }}"
+                            alt="Competition logo">
+                    {% endif %}
+                </div>
+
+
+            </div>
+
+
         </div>
 
         <!-- COMPETITION NAVIGATION -->

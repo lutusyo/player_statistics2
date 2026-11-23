@@ -122,14 +122,11 @@ class Match(models.Model):
 
     # Match number
     match_no = models.PositiveIntegerField(null=True, blank=True, default=None, help_text="Match number in competition")
-
     # Optional group/phase (e.g., Group A, Quarterfinals)
     group = models.CharField( max_length=50, blank=True, null=True, default=None, help_text="Optional group/phase for competition")
-
     # Round/stage
     round = models.CharField(max_length=50, blank=True, null=True, default=None,help_text="Competition round or stage")
     
-
     opponent_yellow_cards = models.PositiveIntegerField(default=0)
     opponent_red_cards = models.PositiveIntegerField(default=0)
     rating_links_sent = models.BooleanField(default=False)
@@ -145,6 +142,15 @@ class Match(models.Model):
         ("CANCELLED", "Cancelled"),
         ("ABANDONED", "Abandoned"),
     ],default="SCHEDULED",)
+
+
+
+    # Post-match technical review
+    methodology_review = models.TextField(
+        blank=True, 
+        null=True, 
+        help_text="Methodolgy Director's post Match observations, strength, weaknesses, and areas for improvement. ")
+
 
     def __str__(self):
         return f"{self.home_team.name} vs {self.away_team.name} ({self.date})"
