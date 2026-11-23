@@ -1,50 +1,118 @@
+
 /* =========================================================
-   COMPETITION SEASON
-   Dedicated styles
+   COMPETITION SEASON DASHBOARD
+   Modern Professional Football Design
    ========================================================= */
 
-.competition-page {
+.competition-dashboard {
     width: 100%;
-    max-width: 1400px;
+    max-width: 1500px;
     margin: 0 auto;
     padding: 24px;
+    color: #1e293b;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
-
 /* =========================================================
-   HEADER
+   COMPETITION HEADER
    ========================================================= */
 
 .competition-header {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 28px 32px;
-    margin-bottom: 16px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+
+    min-height: 175px;
+    padding: 32px 38px;
+
+    background: linear-gradient(120deg, #101d35, #1e3557);
+    border-radius: 16px;
+
+    margin-bottom: 22px;
+    overflow: hidden;
+    box-shadow: 0 5px 18px rgba(15, 23, 42, 0.12);
 }
 
-.competition-label {
-    margin: 0 0 6px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    color: #6b7280;
+/* Subtle decorative background */
+.competition-header::after {
+    content: "";
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    right: 15%;
+    top: -190px;
+
+    border: 45px solid rgba(255, 255, 255, 0.035);
+    border-radius: 50%;
+    pointer-events: none;
 }
 
 .competition-header h1 {
+    position: relative;
+    z-index: 1;
+
     margin: 0;
+    color: #ffffff;
+
     font-size: 30px;
-    font-weight: 700;
-    color: #111827;
+    font-weight: 750;
+    letter-spacing: -0.7px;
+    line-height: 1.3;
 }
 
 .competition-header h2 {
-    margin: 6px 0 0;
-    font-size: 16px;
-    font-weight: 500;
-    color: #6b7280;
+    position: relative;
+    z-index: 1;
+
+    display: inline-block;
+    margin: 12px 0 0;
+
+    padding: 6px 13px;
+
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+
+    color: #dbeafe;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
+/* =========================================================
+   COMPETITION LOGOS
+   ========================================================= */
+
+.competition-heading {
+    position: relative;
+    z-index: 2;
+}
+
+.competition-logos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+}
+
+.competition-logos img {
+    width: 82px;
+    height: 82px;
+    object-fit: contain;
+
+    padding: 10px;
+    background: #ffffff;
+    border-radius: 14px;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
+}
+
+.competition-logos img:hover {
+    transform: translateY(-4px);
+}
 
 /* =========================================================
    NAVIGATION
@@ -52,68 +120,140 @@
 
 .competition-navigation {
     display: flex;
-    gap: 4px;
+    align-items: center;
+    gap: 5px;
+
+    padding: 7px;
 
     background: #ffffff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
 
-    padding: 6px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 
     overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
 
 .competition-navigation a {
-    padding: 10px 15px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 12px 17px;
 
     border-radius: 8px;
 
-    color: #4b5563;
+    color: #64748b;
     text-decoration: none;
 
-    font-size: 14px;
-    font-weight: 600;
-
+    font-size: 13px;
+    font-weight: 650;
     white-space: nowrap;
+
+    transition: all 0.2s ease;
 }
 
 .competition-navigation a:hover {
-    background: #f3f4f6;
-    color: #111827;
+    background: #f1f5f9;
+    color: #1e293b;
 }
 
+/* Active navigation - add class="active" to current page */
+.competition-navigation a.active {
+    background: #eaf2ff;
+    color: #1d4ed8;
+}
+
+.competition-navigation a.active::after {
+    content: "";
+    position: absolute;
+
+    bottom: -7px;
+    left: 20%;
+    width: 60%;
+    height: 3px;
+
+    background: #2563eb;
+    border-radius: 5px;
+}
 
 /* =========================================================
-   CONTENT
+   PAGE CONTENT
    ========================================================= */
 
 .competition-content {
     width: 100%;
+    min-width: 0;
 }
 
-
 /* =========================================================
-   MOBILE
+   RESPONSIVE DESIGN
    ========================================================= */
 
 @media (max-width: 768px) {
 
-    .competition-page {
+    .competition-dashboard {
         padding: 14px;
     }
 
     .competition-header {
-        padding: 20px;
+        min-height: 140px;
+        padding: 22px;
+        gap: 12px;
+        border-radius: 12px;
     }
 
     .competition-header h1 {
-        font-size: 24px;
+        font-size: 21px;
+    }
+
+    .competition-header h2 {
+        font-size: 12px;
+    }
+
+    .competition-logos {
+        gap: 8px;
+    }
+
+    .competition-logos img {
+        width: 55px;
+        height: 55px;
+        padding: 7px;
+    }
+
+    .competition-navigation {
+        border-radius: 10px;
+        margin-bottom: 18px;
     }
 
     .competition-navigation a {
-        padding: 9px 12px;
-        font-size: 13px;
+        padding: 11px 13px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .competition-header {
+        align-items: flex-start;
+        padding: 20px 16px;
     }
 
+    .competition-header h1 {
+        font-size: 18px;
+    }
+
+    .competition-logos {
+        flex-direction: column;
+    }
+
+    .competition-logos img {
+        width: 43px;
+        height: 43px;
+    }
 }
