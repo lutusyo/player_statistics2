@@ -1,0 +1,141 @@
+
+{% extends "performance_analysis/base.html" %}
+
+{% block title %}Performance Dashboard{% endblock %}
+{% block page_heading %}Performance Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+        <h2 class="page-title">Performance Analysis</h2>
+        <p class="page-subtitle">
+            Analyse academy performance across teams and reporting periods.
+        </p>
+    </div>
+
+    <a href="{% url 'performance_analysis:create_analysis' %}"
+       class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i>
+        Create Analysis
+    </a>
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stat-label">Total Analyses</div>
+                    <div class="stat-value">{{ total_analyses }}</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-bar-chart"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stat-label">Recent Analyses</div>
+                    <div class="stat-value">{{ analyses|length }}</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="stat-label">Analysis Platform</div>
+                    <div class="stat-value fs-5 mt-3">Academy</div>
+                </div>
+                <div class="stat-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="content-card">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h5 class="fw-bold mb-1">Your Analyses</h5>
+            <small class="text-muted">Previously created analysis projects</small>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Analysis Name</th>
+                    <th>Type</th>
+                    <th>Comparison Mode</th>
+                    <th>Periods</th>
+                    <th>Created</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for analysis in analyses %}
+                <tr>
+                    <td>
+                        <strong>{{ analysis.name }}</strong>
+                        {% if analysis.description %}
+                        <div class="small text-muted">
+                            {{ analysis.description|truncatechars:65 }}
+                        </div>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ analysis.get_analysis_type_display }}</td>
+
+                    <td>{{ analysis.get_comparison_mode_display }}</td>
+
+                    <td>{{ analysis.periods.count }}</td>
+
+                    <td>{{ analysis.created_at|date:"d M Y" }}</td>
+
+                    <td>
+                        <a href="{% url 'performance_analysis:analysis_detail' analysis.pk %}"
+                           class="btn btn-sm btn-outline-primary">
+                            Open
+                        </a>
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <i class="bi bi-bar-chart-line fs-1 text-muted"></i>
+                        <h6 class="mt-3">No analyses created yet</h6>
+                        <p class="text-muted small">
+                            Create your first analysis to get started.
+                        </p>
+                        <a href="{% url 'performance_analysis:create_analysis' %}"
+                           class="btn btn-primary btn-sm">
+                            Create First Analysis
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

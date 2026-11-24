@@ -1,4 +1,4 @@
-# tagging_app_v2/models.py
+# version2/tagging_app_v2/models.py
 from django.db import models
 
 from apps.core.constants import BALL_ACTION_CHOICES, FOUL_OUTCOME

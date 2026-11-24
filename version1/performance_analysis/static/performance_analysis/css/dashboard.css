@@ -1,0 +1,252 @@
+
+:root {
+    --primary: #0756a5;
+    --primary-dark: #063d75;
+    --sidebar-bg: #10243a;
+    --sidebar-text: #b9c7d8;
+    --page-bg: #f4f7fb;
+    --border: #e5eaf0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--page-bg);
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #243247;
+}
+
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    width: 255px;
+    min-width: 255px;
+    background: var(--sidebar-bg);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    transition: all .25s ease;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 24px 20px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+}
+
+.sidebar-brand h5 {
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.sidebar-brand small {
+    color: var(--sidebar-text);
+    font-size: 11px;
+}
+
+.brand-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: var(--primary);
+    display: grid;
+    place-items: center;
+    font-size: 21px;
+}
+
+.sidebar-section {
+    padding: 22px 20px 8px;
+    color: #8196ad;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.3px;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 5px 12px;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 12px 14px;
+    margin-bottom: 4px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    border-radius: 7px;
+    font-size: 13px;
+    transition: .2s;
+}
+
+.sidebar-link i {
+    font-size: 17px;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+    background: var(--primary);
+    color: white;
+}
+
+.sidebar-footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px;
+    border-top: 1px solid rgba(255,255,255,.1);
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    background: #2469ad;
+    border-radius: 50%;
+    font-weight: bold;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+}
+
+.user-details small {
+    color: var(--sidebar-text);
+}
+
+/* MAIN AREA */
+
+.main-area {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.topbar {
+    height: 72px;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 0 28px;
+}
+
+.topbar h6 {
+    font-weight: 700;
+}
+
+.sidebar-toggle {
+    font-size: 23px;
+    border: none;
+}
+
+.content-area {
+    padding: 28px;
+    flex: 1;
+}
+
+.app-footer {
+    padding: 15px 28px;
+    background: white;
+    border-top: 1px solid var(--border);
+    color: #8793a2;
+    font-size: 12px;
+}
+
+/* DASHBOARD COMPONENTS */
+
+.page-title {
+    font-size: 23px;
+    font-weight: 750;
+}
+
+.page-subtitle {
+    color: #7c8998;
+    font-size: 13px;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    height: 100%;
+}
+
+.stat-card .stat-label {
+    color: #7c8998;
+    font-size: 12px;
+}
+
+.stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 750;
+    margin-top: 8px;
+}
+
+.stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: #eaf2fb;
+    color: var(--primary);
+    font-size: 20px;
+}
+
+.content-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px;
+}
+
+.btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+@media (max-width: 900px) {
+    .sidebar {
+        position: fixed;
+        z-index: 1050;
+        left: -255px;
+        top: 0;
+        bottom: 0;
+    }
+
+    .sidebar.show {
+        left: 0;
+    }
+
+    .content-area {
+        padding: 18px;
+    }
+
+    .topbar {
+        padding: 0 16px;
+    }
+}

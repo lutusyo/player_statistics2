@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'version1.tagging_app', 'version1.goalkeeping_app', 'version1.defensive_app', 'version1.lineup_app',
     'version1.perfomance_rating_app', 'version1.training_app', 'version1.sheets_generator_app',
     'version1.library_app',
+    "version1.performance_analysis",
 
     #loaned_players
     #'version1.loans_app',

@@ -6,6 +6,8 @@ from django.conf.urls.static import static
 from version1.accounts_app import views 
 
 urlpatterns = [
+
+    #version1
     path('admin/', admin.site.urls),
     path('accounts/', include('version1.accounts_app.urls')),
     path('players_app/', include('version1.players_app.urls')),
@@ -23,6 +25,9 @@ urlpatterns = [
     path('training/', include('version1.training_app.urls')),
     path("sheets/", include("version1.sheets_generator_app.urls")), #sheets generator
     path('library/', include('version1.library_app.urls')),
+
+    #performance analysis
+    path("performance-analysis/",include("version1.performance_analysis.urls")),
 
     # Version2
     path('tagging_v2/', include('version2.tagging_app_v2.urls')), #tagging_app_v2
