@@ -291,7 +291,7 @@
                             {% for team in our_teams %}
                                 <li><a class="dropdown-item" href="{% url 'performance_rating_app:performance_list' team.id %}">{{ team.age_group.code }}</a></li>
                             {% endfor %}
-                            <a class="dropdown-item" href="{% url 'psychology_app_v2:psychology_dashboard' %}">Psychology Dashboard</a>
+                            <a class="dropdown-item" href="{% url 'performance_analysis:dashboard' %}">Data Analysis</a>
 
 
                         </ul>
