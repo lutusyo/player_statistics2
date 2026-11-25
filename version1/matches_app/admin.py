@@ -67,8 +67,8 @@ class CompetitionRuleAdmin(admin.ModelAdmin):
 class MatchAdmin(admin.ModelAdmin):
     list_display = (
         "home_team", "away_team", "date",
-        "competition_logo", "competition_name", "venue",
-        "get_region", "get_country", "season", "age_group", "group",
+        "competition_logo", "competition_season", "venue",
+        "get_region", "age_group",
     )
 
     list_filter = (
