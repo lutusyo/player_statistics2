@@ -18,8 +18,19 @@ WHITE = RGBColor(255, 255, 255)
 DARK = RGBColor(45, 45, 45)
 GREY = RGBColor(110, 110, 110)
 LIGHT_GREY = RGBColor(243, 245, 247)
-GREEN = RGBColor(39, 128, 75)
-RED = RGBColor(190, 55, 55)
+
+GREEN = RGBColor(198, 239, 206)
+RED = RGBColor(255, 199, 206)
+YELLOW = RGBColor(255, 235, 156)
+
+def get_team_label(item):
+    team_name = item.get("team_name", "-")
+    age_group = item.get("age_group")
+
+    if age_group:
+        return f"{team_name} ({age_group})"
+
+    return team_name
 
 
 def add_background(slide, color=WHITE):
@@ -85,13 +96,15 @@ def add_footer(slide, page):
         size=8, color=GREY,
     )
 
-
 def add_table(slide, headers, rows, x=0.55, y=1.35,
-              w=12.2, row_height=0.38, font_size=9):
+              w=12.2, row_height=0.38, font_size=9,
+              row_colors=None):
+
     if not headers:
         return
 
     row_count = max(len(rows), 1) + 1
+
     table = slide.shapes.add_table(
         row_count,
         len(headers),
@@ -104,6 +117,7 @@ def add_table(slide, headers, rows, x=0.55, y=1.35,
     for column in table.columns:
         column.width = Inches(table_width)
 
+    # HEADER
     for col, header in enumerate(headers):
         cell = table.cell(0, col)
         cell.text = str(header)
@@ -113,24 +127,36 @@ def add_table(slide, headers, rows, x=0.55, y=1.35,
 
         for paragraph in cell.text_frame.paragraphs:
             paragraph.alignment = PP_ALIGN.CENTER
+
             for run in paragraph.runs:
                 run.font.name = "Arial"
                 run.font.size = Pt(font_size)
                 run.font.bold = True
                 run.font.color.rgb = WHITE
 
+    # DATA ROWS
     for row_index, row in enumerate(rows, start=1):
+
         for col_index, value in enumerate(row):
             cell = table.cell(row_index, col_index)
+
             cell.text = str(value if value is not None else "-")
-            cell.fill.solid()
-            cell.fill.fore_color.rgb = (
-                WHITE if row_index % 2 else LIGHT_GREY
-            )
+
+            # Apply custom row colour when supplied
+            if row_colors and row_index <= len(row_colors):
+                cell.fill.solid()
+                cell.fill.fore_color.rgb = row_colors[row_index - 1]
+            else:
+                cell.fill.solid()
+                cell.fill.fore_color.rgb = (
+                    WHITE if row_index % 2 else LIGHT_GREY
+                )
+
             cell.vertical_anchor = MSO_ANCHOR.MIDDLE
 
             for paragraph in cell.text_frame.paragraphs:
                 paragraph.alignment = PP_ALIGN.CENTER
+
                 for run in paragraph.runs:
                     run.font.name = "Arial"
                     run.font.size = Pt(font_size)
@@ -274,7 +300,12 @@ def export_analysis_pptx(run):
 
     add_text(
         slide,
-        ", ".join(team.get("name", "") for team in teams) or "No teams selected",
+        ", ".join(
+            f'{team.get("name", "")} ({team.get("age_group")})'
+            if team.get("age_group")
+            else team.get("name", "")
+            for team in teams
+        ) or "No teams selected",
         0.7, 5.55, 11.8, 0.55,
         size=12, color=DARK,
     )
@@ -289,7 +320,7 @@ def export_analysis_pptx(run):
     performance_rows = [
         [
             item.get("period_name"),
-            item.get("team_name"),
+            get_team_label(item),
             item.get("played", 0),
             item.get("won", 0),
             item.get("drawn", 0),
@@ -318,6 +349,111 @@ def export_analysis_pptx(run):
 
     add_footer(slide, 3)
 
+
+
+
+    # 4. TEAM MATCH RESULTS
+
+    result_rows = []
+    result_colors = []
+
+    result_color_map = {
+        "success": GREEN,
+        "danger": RED,
+        "warning": YELLOW,
+    }
+
+    for item in results:
+
+        team_label = get_team_label(item)
+
+        for match in item.get("match_results", []):
+
+            result_rows.append([
+                item.get("period_name", "-"),
+                match.get("date", "-"),
+                team_label,
+                match.get("home_team", "-"),
+                (
+                    f'{match.get("home_score", 0)} - '
+                    f'{match.get("away_score", 0)}'
+                ),
+                match.get("result", "-"),
+                match.get("away_team", "-"),
+            ])
+
+            result_colors.append(
+                result_color_map.get(
+                    match.get("result_color"),
+                    WHITE,
+                )
+            )
+
+    # Split results into slides (10 matches per slide)
+    result_chunks = [
+        result_rows[i:i + 10]
+        for i in range(0, len(result_rows), 10)
+    ]
+
+    color_chunks = [
+        result_colors[i:i + 10]
+        for i in range(0, len(result_colors), 10)
+    ]
+
+    if result_chunks:
+
+        for index, chunk in enumerate(result_chunks):
+
+            slide = prs.slides.add_slide(blank)
+            add_background(slide)
+
+            title = (
+                "Team Match Results"
+                if index == 0
+                else "Team Match Results (Continued)"
+            )
+
+            add_header(slide, title)
+
+            add_table(
+                slide,
+                [
+                    "Period",
+                    "Date",
+                    "Team",
+                    "Home Team",
+                    "Score",
+                    "Result",
+                    "Away Team",
+                ],
+                chunk,
+                x=0.45,
+                y=1.4,
+                w=12.4,
+                row_height=0.48,
+                font_size=9,
+                row_colors=color_chunks[index],
+            )
+
+            add_footer(slide, len(prs.slides))
+
+    else:
+
+        slide = prs.slides.add_slide(blank)
+        add_background(slide)
+        add_header(slide, "Team Match Results")
+
+        add_empty_message(
+            slide,
+            "No match results available.",
+        )
+
+        add_footer(slide, len(prs.slides))
+
+
+
+
+
     # 4. SHOOTING AND PASSING
     slide = prs.slides.add_slide(blank)
     add_background(slide)
@@ -326,7 +462,7 @@ def export_analysis_pptx(run):
     technical_rows = [
         [
             item.get("period_name"),
-            item.get("team_name"),
+            get_team_label(item),
             item.get("shots", 0),
             item.get("shots_on_target", 0),
             f"{item.get('shooting_accuracy', 0)}%",

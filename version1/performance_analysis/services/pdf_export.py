@@ -26,6 +26,16 @@ DARK_GREY = colors.HexColor("#555555")
 WHITE = colors.white
 
 
+def get_team_label(item):
+    team_name = item.get("team_name", "-")
+    age_group = item.get("age_group")
+
+    return (
+        f"{team_name} ({age_group})"
+        if age_group else team_name
+    )
+
+
 def make_styles():
     styles = getSampleStyleSheet()
 
@@ -90,8 +100,7 @@ def cell(value, style):
         value = "-"
     return Paragraph(str(value), style)
 
-
-def make_table(headers, rows, widths=None):
+def make_table(headers, rows, widths=None, row_colors=None):
     styles = make_styles()
 
     table_data = [
@@ -110,7 +119,7 @@ def make_table(headers, rows, widths=None):
         hAlign="LEFT",
     )
 
-    table.setStyle(TableStyle([
+    table_style = [
         ("BACKGROUND", (0, 0), (-1, 0), NAVY),
         ("TEXTCOLOR", (0, 0), (-1, 0), WHITE),
         ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#D5DDE5")),
@@ -120,7 +129,15 @@ def make_table(headers, rows, widths=None):
         ("RIGHTPADDING", (0, 0), (-1, -1), 4),
         ("TOPPADDING", (0, 0), (-1, -1), 5),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-    ]))
+    ]
+
+    for row_number, color in enumerate(row_colors or [], start=1):
+        if color:
+            table_style.append(
+                ("BACKGROUND", (0, row_number), (-1, row_number), color)
+            )
+
+    table.setStyle(TableStyle(table_style))
 
     return table
 
@@ -261,7 +278,7 @@ def export_analysis_pdf(run):
     for item in results:
         performance_rows.append([
             item.get("period_name", "-"),
-            item.get("team_name", "-"),
+            get_team_label(item),
             item.get("played", 0),
             item.get("won", 0),
             item.get("drawn", 0),
@@ -287,6 +304,82 @@ def export_analysis_pdf(run):
         ))
 
     story.append(Spacer(1, 4 * mm))
+
+
+
+
+    # MATCH RESULTS
+    story.append(Paragraph(
+        "Team Match Results",
+        styles["SectionHeading"],
+    ))
+
+    result_rows = []
+    result_colors = []
+
+    result_color_map = {
+        "success": colors.HexColor("#C6EFCE"),
+        "danger": colors.HexColor("#FFC7CE"),
+        "warning": colors.HexColor("#FFEB9C"),
+    }
+
+    for item in results:
+        team_label = get_team_label(item)
+
+        for match in item.get("match_results", []):
+            result_rows.append([
+                item.get("period_name", "-"),
+                match.get("date", "-"),
+                team_label,
+                match.get("home_team", "-"),
+                (
+                    f'{match.get("home_score", 0)} - '
+                    f'{match.get("away_score", 0)}'
+                ),
+                match.get("result", "-"),
+                match.get("away_team", "-"),
+            ])
+
+            result_colors.append(
+                result_color_map.get(
+                    match.get("result_color"),
+                    WHITE,
+                )
+            )
+
+    if result_rows:
+        story.append(make_table(
+            [
+                "Period",
+                "Date",
+                "Team",
+                "Home Team",
+                "Score",
+                "Result",
+                "Away Team",
+            ],
+            result_rows,
+            [
+                35 * mm,
+                22 * mm,
+                35 * mm,
+                43 * mm,
+                18 * mm,
+                20 * mm,
+                43 * mm,
+            ],
+            row_colors=result_colors,
+        ))
+    else:
+        story.append(Paragraph(
+            "No match results available.",
+            styles["SmallText"],
+        ))
+
+    story.append(Spacer(1, 5 * mm))
+
+
+
 
     # SHOOTING AND PASSING
     story.append(Paragraph(

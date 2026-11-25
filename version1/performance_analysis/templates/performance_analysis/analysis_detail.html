@@ -82,6 +82,9 @@
         {% for selection in analysis.selected_teams.all %}
             <span class="badge bg-light text-dark border me-1 mb-2">
                 {{ selection.team.name }}
+                {% if selection.team.age_group %}
+                    ({{ selection.team.age_group }})
+                {% endif %}
             </span>
         {% empty %}
             <p class="text-muted">No teams selected.</p>
@@ -117,6 +120,9 @@
                 {% for selection in period.selected_teams.all %}
                     <span class="badge bg-light text-dark border me-1 mb-1">
                         {{ selection.team.name }}
+                        {% if selection.team.age_group %}
+                            ({{ selection.team.age_group }})
+                        {% endif %}
                     </span>
                 {% empty %}
                     <span class="text-muted small">No teams selected.</span>
@@ -216,8 +222,13 @@
                         {% for row in report.results %}
                             <tr>
                                 <td>{{ row.period_name }}</td>
-                                <td class="fw-semibold">{{ row.team_name }}</td>
-                                <td>{{ row.played }}</td>
+                                <td class="fw-semibold">
+                                    {{ row.team_name }}
+                                    {% if row.age_group %}
+                                        ({{ row.age_group }})
+                                    {% endif %}
+                                </td>
+                                                                <td>{{ row.played }}</td>
                                 <td>{{ row.won }}</td>
                                 <td>{{ row.drawn }}</td>
                                 <td>{{ row.lost }}</td>
@@ -243,6 +254,101 @@
 
 
 
+
+
+        <!-- MATCH RESULTS BY TEAM AND PERIOD -->
+        <div id="team-match-results" class="card shadow-sm border-0 mb-4"
+            style="scroll-margin-top: 90px;">
+
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Team Match Results</h5>
+            </div>
+
+            <div class="card-body">
+
+                {% for row in report.results %}
+
+                    <div class="mb-4">
+
+                        <h6 class="fw-bold mb-1">
+                            {{ row.team_name }}
+                            {% if row.age_group %}
+                                ({{ row.age_group }})
+                            {% endif %}
+                        </h6>
+
+                        <small class="text-muted">
+                            {{ row.period_name }}
+                        </small>
+
+                        <div class="table-responsive mt-3">
+
+                            <table class="table table-bordered table-hover
+                                        table-sm align-middle text-center">
+
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Home Team</th>
+                                        <th>Score</th>
+                                        <th>Result</th>
+                                        <th>Away Team</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    {% for match in row.match_results %}
+
+                                        <tr class="table-{{ match.result_color }}">
+
+                                            <td>{{ match.date }}</td>
+
+                                            <td>{{ match.home_team }}</td>
+
+                                            <td class="fw-bold">
+                                                {{ match.home_score }} -
+                                                {{ match.away_score }}
+                                            </td>
+
+                                            <td class="fw-bold">
+                                                {{ match.result }}
+                                            </td>
+
+                                            <td>{{ match.away_team }}</td>
+
+                                        </tr>
+
+                                    {% empty %}
+
+                                        <tr>
+                                            <td colspan="5"
+                                                class="text-center text-muted">
+                                                No finished matches found for this team
+                                                during this period.
+                                            </td>
+                                        </tr>
+
+                                    {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                {% empty %}
+
+                    <p class="text-muted">
+                        No match results available.
+                    </p>
+
+                {% endfor %}
+
+            </div>
+        </div>
 
 
     

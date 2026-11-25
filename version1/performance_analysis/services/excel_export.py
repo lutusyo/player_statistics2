@@ -17,6 +17,23 @@ THIN_BORDER = Border(
 )
 
 
+RESULT_FILLS = {
+    "success": PatternFill("solid", fgColor="C6EFCE"),  # WIN - Green
+    "danger": PatternFill("solid", fgColor="FFC7CE"),   # LOSS - Red
+    "warning": PatternFill("solid", fgColor="FFEB9C"),  # DRAW - Yellow
+}
+
+
+def get_team_label(item):
+    team_name = item.get("team_name", "")
+    age_group = item.get("age_group")
+
+    if age_group:
+        return f"{team_name} ({age_group})"
+
+    return team_name
+
+
 def style_sheet(ws):
     ws.freeze_panes = "A2"
     ws.sheet_view.showGridLines = False
@@ -129,7 +146,7 @@ def export_analysis_excel(run):
             item.get("start_date"),
             item.get("end_date"),
             item.get("age_group"),
-            item.get("team_name"),
+            get_team_label(item),
             item.get("played", 0),
             item.get("won", 0),
             item.get("drawn", 0),
@@ -158,6 +175,49 @@ def export_analysis_excel(run):
         wb, "Team Performance", performance_headers, performance_rows
     )
 
+
+
+    # MATCH RESULTS
+    match_headers = [
+        "Period", "Date", "Age Group", "Team",
+        "Home Team", "Score", "Result", "Away Team",
+    ]
+
+    match_rows = []
+
+    for item in results:
+        for match in item.get("match_results", []):
+            match_rows.append([
+                item.get("period_name"),
+                match.get("date", ""),
+                item.get("age_group", ""),
+                get_team_label(item),
+                match.get("home_team", ""),
+                f'{match.get("home_score", 0)} - {match.get("away_score", 0)}',
+                match.get("result", ""),
+                match.get("away_team", ""),
+            ])
+
+    match_ws = add_table_sheet(
+        wb, "Match Results", match_headers, match_rows
+    )
+
+    # Colour each match according to its result
+    excel_row = 2
+
+    for item in results:
+        for match in item.get("match_results", []):
+            fill = RESULT_FILLS.get(match.get("result_color"))
+
+            if fill:
+                for cell in match_ws[excel_row]:
+                    cell.fill = fill
+
+            excel_row += 1
+
+
+
+
     # PERIOD COMPARISONS
     comparison_headers = [
         "Team", "Period", "Previous Period", "Metric",
@@ -173,7 +233,7 @@ def export_analysis_excel(run):
 
         for metric, change in changes.items():
             comparison_rows.append([
-                item.get("team_name"),
+                get_team_label(item),
                 item.get("period_name"),
                 item.get("previous_period_name") or "No previous period",
                 metric.replace("_", " ").title(),
@@ -196,7 +256,7 @@ def export_analysis_excel(run):
         for insight in item.get("insights", []):
             insight_rows.append([
                 item.get("period_name"),
-                item.get("team_name"),
+                get_team_label(item),
                 insight.get("category"),
                 insight.get("metric"),
                 insight.get("status"),
@@ -219,7 +279,7 @@ def export_analysis_excel(run):
             player_rows.append([
                 item.get("period_name"),
                 item.get("age_group"),
-                item.get("team_name"),
+                get_team_label(item),
                 player.get("player_name"),
                 player.get("appearances", 0),
                 player.get("minutes", 0),
@@ -297,7 +357,7 @@ def export_analysis_excel(run):
             discipline = team.get("discipline", {})
 
             period_name = period.get("period_name")
-            team_name = team.get("team_name")
+            team_name = get_team_label(team)
 
             # SHOOTING
             shooting_rows.append([
