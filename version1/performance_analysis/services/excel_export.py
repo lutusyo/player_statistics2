@@ -77,6 +77,7 @@ def export_analysis_excel(run):
     comparisons = report.get("comparisons", [])
     insights = report.get("insights", [])
     player_analysis = report.get("player_analysis", [])
+    technical_analysis = report.get("technical_analysis", [])
 
     # SUMMARY
     summary.merge_cells("A1:B1")
@@ -267,6 +268,145 @@ def export_analysis_excel(run):
         player_performance_headers,
         player_performance_rows,
     )
+
+
+
+
+
+
+
+
+    # TECHNICAL ANALYSIS
+    shooting_headers = [
+        "Period", "Team", "Matches Played",
+        "Shots", "Shots on Target", "Goals",
+        "Saved", "Blocked", "Off Target", "Player Errors",
+        "Shooting Accuracy %", "Conversion Rate %",
+    ]
+
+    shooting_rows = []
+    breakdown_rows = []
+    goalkeeper_rows = []
+    discipline_rows = []
+
+    for period in technical_analysis:
+        for team in period.get("teams", []):
+
+            shooting = team.get("shooting", {})
+            goalkeeping = team.get("goalkeeping", {})
+            discipline = team.get("discipline", {})
+
+            period_name = period.get("period_name")
+            team_name = team.get("team_name")
+
+            # SHOOTING
+            shooting_rows.append([
+                period_name,
+                team_name,
+                team.get("matches_played", 0),
+                shooting.get("shots", 0),
+                shooting.get("shots_on_target", 0),
+                shooting.get("goals", 0),
+                shooting.get("saved", 0),
+                shooting.get("blocked", 0),
+                shooting.get("off_target", 0),
+                shooting.get("player_errors", 0),
+                shooting.get("shooting_accuracy", 0),
+                shooting.get("conversion_rate", 0),
+            ])
+
+            # SHOT BREAKDOWNS
+            for category, items in [
+                ("Outcome", shooting.get("outcomes", [])),
+                ("Delivery Type", shooting.get("delivery_types", [])),
+                ("Body Part", shooting.get("body_parts", [])),
+                ("Shot Location", shooting.get("locations", [])),
+            ]:
+                for item in items:
+                    breakdown_rows.append([
+                        period_name,
+                        team_name,
+                        category,
+                        item.get("name"),
+                        item.get("count", 0),
+                    ])
+
+            # GOALKEEPER PERFORMANCE
+            for player in goalkeeping.get("goalkeepers", []):
+                goalkeeper_rows.append([
+                    period_name,
+                    team_name,
+                    player.get("player_name"),
+                    player.get("matches_played", 0),
+                    player.get("starts", 0),
+                    player.get("substitute_appearances", 0),
+                    player.get("minutes", 0),
+                    player.get("average_minutes", 0),
+                    player.get("clean_sheets", 0),
+                    player.get("clean_sheet_percentage", 0),
+                    player.get("team_goals_conceded", 0),
+                    player.get("missing_entry_time", 0),
+                    player.get("invalid_time_intervals", 0),
+                ])
+
+            # DISCIPLINE
+            discipline_rows.append([
+                period_name,
+                team_name,
+                team.get("matches_played", 0),
+                discipline.get("fouls_committed", 0),
+                discipline.get("fouls_won", 0),
+                discipline.get("no_card_fouls", 0),
+                discipline.get("yellow_cards", 0),
+                discipline.get("red_cards", 0),
+                discipline.get("total_cards", 0),
+            ])
+
+    add_table_sheet(
+        wb,
+        "Shooting Analysis",
+        shooting_headers,
+        shooting_rows,
+    )
+
+    add_table_sheet(
+        wb,
+        "Shot Breakdowns",
+        ["Period", "Team", "Breakdown Type", "Category", "Count"],
+        breakdown_rows,
+    )
+
+    add_table_sheet(
+        wb,
+        "Goalkeeper Analysis",
+        [
+            "Period", "Team", "Goalkeeper",
+            "Appearances", "Starts", "Substitute Appearances",
+            "Minutes", "Average Minutes",
+            "Clean Sheets", "Clean Sheet %",
+            "Team Goals Conceded While Appeared",
+            "Missing Entry Time", "Invalid Time Intervals",
+        ],
+        goalkeeper_rows,
+    )
+
+    add_table_sheet(
+        wb,
+        "Discipline Analysis",
+        [
+            "Period", "Team", "Matches Played",
+            "Fouls Committed", "Fouls Won", "No Card Fouls",
+            "Yellow Cards", "Red Cards", "Total Cards",
+        ],
+        discipline_rows,
+    )
+
+
+
+
+
+
+
 
     # PAGE SETUP
     for ws in wb.worksheets:

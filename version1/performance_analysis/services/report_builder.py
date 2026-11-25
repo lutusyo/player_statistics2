@@ -3,17 +3,11 @@ from .match_analysis import generate_team_match_analysis
 from .period_comparison import build_period_comparisons
 from .performance_insights import generate_all_performance_insights
 
-from version1.performance_analysis.services.player_analysis import (
-    get_player_stats,
-)
-
-from version1.performance_analysis.services.match_analysis import (
-    get_period_teams,
-    get_finished_matches,
-)
+from version1.performance_analysis.services.player_analysis import ( get_player_stats,)
+from version1.performance_analysis.services.match_analysis import (get_period_teams, get_finished_matches,)
 
 from version1.teams_app.models import Team
-
+from version1.performance_analysis.services.technical_analysis import build_technical_analysis
 
 
 
@@ -51,6 +45,7 @@ def build_analysis_report(analysis):
     # Generate statistics
     results = generate_team_match_analysis(analysis)
     player_analysis = build_player_analysis(analysis)
+    technical_analysis = build_technical_analysis(analysis)
 
     # Compare periods
     comparisons = build_period_comparisons(analysis, results,)
@@ -141,4 +136,5 @@ def build_analysis_report(analysis):
         "insights": insights,
         "team_charts": team_charts,
         "player_analysis": player_analysis,
+        "technical_analysis": technical_analysis,
     }

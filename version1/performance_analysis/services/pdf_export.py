@@ -165,6 +165,7 @@ def export_analysis_pdf(run):
     comparisons = report.get("comparisons", [])
     insights = report.get("insights", [])
     player_analysis = report.get("player_analysis", [])
+    technical_analysis = report.get("technical_analysis", [])
 
     buffer = BytesIO()
 
@@ -485,6 +486,206 @@ def export_analysis_pdf(run):
             "No individual player performance data available.",
             styles["SmallText"],
         ))
+
+
+
+
+
+    # DETAILED TECHNICAL ANALYSIS
+    story.append(PageBreak())
+    story.append(Paragraph(
+        "Detailed Technical Analysis",
+        styles["SectionHeading"],
+    ))
+
+    shooting_rows = []
+    breakdown_rows = []
+    goalkeeper_rows = []
+    discipline_rows = []
+
+    for period in technical_analysis:
+        period_name = period.get("period_name", "-")
+
+        for team in period.get("teams", []):
+            team_name = team.get("team_name", "-")
+
+            shooting = team.get("shooting", {})
+            goalkeeping = team.get("goalkeeping", {})
+            discipline = team.get("discipline", {})
+
+            # SHOOTING
+            shooting_rows.append([
+                period_name,
+                team_name,
+                team.get("matches_played", 0),
+                shooting.get("shots", 0),
+                shooting.get("shots_on_target", 0),
+                shooting.get("goals", 0),
+                shooting.get("saved", 0),
+                shooting.get("blocked", 0),
+                shooting.get("off_target", 0),
+                shooting.get("player_errors", 0),
+                shooting.get("shooting_accuracy", 0),
+                shooting.get("conversion_rate", 0),
+            ])
+
+            # SHOT BREAKDOWNS
+            for category, items in [
+                ("Outcome", shooting.get("outcomes", [])),
+                ("Delivery Type", shooting.get("delivery_types", [])),
+                ("Body Part", shooting.get("body_parts", [])),
+                ("Shot Location", shooting.get("locations", [])),
+            ]:
+                for item in items:
+                    breakdown_rows.append([
+                        period_name,
+                        team_name,
+                        category,
+                        item.get("name", "-"),
+                        item.get("count", 0),
+                    ])
+
+            # GOALKEEPER PERFORMANCE
+            for player in goalkeeping.get("goalkeepers", []):
+                goalkeeper_rows.append([
+                    period_name,
+                    team_name,
+                    player.get("player_name", "-"),
+                    player.get("matches_played", 0),
+                    player.get("starts", 0),
+                    player.get("substitute_appearances", 0),
+                    player.get("minutes", 0),
+                    player.get("average_minutes", 0),
+                    player.get("clean_sheets", 0),
+                    player.get("clean_sheet_percentage", 0),
+                    player.get("team_goals_conceded", 0),
+                    player.get("missing_entry_time", 0),
+                    player.get("invalid_time_intervals", 0),
+                ])
+
+            # DISCIPLINE
+            discipline_rows.append([
+                period_name,
+                team_name,
+                team.get("matches_played", 0),
+                discipline.get("fouls_committed", 0),
+                discipline.get("fouls_won", 0),
+                discipline.get("no_card_fouls", 0),
+                discipline.get("yellow_cards", 0),
+                discipline.get("red_cards", 0),
+                discipline.get("total_cards", 0),
+            ])
+
+    # SHOOTING ANALYSIS
+    story.append(Paragraph("Shooting Analysis", styles["SectionHeading"]))
+
+    if shooting_rows:
+        story.append(make_table(
+            [
+                "Period", "Team", "Matches", "Shots",
+                "On Target", "Goals", "Saved", "Blocked",
+                "Off Target", "Player Errors",
+                "Accuracy %", "Conversion %",
+            ],
+            shooting_rows,
+            [
+                25 * mm, 35 * mm, 18 * mm, 14 * mm,
+                18 * mm, 14 * mm, 14 * mm, 14 * mm,
+                17 * mm, 18 * mm, 23 * mm, 23 * mm,
+            ],
+        ))
+    else:
+        story.append(Paragraph(
+            "No shooting analysis available.",
+            styles["SmallText"],
+        ))
+
+    story.append(Spacer(1, 4 * mm))
+
+    # SHOT BREAKDOWNS
+    story.append(Paragraph("Shot Breakdowns", styles["SectionHeading"]))
+
+    if breakdown_rows:
+        story.append(make_table(
+            ["Period", "Team", "Breakdown Type", "Category", "Count"],
+            breakdown_rows,
+            [35 * mm, 45 * mm, 45 * mm, 100 * mm, 20 * mm],
+        ))
+    else:
+        story.append(Paragraph(
+            "No shot breakdown data available.",
+            styles["SmallText"],
+        ))
+
+    story.append(Spacer(1, 4 * mm))
+
+    # GOALKEEPER ANALYSIS
+    story.append(Paragraph(
+        "Goalkeeper Performance",
+        styles["SectionHeading"],
+    ))
+
+    if goalkeeper_rows:
+        story.append(make_table(
+            [
+                "Period", "Team", "Goalkeeper",
+                "Apps", "Starts", "Sub Apps",
+                "Minutes", "Avg Min", "Clean Sheets",
+                "Clean Sheet %", "Team Goals Conceded",
+                "Missing Entry", "Invalid Times",
+            ],
+            goalkeeper_rows,
+            [
+                22 * mm, 27 * mm, 33 * mm,
+                12 * mm, 12 * mm, 17 * mm,
+                15 * mm, 15 * mm, 19 * mm,
+                19 * mm, 28 * mm, 18 * mm, 18 * mm,
+            ],
+        ))
+
+        story.append(Spacer(1, 2 * mm))
+        story.append(Paragraph(
+            "<b>Note:</b> Team Goals Conceded represents the team's "
+            "total goals conceded in matches where the goalkeeper "
+            "appeared. It is not individually attributed when multiple "
+            "goalkeepers played in the same match.",
+            styles["SmallText"],
+        ))
+    else:
+        story.append(Paragraph(
+            "No goalkeeper data available.",
+            styles["SmallText"],
+        ))
+
+    story.append(Spacer(1, 4 * mm))
+
+    # DISCIPLINE ANALYSIS
+    story.append(Paragraph("Discipline Analysis", styles["SectionHeading"]))
+
+    if discipline_rows:
+        story.append(make_table(
+            [
+                "Period", "Team", "Matches",
+                "Fouls Committed", "Fouls Won",
+                "No Card", "Yellow Cards",
+                "Red Cards", "Total Cards",
+            ],
+            discipline_rows,
+            [
+                27 * mm, 35 * mm, 20 * mm,
+                35 * mm, 25 * mm, 25 * mm,
+                25 * mm, 22 * mm, 25 * mm,
+            ],
+        ))
+    else:
+        story.append(Paragraph(
+            "No discipline data available.",
+            styles["SmallText"],
+        ))
+
+
+
+
 
     doc.build(
         story,

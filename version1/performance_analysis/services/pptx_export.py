@@ -591,6 +591,202 @@ def export_analysis_pptx(run):
 
 
 
+    # 9. DETAILED TECHNICAL ANALYSIS
+    technical_analysis = report.get("technical_analysis", [])
+
+    def add_technical_slides(
+        title, period_name, team_name,
+        headers, rows, chunk_size=8, font_size=8,
+    ):
+        subtitle = f"{period_name} | {team_name}"
+
+        chunks = [
+            rows[i:i + chunk_size]
+            for i in range(0, len(rows), chunk_size)
+        ]
+
+        if not chunks:
+            chunks = [[]]
+
+        for index, chunk in enumerate(chunks):
+            slide = prs.slides.add_slide(blank)
+            add_background(slide)
+
+            slide_title = (
+                title if index == 0
+                else f"{title} (Continued)"
+            )
+
+            add_header(slide, slide_title, subtitle)
+
+            if chunk:
+                add_table(
+                    slide,
+                    headers,
+                    chunk,
+                    x=0.45,
+                    y=1.5,
+                    w=12.4,
+                    row_height=0.45,
+                    font_size=font_size,
+                )
+            else:
+                add_empty_message(
+                    slide,
+                    f"No {title.lower()} data available.",
+                )
+
+            add_footer(slide, len(prs.slides))
+
+    for period in technical_analysis:
+        period_name = period.get("period_name", "-")
+
+        for team in period.get("teams", []):
+            team_name = team.get("team_name", "-")
+
+            shooting = team.get("shooting", {})
+            goalkeeping = team.get("goalkeeping", {})
+            discipline = team.get("discipline", {})
+
+            # SHOOTING ANALYSIS
+            shooting_rows = [[
+                shooting.get("shots", 0),
+                shooting.get("shots_on_target", 0),
+                shooting.get("goals", 0),
+                shooting.get("saved", 0),
+                shooting.get("blocked", 0),
+                shooting.get("off_target", 0),
+                shooting.get("player_errors", 0),
+                shooting.get("shooting_accuracy", 0),
+                shooting.get("conversion_rate", 0),
+            ]]
+
+            add_technical_slides(
+                "Shooting Analysis",
+                period_name,
+                team_name,
+                [
+                    "Shots", "On Target", "Goals",
+                    "Saved", "Blocked", "Off Target",
+                    "Player Errors", "Accuracy %",
+                    "Conversion %",
+                ],
+                shooting_rows,
+                chunk_size=8,
+                font_size=8,
+            )
+
+            # SHOT BREAKDOWNS
+            breakdown_rows = []
+
+            for category, items in [
+                ("Outcome", shooting.get("outcomes", [])),
+                ("Delivery Type", shooting.get("delivery_types", [])),
+                ("Body Part", shooting.get("body_parts", [])),
+                ("Shot Location", shooting.get("locations", [])),
+            ]:
+                for item in items:
+                    breakdown_rows.append([
+                        category,
+                        item.get("name", "-"),
+                        item.get("count", 0),
+                    ])
+
+            add_technical_slides(
+                "Shot Breakdowns",
+                period_name,
+                team_name,
+                ["Breakdown Type", "Category", "Count"],
+                breakdown_rows,
+                chunk_size=12,
+                font_size=9,
+            )
+
+            # GOALKEEPER ANALYSIS
+            goalkeeper_rows = []
+
+            for player in goalkeeping.get("goalkeepers", []):
+                goalkeeper_rows.append([
+                    player.get("player_name", "-"),
+                    player.get("matches_played", 0),
+                    player.get("starts", 0),
+                    player.get("substitute_appearances", 0),
+                    player.get("minutes", 0),
+                    player.get("average_minutes", 0),
+                    player.get("clean_sheets", 0),
+                    player.get("clean_sheet_percentage", 0),
+                    player.get("team_goals_conceded", 0),
+                    player.get("missing_entry_time", 0),
+                    player.get("invalid_time_intervals", 0),
+                ])
+
+            add_technical_slides(
+                "Goalkeeper Performance",
+                period_name,
+                team_name,
+                [
+                    "Goalkeeper", "Apps", "Starts", "Sub Apps",
+                    "Minutes", "Avg Min", "Clean Sheets",
+                    "Clean Sheet %", "Team Goals Conceded",
+                    "Missing Entry", "Invalid Times",
+                ],
+                goalkeeper_rows,
+                chunk_size=7,
+                font_size=7,
+            )
+
+            # DISCIPLINE ANALYSIS
+            discipline_rows = [[
+                discipline.get("fouls_committed", 0),
+                discipline.get("fouls_won", 0),
+                discipline.get("no_card_fouls", 0),
+                discipline.get("yellow_cards", 0),
+                discipline.get("red_cards", 0),
+                discipline.get("total_cards", 0),
+            ]]
+
+            add_technical_slides(
+                "Discipline Analysis",
+                period_name,
+                team_name,
+                [
+                    "Fouls Committed", "Fouls Won",
+                    "No Card Fouls", "Yellow Cards",
+                    "Red Cards", "Total Cards",
+                ],
+                discipline_rows,
+                chunk_size=8,
+                font_size=9,
+            )
+
+            # GOALKEEPER DATA NOTE
+            slide = prs.slides.add_slide(blank)
+            add_background(slide)
+            add_header(
+                slide,
+                "Goalkeeper Data Note",
+                f"{period_name} | {team_name}",
+            )
+
+            add_text(
+                slide,
+                "Team Goals Conceded represents the team's total "
+                "goals conceded in matches where the goalkeeper "
+                "appeared. It is not individually attributed when "
+                "multiple goalkeepers played in the same match.",
+                0.9, 2.0, 11.5, 1.2,
+                size=17, color=DARK,
+                align=PP_ALIGN.CENTER,
+            )
+
+            add_footer(slide, len(prs.slides))
+
+
+
+
+
+
+
     # SAVE PRESENTATION
     buffer = BytesIO()
     prs.save(buffer)

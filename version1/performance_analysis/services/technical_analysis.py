@@ -1,22 +1,14 @@
-
 from collections import Counter
-
 from django.db.models import Q
-
 from version1.tagging_app.models import AttemptToGoal
 from version1.lineup_app.models import MatchLineup
 from version1.teams_app.models import Team
-
-from version1.performance_analysis.services.match_analysis import (
-    get_period_teams,
-    get_finished_matches,
-)
+from version1.performance_analysis.services.match_analysis import ( get_period_teams, get_finished_matches,)
+from version2.tagging_app_v2.models import PassEvent_v2
 
 
 def count_breakdown(queryset, field):
-    counts = Counter(
-        queryset.values_list(field, flat=True)
-    )
+    counts = Counter(queryset.values_list(field, flat=True))
 
     return [
         {"name": name or "Not specified", "count": count}
@@ -66,6 +58,34 @@ def calculate_shooting_analysis(team, match_ids):
         "delivery_types": count_breakdown(attempts, "delivery_type"),
         "body_parts": count_breakdown(attempts, "body_part"),
         "locations": count_breakdown(attempts, "location_tag"),
+    }
+
+
+
+def calculate_foul_card_analysis(team, match_ids):
+    fouls = PassEvent_v2.objects.filter(
+        match_id__in=match_ids,
+        actor__team=team,
+        action_type="FOULS",
+    )
+
+    no_card = fouls.filter(foul_outcome="NO CARD").count()
+    yellow_cards = fouls.filter(foul_outcome="YELLOW CARD").count()
+    red_cards = fouls.filter(foul_outcome="RED CARD").count()
+
+    fouls_won = PassEvent_v2.objects.filter(
+        match_id__in=match_ids,
+        action_type="FOULS",
+        receiver__team=team,
+    ).exclude(actor__team=team).count()
+
+    return {
+        "fouls_committed": fouls.count(),
+        "fouls_won": fouls_won,
+        "no_card_fouls": no_card,
+        "yellow_cards": yellow_cards,
+        "red_cards": red_cards,
+        "total_cards": yellow_cards + red_cards,
     }
 
 
@@ -189,17 +209,14 @@ def build_technical_analysis(analysis):
             matches = get_finished_matches(period, [team.id])
             match_ids = [match.id for match in matches]
 
-            period_teams.append({
-                "team_id": team.id,
-                "team_name": team.name,
-                "matches_played": len(matches),
-                "shooting": calculate_shooting_analysis(
-                    team, match_ids
-                ),
-                "goalkeeping": calculate_goalkeeper_analysis(
-                    team, matches
-                ),
-            })
+        period_teams.append({
+            "team_id": team.id,
+            "team_name": team.name,
+            "matches_played": len(matches),
+            "shooting": calculate_shooting_analysis(team, match_ids),
+            "goalkeeping": calculate_goalkeeper_analysis(team, matches),
+            "discipline": calculate_foul_card_analysis(team, match_ids),
+        })
 
         technical_analysis.append({
             "period_id": period.id,

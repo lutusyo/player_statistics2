@@ -6,10 +6,15 @@
     --sidebar-text: #b9c7d8;
     --page-bg: #f4f7fb;
     --border: #e5eaf0;
+    --sidebar-width: 255px;
 }
 
 * {
     box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
 }
 
 body {
@@ -19,22 +24,67 @@ body {
     color: #243247;
 }
 
+
+/* =====================================
+   APP LAYOUT
+===================================== */
+
 .app-layout {
     display: flex;
     min-height: 100vh;
 }
 
-/* SIDEBAR */
+.main-area {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    min-width: 0;
+    min-height: 100vh;
 
-.sidebar {
-    width: 255px;
-    min-width: 255px;
-    background: var(--sidebar-bg);
-    color: white;
     display: flex;
     flex-direction: column;
-    transition: all .25s ease;
 }
+
+
+/* =====================================
+   FIXED SIDEBAR
+===================================== */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+
+    width: var(--sidebar-width);
+    height: 100vh;
+
+    background: var(--sidebar-bg);
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    z-index: 1200;
+
+    transition: left .25s ease;
+}
+
+/* Sidebar scrollbar */
+
+.sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #40546a;
+    border-radius: 10px;
+}
+
+
+/* SIDEBAR BRAND */
 
 .sidebar-brand {
     display: flex;
@@ -42,6 +92,8 @@ body {
     gap: 12px;
     padding: 24px 20px;
     border-bottom: 1px solid rgba(255,255,255,.1);
+
+    flex-shrink: 0;
 }
 
 .sidebar-brand h5 {
@@ -60,10 +112,15 @@ body {
     height: 42px;
     border-radius: 10px;
     background: var(--primary);
+
     display: grid;
     place-items: center;
+
     font-size: 21px;
 }
+
+
+/* SIDEBAR SECTIONS */
 
 .sidebar-section {
     padding: 22px 20px 8px;
@@ -72,6 +129,9 @@ body {
     font-weight: 700;
     letter-spacing: 1.3px;
 }
+
+
+/* SIDEBAR NAVIGATION */
 
 .sidebar-nav {
     flex: 1;
@@ -82,12 +142,16 @@ body {
     display: flex;
     align-items: center;
     gap: 13px;
+
     padding: 12px 14px;
     margin-bottom: 4px;
+
     color: var(--sidebar-text);
     text-decoration: none;
+
     border-radius: 7px;
     font-size: 13px;
+
     transition: .2s;
 }
 
@@ -101,21 +165,31 @@ body {
     color: white;
 }
 
+
+/* SIDEBAR FOOTER */
+
 .sidebar-footer {
     display: flex;
     align-items: center;
     gap: 12px;
+
     padding: 18px;
+
     border-top: 1px solid rgba(255,255,255,.1);
+
+    flex-shrink: 0;
 }
 
 .user-avatar {
     width: 36px;
     height: 36px;
+
     display: grid;
     place-items: center;
+
     background: #2469ad;
     border-radius: 50%;
+
     font-weight: bold;
 }
 
@@ -129,23 +203,29 @@ body {
     color: var(--sidebar-text);
 }
 
-/* MAIN AREA */
 
-.main-area {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-}
+/* =====================================
+   TOP NAVIGATION
+===================================== */
 
 .topbar {
     height: 72px;
+    min-height: 72px;
+
     background: white;
     border-bottom: 1px solid var(--border);
+
     display: flex;
     align-items: center;
     gap: 15px;
+
     padding: 0 28px;
+
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    flex-shrink: 0;
 }
 
 .topbar h6 {
@@ -157,20 +237,31 @@ body {
     border: none;
 }
 
+
+/* =====================================
+   PAGE CONTENT
+===================================== */
+
 .content-area {
     padding: 28px;
     flex: 1;
+    min-width: 0;
 }
 
 .app-footer {
     padding: 15px 28px;
+
     background: white;
     border-top: 1px solid var(--border);
+
     color: #8793a2;
     font-size: 12px;
 }
 
-/* DASHBOARD COMPONENTS */
+
+/* =====================================
+   DASHBOARD COMPONENTS
+===================================== */
 
 .page-title {
     font-size: 23px;
@@ -186,6 +277,7 @@ body {
     background: white;
     border: 1px solid var(--border);
     border-radius: 12px;
+
     padding: 20px;
     height: 100%;
 }
@@ -204,11 +296,15 @@ body {
 .stat-icon {
     width: 42px;
     height: 42px;
+
     border-radius: 10px;
+
     display: grid;
     place-items: center;
+
     background: #eaf2fb;
     color: var(--primary);
+
     font-size: 20px;
 }
 
@@ -218,6 +314,11 @@ body {
     border-radius: 12px;
     padding: 22px;
 }
+
+
+/* =====================================
+   BUTTONS
+===================================== */
 
 .btn-primary {
     background: var(--primary);
@@ -229,17 +330,43 @@ body {
     border-color: var(--primary-dark);
 }
 
+
+/* =====================================
+   ANALYSIS SECTION NAVIGATION
+===================================== */
+
+#team-performance,
+#player-performance,
+#technical-analysis,
+#training-analysis,
+#period-comparison,
+#report-top {
+    scroll-margin-top: 100px;
+}
+
+
+/* =====================================
+   RESPONSIVE DESIGN
+===================================== */
+
 @media (max-width: 900px) {
+
+    /* Sidebar becomes an off-canvas menu */
+
     .sidebar {
-        position: fixed;
-        z-index: 1050;
-        left: -255px;
-        top: 0;
-        bottom: 0;
+        left: calc(-1 * var(--sidebar-width));
+        width: var(--sidebar-width);
     }
 
     .sidebar.show {
         left: 0;
+    }
+
+    /* Main content uses full width */
+
+    .main-area {
+        margin-left: 0;
+        width: 100%;
     }
 
     .content-area {
@@ -247,6 +374,31 @@ body {
     }
 
     .topbar {
-        padding: 0 16px;
+        padding: 0 18px;
+    }
+}
+
+
+@media (max-width: 576px) {
+
+    .topbar {
+        gap: 10px;
+        padding: 0 12px;
+    }
+
+    .topbar .ms-auto {
+        gap: 8px !important;
+    }
+
+    .topbar .ms-auto span {
+        display: none;
+    }
+
+    .content-area {
+        padding: 14px;
+    }
+
+    .app-footer {
+        padding: 12px 14px;
     }
 }
