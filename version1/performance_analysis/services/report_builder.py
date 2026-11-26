@@ -8,6 +8,7 @@ from version1.performance_analysis.services.match_analysis import (get_period_te
 
 from version1.teams_app.models import Team
 from version1.performance_analysis.services.technical_analysis import build_technical_analysis
+from version1.performance_analysis.models import AnalysisPeriodSquadPhoto
 
 
 
@@ -66,6 +67,43 @@ def build_analysis_report(analysis):
         }
         for period in periods
     ]
+
+
+
+
+
+    # Prepare selected squad photos for each reporting period
+    squad_photos = []
+
+    photo_selections = (
+        AnalysisPeriodSquadPhoto.objects
+        .filter(period__analysis=analysis)
+        .select_related(
+            "period",
+            "team",
+            "squad_photo",
+        )
+        .order_by("period__order", "team__name")
+    )
+
+    for selection in photo_selections:
+        photo = selection.squad_photo
+
+        squad_photos.append({
+            "period_id": selection.period_id,
+            "period_name": selection.period.name,
+            "team_id": selection.team_id,
+            "team_name": selection.team.name,
+            "photo_id": photo.id,
+            "photo_path": photo.photo.name if photo.photo else "",
+            "photo_date": photo.photo_date.isoformat(),
+            "label": photo.label,
+            "notes": photo.notes,
+        })
+
+
+
+
 
     # Get unique teams
     teams = {}
@@ -137,4 +175,5 @@ def build_analysis_report(analysis):
         "team_charts": team_charts,
         "player_analysis": player_analysis,
         "technical_analysis": technical_analysis,
+        "squad_photos": squad_photos,
     }

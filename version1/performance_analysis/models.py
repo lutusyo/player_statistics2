@@ -4,7 +4,11 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
-from version1.teams_app.models import Team, AgeGroup
+from version1.teams_app.models import (
+    Team,
+    AgeGroup,
+    TeamSquadPhoto,
+)
 
 
 class Analysis(models.Model):
@@ -188,6 +192,78 @@ class AnalysisPeriodTeam(models.Model):
         return f"{self.period.name} - {self.team.name}"
 
 
+
+
+
+
+class AnalysisPeriodSquadPhoto(models.Model):
+    """
+    Stores the squad photo selected for a team
+    within a specific analysis period.
+    """
+
+    period = models.ForeignKey(
+        AnalysisPeriod,
+        on_delete=models.CASCADE,
+        related_name="squad_photo_selections",
+    )
+
+    team = models.ForeignKey(
+        Team,
+        on_delete=models.CASCADE,
+        related_name="analysis_squad_photo_selections",
+    )
+
+    squad_photo = models.ForeignKey(
+        TeamSquadPhoto,
+        on_delete=models.PROTECT,
+        related_name="analysis_selections",
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["period", "team"],
+                name="unique_period_team_squad_photo",
+            )
+        ]
+
+    def clean(self):
+        if not self.period_id or not self.team_id:
+            return
+
+        analysis = self.period.analysis
+
+        if analysis.comparison_mode == Analysis.ComparisonMode.SAME_TEAMS:
+            team_selected = analysis.selected_teams.filter(
+                team_id=self.team_id
+            ).exists()
+
+        else:
+            team_selected = self.period.selected_teams.filter(
+                team_id=self.team_id
+            ).exists()
+
+        if not team_selected:
+            raise ValidationError(
+                "This team is not selected for this analysis period."
+            )
+
+        if (
+            self.squad_photo_id
+            and self.squad_photo.team_id != self.team_id
+        ):
+            raise ValidationError(
+                "The selected squad photo does not belong to this team."
+            )
+
+    def __str__(self):
+        return f"{self.period.name} - {self.team} - Squad Photo"
+
+
+
+
+
 class AnalysisRun(models.Model):
 
     class Status(models.TextChoices):
@@ -209,9 +285,7 @@ class AnalysisRun(models.Model):
     )
 
     generated_at = models.DateTimeField(auto_now_add=True)
-
-    status = models.CharField(
-        max_length=20,
+    status = models.CharField(max_length=20,
         choices=Status.choices,
         default=Status.PENDING
     )

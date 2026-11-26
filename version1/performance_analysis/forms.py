@@ -2,7 +2,7 @@
 from django import forms
 from django.forms import formset_factory
 
-from version1.teams_app.models import Team, AgeGroup
+from version1.teams_app.models import Team, AgeGroup, TeamSquadPhoto
 from .models import Analysis
 
 
@@ -122,3 +122,47 @@ AnalysisPeriodFormSet = formset_factory(
     validate_min=True,
     can_delete=True,
 )
+
+
+class PeriodSquadPhotoForm(forms.Form):
+
+    def __init__(
+        self,
+        *args,
+        teams,
+        initial_selections=None,
+        **kwargs
+    ):
+        super().__init__(*args, **kwargs)
+
+        initial_selections = initial_selections or {}
+
+        for team in teams:
+
+            field_name = f"photo_{team.id}"
+
+            age_group = (
+                f" ({team.age_group.code})"
+                if team.age_group
+                else ""
+            )
+
+            self.fields[field_name] = forms.ModelChoiceField(
+                queryset=TeamSquadPhoto.objects.filter(
+                    team=team
+                ).order_by("-photo_date", "-uploaded_at"),
+
+                required=False,
+
+                empty_label="No photo selected",
+
+                label=f"{team.name}{age_group}",
+
+                widget=forms.Select(
+                    attrs={"class": "form-select"}
+                )
+            )
+
+            self.fields[field_name].initial = (
+                initial_selections.get(team.id)
+            )

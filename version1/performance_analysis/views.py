@@ -36,6 +36,18 @@ from .services.pdf_export import export_analysis_pdf
 
 from .services.pptx_export import export_analysis_pptx
 
+from django.db import transaction
+from django.contrib import messages
+
+from .models import (
+    Analysis,
+    AnalysisPeriod,
+    AnalysisPeriodSquadPhoto,
+)
+from .forms import PeriodSquadPhotoForm
+from version1.teams_app.models import Team
+from django.core.files.storage import default_storage
+
 @login_required
 def dashboard(request):
     analyses = Analysis.objects.filter(
@@ -195,13 +207,26 @@ def analysis_detail(request, pk):
     if latest_run and latest_run.status == "COMPLETED":
         report = latest_run.results_snapshot
 
+        # Convert saved squad photo paths into displayable URLs.
+        for photo in report.get("squad_photos", []):
+            photo_path = photo.get("photo_path")
+
+            if photo_path and default_storage.exists(photo_path):
+                photo["photo_url"] = default_storage.url(photo_path)
+            else:
+                photo["photo_url"] = None
+
     context = {
         "analysis": analysis,
         "latest_run": latest_run,
         "report": report,
     }
 
-    return render(request, "performance_analysis/analysis_detail.html", context,)
+    return render(
+        request,
+        "performance_analysis/analysis_detail.html",
+        context,
+    )
 
 
 
@@ -310,3 +335,111 @@ def export_pptx(request, pk):
         raise Http404("No completed analysis report is available.")
 
     return export_analysis_pptx(run)
+
+
+
+
+@login_required
+def manage_period_squad_photos(request, pk, period_id):
+
+    analysis = get_object_or_404(
+        Analysis,
+        pk=pk,
+        created_by=request.user,
+    )
+
+    period = get_object_or_404(
+        AnalysisPeriod,
+        pk=period_id,
+        analysis=analysis,
+    )
+
+    # Get the teams selected for this reporting period.
+    if analysis.comparison_mode == Analysis.ComparisonMode.SAME_TEAMS:
+        teams = Team.objects.filter(
+            analysis_selections__analysis=analysis
+        ).select_related("age_group").order_by(
+            "age_group__code", "name"
+        )
+
+    else:
+        teams = Team.objects.filter(
+            period_analysis_selections__period=period
+        ).select_related("age_group").order_by(
+            "age_group__code", "name"
+        )
+
+    teams = teams.distinct()
+
+    # Existing photo selections for this period.
+    existing_selections = {
+        selection.team_id: selection.squad_photo_id
+        for selection in AnalysisPeriodSquadPhoto.objects.filter(
+            period=period
+        )
+    }
+
+    if request.method == "POST":
+
+        form = PeriodSquadPhotoForm(
+            request.POST,
+            teams=teams,
+        )
+
+        if form.is_valid():
+
+            with transaction.atomic():
+
+                for team in teams:
+
+                    field_name = f"photo_{team.id}"
+                    selected_photo = form.cleaned_data[field_name]
+
+                    if selected_photo:
+
+                        selection, created = (
+                            AnalysisPeriodSquadPhoto.objects.update_or_create(
+                                period=period,
+                                team=team,
+                                defaults={
+                                    "squad_photo": selected_photo
+                                },
+                            )
+                        )
+
+                        selection.full_clean()
+                        selection.save()
+
+                    else:
+                        AnalysisPeriodSquadPhoto.objects.filter(
+                            period=period,
+                            team=team,
+                        ).delete()
+
+            messages.success(
+                request,
+                "Squad photo selections saved successfully."
+            )
+
+            return redirect(
+                "performance_analysis:analysis_detail",
+                pk=analysis.pk,
+            )
+
+    else:
+
+        form = PeriodSquadPhotoForm(
+            teams=teams,
+            initial_selections=existing_selections,
+        )
+
+    return render(
+        request,
+        "performance_analysis/manage_squad_photos.html",
+        {
+            "analysis": analysis,
+            "period": period,
+            "form": form,
+            "teams": teams,
+        },
+    )

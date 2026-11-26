@@ -1,438 +1,940 @@
 
+
 {% extends "performance_analysis/base.html" %}
 
+
+
 {% block title %}{{ analysis.name }} | Performance Analysis{% endblock %}
+
 {% block page_heading %}Analysis Details{% endblock %}
+
+
 
 {% block content %}
 
+
+
 <div id="report-top" class="d-flex gap-2 flex-wrap"
+
      style="scroll-margin-top: 90px;">
+
     <form method="POST"
+
           action="{% url 'performance_analysis:generate_analysis' analysis.pk %}">
+
         {% csrf_token %}
+
         <button type="submit" class="btn btn-primary">
+
             <i class="bi bi-graph-up-arrow"></i>
+
             Generate Analysis
+
         </button>
 
+
+
         <a href="{% url 'performance_analysis:export_excel' analysis.pk %}"
+
         class="btn btn-success">
+
             <i class="bi bi-file-earmark-excel"></i>
+
             Export Excel
-        </a>
-        <a href="{% url 'performance_analysis:export_pdf' analysis.pk %}"
-        class="btn btn-danger">
-            <i class="bi bi-file-earmark-pdf"></i>
-            Export PDF
+
         </a>
 
-        <a href="{% url 'performance_analysis:export_pptx' analysis.pk %}"
-        class="btn btn-warning">
-            <i class="bi bi-file-earmark-ppt"></i>
-            Export PowerPoint
+        <a href="{% url 'performance_analysis:export_pdf' analysis.pk %}"
+
+        class="btn btn-danger">
+
+            <i class="bi bi-file-earmark-pdf"></i>
+
+            Export PDF
+
         </a>
+
+
+
+        <a href="{% url 'performance_analysis:export_pptx' analysis.pk %}"
+
+        class="btn btn-warning">
+
+            <i class="bi bi-file-earmark-ppt"></i>
+
+            Export PowerPoint
+
+        </a>
+
+
+
 
 
     </form>
 
+
+
     <a href="{% url 'performance_analysis:dashboard' %}"
+
        class="btn btn-outline-secondary">
+
         <i class="bi bi-arrow-left"></i> Back to Dashboard
+
     </a>
+
 </div>
 
+
+
 <div class="content-card mb-4">
+
     <h5 class="fw-bold mb-3">Analysis Configuration</h5>
 
+
+
     <div class="row g-3">
+
         <div class="col-md-4">
+
             <small class="text-muted">Analysis Type</small>
+
             <div class="fw-semibold">{{ analysis.get_analysis_type_display }}</div>
+
         </div>
 
+
+
         <div class="col-md-4">
+
             <small class="text-muted">Comparison Mode</small>
+
             <div class="fw-semibold">{{ analysis.get_comparison_mode_display }}</div>
+
         </div>
 
+
+
         <div class="col-md-4">
+
             <small class="text-muted">Created</small>
+
             <div class="fw-semibold">{{ analysis.created_at|date:"d M Y" }}</div>
+
         </div>
+
+
 
         <div class="col-12">
+
             <small class="text-muted">Age Categories</small>
+
             <div class="mt-1">
+
                 {% for age_group in analysis.age_groups.all %}
+
                     <span class="badge bg-primary me-1">{{ age_group.code }}</span>
+
                 {% empty %}
+
                     <span class="text-muted">No categories selected</span>
+
                 {% endfor %}
+
             </div>
+
         </div>
+
     </div>
+
 </div>
 
+
+
 <div class="content-card mb-4">
+
     <h5 class="fw-bold mb-3">Selected Teams</h5>
+
+
 
     {% if analysis.comparison_mode == "SAME_TEAMS" %}
 
+
+
         {% for selection in analysis.selected_teams.all %}
+
             <span class="badge bg-light text-dark border me-1 mb-2">
+
                 {{ selection.team.name }}
+
                 {% if selection.team.age_group %}
+
                     ({{ selection.team.age_group }})
+
                 {% endif %}
+
             </span>
+
         {% empty %}
+
             <p class="text-muted">No teams selected.</p>
+
         {% endfor %}
+
+
 
     {% else %}
 
+
+
         <p class="text-muted small">
+
             Teams are selected separately for each reporting period below.
+
         </p>
 
+
+
     {% endif %}
+
 </div>
 
+
+
 <div class="content-card">
+
     <h5 class="fw-bold mb-3">Reporting Periods</h5>
+
+
 
     {% for period in analysis.periods.all %}
 
+
+
         <div class="period-card mb-3">
+
+
 
             <h6 class="fw-bold">{{ period.order }}. {{ period.name }}</h6>
 
+
+
             <p class="text-muted small mb-2">
+
                 {{ period.start_date|date:"d M Y" }}
+
                 –
+
                 {{ period.end_date|date:"d M Y" }}
+
             </p>
 
+            <a href="{% url 'performance_analysis:manage_period_squad_photos' analysis.pk period.pk %}"
+
+            class="btn btn-sm btn-outline-primary mb-3">
+
+                <i class="bi bi-images"></i>
+
+                Manage Squad Photos
+
+            </a>
+
+
+
             {% if analysis.comparison_mode == "PER_PERIOD" %}
+
                 <div class="small fw-semibold mb-2">Selected Teams</div>
 
+
+
                 {% for selection in period.selected_teams.all %}
+
                     <span class="badge bg-light text-dark border me-1 mb-1">
+
                         {{ selection.team.name }}
+
                         {% if selection.team.age_group %}
+
                             ({{ selection.team.age_group }})
+
                         {% endif %}
+
                     </span>
+
                 {% empty %}
+
                     <span class="text-muted small">No teams selected.</span>
+
                 {% endfor %}
+
             {% endif %}
+
+
 
         </div>
 
+
+
     {% empty %}
+
         <p class="text-muted">No reporting periods found.</p>
+
     {% endfor %}
 
+
+
 </div>
+
+
+
+
 
 
 
 {% if messages %}
+
     {% for message in messages %}
+
         <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+
             {{ message }}
+
             <button type="button" class="btn-close"
+
                     data-bs-dismiss="alert"></button>
+
         </div>
+
     {% endfor %}
+
 {% endif %}
+
+
 
 <hr class="my-4">
 
+
+
 <div class="content-card">
+
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+
         <div>
+
             <h5 class="fw-bold mb-1">Performance Report</h5>
 
+
+
             {% if latest_run %}
+
                 <small class="text-muted">
+
                     Last generated:
+
                     {{ latest_run.generated_at|date:"d M Y, H:i" }}
+
                 </small>
+
             {% else %}
+
                 <small class="text-muted">
+
                     No report generated yet.
+
                 </small>
+
             {% endif %}
+
         </div>
+
+
 
         {% if latest_run %}
+
             {% if latest_run.status == "COMPLETED" %}
+
                 <span class="badge bg-success">Completed</span>
+
             {% elif latest_run.status == "FAILED" %}
+
                 <span class="badge bg-danger">Failed</span>
+
             {% else %}
+
                 <span class="badge bg-warning text-dark">
+
                     {{ latest_run.get_status_display }}
+
                 </span>
+
             {% endif %}
+
         {% endif %}
+
     </div>
 
+
+
     {% if latest_run.status == "FAILED" %}
+
         <div class="alert alert-danger">
+
             Report generation failed.
+
             <div class="small mt-1">
+
                 {{ latest_run.error_message }}
+
             </div>
+
         </div>
+
     {% endif %}
+
+
 
     {% if report %}
 
 
+
+
+
         <div id="team-performance" class="mb-4">
+
             <h6 class="fw-bold mt-4 mb-3">
+
                 Team Performance Summary
+
             </h6>
 
+
+
             <div class="table-responsive">
+
                 <table class="table table-bordered table-hover align-middle">
+
                     <thead class="table-light">
+
                         <tr>
+
                             <th>Period</th>
+
                             <th>Team</th>
+
                             <th>P</th>
+
                             <th>W</th>
+
                             <th>D</th>
+
                             <th>L</th>
+
                             <th>GF</th>
+
                             <th>GA</th>
+
                             <th>GD</th>
+
                             <th>Pts</th>
+
                             <th>Win %</th>
+
                             <th>Shots</th>
+
                             <th>Pass %</th>
+
                         </tr>
+
                     </thead>
 
+
+
                     <tbody>
+
                         {% for row in report.results %}
+
                             <tr>
+
                                 <td>{{ row.period_name }}</td>
+
                                 <td class="fw-semibold">
+
                                     {{ row.team_name }}
+
                                     {% if row.age_group %}
+
                                         ({{ row.age_group }})
+
                                     {% endif %}
+
                                 </td>
+
                                                                 <td>{{ row.played }}</td>
+
                                 <td>{{ row.won }}</td>
+
                                 <td>{{ row.drawn }}</td>
+
                                 <td>{{ row.lost }}</td>
+
                                 <td>{{ row.goals_for }}</td>
+
                                 <td>{{ row.goals_against }}</td>
+
                                 <td>{{ row.goal_difference }}</td>
+
                                 <td class="fw-bold">{{ row.points }}</td>
+
                                 <td>{{ row.win_percentage }}%</td>
+
                                 <td>{{ row.shots }}</td>
+
                                 <td>{{ row.pass_accuracy }}%</td>
+
                             </tr>
+
                         {% empty %}
+
                             <tr>
+
                                 <td colspan="13" class="text-center text-muted">
+
                                     No team match results found for the selected periods.
+
                                 </td>
+
                             </tr>
+
                         {% endfor %}
+
                     </tbody>
+
                 </table>
+
             </div>
+
         </div>
 
 
 
+
+
+
+
+
+
+
+
+        {% for report_period in report.periods %}
+            <div class="mb-4">
+                <h4 class="fw-bold border-bottom pb-2 mb-4">{{ report_period.name }}</h4>
+        <!-- SQUAD PHOTO FOR THIS PERIOD -->
+        <div id="squad-photos" class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Squad Photo</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    {% for photo in report.squad_photos %}
+                        {% if photo.period_id == report_period.id %}
+                            <div class="col-12">
+                                <div class="border rounded p-3">
+                                    <h6 class="fw-bold mb-1">{{ photo.team_name }}</h6>
+                                    {% if photo.photo_url %}
+                                        <img src="{{ photo.photo_url }}"
+                                             alt="{{ photo.team_name }} squad photo"
+                                             class="img-fluid w-100 rounded mt-2"
+                                             style="height: auto; object-fit: contain; display: block;">
+                                    {% else %}
+                                        <div class="alert alert-warning mt-2 mb-0">Squad photo is unavailable.</div>
+                                    {% endif %}
+                                    {% if photo.label %}
+                                        <div class="fw-semibold mt-2">{{ photo.label }}</div>
+                                    {% endif %}
+                                    <small class="text-muted">Photo date: {{ photo.photo_date|date:"d M Y" }}</small>
+                                    {% if photo.notes %}
+                                        <p class="small text-muted mt-2 mb-0">{{ photo.notes }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="col-12"><p class="text-muted mb-0">No squad photos were included when this report was generated.</p></div>
+                    {% endfor %}
+                </div>
+                {% if not report.squad_photos %}
+                    <div class="alert alert-info mb-0 mt-3">
+                        No squad photos were included when this report was generated.
+                        Select photos for this period and generate a new report.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
 
 
         <!-- MATCH RESULTS BY TEAM AND PERIOD -->
+
         <div id="team-match-results" class="card shadow-sm border-0 mb-4"
+
             style="scroll-margin-top: 90px;">
 
+
+
             <div class="card-header bg-dark text-white">
+
                 <h5 class="mb-0">Team Match Results</h5>
+
             </div>
+
+
 
             <div class="card-body">
 
+
+
                 {% for row in report.results %}
+                    {% if row.period_name == report_period.name %}
+
+
 
                     <div class="mb-4">
 
+
+
                         <h6 class="fw-bold mb-1">
+
                             {{ row.team_name }}
+
                             {% if row.age_group %}
+
                                 ({{ row.age_group }})
+
                             {% endif %}
+
                         </h6>
 
+
+
                         <small class="text-muted">
+
                             {{ row.period_name }}
+
                         </small>
+
+
 
                         <div class="table-responsive mt-3">
 
+
+
                             <table class="table table-bordered table-hover
+
                                         table-sm align-middle text-center">
 
+
+
                                 <thead class="table-light">
+
                                     <tr>
+
                                         <th>Date</th>
+
                                         <th>Home Team</th>
+
                                         <th>Score</th>
+
                                         <th>Result</th>
+
                                         <th>Away Team</th>
+
                                     </tr>
+
                                 </thead>
+
+
 
                                 <tbody>
 
+
+
                                     {% for match in row.match_results %}
+
+
 
                                         <tr class="table-{{ match.result_color }}">
 
+
+
                                             <td>{{ match.date }}</td>
+
+
 
                                             <td>{{ match.home_team }}</td>
 
-                                            <td class="fw-bold">
-                                                {{ match.home_score }} -
-                                                {{ match.away_score }}
-                                            </td>
+
 
                                             <td class="fw-bold">
-                                                {{ match.result }}
+
+                                                {{ match.home_score }} -
+
+                                                {{ match.away_score }}
+
                                             </td>
+
+
+
+                                            <td class="fw-bold">
+
+                                                {{ match.result }}
+
+                                            </td>
+
+
 
                                             <td>{{ match.away_team }}</td>
 
+
+
                                         </tr>
+
+
 
                                     {% empty %}
 
+
+
                                         <tr>
+
                                             <td colspan="5"
+
                                                 class="text-center text-muted">
+
                                                 No finished matches found for this team
+
                                                 during this period.
+
                                             </td>
+
                                         </tr>
+
+
 
                                     {% endfor %}
 
+
+
                                 </tbody>
+
+
 
                             </table>
 
+
+
                         </div>
+
+
 
                     </div>
 
+
+
+                    {% endif %}
                 {% empty %}
 
+
+
                     <p class="text-muted">
+
                         No match results available.
+
                     </p>
+
+
 
                 {% endfor %}
 
+
+
             </div>
+
         </div>
 
 
-    
+
+
+
+
+
+
+
+
 
 
 
         <!-- PLAYER PERFORMANCE -->
+
         <div id="player-performance"
+
             class="card shadow-sm border-0 mb-4"
+
             style="scroll-margin-top: 90px;">
+
             <div class="card-header bg-dark text-white">
+
                 <h5 class="mb-0">Player Performance Analysis</h5>
+
             </div>
+
+
 
             <div class="card-body">
 
-                {% for period in report.player_analysis %}
+
+
+                {% for player_period in report.player_analysis %}
+                    {% if player_period.period_name == report_period.name %}
+
+
 
                     <h5 class="mt-3 mb-3">
-                        {{ period.period_name }}
+
+                        {{ player_period.period_name }}
+
                     </h5>
+
+
 
                     {% for team in period.teams %}
 
+
+
                         <h6 class="fw-bold mt-3">
+
                             {{ team.team_name }}
+
                         </h6>
 
+
+
                         <div class="table-responsive mb-4">
+
                             <table class="table table-sm table-bordered table-hover align-middle">
 
+
+
                                 <thead class="table-dark">
+
                                     <tr>
+
                                         <th>Player</th>
+
                                         <th>Apps</th>
+
                                         <th>Starts</th>
+
                                         <th>Sub Apps</th>
+
                                         <th>Minutes</th>
+
                                         <th>Avg Minutes</th>
+
                                         <th>Goals</th>
+
                                         <th>Assists</th>
+
                                         <th>Pre-assists</th>
+
                                         <th>Contributions</th>
+
                                     </tr>
+
                                 </thead>
 
+
+
                                 <tbody>
+
                                     {% for player in team.players %}
+
                                         <tr>
+
                                             <td>{{ player.player_name }}</td>
+
                                             <td>{{ player.appearances }}</td>
+
                                             <td>{{ player.starts }}</td>
+
                                             <td>{{ player.substitute_appearances }}</td>
+
                                             <td>{{ player.minutes }}</td>
+
                                             <td>{{ player.average_minutes_per_appearance }}</td>
+
                                             <td>{{ player.goals }}</td>
+
                                             <td>{{ player.assists }}</td>
+
                                             <td>{{ player.pre_assists }}</td>
+
                                             <td class="fw-bold">
+
                                                 {{ player.goal_contributions }}
+
                                             </td>
+
                                         </tr>
+
                                     {% empty %}
+
                                         <tr>
+
                                             <td colspan="10" class="text-center text-muted">
+
                                                 No player data available.
+
                                             </td>
+
                                         </tr>
+
                                     {% endfor %}
+
                                 </tbody>
 
+
+
                             </table>
+
                         </div>
 
+
+
                     {% empty %}
+
                         <p class="text-muted">No teams available for this period.</p>
+
                     {% endfor %}
 
+                    {% endif %}
                 {% empty %}
+
                     <p class="text-muted">No player analysis available.</p>
+
                 {% endfor %}
 
+
+
             </div>
+
         </div>
+
+
+
+
+
+
+
+
+
 
 
 
@@ -442,254 +944,503 @@
 
 
         <!-- TECHNICAL ANALYSIS -->
+
         <div id="technical-analysis"
+
             class="card shadow-sm border-0 mb-4"
+
             style="scroll-margin-top: 90px;">
 
+
+
             <div class="card-header bg-primary text-white">
+
                 <h5 class="mb-0">Technical Analysis</h5>
+
             </div>
+
+
 
             <div class="card-body">
 
-                {% for period in report.technical_analysis %}
+
+
+                {% for technical_period in report.technical_analysis %}
+                    {% if technical_period.period_name == report_period.name %}
+
+
 
                     <h5 class="fw-bold mt-3 mb-3">
-                        {{ period.period_name }}
+
+                        {{ technical_period.period_name }}
+
                     </h5>
+
+
 
                     {% for team in period.teams %}
 
+
+
                         <div class="border rounded p-3 mb-4">
 
+
+
                             <h6 class="fw-bold mb-3">
+
                                 {{ team.team_name }}
+
                             </h6>
+
+
 
                             <p class="text-muted small">
+
                                 Matches played: {{ team.matches_played }}
+
                             </p>
 
+
+
                             <!-- SHOOTING ANALYSIS -->
+
                             <h6 class="fw-bold text-primary mt-3">
+
                                 Shooting Analysis
+
                             </h6>
 
+
+
                             <div class="table-responsive">
+
                                 <table class="table table-sm table-bordered text-center">
+
                                     <thead class="table-light">
+
                                         <tr>
+
                                             <th>Shots</th>
+
                                             <th>On Target</th>
+
                                             <th>Goals</th>
+
                                             <th>Saved</th>
+
                                             <th>Blocked</th>
+
                                             <th>Off Target</th>
+
                                             <th>Player Errors</th>
+
                                             <th>Accuracy</th>
+
                                             <th>Conversion</th>
+
                                         </tr>
+
                                     </thead>
 
+
+
                                     <tbody>
+
                                         <tr>
+
                                             <td>{{ team.shooting.shots }}</td>
+
                                             <td>{{ team.shooting.shots_on_target }}</td>
+
                                             <td class="fw-bold">{{ team.shooting.goals }}</td>
+
                                             <td>{{ team.shooting.saved }}</td>
+
                                             <td>{{ team.shooting.blocked }}</td>
+
                                             <td>{{ team.shooting.off_target }}</td>
+
                                             <td>{{ team.shooting.player_errors }}</td>
+
                                             <td>{{ team.shooting.shooting_accuracy }}%</td>
+
                                             <td>{{ team.shooting.conversion_rate }}%</td>
+
                                         </tr>
+
                                     </tbody>
+
                                 </table>
+
                             </div>
+
+
 
                             <!-- SHOT BREAKDOWNS -->
+
                             <div class="row g-3 mt-2">
 
+
+
                                 <div class="col-md-3">
+
                                     <h6 class="small fw-bold">Shot Outcomes</h6>
+
                                     {% for item in team.shooting.outcomes %}
+
                                         <div class="small d-flex justify-content-between">
+
                                             <span>{{ item.name }}</span>
+
                                             <strong>{{ item.count }}</strong>
+
                                         </div>
+
                                     {% empty %}
+
                                         <small class="text-muted">No data</small>
+
                                     {% endfor %}
+
                                 </div>
 
+
+
                                 <div class="col-md-3">
+
                                     <h6 class="small fw-bold">Delivery Types</h6>
+
                                     {% for item in team.shooting.delivery_types %}
+
                                         <div class="small d-flex justify-content-between">
+
                                             <span>{{ item.name }}</span>
+
                                             <strong>{{ item.count }}</strong>
+
                                         </div>
+
                                     {% empty %}
+
                                         <small class="text-muted">No data</small>
+
                                     {% endfor %}
+
                                 </div>
 
+
+
                                 <div class="col-md-3">
+
                                     <h6 class="small fw-bold">Body Parts</h6>
+
                                     {% for item in team.shooting.body_parts %}
+
                                         <div class="small d-flex justify-content-between">
+
                                             <span>{{ item.name }}</span>
+
                                             <strong>{{ item.count }}</strong>
+
                                         </div>
+
                                     {% empty %}
+
                                         <small class="text-muted">No data</small>
+
                                     {% endfor %}
+
                                 </div>
 
+
+
                                 <div class="col-md-3">
+
                                     <h6 class="small fw-bold">Shot Locations</h6>
+
                                     {% for item in team.shooting.locations %}
+
                                         <div class="small d-flex justify-content-between">
+
                                             <span>{{ item.name }}</span>
+
                                             <strong>{{ item.count }}</strong>
+
                                         </div>
+
                                     {% empty %}
+
                                         <small class="text-muted">No data</small>
+
                                     {% endfor %}
+
                                 </div>
+
+
 
                             </div>
 
+
+
                             <hr>
+
+
 
                             <!-- GOALKEEPER ANALYSIS -->
+
                             <h6 class="fw-bold text-primary mt-3">
+
                                 Goalkeeper Analysis
+
                             </h6>
 
+
+
                             <div class="table-responsive">
+
                                 <table class="table table-sm table-bordered table-hover align-middle">
 
+
+
                                     <thead class="table-light">
+
                                         <tr>
+
                                             <th>Goalkeeper</th>
+
                                             <th>Apps</th>
+
                                             <th>Starts</th>
+
                                             <th>Sub Apps</th>
+
                                             <th>Minutes</th>
+
                                             <th>Avg Minutes</th>
+
                                             <th>Clean Sheets</th>
+
                                             <th>Clean Sheet %</th>
-                                            <th>Team Goals Conceded*</th>
+
+                                            <th>Team Goals Conceded\*</th>
+
                                         </tr>
+
                                     </thead>
 
+
+
                                     <tbody>
+
                                         {% for player in team.goalkeeping.goalkeepers %}
+
                                             <tr>
+
                                                 <td>{{ player.player_name }}</td>
+
                                                 <td>{{ player.matches_played }}</td>
+
                                                 <td>{{ player.starts }}</td>
+
                                                 <td>{{ player.substitute_appearances }}</td>
+
                                                 <td>{{ player.minutes }}</td>
+
                                                 <td>{{ player.average_minutes }}</td>
+
                                                 <td>{{ player.clean_sheets }}</td>
+
                                                 <td>{{ player.clean_sheet_percentage }}%</td>
+
                                                 <td>{{ player.team_goals_conceded }}</td>
+
                                             </tr>
+
                                         {% empty %}
+
                                             <tr>
+
                                                 <td colspan="9" class="text-center text-muted">
+
                                                     No goalkeeper data available.
+
                                                 </td>
+
                                             </tr>
+
                                         {% endfor %}
+
                                     </tbody>
 
+
+
                                 </table>
+
                             </div>
 
+
+
                             <small class="text-muted">
-                                *Team goals conceded in matches where the goalkeeper appeared.
+
+                                \*Team goals conceded in matches where the goalkeeper appeared.
+
                                 This is not an individually attributed goalkeeper statistic.
+
                             </small>
+
+
 
                             <hr>
 
+
+
                             <!-- DISCIPLINE ANALYSIS -->
+
                             <h6 class="fw-bold text-primary mt-3">
+
                                 Discipline Analysis
+
                             </h6>
+
+
 
                             <div class="row g-3">
 
+
+
                                 <div class="col-6 col-md-2">
+
                                     <div class="border rounded p-3 text-center">
+
                                         <small class="text-muted">Fouls Committed</small>
+
                                         <h4 class="fw-bold mb-0">
+
                                             {{ team.discipline.fouls_committed }}
+
                                         </h4>
+
                                     </div>
+
                                 </div>
 
+
+
                                 <div class="col-6 col-md-2">
+
                                     <div class="border rounded p-3 text-center">
+
                                         <small class="text-muted">Fouls Won</small>
+
                                         <h4 class="fw-bold mb-0">
+
                                             {{ team.discipline.fouls_won }}
+
                                         </h4>
+
                                     </div>
+
                                 </div>
 
+
+
                                 <div class="col-6 col-md-2">
+
                                     <div class="border rounded p-3 text-center">
+
                                         <small class="text-muted">No Card</small>
+
                                         <h4 class="fw-bold mb-0">
+
                                             {{ team.discipline.no_card_fouls }}
+
                                         </h4>
+
                                     </div>
+
                                 </div>
 
+
+
                                 <div class="col-6 col-md-2">
+
                                     <div class="border rounded p-3 text-center">
+
                                         <small class="text-muted">Yellow Cards</small>
+
                                         <h4 class="fw-bold text-warning mb-0">
+
                                             {{ team.discipline.yellow_cards }}
+
                                         </h4>
+
                                     </div>
+
                                 </div>
 
+
+
                                 <div class="col-6 col-md-2">
+
                                     <div class="border rounded p-3 text-center">
+
                                         <small class="text-muted">Red Cards</small>
+
                                         <h4 class="fw-bold text-danger mb-0">
+
                                             {{ team.discipline.red_cards }}
+
                                         </h4>
+
                                     </div>
+
                                 </div>
 
+
+
                                 <div class="col-6 col-md-2">
+
                                     <div class="border rounded p-3 text-center">
+
                                         <small class="text-muted">Total Cards</small>
+
                                         <h4 class="fw-bold mb-0">
+
                                             {{ team.discipline.total_cards }}
+
                                         </h4>
+
                                     </div>
+
                                 </div>
+
+
 
                             </div>
 
+
+
                         </div>
 
+
+
                     {% empty %}
+
                         <p class="text-muted">No teams available.</p>
+
                     {% endfor %}
 
+                    {% endif %}
                 {% empty %}
+
                     <p class="text-muted">No technical analysis available.</p>
+
                 {% endfor %}
 
+
+
             </div>
+
         </div>
 
 
@@ -700,84 +1451,185 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+            </div>
+        {% empty %}
+            <p class="text-muted">No reporting periods available.</p>
+        {% endfor %}
+
         <!-- PERIOD COMPARISON -->
+
         <div id="period-comparison"
+
             class="card shadow-sm border-0 mb-4"
+
             style="scroll-margin-top: 90px;">
 
+
+
             <div class="card-header bg-dark text-white">
+
                 <h5 class="mb-0">Period Comparison</h5>
+
             </div>
+
+
 
             <div class="card-body">
 
+
+
                 {% for item in report.comparisons %}
 
+
+
                     <h6 class="fw-bold mt-3 mb-2">
+
                         {{ item.team_name }} —
+
                         {{ item.period_name }}
+
                     </h6>
 
+
+
                     <small class="text-muted">
+
                         Compared with {{ item.previous_period_name|default:"Previous Period" }}
+
                     </small>
 
+
+
                     <div class="table-responsive mt-2 mb-4">
+
                         <table class="table table-sm table-bordered align-middle">
 
+
+
                             <thead class="table-light">
+
                                 <tr>
+
                                     <th>Performance Metric</th>
+
                                     <th>Change</th>
+
                                     <th>Unit</th>
+
                                 </tr>
+
                             </thead>
 
+
+
                             <tbody>
+
                                 {% for metric, change in item.changes.items %}
+
                                     {% if change != None %}
+
                                         <tr>
+
                                             <td>{{ metric|cut:"_"|title }}</td>
 
+
+
                                             <td class="fw-bold">
+
                                                 {% if change > 0 %}
+
                                                     <span class="text-success">+{{ change }}</span>
+
                                                 {% elif change < 0 %}
+
                                                     <span class="text-danger">{{ change }}</span>
+
                                                 {% else %}
+
                                                     {{ change }}
+
                                                 {% endif %}
+
                                             </td>
+
+
 
                                             <td>
+
                                                 {% if metric in item.percentage_metrics %}
+
                                                     Percentage points
+
                                                 {% else %}
+
                                                     Value
+
                                                 {% endif %}
+
                                             </td>
+
                                         </tr>
+
                                     {% endif %}
+
                                 {% empty %}
+
                                     <tr>
+
                                         <td colspan="3" class="text-center text-muted">
+
                                             No comparison data available.
+
                                         </td>
+
                                     </tr>
+
                                 {% endfor %}
+
                             </tbody>
 
+
+
                         </table>
+
                     </div>
 
+
+
                 {% empty %}
+
                     <p class="text-muted mb-0">
+
                         No period comparisons available.
+
                     </p>
+
                 {% endfor %}
 
+
+
             </div>
+
         </div>
+
+
+
+
+
+
+
+
+
 
 
 
@@ -787,166 +1639,333 @@
 
 
         <!-- PERFORMANCE CHARTS -->
+
         <div class="mt-5">
+
             <h5 class="fw-bold mb-4">Performance Trends</h5>
 
+
+
             {% for chart in report.team_charts %}
+
                 <div class="content-card mb-4">
 
+
+
                     <div class="mb-3">
+
                         <h6 class="fw-bold mb-1">{{ chart.team_name }}</h6>
+
                         <small class="text-muted">{{ chart.age_group }}</small>
+
                     </div>
+
+
 
                     <div class="row g-4">
 
+
+
                         <div class="col-lg-6">
+
                             <h6 class="small fw-semibold">Points Across Periods</h6>
+
                             <div style="height:280px;">
+
                                 <canvas data-team-id="{{ chart.team_id }}"
+
                                         data-metric="points"></canvas>
+
                             </div>
+
                         </div>
 
+
+
                         <div class="col-lg-6">
+
                             <h6 class="small fw-semibold">Goals Scored vs Conceded</h6>
+
                             <div style="height:280px;">
+
                                 <canvas data-team-id="{{ chart.team_id }}"
+
                                         data-metric="goals"></canvas>
+
                             </div>
+
                         </div>
 
+
+
                         <div class="col-lg-6">
+
                             <h6 class="small fw-semibold">Shooting Accuracy</h6>
+
                             <div style="height:280px;">
+
                                 <canvas data-team-id="{{ chart.team_id }}"
+
                                         data-metric="shooting_accuracy"></canvas>
+
                             </div>
+
                         </div>
 
+
+
                         <div class="col-lg-6">
+
                             <h6 class="small fw-semibold">Passing Accuracy</h6>
+
                             <div style="height:280px;">
+
                                 <canvas data-team-id="{{ chart.team_id }}"
+
                                         data-metric="pass_accuracy"></canvas>
+
                             </div>
+
                         </div>
+
+
 
                     </div>
+
                 </div>
+
+
 
             {% empty %}
+
                 <div class="alert alert-warning">
+
                     No chart data available for the selected teams and periods.
+
                 </div>
+
             {% endfor %}
+
         </div>
 
+
+
         <!-- Safely transfer Django data to JavaScript -->
+
         {{ report.team_charts|json_script:"team-chart-data" }}
 
+
+
         <!-- Chart.js library -->
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script src="https\://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
 
         <script>
+
         document.addEventListener("DOMContentLoaded", function () {
+
+
 
             const dataElement = document.getElementById("team-chart-data");
 
+
+
             if (!dataElement) {
+
                 console.error("Chart data element not found.");
+
                 return;
+
             }
 
+
+
             if (typeof Chart === "undefined") {
+
                 console.error("Chart.js failed to load.");
+
                 return;
+
             }
+
+
 
             const teamCharts = JSON.parse(dataElement.textContent);
 
+
+
             const teamData = {};
 
+
+
             teamCharts.forEach(function (team) {
+
                 teamData[team.team_id] = team;
+
             });
+
+
 
             document.querySelectorAll("canvas[data-metric]").forEach(function (canvas) {
 
+
+
                 const teamId = canvas.dataset.teamId;
+
                 const metric = canvas.dataset.metric;
+
                 const team = teamData[teamId];
+
+
 
                 if (!team) return;
 
+
+
                 let datasets = [];
+
                 let chartType = "line";
+
+
 
                 if (metric === "goals") {
 
+
+
                     chartType = "bar";
 
+
+
                     datasets = [
+
                         {
+
                             label: "Goals Scored",
+
                             data: team.goals_for
+
                         },
+
                         {
+
                             label: "Goals Conceded",
+
                             data: team.goals_against
+
                         }
+
                     ];
+
+
 
                 } else {
 
+
+
                     const labels = {
+
                         points: "Points",
+
                         shooting_accuracy: "Shooting Accuracy (%)",
+
                         pass_accuracy: "Passing Accuracy (%)"
+
                     };
 
+
+
                     datasets = [{
+
                         label: labels[metric],
+
                         data: team[metric]
+
                     }];
+
                 }
 
+
+
                 new Chart(canvas, {
+
                     type: chartType,
 
+
+
                     data: {
+
                         labels: team.labels,
+
                         datasets: datasets
+
                     },
 
+
+
                     options: {
+
                         responsive: true,
+
                         maintainAspectRatio: false,
 
+
+
                         interaction: {
+
                             intersect: false,
+
                             mode: "index"
+
                         },
+
+
 
                         plugins: {
+
                             legend: {
+
                                 display: true,
+
                                 position: "bottom"
+
                             }
+
                         },
 
+
+
                         scales: {
+
                             y: {
+
                                 beginAtZero: true
+
                             }
+
                         }
+
                     }
+
                 });
+
+
 
             });
 
+
+
         });
+
         </script>
+
+
+
+
+
+
+
 
 
 
@@ -955,37 +1974,74 @@
 
         <h6 class="fw-bold mt-5 mb-3">Football Performance Insights</h6>
 
+
+
         {% for item in report.insights %}
+
             <div class="border rounded p-3 mb-3">
+
                 <div class="fw-bold mb-2">
+
                     {{ item.team_name }} — {{ item.period_name }}
+
                 </div>
 
+
+
                 {% for insight in item.insights %}
+
                     <div class="d-flex gap-2 mb-2">
+
                         <span class="text-muted">
+
                             {{ insight.category }}:
+
                         </span>
+
                         <span>{{ insight.message }}</span>
+
                     </div>
+
                 {% empty %}
+
                     <p class="text-muted mb-0">No insights available.</p>
+
                 {% endfor %}
+
             </div>
+
         {% empty %}
+
             <p class="text-muted">No performance insights available.</p>
+
         {% endfor %}
 
+
+
     {% else %}
+
         <div class="text-center py-5">
+
             <i class="bi bi-bar-chart-line fs-1 text-muted"></i>
+
             <h6 class="mt-3">No performance report available</h6>
+
             <p class="text-muted">
+
                 Click Generate Analysis to calculate team performance.
+
             </p>
+
         </div>
+
     {% endif %}
+
 </div>
+
+
+
+
+
 
 
 

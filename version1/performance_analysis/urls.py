@@ -28,4 +28,11 @@ path(
     views.export_pptx,
     name="export_pptx",
 ),
+
+
+path(
+    "analysis/<int:pk>/period/<int:period_id>/squad-photos/",
+    views.manage_period_squad_photos,
+    name="manage_period_squad_photos",
+),
 ]

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import StaffMember, Team, AgeGroup, Country, Region
+from .models import StaffMember, Team, AgeGroup, Country, Region, TeamSquadPhoto
 
 @admin.register(AgeGroup)
 class AgeGroupAdmin(admin.ModelAdmin):
@@ -29,5 +29,10 @@ class RegionAdmin(admin.ModelAdmin):
     list_filter = ['name', 'country']
     search_fields = ['name', 'country']
 
+@admin.register(TeamSquadPhoto)
+class TeamSquadPhotoAdmin(admin.ModelAdmin):
+    list_display = ['team', 'photo', 'photo_date', 'label']
+    list_filter = ['team', 'photo', 'photo_date', 'label']
+    search_fields = ['team', 'photo', 'photo_date', 'label']
 
 

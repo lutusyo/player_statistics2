@@ -1,0 +1,89 @@
+
+{% extends "performance_analysis/base.html" %}
+
+{% block title %}Squad Photos | Performance Analysis{% endblock %}
+{% block page_heading %}Manage Squad Photos{% endblock %}
+
+{% block content %}
+
+<div class="content-card mb-4">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+            <h5 class="fw-bold mb-1">{{ analysis.name }}</h5>
+            <p class="text-muted mb-0">
+                {{ period.name }} |
+                {{ period.start_date|date:"d M Y" }} –
+                {{ period.end_date|date:"d M Y" }}
+            </p>
+        </div>
+
+        <a href="{% url 'performance_analysis:analysis_detail' analysis.pk %}"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Analysis
+        </a>
+    </div>
+
+    <hr>
+
+    <div class="alert alert-info">
+        Select the squad photo that represents each team's squad during this reporting period.
+        Photos are uploaded and managed through Django Admin.
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="border rounded p-3 mb-3">
+
+                <label for="{{ field.id_for_label }}"
+                       class="form-label fw-bold">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
+
+                <small class="text-muted">
+                    Only photos belonging to this team are shown.
+                </small>
+
+            </div>
+        {% empty %}
+            <div class="alert alert-warning">
+                No teams have been selected for this reporting period.
+            </div>
+        {% endfor %}
+
+        {% if teams %}
+            <div class="d-flex gap-2 flex-wrap mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Save Squad Photos
+                </button>
+
+                <a href="{% url 'performance_analysis:analysis_detail' analysis.pk %}"
+                   class="btn btn-outline-secondary">
+                    Cancel
+                </a>
+            </div>
+        {% endif %}
+
+    </form>
+
+</div>
+
+{% endblock %}

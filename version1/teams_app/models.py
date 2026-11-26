@@ -75,6 +75,27 @@ class Team(models.Model):
             return f"{self.name} ({self.age_group.name})"
         return self.name
 
+
+
+
+class TeamSquadPhoto(models.Model):
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="squad_photos", )
+    photo = models.ImageField(upload_to="team_squad_photos/%Y/%m/",)
+    photo_date = models.DateField(default=date.today)
+    label = models.CharField(max_length=100, blank=True, help_text="Example: First Half of 2026/2027 Season",)
+    notes = models.TextField(blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-photo_date", "-uploaded_at"]
+
+    def __str__(self):
+        return f"{self.team} - {self.photo_date}"
+
+
+
+
+
 class StaffMember(models.Model):
     ROLE_CHOICES = [
         ('HEAD_COACH', 'Head Coach'),
