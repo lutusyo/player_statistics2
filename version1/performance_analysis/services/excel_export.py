@@ -6,6 +6,10 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
+from django.core.files.storage import default_storage
+from openpyxl.drawing.image import Image as ExcelImage
+from PIL import Image as PILImage
+
 
 HEADER_FILL = PatternFill("solid", fgColor="17365D")
 SUBHEADER_FILL = PatternFill("solid", fgColor="D9EAF7")
@@ -17,11 +21,24 @@ THIN_BORDER = Border(
 )
 
 
+
 RESULT_FILLS = {
     "success": PatternFill("solid", fgColor="C6EFCE"),  # WIN - Green
     "danger": PatternFill("solid", fgColor="FFC7CE"),   # LOSS - Red
     "warning": PatternFill("solid", fgColor="FFEB9C"),  # DRAW - Yellow
 }
+
+
+
+def get_squad_photo_bytes(report):
+    for photo in report.get("squad_photos", []):
+        photo_path = photo.get("photo_path")
+
+        if photo_path and default_storage.exists(photo_path):
+            with default_storage.open(photo_path, "rb") as image_file:
+                return image_file.read()
+
+    return None
 
 
 def get_team_label(item):
@@ -125,6 +142,21 @@ def export_analysis_excel(run):
 
     summary.column_dimensions["A"].width = 24
     summary.column_dimensions["B"].width = 40
+
+
+    # SQUAD PHOTO
+    photo_bytes = get_squad_photo_bytes(report)
+
+    if photo_bytes:
+        photo_stream = BytesIO(photo_bytes)
+        squad_image = ExcelImage(photo_stream)
+
+        with PILImage.open(BytesIO(photo_bytes)) as image:
+            ratio = min(500 / image.width, 300 / image.height)
+            squad_image.width = int(image.width * ratio)
+            squad_image.height = int(image.height * ratio)
+
+        summary.add_image(squad_image, "D2")
 
     # TEAM PERFORMANCE
     performance_headers = [

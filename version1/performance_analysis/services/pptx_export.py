@@ -10,6 +10,9 @@ from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.dml import MSO_THEME_COLOR
 
+from django.core.files.storage import default_storage
+from PIL import Image as PILImage
+
 
 NAVY = RGBColor(23, 54, 93)
 BLUE = RGBColor(68, 114, 196)
@@ -22,6 +25,17 @@ LIGHT_GREY = RGBColor(243, 245, 247)
 GREEN = RGBColor(198, 239, 206)
 RED = RGBColor(255, 199, 206)
 YELLOW = RGBColor(255, 235, 156)
+
+
+def get_squad_photo_bytes(report):
+    for photo in report.get("squad_photos", []):
+        photo_path = photo.get("photo_path")
+
+        if photo_path and default_storage.exists(photo_path):
+            with default_storage.open(photo_path, "rb") as image_file:
+                return image_file.read()
+
+    return None
 
 def get_team_label(item):
     team_name = item.get("team_name", "-")
@@ -268,6 +282,46 @@ def export_analysis_pptx(run):
         align=PP_ALIGN.CENTER,
     )
 
+
+
+    # 2. SQUAD PHOTO
+    photo_bytes = get_squad_photo_bytes(report)
+
+    if photo_bytes:
+        slide = prs.slides.add_slide(blank)
+        add_background(slide)
+        add_header(slide, "Squad Photo", analysis.get("name"))
+
+        with PILImage.open(BytesIO(photo_bytes)) as image:
+            image_width, image_height = image.size
+
+        max_width = 11.9
+        max_height = 5.6
+
+        ratio = min(
+            max_width / image_width,
+            max_height / image_height,
+        )
+
+        display_width = image_width * ratio
+        display_height = image_height * ratio
+
+        x = (13.333 - display_width) / 2
+        y = 1.2 + (5.6 - display_height) / 2
+
+        slide.shapes.add_picture(
+            BytesIO(photo_bytes),
+            Inches(x),
+            Inches(y),
+            width=Inches(display_width),
+            height=Inches(display_height),
+        )
+
+        add_footer(slide, 2)
+
+
+
+
     # 2. EXECUTIVE SUMMARY
     slide = prs.slides.add_slide(blank)
     add_background(slide)
@@ -310,7 +364,7 @@ def export_analysis_pptx(run):
         size=12, color=DARK,
     )
 
-    add_footer(slide, 2)
+    add_footer(slide, 3)
 
     # 3. TEAM PERFORMANCE
     slide = prs.slides.add_slide(blank)
@@ -347,7 +401,7 @@ def export_analysis_pptx(run):
     else:
         add_empty_message(slide, "No team performance data available.")
 
-    add_footer(slide, 3)
+    add_footer(slide, 4)
 
 
 

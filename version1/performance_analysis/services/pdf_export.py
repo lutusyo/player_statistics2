@@ -18,12 +18,24 @@ from reportlab.platypus import (
     KeepTogether,
 )
 
+from django.core.files.storage import default_storage
+from reportlab.platypus import Image as PDFImage
 
 NAVY = colors.HexColor("#17365D")
 BLUE = colors.HexColor("#D9EAF7")
 LIGHT_GREY = colors.HexColor("#F3F5F7")
 DARK_GREY = colors.HexColor("#555555")
 WHITE = colors.white
+
+def get_squad_photo_bytes(report):
+    for photo in report.get("squad_photos", []):
+        photo_path = photo.get("photo_path")
+
+        if photo_path and default_storage.exists(photo_path):
+            with default_storage.open(photo_path, "rb") as image_file:
+                return image_file.read()
+
+    return None
 
 
 def get_team_label(item):
@@ -239,6 +251,33 @@ def export_analysis_pdf(run):
 
     story.append(make_table(["Item", "Details"], overview_rows))
     story.append(Spacer(1, 4 * mm))
+
+
+
+    # SQUAD PHOTO
+    photo_bytes = get_squad_photo_bytes(report)
+
+    if photo_bytes:
+        story.append(Paragraph(
+            "Squad Photo",
+            styles["SectionHeading"],
+        ))
+
+        squad_image = PDFImage(BytesIO(photo_bytes))
+
+        max_height = 85 * mm
+        scale = min(
+            doc.width / squad_image.imageWidth,
+            max_height / squad_image.imageHeight,
+        )
+
+        squad_image.drawWidth = squad_image.imageWidth * scale
+        squad_image.drawHeight = squad_image.imageHeight * scale
+
+        story.append(squad_image)
+        story.append(Spacer(1, 4 * mm))
+
+
 
     # PERIODS
     story.append(Paragraph("Reporting Periods", styles["SectionHeading"]))
